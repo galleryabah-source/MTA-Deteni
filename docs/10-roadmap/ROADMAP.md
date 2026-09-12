@@ -1,103 +1,52 @@
-# MTA DETENI — Master Roadmap v1.1
+# MTA DETENI — Master Roadmap v1.2
 
 ## Roadmap Strategy
 
-Roadmap ini mengikuti prinsip:
-
 **Governance → Process → Data → Authority → Security → Document → Architecture → Implementation → Test → Audit → Pilot → Release → Institutionalization**
 
-MTA DETENI adalah inovasi tata kelola; MTA DETENI Digital adalah instrumen pendukung. Setiap fase harus menghasilkan evidence yang dapat digunakan untuk PKP dan operasional.
+MTA DETENI adalah inovasi tata kelola; MTA DETENI Digital adalah instrumen pendukung. Setiap fase menghasilkan evidence untuk PKP dan operasional.
 
 ---
 
 # D0 — Governance & Discovery
 
-## Tujuan
-Menetapkan masalah, kewenangan, ruang lingkup, baseline, dan arah perubahan.
-
-## Workstream
 - validasi positioning PKP;
-- AS-IS interview RAP, PERKES, KAMTIB, Subbag TU, dan pimpinan;
-- pemetaan alur registrasi, kesehatan, keamanan/ketertiban, izin keluar, pengawalan, surat tugas, pelaporan, dan arsip;
-- identifikasi bottleneck, duplikasi input, keterlambatan, dan risiko kehilangan dokumen;
+- AS-IS interview RAP, PERKES, KAMTIB, Subbag TU, pimpinan;
+- pemetaan registrasi, kesehatan, keamanan/ketertiban, izin keluar, pengawalan, surat tugas, pelaporan, arsip;
 - baseline KPI;
 - authority/responsibility matrix;
-- scope/non-goals;
-- identifikasi dasar hukum/SOP internal yang berlaku;
-- identifikasi klasifikasi data dan dokumen;
-- daftar stakeholder dan owner proses.
+- dasar hukum/SOP internal;
+- klasifikasi data/dokumen;
+- stakeholder dan process owner.
 
-## Gate D0
-- masalah prioritas tervalidasi;
-- kewenangan tervalidasi;
-- baseline KPI tersedia;
-- AS-IS map disetujui;
-- scope dan non-goals disetujui.
+**Gate D0:** masalah, kewenangan, baseline KPI, AS-IS, scope/non-goals tervalidasi.
 
 ---
 
 # D1 — Process, Data & Document Contract Foundation
 
-## Tujuan
-Mengunci desain proses, data, workflow, dan kontrak dokumen sebelum coding besar.
-
-## Workstream
-### Process
 - TO-BE BPMN/process map;
-- SOP/control points;
-- handoff antar-seksi;
-- exception path;
-- escalation path.
+- SOP/control points, handoff, exception dan escalation;
+- data dictionary, logical model, classification, lifecycle, provenance, retention;
+- authority matrix sampai action/field/domain/context;
+- separation of duties, approval authority, break-glass;
+- workflow state machine;
+- **Document Contract** untuk Surat Izin Keluar Sementara dan Surat Tugas Pengawalan;
+- field mapping, placeholders, signature block, numbering/register, template owner/version/effective date/archive;
+- **RBAC Permission Catalog**: domain, action, scope, risk level, mandatory/optional, dependency, incompatible permissions;
+- **Super Admin RBAC policy**: siapa boleh mengubah permission, batas perubahan, second approval untuk permission kritis, rollback/versioning.
 
-### Data
-- data dictionary;
-- entity relationship logical model;
-- data classification;
-- required/optional fields;
-- provenance model;
-- lifecycle record;
-- retention/deletion policy baseline.
-
-### Authority
-- permission matrix sampai action/field/domain/context;
-- separation of duties;
-- approval authority;
-- break-glass policy.
-
-### Workflow
-- state machine;
-- transition rules;
-- required evidence per state;
-- rejection/revision rules.
-
-### Document Contract — PRIORITAS
-- spesifikasi **Surat Izin Keluar Sementara**;
-- spesifikasi **Surat Tugas Pengawalan**;
-- field mapping;
-- placeholder schema;
-- signature block;
-- numbering/register;
-- approval chain;
-- metadata;
-- template ownership;
-- template version/effective date;
-- archive/distribution requirements.
-
-## Gate D1
-Tidak boleh lanjut ke implementation besar sebelum process, data, authority, workflow, dan document contract disetujui.
+**Gate D1:** process, data, authority, workflow, document contract, dan RBAC catalog disetujui.
 
 ---
 
 # D2 — Architecture & Security Foundation
 
-## Tujuan
-Membangun security-by-design dan arsitektur teknis yang dapat dipertanggungjawabkan.
-
-## Workstream
-- target architecture;
-- trust boundary;
+- target architecture dan trust boundary;
 - threat model;
 - RBAC/ABAC enforcement design;
+- **Super Admin RBAC Console architecture**;
+- authorization decision point/policy enforcement point;
 - restricted PERKES/health-data boundary;
 - RLS strategy bila relevan;
 - authentication/session;
@@ -105,301 +54,276 @@ Membangun security-by-design dan arsitektur teknis yang dapat dipertanggungjawab
 - encryption;
 - object-storage security;
 - audit/event integrity;
-- backup/restore;
-- disaster recovery;
+- backup/restore dan disaster recovery;
 - logging/observability;
 - secret/dependency scanning;
 - CI security gates;
 - synthetic test-data strategy.
 
-## Gate D2
-- architecture review PASS;
-- threat model reviewed;
-- security baseline approved;
-- audit model approved;
-- backup/restore design approved;
-- no sensitive production data in repository.
+**Gate D2:** architecture/security/audit/backup design approved.
 
 ---
 
 # D3 — Core Administration
 
-## Tujuan
-Membangun fondasi data deteni dan penempatan.
-
-## Modules
 - authentication;
 - users/roles/permissions;
 - master data deteni;
-- document registry dasar;
+- document registry;
 - block/room/bed;
 - status history;
 - detainee timeline foundation;
 - provenance;
-- completeness/verification status;
+- completeness/verification;
 - restricted-domain boundary.
 
-## Acceptance
-- CRUD sesuai matrix;
-- field-level restrictions tested;
-- history tidak dapat silent overwrite;
-- data validation berjalan;
-- synthetic fixtures tersedia.
+**Acceptance:** CRUD, field restrictions, history, validation, synthetic fixtures pass.
 
 ---
 
 # D4 — Movement, Identification, Headcount & Temporary Exit
 
-## Tujuan
-Mengendalikan pergerakan deteni dan proses keluar sementara.
-
-## Modules
 - movement ledger;
 - placement transfer;
 - headcount;
-- barcode/QR individual;
+- barcode/QR;
 - block/room operational list;
 - temporary exit request;
 - configurable exit purpose;
 - approval prerequisite;
 - escort planning;
-- departure/return recording;
+- departure/return;
 - operational alerts;
 - exception handling.
 
-## Core Flow
+Core flow:
 
-```text
-Request → Validation → Authorization/Approval → Exit Letter
-       → Escort Assignment → Execution → Return → Result/Event
-```
-
-## Acceptance
-- izin tidak dapat diterbitkan tanpa prerequisite;
-- departure/return tercatat;
-- movement/headcount konsisten;
-- semua event masuk timeline/audit;
-- role boundary KAMTIB/RAP/PERKES/TU enforced.
+`Request → Validation → Authorization/Approval → Exit Letter → Escort Assignment → Execution → Return → Result/Event`
 
 ---
 
 # D5 — Document Engine — CORE MVP OUTPUT
 
-## Tujuan
-Menghasilkan dokumen Word resmi/terkendali secara konsisten, cepat, dapat diaudit, dan dapat diarsipkan.
+Mandatory:
 
-## Mandatory Outputs
-### 1. Surat Izin Keluar Sementara
-- generate `.docx`;
-- data merge dari record yang telah diverifikasi;
-- nomor surat;
-- identitas deteni sesuai policy;
-- tujuan/purpose;
-- tanggal/waktu keluar dan kembali;
-- dasar/rujukan;
-- pejabat berwenang;
-- signature block;
+1. **Surat Izin Keluar Sementara — DOCX**
+2. **Surat Tugas Pengawalan — DOCX**
+
+Includes:
+- controlled templates;
+- data merge;
+- template versioning/effective date;
+- placeholder validation;
+- numbering/register;
+- approval/signature metadata;
 - document ID;
-- template version;
-- hash.
+- SHA-256 integrity;
+- download audit;
+- distribution/archive;
+- historical template binding.
 
-### 2. Surat Tugas Pengawalan
-- generate `.docx`;
-- petugas pengawal;
-- jabatan/pangkat/NIP bila memang diperlukan dan diizinkan;
-- deteni terkait;
-- tujuan;
-- waktu/tanggal;
-- dasar penugasan;
-- pejabat berwenang;
-- signature block;
-- document ID;
-- template version;
-- hash.
-
-## Template Governance
-- template registry;
-- versioning;
-- effective date;
-- ACTIVE/RETIRED status;
-- required placeholder validation;
-- controlled template upload;
-- old document remains bound to historical template version;
-- no arbitrary template modification by ordinary operators.
-
-## Access
+Access:
 - KAMTIB: generate/review/download Surat Izin Keluar sesuai status;
 - SUBBAG_TU: administer/register/generate/download Surat Tugas sesuai status;
-- approver: approve/issue sesuai kewenangan;
+- approver: approve/issue;
 - auditor: read/audit;
-- Head Rudenim: oversight/read-only + direction layer.
-
-## Acceptance
-- DOCX opens correctly;
-- required fields complete;
-- template version recorded;
-- no unauthorized field leakage;
-- generated hash reproducible/verified as designed;
-- download audited;
-- final document archived;
-- old versions remain retrievable.
+- Head Rudenim: oversight/read-only + direction.
 
 ---
 
-# D6 — Workflow, Approval & Leadership Direction
+# D6 — Workflow, Approval, Leadership & RBAC Administration
 
-## Modules
+## A. Workflow/Approval
 - task inbox;
-- approval workflow;
 - review/reject/revise;
 - signature/authorization metadata;
-- document issue;
-- distribution;
-- archive;
-- leadership `PETUNJUK`;
-- `ARAHAN`;
-- `REKOMENDASI`;
-- `DISPOSISI`;
+- issue/distribution/archive;
+- audit events.
+
+## B. Leadership Direction
+- PETUNJUK;
+- ARAHAN;
+- REKOMENDASI;
+- DISPOSISI;
 - acknowledgement;
 - action;
 - response;
 - closure;
-- audit events.
+- monitoring.
 
-## Recommendation Loop
+## C. Super Admin RBAC Console — NEW PRIORITY
 
-`Unit → Recommendation → Target → Acknowledgement → Action → Response → Closure`
+Route target:
 
-## Leadership Loop
+`/admin/security/rbac`
 
-`Data/Timeline → Petunjuk/Arahan/Rekomendasi/Disposisi → Target → Follow-up → Monitoring`
+### UI
+- role selector;
+- permission search;
+- domain/action filters;
+- checklist/checkbox permission matrix;
+- checked = granted;
+- unchecked = denied;
+- locked = policy-mandated or protected;
+- warning = high-risk permission;
+- pending-change indicator;
+- before/after comparison;
+- **Simpan Pengaturan**;
+- Reset Perubahan.
+
+### Capability
+Super Admin dapat:
+- menambah kewenangan dengan check;
+- mengurangi kewenangan dengan uncheck;
+- mengelola role sesuai policy;
+- melihat permission inherited/explicit;
+- melihat dependency/incompatible permission;
+- melihat perubahan yang belum disimpan;
+- menyimpan policy baru sebagai versioned configuration;
+- membandingkan versi;
+- rollback secara terkontrol.
+
+### Save Control
+
+`Edit → Validate → Detect Escalation → Reason → Re-authentication bila perlu → Second Approval bila kritis → Atomic Save → Audit → Cache Invalidation → Confirmation`
+
+Perubahan tidak aktif sebelum **Simpan Pengaturan**.
+
+### Guardrails
+
+- deny-by-default;
+- tidak boleh privilege escalation yang melanggar policy;
+- user tidak boleh menaikkan privilege dirinya secara tidak terkendali;
+- permission audit tampering selalu protected;
+- restricted health access mendapat guardrail khusus;
+- sensitive export mendapat guardrail;
+- critical approval/RBAC permissions dapat membutuhkan second approval;
+- tidak ada partial save;
+- rollback harus diaudit.
+
+### Super Admin vs Head Rudenim
+
+`SUPER_ADMIN` = system access governance.
+
+`HEAD_RUDENIM` = substantive leadership oversight.
+
+Keduanya **tidak boleh disamakan**. Kepala Rudenim tidak otomatis menjadi Super Admin, dan Super Admin tidak otomatis memperoleh akses substantif ke data deteni sensitif.
+
+### Audit
+Setiap perubahan RBAC minimal menyimpan:
+
+`actor, role_changed, before_policy_hash, after_policy_hash, permissions_added, permissions_removed, reason, second_approver, timestamp, correlation_id, result`.
+
+### Acceptance
+- checkbox changes pending state;
+- Save persists atomically;
+- unauthorized change rejected;
+- privilege escalation blocked;
+- critical change requires required controls;
+- audit before/after exists;
+- policy version increments;
+- rollback works and is audited;
+- authorization cache/session policy is refreshed;
+- sensitive domain remains protected.
 
 ---
 
 # D7 — Intelligent Intake
 
-## Tujuan
-Mengurangi input manual tanpa mengorbankan validitas dan keamanan.
-
-## Modules
 - OCR;
-- official message intake;
+- authorized official message intake;
 - transcript extraction;
 - structured draft;
 - confidence score;
 - validation queue;
 - human verification;
-- source/provenance linkage;
+- source/provenance;
 - quarantine/raw vault.
 
-## Rule
-Tidak ada direct path dari OCR/WhatsApp/transcript ke approved operational record.
-
-Gunakan kanal pesan resmi yang sah; jangan menggunakan scraping WhatsApp Web sebagai mekanisme produksi.
+No direct OCR/message/transcript → approved operational record.
 
 ---
 
 # D8 — Reporting & Operational Intelligence
 
-## Modules
 - executive dashboard;
 - RAP dashboard;
-- PERKES restricted dashboard;
+- restricted PERKES dashboard;
 - KAMTIB dashboard;
 - TU document dashboard;
 - Head Rudenim dashboard;
 - KPI;
-- daily/periodic briefing;
-- document turnaround analysis;
-- completeness analysis;
-- exception/anomaly suggestions;
+- briefing;
+- document turnaround;
+- completeness;
+- exception analysis;
 - trend analysis;
-- operational reports;
-- recommendation/disposition follow-up report.
+- recommendation/disposition follow-up.
 
-## Rule
-Analytics membantu keputusan; tidak menggantikan kewenangan pejabat.
+Analytics assist decisions; they do not replace authority.
 
 ---
 
 # D9 — Pilot, Security Hardening & UAT
 
-## Pilot
-- controlled environment;
-- synthetic test before sensitive pilot;
-- limited operational scope;
+- controlled pilot;
+- synthetic tests before sensitive pilot;
 - SOP alignment;
-- user training.
-
-## Tests
-- unit;
-- integration;
-- E2E;
+- user training;
+- unit/integration/E2E tests;
 - authorization regression;
+- **RBAC mutation regression**;
+- privilege-escalation tests;
 - security regression;
 - performance/load;
 - backup/restore drill;
 - audit integrity;
-- document rendering/DOCX regression;
+- DOCX rendering regression;
 - accessibility/usability where appropriate.
 
-## UAT Actors
-- RAP;
-- PERKES;
-- KAMTIB;
-- SUBBAG_TU;
-- PEJABAT_APPROVER;
-- HEAD_RUDENIM;
-- AUDITOR.
+UAT actors: RAP, PERKES, KAMTIB, SUBBAG_TU, PEJABAT_APPROVER, HEAD_RUDENIM, AUDITOR, and authorized Super Admin.
 
-## Gate D9
-UAT PASS + security PASS + backup/restore evidence + SOP readiness + documented known limitations.
+**Gate D9:** UAT + security + RBAC + backup/restore + SOP readiness PASS.
 
 ---
 
 # D10 — Production & Institutionalization
 
-## Production
 - authorized infrastructure;
 - secure deployment;
 - migration only after approved schema/data contract;
 - monitoring;
 - backup;
 - incident response;
-- access review.
-
-## Institutionalization
-- SOP/pedoman;
-- role matrix;
-- data dictionary;
-- document template governance;
-- training;
+- access review;
+- periodic RBAC recertification;
+- policy version review;
+- role/permission change control;
+- operational training;
 - KPI review;
 - periodic audit;
-- access recertification;
-- continuous improvement;
-- change-control board/process.
-
-## Final Outcome
-MTA DETENI menjadi mekanisme kerja yang melekat pada organisasi; MTA DETENI Digital menjadi instrumen yang menjaga konsistensi, kecepatan, traceability, dan evidence.
+- continuous improvement.
 
 ---
 
 # Cross-Phase Workstreams
 
-## A. Governance
-Selalu berjalan D0–D10: legal/SOP alignment, authority review, privacy, change control.
+## Governance
+Legal/SOP alignment, authority review, privacy, change control D0–D10.
 
-## B. Security
-Selalu berjalan D2–D10: threat model, secure coding, authorization testing, audit, backup, incident readiness.
+## Security
+Threat model, secure coding, authorization testing, audit, backup, incident readiness D2–D10.
 
-## C. Document Governance
-Dimulai D1 dan berjalan sampai D10: template owner, version, effective date, approval, archive, retention, integrity.
+## RBAC/ABAC
+Permission catalog → policy → enforcement → Super Admin Console → audit → recertification D1–D10.
 
-## D. KPI / PKP Evidence
-Baseline D0 → target D1 → pilot D9 → before/after measurement D10.
+## Document Governance
+Template owner/version/effective date/approval/archive/retention/integrity D1–D10.
 
-## E. Data Quality
+## KPI/PKP Evidence
+Baseline D0 → target D1 → pilot D9 → before/after D10.
+
+## Data Quality
 Completeness → validation → verification → correction/versioning → monitoring.
 
 ---
@@ -409,9 +333,9 @@ Completeness → validation → verification → correction/versioning → monit
 ```text
 D0 Governance
    ↓
-D1 Process + Data + Authority + Document Contract
+D1 Process + Data + Authority + Document + RBAC Contract
    ↓
-D2 Architecture + Security
+D2 Architecture + Security + Authorization Enforcement
    ↓
 D3 Core Data
    ↓
@@ -419,7 +343,7 @@ D4 Movement + Temporary Exit
    ↓
 D5 Document Engine
    ↓
-D6 Approval + Leadership
+D6 Approval + Leadership + Super Admin RBAC Console
    ↓
 D7 Intelligent Intake
    ↓
@@ -430,24 +354,13 @@ D9 Pilot/UAT/Hardening
 D10 Production/Institutionalization
 ```
 
-**Catatan:** D5 harus diperlakukan sebagai prioritas MVP dan dapat dikerjakan paralel secara terkontrol setelah contract D1/D2 tersedia. Jangan menunggu seluruh roadmap selesai untuk membuktikan output Word.
+**D5 tetap prioritas MVP. D6 RBAC Console dapat mulai dibangun setelah RBAC catalog dan security enforcement contract D1/D2 selesai.**
 
 ---
 
 # Hard Gates
 
-Tidak boleh advance hanya karena kode sudah selesai.
-
-Setiap gate membutuhkan evidence:
-- governance approval;
-- process acceptance;
-- data contract;
-- authority/security acceptance;
-- document contract/template acceptance;
-- tests;
-- audit evidence;
-- UAT evidence;
-- backup/restore evidence bila relevan.
+Setiap gate membutuhkan evidence: governance approval, process acceptance, data contract, authority/security acceptance, document contract/template acceptance, RBAC policy acceptance, tests, audit evidence, UAT evidence, dan backup/restore evidence bila relevan.
 
 ## Non-Negotiable Rules
 
@@ -456,10 +369,12 @@ Setiap gate membutuhkan evidence:
 3. Tidak ada direct WhatsApp/OCR/transcript → production record.
 4. Tidak ada autonomous AI decision-making.
 5. Tidak ada bypass authorization.
-6. Tidak ada silent overwrite terhadap critical records.
+6. Tidak ada silent overwrite critical records.
 7. Tidak ada migration sebelum model dan controls disetujui.
-8. Kepala Rudenim bukan `super-admin`; visibility dan leadership direction dipisahkan dari operational editing.
+8. Kepala Rudenim bukan `SUPER_ADMIN`; visibility/leadership direction dipisahkan dari operational editing.
 9. KAMTIB tidak mengambil alih administrasi Surat Tugas milik TU.
 10. TU tidak mengambil alih keputusan substantif izin/pengawalan.
 11. Template resmi harus versioned dan historical documents tetap terikat pada versi yang digunakan.
-12. Dokumen Word untuk Surat Izin Keluar Sementara dan Surat Tugas Pengawalan adalah output inti MVP.
+12. DOCX Surat Izin Keluar Sementara dan Surat Tugas Pengawalan adalah output inti MVP.
+13. Super Admin hanya mengelola authorization policy sesuai governance; tidak otomatis memperoleh akses substantif ke seluruh data.
+14. Setiap perubahan RBAC harus versioned, atomic, auditable, dan dapat direview/rollback secara terkontrol.
