@@ -1,140 +1,598 @@
-# MTA DETENI — Master Blueprint v1.0
+# MTA DETENI — Master Blueprint v1.1
 
-## 1. Nama dan Positioning
+## 1. Identitas, Positioning, dan Tujuan Inovasi
 
-**MTA DETENI — Manajemen Terpadu Administrasi Deteni** adalah model tata kelola administrasi deteni untuk meningkatkan ketertiban data, konsistensi proses, kecepatan administrasi, akuntabilitas, dan keterlacakan.
+**MTA DETENI — Manajemen Terpadu Administrasi Deteni** adalah model tata kelola administrasi deteni yang mengintegrasikan standardisasi data, proses lintas-seksi, pengendalian dokumen, penelusuran kronologis, kewenangan, dan akuntabilitas.
 
-**MTA DETENI Digital** adalah instrumen pendukung digital untuk menjalankan model tersebut. Fokus inovasi adalah perubahan tata kelola dan proses kerja; teknologi digunakan sebagai enabler.
+**MTA DETENI Digital** adalah instrumen pendukung digital (enabler), bukan substansi inovasi. Untuk konteks PKP, perubahan yang ditonjolkan adalah perubahan tata kelola, mekanisme kerja, SOP, kontrol, dan hasil organisasi; sistem digital digunakan untuk memperkuat dan menjaga perubahan tersebut.
 
-## 2. Tujuan
+### Tujuan strategis
+1. Mewujudkan satu sumber data administratif deteni yang tervalidasi.
+2. Mengintegrasikan RAP, PERKES, KAMTIB, Subbagian Tata Usaha, dan pimpinan sesuai kewenangan masing-masing.
+3. Menjamin setiap perubahan/status/peristiwa penting mempunyai riwayat kronologis dan provenance.
+4. Mempercepat dan menstandarkan pembuatan dokumen administratif.
+5. Menjadikan **Surat Izin Keluar Sementara** dan **Surat Tugas Pengawalan** sebagai output inti yang dapat dibuat dalam **Word (.docx)** menggunakan template resmi/terkendali.
+6. Memperkuat approval, audit trail, register, distribusi, dan arsip dokumen.
+7. Menyediakan dashboard, laporan, alert, dan rekomendasi operasional yang dapat ditindaklanjuti.
+8. Menyiapkan fondasi intake OCR, pesan resmi, transcript extraction, dan AI-assisted administration secara aman dan human-in-the-loop.
 
-- membangun satu sumber data administratif yang tervalidasi;
-- mengintegrasikan proses RAP, PERKES, dan KAMTIB sesuai kewenangan;
-- mencatat setiap peristiwa penting secara kronologis;
-- mempercepat penyusunan dokumen administratif melalui template terkendali;
-- memperkuat approval, audit trail, dan akuntabilitas;
-- menyediakan dashboard dan laporan yang konsisten;
-- menyiapkan fondasi untuk OCR, intake pesan resmi, transcript extraction, dan AI-assisted administration secara aman.
+---
 
-## 3. Prinsip Tata Kelola
+## 2. Prinsip Dasar
 
-- **Purpose limitation** — data digunakan sesuai tujuan dan kewenangan.
-- **Data minimization** — hanya data yang diperlukan yang diproses.
-- **Least privilege** — akses minimum sesuai tugas.
-- **Deny by default** — akses ditolak kecuali diberikan secara eksplisit.
-- **Separation of duties** — input, verifikasi, dan persetujuan tidak dipaksakan pada aktor yang sama.
-- **Provenance** — setiap data penting memiliki sumber, aktor, waktu, metode, dan status verifikasi.
-- **Immutable history** — peristiwa kritis ditambahkan sebagai event, bukan menimpa sejarah.
-- **Human accountability** — sistem dan AI tidak mengambil keputusan administratif final.
-- **Restricted-data isolation** — data kesehatan dan data pribadi berisiko tinggi dipisahkan dari domain operasional umum.
+- **Governance first** — proses dan kewenangan ditetapkan sebelum fitur.
+- **Purpose limitation** — data hanya digunakan untuk tujuan dan kewenangan yang sah.
+- **Data minimization** — hanya data yang diperlukan diproses/ditampilkan.
+- **Least privilege** — akses minimum sesuai fungsi.
+- **Deny by default** — tidak ada akses hanya karena seseorang memiliki jabatan tinggi.
+- **Separation of duties** — input, verifikasi, administrasi surat, pelaksanaan, dan approval dipisahkan sesuai mandat.
+- **Field/domain-level authorization** — hak akses dapat berbeda sampai tingkat field/domain.
+- **Provenance** — sumber, aktor, waktu, metode, confidence, dan verification status dicatat.
+- **Immutable history** — kejadian penting dicatat sebagai event/version, bukan menimpa sejarah.
+- **Human accountability** — manusia tetap bertanggung jawab atas keputusan administratif.
+- **Restricted-data isolation** — data kesehatan dan data pribadi berisiko tinggi dipisahkan dari tampilan operasional umum.
+- **Template governance** — template dokumen resmi memiliki owner, versi, tanggal berlaku, status, dan jejak penggunaan.
+- **No silent overwrite** — koreksi menghasilkan versi/event yang dapat diaudit.
+- **No real sensitive data in repository** — GitHub hanya berisi dokumentasi, kode, dan synthetic fixtures.
 
-## 4. Domain Utama
+---
+
+## 3. Aktor, Peran, dan Batas Kewenangan
+
+### 3.1 Seksi RAP — Registrasi, Administrasi dan Pelaporan
+
+Fungsi utama:
+- registrasi/input data awal deteni;
+- upload dan pengelolaan dokumen administratif;
+- melihat data deteni sesuai kewenangan;
+- mengajukan proses deportasi sesuai mandat;
+- mengajukan permohonan izin keluar sementara sesuai alur;
+- menerima/mengelola notifikasi administratif;
+- penatausahaan barang/kepemilikan deteni;
+- checklist kelengkapan administrasi;
+- verifikasi status data administratif;
+- permintaan pembaruan data administratif;
+- laporan dan rekomendasi administratif.
+
+Tidak berwenang mengubah data kesehatan, placement operasional, audit trail, atau keputusan final di luar mandat.
+
+### 3.2 Seksi PERKES — Perawatan dan Kesehatan
+
+Fungsi utama:
+- input pemeriksaan awal;
+- data dan riwayat kesehatan;
+- jadwal pemeriksaan dan notifikasi;
+- tindak lanjut/referral sesuai kewenangan;
+- rekomendasi medis/administratif terkait kesehatan;
+- kebutuhan makanan dan barang yang terkait kondisi/kebutuhan deteni.
+
+Data kesehatan adalah **restricted domain**. Unit lain hanya menerima informasi minimum yang diperlukan untuk menjalankan tugas.
+
+### 3.3 Seksi KAMTIB — Keamanan dan Ketertiban
+
+Fungsi utama:
+- melihat data operasional yang diperlukan;
+- pengelolaan penempatan blok/ruang/bed;
+- movement ledger dan mutasi;
+- headcount;
+- kontrol keamanan/ketertiban dan incident record;
+- proses izin keluar sementara;
+- pelaksanaan/pengelolaan pengawalan;
+- generate barcode/QR individual sesuai kebijakan;
+- generate daftar deteni per blok/ruang untuk kebutuhan operasional yang sah;
+- menerima notifikasi operasional;
+- membuat/menghasilkan **Surat Izin Keluar Sementara** dalam Word setelah data dan workflow memenuhi syarat;
+- memberikan rekomendasi operasional.
+
+**KAMTIB tidak mengambil alih penatausahaan surat tugas yang menjadi kewenangan TU.**
+
+### 3.4 Subbagian Tata Usaha — SUBBAG_TU
+
+Fungsi utama:
+- menerima/menangani administrasi Surat Tugas pengawalan petugas Rudenim;
+- memeriksa kelengkapan administrasi;
+- menyiapkan/menatausahakan Surat Tugas;
+- penomoran/register sesuai ketentuan yang berlaku;
+- menggunakan template resmi dan versi yang berlaku;
+- generate/download **Surat Tugas Pengawalan dalam Word (.docx)**;
+- mengelola alur tanda tangan/otorisasi administratif;
+- distribusi dokumen;
+- upload final copy dan pengarsipan;
+- pencarian riwayat dokumen;
+- notifikasi dan rekomendasi administratif.
+
+TU tidak berwenang menyetujui substansi izin keluar, mengubah data kesehatan, mengubah placement, atau menentukan hasil pelaksanaan pengawalan.
+
+### 3.5 Kepala Rudenim — HEAD_RUDENIM
+
+Kepala Rudenim memiliki **overall visibility** sesuai kewenangan, termasuk timeline deteni dan status proses, tetapi **read-only terhadap operational records**.
+
+Kewenangan kepemimpinan:
+- melihat keseluruhan dashboard/data/timeline yang sah;
+- melihat status dokumen dan proses lintas-seksi;
+- melihat audit trail sesuai otorisasi;
+- memberikan **PETUNJUK, ARAHAN, REKOMENDASI, dan DISPOSISI**;
+- memonitor tindak lanjut dan penyelesaian.
+
+Jabatan tertinggi tidak otomatis berarti hak edit tertinggi. Fungsi oversight dipisahkan dari fungsi operasional.
+
+### 3.6 Peran pendukung
+
+- `KAMTIB_OPERATOR` — operasi harian.
+- `KAMTIB_ADMIN` — administrasi KAMTIB dengan hak edit yang lebih tinggi dalam domainnya.
+- `PEJABAT_APPROVER` — approval sesuai kewenangan formal.
+- `AUDITOR` — read-only/audit sesuai scope.
+- `SYSTEM_ADMIN` — administrasi teknis; tidak otomatis memperoleh akses substantif ke data sensitif.
+
+---
+
+## 4. Model Kewenangan
+
+Authorization dipisahkan menjadi:
+
+1. **Visibility** — boleh melihat apa.
+2. **Create** — boleh membuat record.
+3. **Edit** — boleh mengubah field/domain tertentu.
+4. **Verify** — boleh memverifikasi.
+5. **Approve** — boleh menyetujui.
+6. **Issue** — boleh menerbitkan dokumen.
+7. **Download/Export** — boleh mengunduh/mengekspor.
+8. **Distribute** — boleh mendistribusikan.
+9. **Archive** — boleh mengarsipkan.
+10. **Technical administration** — konfigurasi teknis.
+
+RBAC menjadi baseline, sedangkan ABAC/context dapat mempertimbangkan unit, domain, status workflow, ownership, purpose, dan kondisi khusus.
+
+---
+
+## 5. Domain Fungsional Utama
 
 1. Master Data Deteni
 2. Dokumen Deteni
 3. Status dan riwayat
-4. Penempatan blok/ruang/bed
-5. Movement ledger
+4. Blok/Ruang/Bed
+5. Movement Ledger
 6. Headcount
 7. KAMTIB
 8. RAP
 9. PERKES
 10. Izin Keluar Sementara
-11. Surat Perintah Pengawalan
-12. Document Generator
-13. Approval Workflow
-14. Barcode/QR
-15. Intake/OCR/Transcript
-16. Dashboard dan Reporting
-17. Notification dan Alert
-18. Audit Trail
-19. RBAC/ABAC
-20. Data Governance dan Security
+11. Pengawalan
+12. Surat Tugas Pengawalan
+13. Document Engine
+14. Template Management
+15. Approval Workflow
+16. Barcode/QR
+17. Detainee Timeline
+18. Leadership Direction Layer
+19. Notification/Alert
+20. Dashboard/Reporting
+21. Intake/OCR/Transcript
+22. Audit Trail
+23. RBAC/ABAC
+24. Data Governance/Security
+25. Document Register/Distribution/Archive
 
-## 5. Alur Data Terkendali
+---
+
+## 6. Alur Tata Kelola Inti
 
 ```text
-Sumber resmi
+DATA → PROSES → VERIFIKASI → DOKUMEN/KEPUTUSAN → PELAKSANAAN
+  ↓         ↓          ↓               ↓              ↓
+PROVENANCE  WORKFLOW   APPROVAL       REGISTER       EVENT
+  └──────────────────────────────→ TIMELINE → AUDIT
+
+UNIT → REKOMENDASI → TARGET → ACKNOWLEDGEMENT → ACTION → RESPONSE → CLOSURE
+
+KEPALA RUDENIM:
+DATA/TIMELINE → PETUNJUK/ARAHAN/REKOMENDASI/DISPOSISI → FOLLOW-UP → MONITORING
+```
+
+---
+
+## 7. Workflow Izin Keluar Sementara dan Surat Tugas — CORE OUTPUT
+
+### 7.1 Rantai proses
+
+```text
+Kebutuhan keluar sementara
+        ↓
+Permohonan / usulan
+        ↓
+Validasi kelengkapan & kewenangan
+        ↓
+Persetujuan sesuai mandat
+        ↓
+Surat Izin Keluar Sementara (.DOCX)
+        ↓
+Penugasan/pengawalan
+        ↓
+Administrasi Surat Tugas oleh SUBBAG_TU
+        ↓
+Surat Tugas Pengawalan (.DOCX)
+        ↓
+Pelaksanaan
+        ↓
+Kembali ke Rudenim
+        ↓
+Hasil/kejadian dicatat
+        ↓
+Timeline + Audit + Arsip
+```
+
+### 7.2 Kategori tujuan izin yang configurable
+
+Minimal:
+1. pemeriksaan kesehatan;
+2. rawat jalan;
+3. rawat inap/perawatan rumah sakit;
+4. keperluan instansi/administratif/hukum yang sah;
+5. repatriasi/deportasi sesuai proses;
+6. kategori lain yang disahkan dan dapat dikonfigurasi.
+
+Kategori bukan hard-coded sehingga dapat disesuaikan tanpa merombak arsitektur.
+
+### 7.3 Aturan inti
+
+- Surat tidak dapat diterbitkan jika field wajib belum terpenuhi.
+- Dokumen final harus terkait dengan record izin dan deteni yang benar.
+- Surat Tugas harus terkait dengan izin keluar/pengawalan yang relevan.
+- KAMTIB mengelola substansi operasional izin/pengawalan.
+- TU mengelola administrasi Surat Tugas.
+- Approval hanya oleh aktor berwenang.
+- Download final dicatat sebagai audit event.
+- Dokumen final menyimpan `document_id`, template version, timestamp, dan integrity hash.
+
+---
+
+## 8. Document Engine dan Template Governance
+
+Document Engine adalah komponen prioritas tinggi, bukan fitur tambahan.
+
+### 8.1 Dokumen wajib MVP
+
+1. **Surat Izin Keluar Sementara — DOCX**
+2. **Surat Tugas Pengawalan — DOCX**
+
+Output PDF dapat ditambahkan kemudian; **Word (.docx) tetap mandatory core output**.
+
+### 8.2 Template registry
+
+```text
+Document Template
+ ├─ Template ID
+ ├─ Document Type
+ ├─ Version
+ ├─ Effective Date
+ ├─ Status (DRAFT/ACTIVE/RETIRED)
+ ├─ Template File
+ ├─ Required Fields
+ ├─ Placeholder Schema
+ ├─ Owner/Authority
+ └─ Metadata
+```
+
+Dokumen yang sudah diterbitkan selalu terikat pada versi template yang digunakan. Pergantian template tidak mengubah dokumen lama.
+
+### 8.3 Field mapping
+
+Template harus memiliki contract yang memetakan placeholder ke data sumber, misalnya:
+- nomor surat;
+- identitas deteni yang diizinkan;
+- kewarganegaraan;
+- tujuan;
+- maksud/keperluan;
+- tanggal dan waktu keluar/kembali;
+- dasar/rujukan;
+- petugas pengawal;
+- pejabat berwenang;
+- blok/ruang bila memang diperlukan;
+- signature block.
+
+Field sensitif tidak boleh otomatis masuk ke template hanya karena tersedia di database.
+
+### 8.4 Lifecycle dokumen
+
+`DRAFT → GENERATED → REVIEWED → APPROVED → ISSUED → DOWNLOADED → DISTRIBUTED → ARCHIVED`
+
+Koreksi/revisi menghasilkan versi/event baru. Tidak boleh silent overwrite.
+
+### 8.5 Integritas dokumen
+
+Setiap generated document minimal memiliki:
+- `document_id`;
+- document type;
+- template/version;
+- generated_at;
+- generated_by;
+- status;
+- SHA-256 hash;
+- audit references;
+- relationship ke deteni dan proses.
+
+---
+
+## 9. Detainee Timeline
+
+Timeline menyatukan event yang relevan tanpa menghapus domain boundary:
+- registrasi/intake;
+- placement;
+- status changes;
+- movement;
+- izin keluar;
+- pengawalan;
+- dokumen;
+- kejadian KAMTIB;
+- rekomendasi;
+- petunjuk/arah/disposisi;
+- hasil tindak lanjut.
+
+Data kesehatan hanya muncul pada level/detail yang diizinkan oleh policy dan role.
+
+---
+
+## 10. Data Architecture dan Provenance
+
+Entitas kandidat:
+
+`deteni`, `deteni_documents`, `deteni_status_history`, `blocks`, `rooms`, `beds`, `deteni_movements`, `headcounts`, `health_records`, `health_events`, `leave_requests`, `leave_approvals`, `escort_orders`, `escort_members`, `document_templates`, `generated_documents`, `document_registers`, `document_distributions`, `document_events`, `leadership_directives`, `recommendations`, `users`, `roles`, `permissions`, `intake_messages`, `extraction_results`, `ocr_documents`, `audit_logs`, `system_events`.
+
+**Ini masih logical model. Tidak boleh dianggap sebagai perintah migration sebelum D1/D2 selesai.**
+
+Provenance minimum:
+- source;
+- source reference;
+- actor;
+- created_at/observed_at;
+- ingestion method (`MANUAL`, `OCR`, `OFFICIAL_MESSAGE`, `IMPORT`, dll.);
+- confidence bila hasil extraction;
+- verification status;
+- verification actor/time.
+
+---
+
+## 11. Controlled Intake: OCR, Pesan Resmi, Transcript
+
+```text
+Official Source
    ↓
-Raw / Intake Vault
+Raw/Intake Vault
    ↓
-Extraction / Parsing / OCR
+OCR/Parsing/Transcript Extraction
    ↓
-Validation
+Structured Draft
+   ↓
+Confidence + Validation
    ↓
 Human Verification
    ↓
 Approved Operational Record
-   ↓
-Workflow / Document / Reporting
-   ↓
-Audit Trail
 ```
 
-Tidak diperbolehkan alur langsung dari WhatsApp/OCR/transcript ke record operasional final.
+Tidak boleh:
+- direct WhatsApp/OCR/transcript → production record;
+- scraping WhatsApp Web sebagai jalur resmi;
+- memasukkan data sensitif ke layanan AI eksternal tanpa otorisasi formal.
 
-## 6. Lifecycle Record
+Jika integrasi pesan digunakan, gunakan **official WhatsApp Business Platform/Cloud API** atau kanal resmi lain yang disahkan.
 
-`DRAFT → VERIFIED → APPROVED → SUPERSEDED / VOIDED`
+---
 
-Record kritis tidak dihapus secara hard delete tanpa dasar kebijakan retensi dan kewenangan. Koreksi dilakukan melalui versi/event yang dapat diaudit.
+## 12. AI Policy
 
-## 7. Modul Digital Prioritas
+AI bersifat assistive:
+- extraction;
+- classification;
+- summarization;
+- anomaly/exception suggestion;
+- draft recommendation.
 
-### MVP
-- Authentication dan session security
-- Master Data Deteni
-- Blok/Ruang/Bed
-- Movement Ledger
-- Barcode/QR
-- Izin Keluar Sementara
-- Surat Perintah Pengawalan
-- Document Generator
-- Approval Workflow
-- Audit Trail
-- Dashboard dasar
+AI tidak boleh menjadi pengambil keputusan administratif final. Setiap output AI yang memengaruhi record harus memiliki provenance, confidence, dan human verification.
 
-### Tahap berikutnya
-- OCR intake
-- WhatsApp Business Platform intake yang sah
-- Transcript → structured data
-- Timeline Deteni
-- Alert dan notification
-- Reporting lanjutan
-- analytics operasional
-- AI-assisted administration dengan human verification
+---
 
-## 8. Keamanan
+## 13. Security Architecture
 
-Data produksi harus berada pada infrastruktur resmi/terotorisasi. Repository hanya memuat dokumentasi dan synthetic fixtures. Tidak boleh memasukkan PII nyata, data kesehatan, data biometrik, data perkara, export WhatsApp, credential, secret, atau dokumen operasional nyata.
+Minimum security baseline:
+- secure authentication/session;
+- RBAC + ABAC;
+- PostgreSQL RLS bila relevan;
+- deny-by-default;
+- restricted health-data boundary;
+- encryption in transit/at rest;
+- CSRF protection;
+- CORS policy;
+- rate limiting;
+- secure headers;
+- input/schema validation;
+- audit integrity/tamper evidence;
+- backup/restore;
+- disaster recovery plan;
+- secret scanning;
+- dependency scanning;
+- SAST/DAST/security regression;
+- periodic access review;
+- break-glass access dengan alasan, batas waktu, dan audit.
 
-Kontrol minimum: RBAC/ABAC, RLS bila relevan, encryption in transit/at rest, secure session, CSRF protection, CORS policy, rate limiting, audit integrity, backup/restore, secret scanning, dependency scanning, security regression test, dan review akses berkala.
+System administrator tidak otomatis boleh membaca seluruh data substantif.
 
-## 9. Arsitektur Target
+---
 
+## 14. Architecture Target
+
+### Application
 - Next.js App Router + TypeScript
+- React Hook Form
+- TanStack Query/Table bila diperlukan
+- Zod/Valibot
+
+### Data
 - PostgreSQL
 - Drizzle ORM
-- Zod/Valibot validation
-- React Hook Form
-- TanStack Table/Query bila dibutuhkan
-- Node.js worker/service untuk pekerjaan asynchronous
-- PostgreSQL queue/pg-boss atau BullMQ + Redis sesuai kebutuhan
-- S3-compatible/private object storage
-- `docx` untuk dokumen DOCX
-- `bwip-js`/QR library untuk barcode/QR
-- PostgreSQL full-text/pg_trgm sebelum mempertimbangkan search engine terpisah
-- OIDC-compatible identity provider atau secure application authentication
+- FTS/`pg_trgm` untuk pencarian awal
+
+### Document
+- server-side DOCX generation (`docx` atau controlled template engine yang dipilih setelah evaluasi)
+- private object storage/S3-compatible storage
+- SHA-256 integrity metadata
+
+### Async/Integration
+- Node.js worker/service
+- pg-boss atau BullMQ + Redis sesuai kebutuhan
+- official message API bila disahkan
+- OCR engine private/on-prem bila diperlukan
+
+### Identification
+- barcode/QR generator seperti `bwip-js`/library setara
+
+### Identity/Observability
+- OIDC-compatible identity provider atau secure auth
 - OpenTelemetry-compatible observability
 
-## 10. Governance Gate
+---
 
-Tidak ada implementasi besar sebelum blueprint, data dictionary, authority matrix, security baseline, dan acceptance criteria disetujui.
+## 15. UI / Screen Blueprint
 
-Urutan delivery:
+### KAMTIB Dashboard
+- active detainees;
+- block/room occupancy;
+- movement today;
+- temporary exits today;
+- escorts today;
+- pending documents;
+- alerts;
+- document generation/download.
 
-**Blueprint → Architecture → Contract → Security → Implementation → Test → Audit → Release**
+### RAP Dashboard
+- new detainees;
+- incomplete documents;
+- verification queue;
+- administrative requests;
+- notifications;
+- reports.
 
-## 11. PKP Outcome
+### PERKES Dashboard
+- restricted health queue;
+- examination schedule;
+- follow-up/referral;
+- health-related needs;
+- notifications.
 
-Output inovasi yang ditonjolkan adalah **model tata kelola dan perubahan proses**, dengan MTA DETENI Digital sebagai instrumen pendukung. Indikator keberhasilan harus mengukur perubahan nyata: waktu proses, kelengkapan data, kepatuhan SOP, kecepatan dokumen, keterlacakan, jumlah koreksi, dan kualitas pelaporan.
+### TU Dashboard
+- Surat Tugas queue;
+- completeness check;
+- numbering/register;
+- template/version;
+- signature/approval status;
+- DOCX generate/download;
+- distribution;
+- archive.
+
+### Head Rudenim Dashboard
+- cross-section KPI;
+- full authorized timeline;
+- pending follow-ups;
+- recommendations;
+- petunjuk/arah/disposisi;
+- document/process status;
+- audit visibility.
+
+---
+
+## 16. KPI dan Outcome PKP
+
+Baseline dan target harus ditentukan dari kondisi nyata.
+
+Indikator minimum:
+- waktu registrasi;
+- kelengkapan data;
+- waktu penyelesaian izin keluar;
+- waktu pembuatan Surat Izin Keluar;
+- waktu administrasi Surat Tugas;
+- jumlah koreksi dokumen;
+- kepatuhan SOP;
+- keterlacakan event;
+- kualitas/ketepatan laporan;
+- jumlah dokumen hilang/tidak terarsip;
+- waktu pencarian dokumen;
+- completion rate tindak lanjut rekomendasi/disposisi.
+
+Outcome PKP menekankan **perubahan organisasi yang terukur**, bukan sekadar jumlah fitur digital.
+
+---
+
+## 17. Delivery Architecture / Gate
+
+Urutan wajib:
+
+**Governance → Process → Data Contract → Authority → Security → Document Contract → Architecture → Implementation → Test → Audit → Pilot → Release → Institutionalization**
+
+Tidak boleh melakukan large implementation atau database migration sebelum:
+- authority matrix tervalidasi;
+- AS-IS/TO-BE disetujui;
+- data dictionary/classification selesai;
+- document contract/template specification selesai;
+- security baseline dan threat model selesai;
+- acceptance criteria disetujui.
+
+---
+
+## 18. Repository Boundary
+
+Repository `galleryabah-source/MTA-Deteni` hanya untuk MTA DETENI.
+
+Repository **IIRE** tetap terpisah dan tidak menjadi dependency atau tempat penyimpanan dokumen MTA DETENI.
+
+Dilarang commit:
+- PII nyata;
+- data kesehatan;
+- biometrik;
+- data perkara/operasional rahasia;
+- export WhatsApp;
+- credential/secret;
+- dokumen resmi yang belum disanitasi.
+
+Gunakan synthetic fixtures dan contoh template non-rahasia.
+
+---
+
+## 19. Roadmap Ringkas
+
+- **D0:** Governance & Discovery
+- **D1:** Process & Data Foundation
+- **D2:** Architecture & Security Foundation
+- **D3:** Core Administration
+- **D4:** Movement, Identification & Temporary Exit
+- **D5:** Document Engine
+- **D6:** Workflow & Approval
+- **D7:** Intelligent Intake
+- **D8:** Reporting & Operational Intelligence
+- **D9:** Pilot & Hardening
+- **D10:** Production & Institutionalization
+
+Document Engine diprioritaskan tinggi karena dua output Word merupakan kebutuhan operasional sekaligus bukti perubahan yang mudah diukur.
+
+---
+
+## 20. Definition of Done Tingkat Sistem
+
+MTA DETENI belum dianggap selesai hanya karena aplikasi dapat dibuka. Sistem harus memiliki:
+1. proses dan kewenangan tervalidasi;
+2. data contract dan classification;
+3. field/domain authorization;
+4. workflow state machine;
+5. dua template dokumen inti;
+6. DOCX generation yang benar;
+7. approval dan separation of duties;
+8. audit trail yang dapat diverifikasi;
+9. dashboard dan laporan;
+10. security regression;
+11. backup/restore evidence;
+12. UAT;
+13. SOP dan training;
+14. KPI sebelum/sesudah;
+15. pilot evidence;
+16. rencana institutionalization.
+
+**Status baseline:** blueprint adalah living document. Setiap perubahan besar terhadap proses, kewenangan, data, dokumen, atau security harus memperbarui blueprint dan roadmap terlebih dahulu.
