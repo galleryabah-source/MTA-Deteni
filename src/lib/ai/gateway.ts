@@ -1,7 +1,7 @@
 import { CircuitBreaker, CircuitOpenError } from './circuit-breaker';
 import { classifyAiError } from './errors';
-import { isRetryableFailure, withBoundedRetry } from './retry';
-import type { AiGateway, AiProvider, AiRequest, AiResult } from './types';
+import { withBoundedRetry } from './retry';
+import type { AiFailure, AiGateway, AiProvider, AiRequest, AiResult } from './types';
 
 export interface AiGatewayOptions {
   providers: readonly AiProvider[];
@@ -43,21 +43,41 @@ export class FailureIsolatedAiGateway implements AiGateway {
     }
 
     const providers = this.config.providers.filter((provider) =>
-      provider.capabilities.includes(request.capability) && (request.allowExternal !== false || provider.kind !== 'external'),
+      provider.capabilities.includes(request.capability) &&
+      (request.allowExternal !== false || provider.kind !== 'external'),
     );
 
-    let lastFailure = this.unavailableFailure('PROVIDER_UNAVAILABLE', 'No eligible AI provider is configured');
+    let lastFailure: AiFailure = {
+      code: 'PROVIDER_UNAVAILABLE',
+      message: 'No eligible AI provider is configured',
+      retryable: false,
+    };
+    let previousProviderFailed = false;
+
     for (const provider of providers) {
       const breaker = this.breakerFor(provider.id);
       try {
-        const value = await withBoundedRetry(
-          () => withTimeout(provider.execute<TInput, TOutput>(request), request.timeoutMs ?? this.options.timeoutMs),
-          (error) => {
-            const failure = classifyAiError(error, provider.id);
-            return failure.retryable;
-          },
+        const value = await breaker.execute(() => withBoundedRetry(
+          () => withTimeout(
+            provider.execute<TInput, TOutput>(request),
+            request.timeoutMs ?? this.options.timeoutMs,
+          ),
+          (error) => classifyAiError(error, provider.id).retryable,
           { maxAttempts: this.options.retryAttempts },
-        );
+        ));
+
+        if (previousProviderFailed) {
+          return {
+            outcome: 'FALLBACK_USED',
+            value,
+            providerId: provider.id,
+            fallbackProviderId: provider.id,
+            correlationId: request.correlationId,
+            latencyMs: Date.now() - started,
+            failure: lastFailure,
+          };
+        }
+
         return {
           outcome: 'SUCCESS',
           value,
@@ -66,16 +86,10 @@ export class FailureIsolatedAiGateway implements AiGateway {
           latencyMs: Date.now() - started,
         };
       } catch (error) {
-        if (error instanceof CircuitOpenError) {
-          lastFailure = this.unavailableFailure('PROVIDER_UNAVAILABLE', error.message, provider.id);
-          continue;
-        }
-        try {
-          await breaker.execute(async () => { throw error; });
-        } catch {
-          // The breaker records the failure. The gateway continues to the next provider.
-        }
-        lastFailure = classifyAiError(error, provider.id);
+        previousProviderFailed = true;
+        lastFailure = error instanceof CircuitOpenError
+          ? { code: 'PROVIDER_UNAVAILABLE', message: error.message, retryable: true, providerId: provider.id }
+          : classifyAiError(error, provider.id);
       }
     }
 
@@ -99,21 +113,12 @@ export class FailureIsolatedAiGateway implements AiGateway {
     return breaker;
   }
 
-  private unavailable<TInput, TOutput>(request: AiRequest<TInput>, code: Parameters<typeof this.unavailableFailure>[0], message: string): AiResult<TOutput> {
-    const failure = this.unavailableFailure(code, message);
-    return {
-      outcome: this.failureOutcome(code),
-      correlationId: request.correlationId,
-      latencyMs: 0,
-      failure,
-    };
+  private unavailable<TInput, TOutput>(request: AiRequest<TInput>, code: AiFailure['code'], message: string): AiResult<TOutput> {
+    const failure: AiFailure = { code, message, retryable: false };
+    return { outcome: this.failureOutcome(code), correlationId: request.correlationId, latencyMs: 0, failure };
   }
 
-  private unavailableFailure(code: ReturnType<typeof classifyAiError>['code'], message: string, providerId?: string) {
-    return { code, message, retryable: false, providerId } as const;
-  }
-
-  private failureOutcome(code: ReturnType<typeof classifyAiError>['code']): 'UNAVAILABLE' | 'RATE_LIMITED' | 'TIMEOUT' | 'PROVIDER_ERROR' | 'NETWORK_ERROR' | 'AUTH_ERROR' | 'POLICY_BLOCKED' {
+  private failureOutcome(code: AiFailure['code']): 'UNAVAILABLE' | 'RATE_LIMITED' | 'TIMEOUT' | 'PROVIDER_ERROR' | 'NETWORK_ERROR' | 'AUTH_ERROR' | 'POLICY_BLOCKED' {
     switch (code) {
       case 'RATE_LIMITED':
       case 'QUOTA_EXHAUSTED': return 'RATE_LIMITED';
@@ -122,6 +127,9 @@ export class FailureIsolatedAiGateway implements AiGateway {
       case 'POLICY_BLOCKED': return 'POLICY_BLOCKED';
       case 'DNS_FAILURE':
       case 'NETWORK_FAILURE': return 'NETWORK_ERROR';
+      case 'PROVIDER_UNAVAILABLE':
+      case 'LOCAL_AI_UNAVAILABLE':
+      case 'MODEL_UNAVAILABLE': return 'UNAVAILABLE';
       default: return 'PROVIDER_ERROR';
     }
   }
