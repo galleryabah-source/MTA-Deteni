@@ -58,10 +58,7 @@ export class FailureIsolatedAiGateway implements AiGateway {
       const breaker = this.breakerFor(provider.id);
       try {
         const value = await breaker.execute(() => withBoundedRetry(
-          () => withTimeout(
-            provider.execute<TInput, TOutput>(request),
-            request.timeoutMs ?? this.options.timeoutMs,
-          ),
+          () => withTimeout(provider.execute<TInput, TOutput>(request), request.timeoutMs ?? this.options.timeoutMs),
           (error) => classifyAiError(error, provider.id).retryable,
           { maxAttempts: this.options.retryAttempts },
         ));
@@ -127,6 +124,7 @@ export class FailureIsolatedAiGateway implements AiGateway {
       case 'POLICY_BLOCKED': return 'POLICY_BLOCKED';
       case 'DNS_FAILURE':
       case 'NETWORK_FAILURE': return 'NETWORK_ERROR';
+      case 'GATEWAY_FAILURE':
       case 'PROVIDER_UNAVAILABLE':
       case 'LOCAL_AI_UNAVAILABLE':
       case 'MODEL_UNAVAILABLE': return 'UNAVAILABLE';
