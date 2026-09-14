@@ -1,6 +1,6 @@
 # MTA DETENI — Project Status
 
-**Version:** P10.18 Document Output Operationalization Package  
+**Version:** P10.19 DOCX Artifact Contract Tests & Synthetic Output Fixtures  
 **Branch:** `phase10.14-database-verification-package`  
 **Certification:** NOT CERTIFIED  
 **Migration Freeze:** TRUE  
@@ -38,17 +38,16 @@
 - P10.15 controlled database execution harness contract and fail-closed execution test;
 - P10.16 database role/RLS verification specification and synthetic isolation matrix;
 - P10.17 persistent artifact-grant end-to-end synthetic runtime verification contract;
-- P10.18 document output operationalization package for both required Word outputs, template governance, lifecycle/SoD, artifact integrity and secure download handoff.
+- P10.18 document output operationalization package;
+- P10.19 DOCX artifact contract test and synthetic output fixture package.
 
-## P10.18 preparation
+## P10.19 preparation
 
-`Template Manifest → Synthetic Field Validation → DOCX Artifact → SHA-256 Binding → Lifecycle/Approval/SoD → Persistent Grant → Secure Download → Audit/Outbox Evidence`
+`Synthetic Template Fixtures → Manifest Integrity → Field Validation → DOCX Contract → SHA-256 Binding → Lifecycle/SoD → Secure Grant → Evidence`
 
-P10.18 formalizes the two required MVP outputs: `TEMPORARY_EXIT_PERMISSION` (Surat Izin Keluar Sementara) and `ESCORT_ASSIGNMENT_LETTER` (Surat Tugas Pengawalan). Official issuance remains downstream of authorization, approval, separation of duties, final artifact identity/hash and private storage controls.
+P10.19 adds deterministic synthetic fixtures for both required MVP Word outputs and a fail-closed contract suite covering template/version/checksum metadata, document lifecycle and separation of duties, artifact integrity, single-use handoff, replay/isolation denial, transaction/provider ordering, and synthetic-only evidence.
 
-Production templates and signature infrastructure remain governance dependencies. Until approved, tests must use synthetic templates and opaque values only.
-
-Execution remains blocked for real database operations while `MIGRATION_FREEZE=TRUE`.
+The fixture values are opaque test identifiers and contain no detainee names, health information, production document contents, credentials, tokens or provider secrets.
 
 ## Certification blockers
 
@@ -78,4 +77,4 @@ Execution remains blocked for real database operations while `MIGRATION_FREEZE=T
 
 ## Next checkpoint
 
-P10.19 — DOCX Artifact Contract Tests & Synthetic Output Fixtures: implement deterministic synthetic fixtures and contract tests for both required Word outputs, template integrity, lifecycle/SoD, checksum binding and secure handoff without production data.
+P10.20 — Document Output Runtime Integration Contract: bind the existing renderer, document lifecycle, artifact storage and persistent grant boundary into a deterministic runtime orchestration contract, still without production database execution or real templates.
