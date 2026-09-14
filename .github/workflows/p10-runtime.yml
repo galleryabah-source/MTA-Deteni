@@ -1,0 +1,31 @@
+name: P10 Runtime Domain
+
+on:
+  push:
+    branches: [phase9-kernel-implementation]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  runtime-domain:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      APP_ENV: test
+      AI_ENABLED: 'false'
+      MIGRATION_FREEZE: 'true'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Verify synthetic-only runtime contract
+        run: |
+          set -euxo pipefail
+          test "$APP_ENV" = test
+          test "$AI_ENABLED" = false
+          test "$MIGRATION_FREEZE" = true
+          node --test test/p10.1-runtime-domain-integration.test.mjs
