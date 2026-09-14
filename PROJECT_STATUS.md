@@ -1,6 +1,6 @@
 # MTA DETENI — Project Status
 
-**Version:** P10.4 Operational Identity / Barcode-QR Boundary  
+**Version:** P10.5 Temporary Exit Approval / Execution Boundary  
 **Branch:** `phase10.4`  
 **Certification:** NOT CERTIFIED  
 **Migration Freeze:** TRUE  
@@ -24,41 +24,40 @@
 - P10.1 temporary-exit runtime/domain integration foundation;
 - P10.2 placement domain boundary and synthetic integration coverage;
 - P10.3 append-only movement ledger and deterministic headcount projection foundation;
-- P10.4 opaque barcode/QR operational identity boundary and synthetic integration coverage.
+- P10.4 opaque barcode/QR operational identity boundary and synthetic integration coverage;
+- P10.5 temporary-exit approval boundary and synthetic regression coverage.
 
-## P10.4 executable flow
+## P10.5 executable flow
 
-`Scanner Input → Opaque Identity Normalization → Identity Resolution → Authorization → Transaction → Audit → Outbox`
+`EXIT_REQUESTED → Validation → Authorization → Approval → EXIT_APPROVED → Audit → Outbox`
 
-The scanned identity is treated as untrusted input. Resolution identifies an operational record only; it does not grant authorization.
+Approval requires explicit context, a controlled purpose, eligible request state, explicit approver identity, and separation of duties between requester and approver.
 
-## P10.4 controls
+## P10.5 controls
 
-- BARCODE and QR are explicit identity types;
-- scanned tokens are opaque and must not encode direct detainee identifiers;
-- malformed and unknown identities fail closed;
-- inactive identities cannot proceed as operational actions;
+- approval is only valid for `EXIT_REQUESTED`;
+- approver cannot be the requesting actor;
+- purpose uses an explicit controlled vocabulary;
 - authorization remains independent and deny-by-default;
-- successful scans cross the transactional boundary;
-- audit and outbox are critical side effects;
-- idempotent replay does not duplicate critical side effects;
+- unauthorized approval creates no domain/audit/outbox side effects;
+- successful approval is atomic across domain state, audit, outbox and idempotency;
+- replay does not duplicate critical side effects;
+- different payload under the same idempotency key conflicts;
 - synthetic fixtures only.
 
 ## Certification blockers
 
-The following remain intentionally `NOT_RUN` or externally unverified:
-
 - real PostgreSQL transaction/isolation/concurrency behavior;
 - real capacity concurrency enforcement;
 - PostgreSQL-backed identity registry and uniqueness/revocation semantics;
-- physical barcode/QR issuance, replacement and rotation policy;
-- scanner/device trust model;
-- real storage provider security;
-- real external provider idempotency/retry behavior;
+- approved authority matrix and SOP validation for actual approver roles;
+- final DOCX document contract, template/version/numbering/signature controls;
+- physical barcode/QR issuance and device trust policy;
+- real storage/provider behavior;
 - runtime HTTP/RBAC integration;
 - production deployment evidence;
 - final database contract reconciliation;
-- CI step-level evidence where GitHub exposes a failed run without accessible job logs.
+- CI step-level evidence where GitHub exposes failures without accessible job logs.
 
 A completed CI failure without accessible step evidence is not converted to PASS.
 
@@ -74,4 +73,4 @@ A completed CI failure without accessible step evidence is not converted to PASS
 
 ## Next checkpoint
 
-P10.5 — Temporary Exit Approval / Execution Boundary, preparing the mandatory DOCX output contract without bypassing authorization or migration gates.
+P10.6 — Document Contract / DOCX Generation Boundary for Surat Izin Keluar Sementara and Surat Tugas Pengawalan.
