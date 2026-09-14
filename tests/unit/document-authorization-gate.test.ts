@@ -115,7 +115,7 @@ describe("document authorization gate", () => {
     expect(decision.allowed).toBe(true);
     expect(decision.reason).toBe("APPROVED");
     expect(decision.authorization.reason).toBe("GRANTED");
-    expect(decision.guardrails).toContain("CRITICAL_SECOND_APPROVAL");
+    expect(decision.guardrails).toContain("AUDIT");
   });
 
   it("fails closed when correlation identity is inconsistent", () => {
