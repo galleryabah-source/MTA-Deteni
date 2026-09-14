@@ -1,6 +1,6 @@
 # MTA DETENI — Project Status
 
-**Version:** P10.16 Database Role/RLS Verification Specification  
+**Version:** P10.18 Document Output Operationalization Package  
 **Branch:** `phase10.14-database-verification-package`  
 **Certification:** NOT CERTIFIED  
 **Migration Freeze:** TRUE  
@@ -36,24 +36,19 @@
 - P10.13 identity/scope RLS finalization contract and approved database integration execution gate;
 - P10.14 database integration verification package and executable verification matrix;
 - P10.15 controlled database execution harness contract and fail-closed execution test;
-- P10.16 database role/RLS verification specification and synthetic isolation matrix.
+- P10.16 database role/RLS verification specification and synthetic isolation matrix;
+- P10.17 persistent artifact-grant end-to-end synthetic runtime verification contract;
+- P10.18 document output operationalization package for both required Word outputs, template governance, lifecycle/SoD, artifact integrity and secure download handoff.
 
-## P10.16 preparation
+## P10.18 preparation
 
-`Synthetic Fixtures → Role Matrix → RLS/Privilege Checks → Identity/Scope Isolation → Lifecycle Checks → Atomic Transition Checks → Evidence`
+`Template Manifest → Synthetic Field Validation → DOCX Artifact → SHA-256 Binding → Lifecycle/Approval/SoD → Persistent Grant → Secure Download → Audit/Outbox Evidence`
 
-P10.16 defines the post-migration verification contract using opaque synthetic identities only. Anonymous/public, unauthorised authenticated, wrong-scope, inactive/revoked actors and Super Admin without operational authority remain denied. Authorized server-side actor/scope context is the only permitted operational path.
+P10.18 formalizes the two required MVP outputs: `TEMPORARY_EXIT_PERMISSION` (Surat Izin Keluar Sementara) and `ESCORT_ASSIGNMENT_LETTER` (Surat Tugas Pengawalan). Official issuance remains downstream of authorization, approval, separation of duties, final artifact identity/hash and private storage controls.
 
-No test is permitted to weaken RLS or introduce permissive policies for convenience. No production identity or detainee data is permitted in fixtures or evidence.
+Production templates and signature infrastructure remain governance dependencies. Until approved, tests must use synthetic templates and opaque values only.
 
-Execution remains blocked while `MIGRATION_FREEZE=TRUE`.
-
-## Required MVP document outputs
-
-- `TEMPORARY_EXIT_PERMISSION` — Surat Izin Keluar Sementara;
-- `ESCORT_ASSIGNMENT_LETTER` — Surat Tugas Pengawalan.
-
-Artifacts remain downstream of authorization, document lifecycle, approval/SoD, template governance, checksum integrity and private storage controls.
+Execution remains blocked for real database operations while `MIGRATION_FREEZE=TRUE`.
 
 ## Certification blockers
 
@@ -83,4 +78,4 @@ Artifacts remain downstream of authorization, document lifecycle, approval/SoD, 
 
 ## Next checkpoint
 
-P10.17 — Persistent Grant End-to-End Synthetic Runtime Verification: connect the domain, repository, transaction, audit and outbox contracts through an executable synthetic scenario without requiring a real database.
+P10.19 — DOCX Artifact Contract Tests & Synthetic Output Fixtures: implement deterministic synthetic fixtures and contract tests for both required Word outputs, template integrity, lifecycle/SoD, checksum binding and secure handoff without production data.
