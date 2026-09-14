@@ -4,6 +4,15 @@ const STATES = new Set(['QUARANTINED', 'AVAILABLE', 'REVOKED', 'ARCHIVED', 'EXPI
 const CLASSES = new Set(['INTAKE_ORIGINAL', 'EXTRACTION_ARTIFACT', 'OFFICIAL_TEMPLATE', 'GENERATED_DOCUMENT', 'EVIDENCE', 'EXPORT_ARTIFACT', 'SYSTEM_ARTIFACT']);
 const CLASSIFICATIONS = new Set(['L1', 'L2', 'L3', 'L4']);
 
+function assertAccess(context, metadata, purpose = 'VIEW') {
+  if (!context?.actorId?.trim() || !context?.scopeId?.trim()) throw new Error('STORAGE_ACCESS_CONTEXT_REQUIRED');
+  if (context.scopeId !== metadata.scopeId) throw new Error('STORAGE_SCOPE_DENIED');
+  if (!Array.isArray(context.allowedClassifications) || !context.allowedClassifications.includes(metadata.classification)) throw new Error('STORAGE_CLASSIFICATION_DENIED');
+  if (metadata.status !== 'AVAILABLE') throw new Error('STORAGE_OBJECT_STATE_DENIED');
+  if (!purpose?.trim()) throw new Error('STORAGE_PURPOSE_REQUIRED');
+  return true;
+}
+
 export function buildStorageKey({ environment, objectClass, scopeId, objectId = randomUUID(), randomName = randomUUID() }) {
   for (const value of [environment, objectClass, scopeId, objectId, randomName]) {
     if (typeof value !== 'string' || !value || /(?:\.\.|[\\/\0\r\n])/.test(value)) throw new Error('STORAGE_KEY_INPUT_INVALID');
@@ -19,17 +28,19 @@ export function sha256(content) {
 export class PrivateStorageTestDouble {
   #objects = new Map();
   #metadata = new Map();
+  #grants = new Map();
   #audit = [];
 
   put({ content, environment = 'test', objectClass, scopeId, originalFilename, detectedMimeType, classification, sourceType, sourceId, correlationId, uploadedBy }) {
     if (!Buffer.isBuffer(content)) throw new Error('STORAGE_CONTENT_REQUIRED');
     if (!CLASSES.has(objectClass)) throw new Error('STORAGE_CLASS_INVALID');
+    if (!scopeId?.trim()) throw new Error('STORAGE_SCOPE_REQUIRED');
     if (!CLASSIFICATIONS.has(classification)) throw new Error('STORAGE_CLASSIFICATION_INVALID');
     if (!correlationId?.trim()) throw new Error('STORAGE_CORRELATION_REQUIRED');
     const objectId = randomUUID();
     const storageKey = buildStorageKey({ environment, objectClass, scopeId, objectId });
     const checksumSha256 = sha256(content);
-    const metadata = Object.freeze({ objectId, storageKey, objectClass, originalFilename, detectedMimeType, sizeBytes: content.byteLength, checksumSha256, classification, sourceType, sourceId, correlationId, uploadedBy, uploadedAt: new Date().toISOString(), status: 'QUARANTINED' });
+    const metadata = Object.freeze({ objectId, storageKey, objectClass, scopeId, originalFilename, detectedMimeType, sizeBytes: content.byteLength, checksumSha256, classification, sourceType, sourceId, correlationId, uploadedBy, uploadedAt: new Date().toISOString(), status: 'QUARANTINED' });
     this.#objects.set(objectId, Buffer.from(content));
     this.#metadata.set(objectId, metadata);
     this.#audit.push({ event: 'STORAGE_QUARANTINED', objectId, correlationId });
@@ -46,7 +57,35 @@ export class PrivateStorageTestDouble {
     return next;
   }
 
-  getMetadata(objectId) { return this.#metadata.get(objectId) ?? null; }
+  getMetadata(objectId, context) {
+    const metadata = this.#metadata.get(objectId);
+    if (!metadata) throw new Error('STORAGE_OBJECT_NOT_FOUND');
+    assertAccess(context, metadata);
+    this.#audit.push({ event: 'STORAGE_VIEW_REQUESTED', objectId, actorId: context.actorId, correlationId: metadata.correlationId });
+    return metadata;
+  }
+
+  createTemporaryDownload(objectId, context, now = Date.now(), ttlMs = 60_000) {
+    const metadata = this.#metadata.get(objectId);
+    if (!metadata) throw new Error('STORAGE_OBJECT_NOT_FOUND');
+    assertAccess(context, metadata, 'DOWNLOAD');
+    if (!Number.isInteger(ttlMs) || ttlMs < 1 || ttlMs > 300_000) throw new Error('STORAGE_GRANT_TTL_INVALID');
+    const grantId = randomUUID();
+    this.#grants.set(grantId, { grantId, objectId, actorId: context.actorId, purpose: 'DOWNLOAD', expiresAt: now + ttlMs, used: false });
+    this.#audit.push({ event: 'STORAGE_DOWNLOAD_GRANTED', objectId, actorId: context.actorId, correlationId: metadata.correlationId });
+    return Object.freeze({ grantId, expiresAt: now + ttlMs });
+  }
+
+  consumeTemporaryDownload(grantId, context, now = Date.now()) {
+    const grant = this.#grants.get(grantId);
+    if (!grant || grant.used || grant.expiresAt <= now || grant.actorId !== context?.actorId) throw new Error('STORAGE_DOWNLOAD_GRANT_DENIED');
+    const metadata = this.#metadata.get(grant.objectId);
+    if (!metadata) throw new Error('STORAGE_OBJECT_NOT_FOUND');
+    assertAccess(context, metadata, grant.purpose);
+    grant.used = true;
+    this.#audit.push({ event: 'STORAGE_DOWNLOAD_COMPLETED', objectId: metadata.objectId, actorId: context.actorId, correlationId: metadata.correlationId });
+    return Buffer.from(this.#objects.get(metadata.objectId));
+  }
 
   verifyIntegrity(objectId) {
     const metadata = this.#metadata.get(objectId);
