@@ -1,6 +1,6 @@
 # MTA DETENI — Project Status
 
-**Version:** P10.10 Persistent Grant / Revocation Transaction Boundary  
+**Version:** P10.11 Persistent Grant Integration Readiness  
 **Branch:** `phase10.10-persistent-grant-boundary`  
 **Certification:** NOT CERTIFIED  
 **Migration Freeze:** TRUE  
@@ -30,28 +30,32 @@
 - P10.7 deterministic DOCX artifact renderer and checksum boundary;
 - P10.8 controlled artifact handoff boundary;
 - P10.9 runtime artifact distribution security boundary;
-- P10.10 persistent artifact-grant repository contract, parameterized atomic consume/revoke operations, and fail-closed affected-row enforcement.
+- P10.10 persistent artifact-grant repository contract, parameterized atomic consume/revoke operations, and fail-closed affected-row enforcement;
+- P10.11 persistent grant integration readiness contract and transaction orchestration boundary.
 
-## P10.10 executable contract
+## P10.11 executable contract
 
-`ISSUED Artifact → Persistent Grant Insert → Commit (Audit + Outbox) → Post-commit Provider Handoff → Atomic ACTIVE/Unexpired/Actor/Scope/Object Consume → Single-use Download`
+`Authorization → ISSUED/Artifact Binding → BEGIN → Persistent Grant INSERT → Audit → Outbox → COMMIT → Worker Claim → Provider Call → Atomic Grant Consume → Completion Audit`
 
-P10.10 replaces the purely in-memory persistence assumption with an explicit repository boundary. Grant creation uses parameterized PostgreSQL INSERT semantics. Consumption is a single conditional UPDATE requiring ACTIVE status, non-expiry, actor binding, scope binding and object binding; exactly one affected row is required. Revocation is likewise a single conditional UPDATE requiring ACTIVE status and actor/scope binding. Zero affected rows fail closed.
+P10.11 reconciles the P10.10 repository with the existing document lifecycle, deny-by-default authorization, critical transaction, audit and outbox boundaries. Grant insertion, audit and outbox callbacks are explicitly orchestrated on the same transaction client. Provider/network operations remain outside this boundary and are permitted only after durable outbox claim and commit.
 
-The repository adapter does not execute DDL or create schema. It is intentionally compatible with the active Migration Freeze. No production database schema, grant table, or migration was created by this checkpoint.
+The future database model must bind grant identity, document/artifact/object identity, checksum, actor, scope, issuance/expiry and lifecycle state. Consumption and revocation remain atomic conditional updates with exactly-one-row success semantics.
 
-## P10.10 controls
+## P10.11 controls
 
-- parameterized SQL only; no string interpolation of request values;
-- single-row conditional state transitions;
-- ACTIVE-only consumption and revocation;
-- consumption requires unexpired grant;
-- actor, scope and object binding enforced in the database predicate;
-- exactly-one-row transition required; zero/multiple rows fail closed;
-- provider/network storage calls remain post-commit outbox work;
+- application authorization remains authoritative;
+- persistent grant cannot grant permission by itself;
+- `ISSUED` document state remains mandatory;
+- document/artifact/object/checksum binding remains mandatory;
+- grant identity is opaque and contains no detainee PII;
+- actor and scope are persisted and enforced in state transitions;
+- expiry is enforced in the consume predicate;
+- lifecycle is `ACTIVE → CONSUMED` or `ACTIVE → REVOKED`;
+- grant insert + audit + outbox share one critical transaction client;
+- provider/network calls are post-commit only;
+- anonymous/public access to grants is prohibited by future database policy contract;
 - AI remains OFF;
-- tests use synthetic fixtures and a database-client test double only;
-- no real detainee data, production files, credentials or secrets.
+- no production data or secrets are used.
 
 ## Required MVP document outputs
 
@@ -64,23 +68,21 @@ Artifacts remain downstream of authorization, document lifecycle, approval/SoD, 
 
 The following remain intentionally `NOT_RUN` or externally unverified:
 
-- real PostgreSQL schema and migration under an explicitly approved migration window;
-- real PostgreSQL transaction/isolation/concurrency behavior;
-- real capacity concurrency enforcement;
-- persistent download-grant storage against the approved schema;
-- real storage provider security and private bucket policy;
+- real PostgreSQL schema/migration;
+- real PostgreSQL isolation/concurrency testing;
+- RLS enforcement against the approved identity/scope model;
+- persistent grant storage against a deployed schema;
+- real private object storage and provider security;
 - persistent database-backed identity mapping;
-- real scanner/device policy integration;
-- real external provider idempotency/retry behavior;
+- scanner/device integration;
+- provider idempotency/retry/dead-letter behavior;
 - runtime HTTP middleware/RBAC integration;
 - production deployment evidence;
-- final database contract reconciliation;
-- binary `.docx` renderer/storage integration against approved production templates;
-- real template governance and signature infrastructure;
-- end-to-end audit/outbox persistence for artifact distribution;
-- CI step-level evidence where GitHub currently exposes failed jobs without accessible steps/logs.
+- approved production DOCX templates and signature infrastructure;
+- end-to-end persistent audit/outbox evidence;
+- GitHub Actions step-level evidence while recent jobs fail before exposing executable steps/logs.
 
-CI evidence must still be independently observed before certification. A completed CI failure without accessible step evidence is not converted to PASS.
+CI failures with no observable steps remain infrastructure/evidence failures, not application PASS/FAIL evidence.
 
 ## Safety rules
 
@@ -89,9 +91,9 @@ CI evidence must still be independently observed before certification. A complet
 - no real detainee data;
 - no production credentials or secrets;
 - AI remains OFF;
-- domain tests use synthetic fixtures only;
+- domain/integration tests use synthetic fixtures and test doubles;
 - certification is fail-closed.
 
 ## Next checkpoint
 
-P10.11 — Persistent Grant Integration Readiness: reconcile the repository contract with the approved database model, transaction boundary, audit/outbox event contract, RLS/RBAC policy surface, and production storage-provider handoff prerequisites. Migration remains frozen until explicit approval and observable integration evidence are available.
+P10.12 — Database Integration Package: prepare the approved migration package, RLS policy contract, repository integration tests, PostgreSQL concurrency test plan, and rollback plan. Do not execute migration/DDL while the Migration Freeze remains TRUE.
