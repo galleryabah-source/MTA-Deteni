@@ -1,6 +1,6 @@
 # MTA DETENI — Project Status
 
-**Version:** P10.15 Controlled Database Execution Harness  
+**Version:** P10.16 Database Role/RLS Verification Specification  
 **Branch:** `phase10.14-database-verification-package`  
 **Certification:** NOT CERTIFIED  
 **Migration Freeze:** TRUE  
@@ -35,17 +35,18 @@
 - P10.12 database integration package: proposed migration, RLS contract, PostgreSQL concurrency test plan, rollback plan, and static package contract test;
 - P10.13 identity/scope RLS finalization contract and approved database integration execution gate;
 - P10.14 database integration verification package and executable verification matrix;
-- P10.15 controlled database execution harness contract and fail-closed execution test.
+- P10.15 controlled database execution harness contract and fail-closed execution test;
+- P10.16 database role/RLS verification specification and synthetic isolation matrix.
 
-## P10.15 preparation
+## P10.16 preparation
 
-`Approval → Freeze Check → Target Identity → Migration Checksum → Applied-Version Check → Controlled Execution → Schema/RLS Verification → Synthetic Role Tests → Evidence → Release`
+`Synthetic Fixtures → Role Matrix → RLS/Privilege Checks → Identity/Scope Isolation → Lifecycle Checks → Atomic Transition Checks → Evidence`
 
-P10.15 defines a controlled execution boundary. The runner must stop before database execution when the migration freeze is active, approval is absent, target identity is missing/mismatched, migration checksum is unavailable/mismatched, RLS identity/scope contract is not approved, or evidence persistence is unavailable.
+P10.16 defines the post-migration verification contract using opaque synthetic identities only. Anonymous/public, unauthorised authenticated, wrong-scope, inactive/revoked actors and Super Admin without operational authority remain denied. Authorized server-side actor/scope context is the only permitted operational path.
 
-The harness does not accept client-provided SQL, arbitrary migration paths, arbitrary table names, arbitrary connection strings, wildcard targets or inferred production targets. Evidence is restricted to operational metadata and synthetic identifiers.
+No test is permitted to weaken RLS or introduce permissive policies for convenience. No production identity or detainee data is permitted in fixtures or evidence.
 
-No DDL or database migration has been executed. `SKIPPED_BY_SAFETY_GATE` remains distinct from PASS.
+Execution remains blocked while `MIGRATION_FREEZE=TRUE`.
 
 ## Required MVP document outputs
 
@@ -82,4 +83,4 @@ Artifacts remain downstream of authorization, document lifecycle, approval/SoD, 
 
 ## Next checkpoint
 
-P10.16 — Database Role/RLS Verification Specification: prepare the synthetic role matrix, identity/scope fixtures and executable post-migration verification contract. Actual execution remains blocked until the Migration Freeze is explicitly lifted.
+P10.17 — Persistent Grant End-to-End Synthetic Runtime Verification: connect the domain, repository, transaction, audit and outbox contracts through an executable synthetic scenario without requiring a real database.
