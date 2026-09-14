@@ -1,0 +1,41 @@
+name: P10.4 Operational Identity
+
+on:
+  push:
+    branches: [phase10.4]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  operational-identity:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      APP_ENV: test
+      AI_ENABLED: 'false'
+      MIGRATION_FREEZE: 'true'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Verify safety contract
+        run: |
+          set -euxo pipefail
+          test "$APP_ENV" = test
+          test "$AI_ENABLED" = false
+          test "$MIGRATION_FREEZE" = true
+      - name: Run P10.4 operational identity tests
+        run: |
+          set -euxo pipefail
+          node --test test/p10.4-operational-identity.test.mjs | tee p10.4-identity-test-output.txt
+      - name: Upload diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: p10.4-identity-diagnostics
+          path: p10.4-identity-test-output.txt
+          if-no-files-found: ignore
