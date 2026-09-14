@@ -1,6 +1,6 @@
 # MTA DETENI — Project Status
 
-**Version:** P10.14 Database Integration Verification Package  
+**Version:** P10.15 Controlled Database Execution Harness  
 **Branch:** `phase10.14-database-verification-package`  
 **Certification:** NOT CERTIFIED  
 **Migration Freeze:** TRUE  
@@ -34,15 +34,18 @@
 - P10.11 persistent grant integration readiness contract and transaction orchestration boundary;
 - P10.12 database integration package: proposed migration, RLS contract, PostgreSQL concurrency test plan, rollback plan, and static package contract test;
 - P10.13 identity/scope RLS finalization contract and approved database integration execution gate;
-- P10.14 database integration verification package and executable verification matrix.
+- P10.14 database integration verification package and executable verification matrix;
+- P10.15 controlled database execution harness contract and fail-closed execution test.
 
-## P10.14 preparation
+## P10.15 preparation
 
-`Artifact Integrity → Schema Contract → Privilege/RLS Verification → Identity/Scope Isolation → Repository Verification → Transaction Atomicity → Concurrency → Rollback → Evidence Completeness`
+`Approval → Freeze Check → Target Identity → Migration Checksum → Applied-Version Check → Controlled Execution → Schema/RLS Verification → Synthetic Role Tests → Evidence → Release`
 
-P10.14 defines V1–V16 verification cases covering database identity, migration checksum, schema constraints, RLS/privileges, actor/scope/object isolation, expiry/replay, concurrency, revoke races, transaction rollback, provider isolation and evidence completeness. Execution remains blocked while `MIGRATION_FREEZE=TRUE`.
+P10.15 defines a controlled execution boundary. The runner must stop before database execution when the migration freeze is active, approval is absent, target identity is missing/mismatched, migration checksum is unavailable/mismatched, RLS identity/scope contract is not approved, or evidence persistence is unavailable.
 
-A safety-gated result is explicitly `SKIPPED_BY_SAFETY_GATE`, never PASS. No production database operation or DDL has been executed by this checkpoint.
+The harness does not accept client-provided SQL, arbitrary migration paths, arbitrary table names, arbitrary connection strings, wildcard targets or inferred production targets. Evidence is restricted to operational metadata and synthetic identifiers.
+
+No DDL or database migration has been executed. `SKIPPED_BY_SAFETY_GATE` remains distinct from PASS.
 
 ## Required MVP document outputs
 
@@ -54,7 +57,7 @@ Artifacts remain downstream of authorization, document lifecycle, approval/SoD, 
 ## Certification blockers
 
 - explicit governance approval to lift Migration Freeze;
-- migration execution and schema verification;
+- controlled migration execution and schema verification;
 - final approved actor-to-identity and scope RLS policy;
 - real PostgreSQL isolation/concurrency evidence;
 - persistent grant integration against deployed schema;
@@ -66,8 +69,6 @@ Artifacts remain downstream of authorization, document lifecycle, approval/SoD, 
 - scanner/device integration;
 - provider retry/dead-letter/idempotency evidence;
 - GitHub Actions step-level evidence.
-
-Latest observed P10 workflow run #115 failed with a job exposing zero steps; its log endpoint returned BlobNotFound. Therefore CI remains an infrastructure/evidence blocker, not application PASS/FAIL evidence.
 
 ## Safety rules
 
@@ -81,4 +82,4 @@ Latest observed P10 workflow run #115 failed with a job exposing zero steps; its
 
 ## Next checkpoint
 
-P10.15 — Controlled Database Execution Harness: prepare a fail-closed execution runner and evidence schema. It may only execute after explicit Migration Freeze lift and approved target verification.
+P10.16 — Database Role/RLS Verification Specification: prepare the synthetic role matrix, identity/scope fixtures and executable post-migration verification contract. Actual execution remains blocked until the Migration Freeze is explicitly lifted.
