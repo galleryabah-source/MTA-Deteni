@@ -1,6 +1,6 @@
 # MTA DETENI — Project Status
 
-**Version:** P10.8 Controlled Artifact Handoff / Private Download Boundary  
+**Version:** P10.9 Runtime HTTP/RBAC Artifact Distribution Boundary  
 **Branch:** `phase9-kernel-implementation`  
 **Certification:** NOT CERTIFIED  
 **Migration Freeze:** TRUE  
@@ -28,34 +28,37 @@
 - P10.5 document / exit authorization binding and lifecycle foundation;
 - P10.6 deterministic template manifest and field-validation boundary;
 - P10.7 deterministic DOCX artifact renderer and checksum boundary;
-- P10.8 controlled artifact handoff boundary.
+- P10.8 controlled artifact handoff boundary;
+- P10.9 runtime artifact distribution security boundary.
 
-## P10.8 executable flow
+## P10.9 executable flow
 
-`ISSUED Document → Artifact Binding → Scoped Download Grant → Expiry / Revocation → Single-use Consumption → Audit / Outbox Handoff`
+`Authenticated Request → Authorization → ISSUED/Artifact/Scope Validation → Critical Transaction (Audit + Outbox) → Commit → Outbox Worker → Storage Provider Grant → Single-use Download`
 
-The P10.8 boundary binds the document ID, artifact ID, artifact SHA-256 and private storage object identity into a scoped download grant. A grant is actor-bound, scope-bound, time-limited and single-use. Consumption changes the grant to `CONSUMED`; revocation changes it to `REVOKED`; replay, wrong actor, wrong scope, wrong object and expiry fail closed.
+P10.9 binds the P10.8 grant contract to authenticated request context and deny-by-default authorization. Document state, artifact identity/checksum, scope and private-storage metadata are validated before the audit/outbox boundary. Provider/storage network calls are explicitly excluded from the critical transaction and are represented as post-commit outbox work.
 
-This remains a domain/test boundary. Persistence of grants, storage-provider execution and audit/outbox commit behavior remain downstream integration gates.
+This remains a synthetic/runtime adapter boundary. It does not claim production HTTP middleware, persistent grant storage, PostgreSQL concurrency, or production object-storage evidence.
 
 ## Required MVP document outputs
 
 - `TEMPORARY_EXIT_PERMISSION` — Surat Izin Keluar Sementara;
 - `ESCORT_ASSIGNMENT_LETTER` — Surat Tugas Pengawalan.
 
-The artifact handoff layer does not authorize issuance by itself. Existing authorization, document lifecycle, scope, classification and SoD controls remain prerequisites.
+Artifacts remain downstream of authorization, document lifecycle, approval/SoD, template governance, checksum integrity and private storage controls. The runtime distribution boundary cannot authorize issuance by itself.
 
-## P10.8 controls
+## P10.9 controls
 
+- authenticated active session required;
+- permission `deteni.document.artifact.download` required;
+- scope, assignment/duty, classification and policy checks remain deny-by-default;
 - document must already be `ISSUED`;
-- artifact ID and SHA-256 must be present;
-- immutable private object identity binding;
-- actor and scope binding;
-- short-lived grant with explicit expiry;
-- single-use consumption;
-- explicit revocation;
-- fail-closed replay protection;
-- artifact/document/object identity consistency check;
+- artifact ID, SHA-256 and private object ID remain bound;
+- storage object must be `AVAILABLE` and checksum must match;
+- audit and outbox are transaction participants;
+- provider/network storage calls are post-commit only;
+- actor/scope-bound short-lived single-use grant;
+- replay, wrong actor, wrong scope, invalid state and checksum mismatch fail closed;
+- Super Admin operational bypass remains denied;
 - no production storage credentials or real files;
 - AI remains OFF and is not a distribution dependency.
 
@@ -70,13 +73,13 @@ The following remain intentionally `NOT_RUN` or externally unverified:
 - persistent database-backed identity mapping;
 - real scanner/device policy integration;
 - real external provider idempotency/retry behavior;
-- runtime HTTP/RBAC integration;
+- runtime HTTP middleware/RBAC integration;
 - production deployment evidence;
 - final database contract reconciliation;
 - binary `.docx` renderer/storage integration against approved production templates;
 - real template governance and signature infrastructure;
 - end-to-end audit/outbox persistence for artifact distribution;
-- CI step-level evidence where GitHub currently exposes a failed run without accessible job logs.
+- CI step-level evidence where GitHub currently exposes failed jobs without accessible steps/logs.
 
 CI evidence must still be independently observed before certification. A completed CI failure without accessible step evidence is not converted to PASS.
 
@@ -92,4 +95,4 @@ CI evidence must still be independently observed before certification. A complet
 
 ## Next checkpoint
 
-P10.9 — Runtime HTTP/RBAC Artifact Distribution Boundary: connect the P10.8 grant contract to authenticated request context, deny-by-default authorization, private storage access and transactional audit/outbox orchestration without weakening existing security invariants.
+P10.10 — Persistent Grant / Revocation Transaction Boundary: replace the in-memory P10.8 grant lifecycle with a database-backed transactional contract, including concurrency-safe single-use consumption and revocation, without lifting the migration freeze until the database contract is explicitly approved and integration evidence is available.
