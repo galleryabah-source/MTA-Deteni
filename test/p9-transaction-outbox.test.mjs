@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { IdempotencyStore } from '../src/kernel/idempotency.mjs';
+import { IdempotencyStore, fingerprint } from '../src/kernel/idempotency.mjs';
 import { OutboxStore } from '../src/kernel/outbox.mjs';
 
 const event = (id, payload = {}) => ({ eventId: id, eventType: 'LEAVE_COMPLETED', aggregateType: 'DETAINEE_LEAVE', aggregateId: 'd-001', correlationId: 'corr-001', payloadVersion: '1.0', payload });
@@ -18,6 +18,12 @@ test('same idempotency key with different fingerprint conflicts', () => {
   const base = { operation: 'leave.complete', actorId: 'a', scope: 's', resourceId: 'd-001', payload: { state: 'COMPLETED' } };
   store.execute('key-002', base, () => 'authoritative');
   assert.equal(store.execute('key-002', { ...base, payload: { state: 'CANCELLED' } }, () => 'must-not-run').status, 'CONFLICT');
+});
+
+test('idempotency fingerprint is invariant to object property order', () => {
+  const a = { operation: 'leave.complete', actorId: 'a', scope: 's', resourceId: 'd-001', payload: { state: 'COMPLETED', meta: { z: 1, a: 2 } } };
+  const b = { payload: { meta: { a: 2, z: 1 }, state: 'COMPLETED' }, resourceId: 'd-001', scope: 's', actorId: 'a', operation: 'leave.complete' };
+  assert.equal(fingerprint(a), fingerprint(b));
 });
 
 test('outbox claim is lease-based and stale claims recover', () => {
