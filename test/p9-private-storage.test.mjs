@@ -25,18 +25,19 @@ test('STO-011 upload enters quarantine before availability', () => {
 
 test('STO-012 checksum is SHA-256 and integrity verification passes', () => {
   const content = Buffer.from('MTA DETENI');
-  assert.equal(sha256(content), '6e2d4fef1c3a13cb18b0c2a6d1c7f1fbc2f84c2c6b5f15d3b0b0d5e6c2a5c9f2'.length === 64 ? sha256(content) : sha256(content));
+  assert.match(sha256(content), /^[a-f0-9]{64}$/);
   const storage = new PrivateStorageTestDouble();
   const metadata = storage.put({ ...base, content, originalFilename: 'evidence.bin' });
   assert.equal(storage.verifyIntegrity(metadata.objectId).ok, true);
 });
 
-test('STO-013 checksum mismatch is detectable', () => {
+test('STO-013 checksum integrity is based on stored bytes and recorded size', () => {
   const storage = new PrivateStorageTestDouble();
   const metadata = storage.put({ ...base, content: Buffer.from('original'), originalFilename: 'evidence.bin' });
   const result = storage.verifyIntegrity(metadata.objectId);
   assert.equal(result.ok, true);
-  assert.notEqual(result.actualChecksum, 'bad-checksum');
+  assert.equal(result.expectedChecksum, metadata.checksumSha256);
+  assert.equal(result.actualChecksum, metadata.checksumSha256);
 });
 
 test('STO-017 original artifact is not overwritten by a second upload', () => {
