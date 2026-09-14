@@ -1,7 +1,7 @@
 # MTA DETENI — Project Status
 
-**Version:** P10.3 Movement Ledger / Headcount  
-**Branch:** `phase9-kernel-implementation`  
+**Version:** P10.4 Operational Identity / Barcode-QR Boundary  
+**Branch:** `phase10.4`  
 **Certification:** NOT CERTIFIED  
 **Migration Freeze:** TRUE  
 **AI:** OFF  
@@ -23,23 +23,26 @@
 - P9 kernel invariant audit;
 - P10.1 temporary-exit runtime/domain integration foundation;
 - P10.2 placement domain boundary and synthetic integration coverage;
-- P10.3 append-only movement ledger and deterministic headcount projection foundation.
+- P10.3 append-only movement ledger and deterministic headcount projection foundation;
+- P10.4 opaque barcode/QR operational identity boundary and synthetic integration coverage.
 
-## P10.3 executable flow
+## P10.4 executable flow
 
-`Request Context → Authorization → Movement Validation → Append-only Ledger → Transaction → Audit → Outbox → Headcount Projection`
+`Scanner Input → Opaque Identity Normalization → Identity Resolution → Authorization → Transaction → Audit → Outbox`
 
-Movement records require explicit detainee, actor, scope, request and correlation context, source/target location, and an eligible active lifecycle state. Ledger entries are sequenced and request-idempotent.
+The scanned identity is treated as untrusted input. Resolution identifies an operational record only; it does not grant authorization.
 
-## P10.3 controls
+## P10.4 controls
 
-- movement permission reuses `deteni.placement.transfer`;
-- deny-by-default authorization remains mandatory;
-- invalid lifecycle state and missing movement context are rejected before append;
-- movement history is append-only rather than silently overwritten;
-- replay does not duplicate ledger history;
-- headcount is derived from latest known placement per detainee;
-- successful movement records domain state, audit, outbox and idempotency evidence.
+- BARCODE and QR are explicit identity types;
+- scanned tokens are opaque and must not encode direct detainee identifiers;
+- malformed and unknown identities fail closed;
+- inactive identities cannot proceed as operational actions;
+- authorization remains independent and deny-by-default;
+- successful scans cross the transactional boundary;
+- audit and outbox are critical side effects;
+- idempotent replay does not duplicate critical side effects;
+- synthetic fixtures only.
 
 ## Certification blockers
 
@@ -47,14 +50,17 @@ The following remain intentionally `NOT_RUN` or externally unverified:
 
 - real PostgreSQL transaction/isolation/concurrency behavior;
 - real capacity concurrency enforcement;
+- PostgreSQL-backed identity registry and uniqueness/revocation semantics;
+- physical barcode/QR issuance, replacement and rotation policy;
+- scanner/device trust model;
 - real storage provider security;
 - real external provider idempotency/retry behavior;
 - runtime HTTP/RBAC integration;
 - production deployment evidence;
 - final database contract reconciliation;
-- CI step-level evidence where GitHub currently exposes a failed run without accessible job logs.
+- CI step-level evidence where GitHub exposes a failed run without accessible job logs.
 
-CI evidence must still be independently observed before certification. A completed CI failure without accessible step evidence is not converted to PASS.
+A completed CI failure without accessible step evidence is not converted to PASS.
 
 ## Safety rules
 
@@ -68,4 +74,4 @@ CI evidence must still be independently observed before certification. A complet
 
 ## Next checkpoint
 
-P10.4 — Operational Identity / Barcode-QR Boundary, without weakening the migration freeze or certification gates.
+P10.5 — Temporary Exit Approval / Execution Boundary, preparing the mandatory DOCX output contract without bypassing authorization or migration gates.
