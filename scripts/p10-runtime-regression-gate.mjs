@@ -1,4 +1,4 @@
-import { mkdirSync, writeFileSync } from 'node:fs';
+import { accessSync, constants, mkdirSync, writeFileSync } from 'node:fs';
 import { spawnSync } from 'node:child_process';
 
 const requiredTests = [
@@ -35,7 +35,7 @@ const safety = {
 const safeGate = safety.APP_ENV === 'test' && safety.AI_ENABLED === 'false' && safety.MIGRATION_FREEZE === 'true';
 const missing = requiredTests.filter((path) => {
   try {
-    require('node:fs').accessSync(path);
+    accessSync(path, constants.R_OK);
     return false;
   } catch {
     return true;
