@@ -1,6 +1,6 @@
 # MTA DETENI — Project Status
 
-**Version:** P10.40 Final Pre-Governance Release Manifest  
+**Version:** P10.44 Production Cutover / Rollback Gate  
 **Branch:** `phase10.14-database-verification-package`  
 **Certification:** NOT CERTIFIED  
 **Migration Freeze:** TRUE  
@@ -9,7 +9,7 @@
 
 ## Completed checkpoints
 
-P9 kernel foundations; P10.1–P10.13 operational/domain/database-contract foundations; P10.14–P10.17 controlled database verification packages; P10.18–P10.21 document-output operationalization and runtime integration contracts; P10.22–P10.24 CI evidence, release-readiness and safety consolidation; P10.25–P10.34 runtime, authorization, document API, audit, transaction and security certification-readiness contracts; P10.35 release-candidate hardening; P10.36 operational scenario and failure-injection matrix; P10.37 evidence decision record; P10.38 production-readiness traceability; P10.39 final pre-governance gate; P10.40 final pre-governance release manifest.
+P9 kernel foundations; P10.1–P10.13 operational/domain/database-contract foundations; P10.14–P10.17 controlled database verification packages; P10.18–P10.21 document-output operationalization and runtime integration contracts; P10.22–P10.24 CI evidence, release-readiness and safety consolidation; P10.25–P10.34 runtime, authorization, document API, audit, transaction and security certification-readiness contracts; P10.35 release-candidate hardening; P10.36 operational scenario and failure-injection matrix; P10.37 evidence decision record; P10.38 production-readiness traceability; P10.39 final pre-governance gate; P10.40 final pre-governance release manifest; P10.41 controlled governance decision packet; P10.42 controlled PostgreSQL/RLS execution runbook; P10.43 post-freeze verification evidence contract; P10.44 production cutover/rollback gate.
 
 ## Integrated architecture
 
@@ -17,7 +17,7 @@ HTTP request → authentication → server-side authorization → scope/duty/cla
 
 ## Current decision
 
-**BLOCKED FOR PRODUCTION / REVIEW PACKAGE PREPARED.** The application has a consolidated pre-governance contract, but this is not production certification.
+**BLOCKED FOR PRODUCTION / GOVERNANCE DECISION REQUIRED.** The implementation path now has a controlled pre-freeze review package, execution runbook, post-freeze evidence contract, and cutover/rollback gate. These do not constitute production certification.
 
 ## Production blockers
 
@@ -48,4 +48,4 @@ HTTP request → authentication → server-side authorization → scope/duty/cla
 
 ## Governance boundary
 
-The next action is a governance decision, not an automatic technical activation: whether Migration Freeze may be lifted under controlled procedure. Until that decision exists, the database remains untouched and all production activation paths remain blocked.
+P10.41–P10.44 prepare the controlled path after an authorized governance decision. No code path may infer approval, lift the freeze, execute migrations, enable AI, or activate external providers automatically. Until an authorized decision and independently verifiable execution evidence exist, the database remains untouched and production activation remains blocked.
