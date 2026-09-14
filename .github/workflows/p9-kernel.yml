@@ -22,5 +22,28 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
+      - name: Capture runner diagnostics
+        if: always()
+        run: |
+          set -eux
+          node --version
+          npm --version
+          git --version
+          git status --short
+          test -f tests/p9-kernel.test.mjs
+          test -f test/p9-transaction-outbox.test.mjs
+          test -f test/p9-transaction-boundary.test.mjs
+          test -f test/p9-private-storage.test.mjs
+          test -f test/p9-observability.test.mjs
+          test -f test/p9-test-harness.test.mjs
       - name: Run dependency-free kernel tests
-        run: node --test tests/p9-kernel.test.mjs test/p9-transaction-outbox.test.mjs test/p9-transaction-boundary.test.mjs test/p9-private-storage.test.mjs test/p9-observability.test.mjs test/p9-test-harness.test.mjs
+        run: |
+          set -euxo pipefail
+          node --test tests/p9-kernel.test.mjs test/p9-transaction-outbox.test.mjs test/p9-transaction-boundary.test.mjs test/p9-private-storage.test.mjs test/p9-observability.test.mjs test/p9-test-harness.test.mjs test/p9.11-concurrency-failure-security.test.mjs | tee p9-test-output.txt
+      - name: Upload test diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: p9-kernel-diagnostics
+          path: p9-test-output.txt
+          if-no-files-found: ignore
