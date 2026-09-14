@@ -16,10 +16,11 @@ jobs:
     env:
       APP_ENV: test
       AI_ENABLED: 'false'
+      MIGRATION_FREEZE: 'true'
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: 22
       - name: Run dependency-free kernel tests
-        run: node --test tests/p9-kernel.test.mjs test/p9-transaction-outbox.test.mjs test/p9-transaction-boundary.test.mjs test/p9-private-storage.test.mjs
+        run: node --test tests/p9-kernel.test.mjs test/p9-transaction-outbox.test.mjs test/p9-transaction-boundary.test.mjs test/p9-private-storage.test.mjs test/p9-observability.test.mjs test/p9-test-harness.test.mjs
