@@ -1,33 +1,41 @@
 # E6 — Document Engine Implementation Status
 
-Status: FOUNDATION IMPLEMENTED
+Status: INTEGRATION KERNEL — PARTIAL
 
 ## Implemented
 - Typed Document Contract model.
 - Mandatory contracts for Surat Izin Keluar Sementara and Surat Tugas Pengawalan.
 - Deterministic placeholder extraction and merge.
-- Required-field and placeholder validation primitives.
+- Required-field, unknown-field and placeholder validation.
 - Immutable TemplateVersion contract with effective dates and content hash.
+- In-memory Template Registry with exact version lookup and historical effective-date resolution.
+- Template-to-contract compatibility guard.
+- Deterministic renderer adapter contract with AI-independent reference renderer.
+- Document generation orchestration: exact template binding → validation → deterministic merge → render → SHA-256 integrity.
 - Document lifecycle transition guard.
-- SHA-256 content integrity utility.
 - Numbering/register contract.
-- Unit tests covering contract presence, deterministic merge, lifecycle ordering and integrity verification.
+- Unit tests for contract presence, deterministic merge, lifecycle ordering, integrity, template immutability, historical resolution and generation.
 
 ## Security invariants
 - Document generation is deterministic and does not require AI.
-- Missing placeholders fail closed.
+- AI is not in the critical path and cannot be used to silently alter a document.
+- Explicit generation requires an exact template ID + version; no implicit fallback is allowed.
+- Template versions are immutable; duplicate version registration fails closed.
+- Historical generation can bind to the template version effective for the selected time.
+- Template/contract identity and version must match before generation.
+- Missing/unknown fields and missing placeholders fail closed.
 - Archived documents cannot transition back into active states.
-- Template versions are immutable by contract.
-- Document content integrity is represented by SHA-256.
-- Sensitive field markers exist in the contract; authorization remains enforced by the security control plane.
-- No real detainee data or credentials are included.
-- No database schema or migration is introduced by E6 foundation.
+- Generated content integrity is represented by SHA-256.
+- Sensitive field markers remain part of the contract; authorization belongs to the security control plane.
+- No real detainee data, credentials or production secrets are included.
+- No database schema or migration is introduced by E6.
 
-## Not yet implemented
-- Binary DOCX rendering adapter.
-- Persistent template registry/object storage integration.
-- Atomic document numbering persistence.
-- Approval/signature workflow integration.
-- Download/distribution/archive audit persistence.
+## Remaining integration work
+- Binary DOCX rendering adapter using an approved server-side library.
+- Persistent template registry and private object storage.
+- Atomic document numbering persistence and register uniqueness.
+- Approval/signature workflow integration and authorization gates.
+- Download/distribution/archive audit event persistence.
+- Final document artifact persistence, retrieval and retention controls.
 
-These remain subsequent integration steps and must not bypass the existing authorization, workflow and audit kernels.
+These steps must not bypass authorization, workflow, data-governance or audit-integrity controls.
