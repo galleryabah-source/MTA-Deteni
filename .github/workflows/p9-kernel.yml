@@ -38,10 +38,11 @@ jobs:
           test -f test/p9-test-harness.test.mjs
           test -f test/p9.11-concurrency-failure-security.test.mjs
           test -f test/p9.12-ci-quality-gate.test.mjs
+          test -f test/p9.13-certification-evidence.test.mjs
       - name: Run dependency-free kernel tests
         run: |
           set -euxo pipefail
-          node --test tests/p9-kernel.test.mjs test/p9-transaction-outbox.test.mjs test/p9-transaction-boundary.test.mjs test/p9-private-storage.test.mjs test/p9-observability.test.mjs test/p9-test-harness.test.mjs test/p9.11-concurrency-failure-security.test.mjs test/p9.12-ci-quality-gate.test.mjs | tee p9-test-output.txt
+          node --test tests/p9-kernel.test.mjs test/p9-transaction-outbox.test.mjs test/p9-transaction-boundary.test.mjs test/p9-private-storage.test.mjs test/p9-observability.test.mjs test/p9-test-harness.test.mjs test/p9.11-concurrency-failure-security.test.mjs test/p9.12-ci-quality-gate.test.mjs test/p9.13-certification-evidence.test.mjs | tee p9-test-output.txt
       - name: Upload test diagnostics
         if: always()
         uses: actions/upload-artifact@v4
