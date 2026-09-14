@@ -1,6 +1,6 @@
 # MTA DETENI — Project Status
 
-**Version:** P10.2 Placement Domain Boundary  
+**Version:** P10.3 Movement Ledger / Headcount  
 **Branch:** `phase9-kernel-implementation`  
 **Certification:** NOT CERTIFIED  
 **Migration Freeze:** TRUE  
@@ -22,22 +22,24 @@
 - P9.13 deterministic certification evidence evaluator;
 - P9 kernel invariant audit;
 - P10.1 temporary-exit runtime/domain integration foundation;
-- P10.2 placement domain boundary and synthetic integration coverage.
+- P10.2 placement domain boundary and synthetic integration coverage;
+- P10.3 append-only movement ledger and deterministic headcount projection foundation.
 
-## P10.2 executable flow
+## P10.3 executable flow
 
-`Request Context → Authorization → Placement Validation → Transaction → Audit → Outbox`
+`Request Context → Authorization → Movement Validation → Append-only Ledger → Transaction → Audit → Outbox → Headcount Projection`
 
-Placement transfer requires explicit detainee/placement context, target block and room, active state, capacity availability, actor/scope/request/correlation identifiers, and idempotency key.
+Movement records require explicit detainee, actor, scope, request and correlation context, source/target location, and an eligible active lifecycle state. Ledger entries are sequenced and request-idempotent.
 
-## P10.2 controls
+## P10.3 controls
 
-- placement permission is `deteni.placement.transfer`;
+- movement permission reuses `deteni.placement.transfer`;
 - deny-by-default authorization remains mandatory;
-- invalid state and exhausted capacity are rejected before mutation;
-- successful placement records domain state, audit, outbox and idempotency evidence;
-- replay does not duplicate critical side effects;
-- changed target under the same idempotency key produces conflict.
+- invalid lifecycle state and missing movement context are rejected before append;
+- movement history is append-only rather than silently overwritten;
+- replay does not duplicate ledger history;
+- headcount is derived from latest known placement per detainee;
+- successful movement records domain state, audit, outbox and idempotency evidence.
 
 ## Certification blockers
 
@@ -49,7 +51,8 @@ The following remain intentionally `NOT_RUN` or externally unverified:
 - real external provider idempotency/retry behavior;
 - runtime HTTP/RBAC integration;
 - production deployment evidence;
-- final database contract reconciliation.
+- final database contract reconciliation;
+- CI step-level evidence where GitHub currently exposes a failed run without accessible job logs.
 
 CI evidence must still be independently observed before certification. A completed CI failure without accessible step evidence is not converted to PASS.
 
@@ -65,4 +68,4 @@ CI evidence must still be independently observed before certification. A complet
 
 ## Next checkpoint
 
-P10.3 — Movement Ledger / Headcount domain boundary, reusing authorization, immutable event history, transaction, audit, idempotency and outbox invariants. Real database integration remains gated behind contract reconciliation and explicit evidence.
+P10.4 — Operational Identity / Barcode-QR Boundary, without weakening the migration freeze or certification gates.
