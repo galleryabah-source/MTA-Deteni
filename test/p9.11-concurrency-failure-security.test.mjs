@@ -12,6 +12,7 @@ const event = (id = 'evt-1') => ({
   correlationId: 'corr-synthetic-001',
   causationId: 'cmd-synthetic-001',
   payloadVersion: '1.0',
+  availableAt: 0,
   payload: { fixture: true, classification: 'L2' },
 });
 
@@ -37,7 +38,7 @@ test('P9.11-CONC-001: concurrent idempotency execution commits exactly once', as
   assert.equal(results.filter((r) => r.status === 'REPLAY').length, 15);
 });
 
-test('P9.11-CONC-002: outbox worker race yields one active claim', async () => {
+test('P9.11-CONC-002: concurrent outbox worker race yields one active claim', async () => {
   const store = new OutboxStore(); store.enqueue(event('evt-race'));
   const claims = await Promise.all([Promise.resolve(store.claim('worker-A', 1000, 30000)), Promise.resolve(store.claim('worker-B', 1000, 30000))]);
   assert.equal(claims.filter(Boolean).length, 1);
@@ -79,7 +80,7 @@ test('P9.11-GOLD-001: synthetic golden path preserves explicit state transitions
   assert.deepEqual(states, ['ACTIVE->EXIT_REQUESTED', 'EXIT_REQUESTED->ESCORT_ASSIGNED', 'ESCORT_ASSIGNED->HANDOVER_RECORDED', 'HANDOVER_RECORDED->DUTY_COMPLETED']);
 });
 
-test('P9.11-PROV-001: provider call occurs only after outbox state is durable/claimable', () => {
+test('P9.11-PROV-001: provider call occurs only after outbox state is claimable', () => {
   const store = new OutboxStore(); let providerCalls = 0;
   const staged = store.enqueue(event('evt-provider')); assert.equal(staged.status, 'ENQUEUED'); assert.equal(providerCalls, 0);
   const claimed = store.claim('worker-A', 2000); assert.ok(claimed);
