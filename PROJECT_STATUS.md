@@ -1,6 +1,6 @@
 # MTA DETENI — Project Status
 
-**Version:** P10.3 Movement Ledger / Headcount  
+**Version:** P10.4 Operational Identity / Barcode-QR Boundary  
 **Branch:** `phase9-kernel-implementation`  
 **Certification:** NOT CERTIFIED  
 **Migration Freeze:** TRUE  
@@ -23,23 +23,27 @@
 - P9 kernel invariant audit;
 - P10.1 temporary-exit runtime/domain integration foundation;
 - P10.2 placement domain boundary and synthetic integration coverage;
-- P10.3 append-only movement ledger and deterministic headcount projection foundation.
+- P10.3 append-only movement ledger and deterministic headcount projection foundation;
+- P10.4 operational identity / barcode-QR security boundary.
 
-## P10.3 executable flow
+## P10.4 executable flow
 
-`Request Context → Authorization → Movement Validation → Append-only Ledger → Transaction → Audit → Outbox → Headcount Projection`
+`Request Context → Authorization → Identity Issue/Verify → Purpose Check → Lifecycle/Scope Checks → Domain Action`
 
-Movement records require explicit detainee, actor, scope, request and correlation context, source/target location, and an eligible active lifecycle state. Ledger entries are sequenced and request-idempotent.
+The operational identity layer issues an opaque signed token suitable for barcode/QR presentation. The token does not contain direct detainee PII and does not itself grant authorization.
 
-## P10.3 controls
+## P10.4 controls
 
-- movement permission reuses `deteni.placement.transfer`;
-- deny-by-default authorization remains mandatory;
-- invalid lifecycle state and missing movement context are rejected before append;
-- movement history is append-only rather than silently overwritten;
-- replay does not duplicate ledger history;
-- headcount is derived from latest known placement per detainee;
-- successful movement records domain state, audit, outbox and idempotency evidence.
+- opaque subject reference;
+- HMAC-SHA-256 integrity protection;
+- constant-time signature verification;
+- purpose binding;
+- bounded expiry;
+- future-issued timestamp rejection;
+- nonce-based revocation hook;
+- fail-closed signing-secret requirement;
+- no PII embedded in the barcode/QR value;
+- existing RBAC/ABAC, scope, duty, classification, lifecycle and SoD controls remain mandatory.
 
 ## Certification blockers
 
@@ -48,6 +52,8 @@ The following remain intentionally `NOT_RUN` or externally unverified:
 - real PostgreSQL transaction/isolation/concurrency behavior;
 - real capacity concurrency enforcement;
 - real storage provider security;
+- persistent revocation/database-backed identity mapping;
+- real scanner/device policy integration;
 - real external provider idempotency/retry behavior;
 - runtime HTTP/RBAC integration;
 - production deployment evidence;
@@ -68,4 +74,4 @@ CI evidence must still be independently observed before certification. A complet
 
 ## Next checkpoint
 
-P10.4 — Operational Identity / Barcode-QR Boundary, without weakening the migration freeze or certification gates.
+P10.5 — Document/Exit Authorization Binding, including the required Word document output lifecycle, without weakening the migration freeze or certification gates.
