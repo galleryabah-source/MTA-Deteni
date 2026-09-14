@@ -1,4 +1,5 @@
 import type { DocumentKind } from "./types";
+import { verifySha256 } from "./integrity";
 
 export type DocumentArtifactMediaType =
   | "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
@@ -25,5 +26,6 @@ export const createDocumentArtifact = (input: DocumentArtifact): DocumentArtifac
     throw new Error("INCOMPLETE_ARTIFACT_BINDING");
   }
   if (Number.isNaN(Date.parse(input.createdAt))) throw new Error("INVALID_ARTIFACT_DATE");
+  if (!verifySha256(input.bytes, input.contentHash)) throw new Error("ARTIFACT_HASH_MISMATCH");
   return Object.freeze({ ...input, bytes: new Uint8Array(input.bytes) });
 };
