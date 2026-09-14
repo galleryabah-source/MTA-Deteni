@@ -1,7 +1,7 @@
 # MTA DETENI — Project Status
 
-**Version:** P10.12 Database Integration Package  
-**Branch:** `phase10.10-persistent-grant-boundary`  
+**Version:** P10.13 Approved Database Integration Execution Gate  
+**Branch:** `phase10.13-approved-db-integration-gate`  
 **Certification:** NOT CERTIFIED  
 **Migration Freeze:** TRUE  
 **AI:** OFF  
@@ -32,17 +32,16 @@
 - P10.9 runtime artifact distribution security boundary;
 - P10.10 persistent artifact-grant repository contract, parameterized atomic consume/revoke operations, and fail-closed affected-row enforcement;
 - P10.11 persistent grant integration readiness contract and transaction orchestration boundary;
-- P10.12 database integration package: proposed migration, RLS contract, PostgreSQL concurrency test plan, rollback plan, and static package contract test.
+- P10.12 database integration package: proposed migration, RLS contract, PostgreSQL concurrency test plan, rollback plan, and static package contract test;
+- P10.13 identity/scope RLS finalization contract and approved database integration execution gate.
 
-## P10.12 executable preparation
+## P10.13 preparation
 
-`Schema Review → Migration Approval → Controlled Migration Window → Schema Verification → Repository Integration → RLS Verification → PostgreSQL Concurrency Test → Rollback Drill → Evidence Review`
+`Governance Approval → Environment Verification → Migration Checksum Verification → Controlled Migration → Schema Verification → RLS Deployment → Role Tests → Repository Integration → Concurrency Tests → Rollback Drill → Evidence Review`
 
-The proposed migration creates `artifact_download_grants` with lifecycle constraints, checksum validation, expiry ordering, timestamps, indexes, RLS enabled, and explicit revocation of anonymous/authenticated/public table privileges. It is a review artifact only and has not been executed.
+P10.13 explicitly remains a preparation gate while `MIGRATION_FREEZE=TRUE`. The branch adds the authoritative identity/scope mapping contract, execution preconditions/hard stops, evidence requirements, and static contract coverage. No DDL or production database operation has been executed.
 
-The RLS contract deliberately avoids permissive placeholder policies. Final actor-to-identity and scope mapping must be approved before direct authenticated access is enabled. Server-side repository access remains subject to the application Authorization Control Plane.
-
-The concurrency plan requires independent PostgreSQL connections and observable row counts proving that only one concurrent consume can succeed. The rollback plan requires schema/privilege/RLS evidence and protects audit/retention requirements from destructive rollback.
+The identity contract requires authoritative actor and scope mapping, server-side trust boundaries, and fail-closed behavior for missing, inactive, revoked, ambiguous or client-mismatched identity/scope context. Direct browser grant writes remain prohibited.
 
 ## Required MVP document outputs
 
@@ -53,9 +52,10 @@ Artifacts remain downstream of authorization, document lifecycle, approval/SoD, 
 
 ## Certification blockers
 
+- explicit governance approval to lift Migration Freeze;
 - migration execution and schema verification;
+- final approved actor-to-identity and scope RLS policy;
 - real PostgreSQL isolation/concurrency evidence;
-- final actor-to-identity and scope RLS policy;
 - persistent grant integration against deployed schema;
 - end-to-end persistent audit/outbox evidence;
 - real private object storage/provider security;
@@ -66,7 +66,7 @@ Artifacts remain downstream of authorization, document lifecycle, approval/SoD, 
 - provider retry/dead-letter/idempotency evidence;
 - GitHub Actions step-level evidence.
 
-The latest P10 workflow still fails before exposing executable steps; the job reports `failure` with no observable steps/logs. This remains an infrastructure/evidence blocker, not application PASS/FAIL evidence.
+The latest P10 workflow has historically failed before exposing executable steps. Until a run exposes step-level evidence, CI cannot be treated as application PASS/FAIL evidence.
 
 ## Safety rules
 
@@ -80,4 +80,4 @@ The latest P10 workflow still fails before exposing executable steps; the job re
 
 ## Next checkpoint
 
-P10.13 — Approved Database Integration Execution Gate: verify governance approval, finalize identity/scope RLS policy, execute the migration only when the Migration Freeze is explicitly lifted, then run real PostgreSQL integration/concurrency/rollback evidence.
+P10.14 — Database Integration Verification Package: prepare executable role/RLS verification, repository-to-schema integration tests, and evidence collection contracts. Actual migration execution remains blocked until the Migration Freeze is explicitly lifted.
