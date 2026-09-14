@@ -19,7 +19,7 @@ export function requestArtifactDownload({ document, requestContext, authorize, s
   required(requestContext?.sessionId, 'requestContext.sessionId');
   required(requestContext?.correlationId, 'requestContext.correlationId');
   if (typeof authorize !== 'function') throw new Error('authorize is required');
-  if (!storage || typeof storage.getMetadata !== 'function' || typeof storage.createTemporaryDownload !== 'function') throw new Error('private storage adapter is required');
+  if (!storage || typeof storage.getMetadata !== 'function') throw new Error('private storage adapter is required');
   if (typeof audit !== 'function' || typeof outbox !== 'function') throw new Error('audit and outbox adapters are required');
 
   const decision = authorize({
@@ -43,6 +43,8 @@ export function requestArtifactDownload({ document, requestContext, authorize, s
   if (!document || document.state !== 'ISSUED') deny('DOCUMENT_NOT_ISSUED');
   required(document.artifactId, 'document.artifactId');
   required(document.artifactSha256, 'document.artifactSha256');
+  required(document.objectId, 'document.objectId');
+
   const metadata = storage.getMetadata(document.objectId, {
     actorId: requestContext.actorId,
     scopeId: requestContext.scopeId,
@@ -51,69 +53,34 @@ export function requestArtifactDownload({ document, requestContext, authorize, s
   if (metadata.status !== 'AVAILABLE') deny('STORAGE_OBJECT_NOT_AVAILABLE');
   if (metadata.checksumSha256 !== document.artifactSha256) deny('ARTIFACT_CHECKSUM_MISMATCH');
 
-  const handoff = createArtifactHandoff({
-    document,
-    objectId: metadata.objectId,
-    actorId: requestContext.actorId,
-    scopeId: requestContext.scopeId,
-    now,
-    ttlMs,
-  });
+  const handoff = createArtifactHandoff({ document, objectId: metadata.objectId, actorId: requestContext.actorId, scopeId: requestContext.scopeId, now, ttlMs });
 
-  audit({
-    eventType: 'ARTIFACT_DOWNLOAD_GRANT_ISSUED',
-    aggregateType: 'DOCUMENT',
-    aggregateId: document.documentId,
-    actorId: requestContext.actorId,
-    scopeId: requestContext.scopeId,
-    correlationId: requestContext.correlationId,
-    payload: { grantId: handoff.grantId, artifactId: handoff.artifactId, objectId: handoff.objectId },
-  });
-  outbox({
-    eventType: 'ARTIFACT_DOWNLOAD_GRANT_ISSUED',
-    aggregateType: 'DOCUMENT',
-    aggregateId: document.documentId,
-    correlationId: requestContext.correlationId,
-    payload: { grantId: handoff.grantId, artifactId: handoff.artifactId, objectId: handoff.objectId },
-  });
+  // Production adapters MUST call audit/outbox inside the same critical transaction.
+  // Provider/storage network calls are deliberately absent from this transaction boundary.
+  audit({ eventType: 'ARTIFACT_DOWNLOAD_GRANT_ISSUED', aggregateType: 'DOCUMENT', aggregateId: document.documentId, actorId: requestContext.actorId, scopeId: requestContext.scopeId, correlationId: requestContext.correlationId, payload: { grantId: handoff.grantId, artifactId: handoff.artifactId, objectId: handoff.objectId } });
+  outbox({ eventType: 'ARTIFACT_DOWNLOAD_GRANT_ISSUED', aggregateType: 'DOCUMENT', aggregateId: document.documentId, correlationId: requestContext.correlationId, payload: { grantId: handoff.grantId, artifactId: handoff.artifactId, objectId: handoff.objectId } });
 
-  const providerGrant = storage.createTemporaryDownload(metadata.objectId, {
-    actorId: requestContext.actorId,
-    scopeId: requestContext.scopeId,
-    allowedClassifications: requestContext.allowedClassifications ?? [],
-  }, now.getTime(), ttlMs);
+  return Object.freeze({ handoff });
+}
 
-  return Object.freeze({ handoff, providerGrant });
+/** Execute only after an outbox worker has durably claimed a committed event. */
+export function executeArtifactProviderHandoff({ handoff, requestContext, storage, now = Date.now(), ttlMs = 60_000 }) {
+  required(requestContext?.actorId, 'requestContext.actorId');
+  required(requestContext?.scopeId, 'requestContext.scopeId');
+  if (!handoff || handoff.status !== 'ACTIVE') deny('DOWNLOAD_GRANT_NOT_ACTIVE');
+  if (handoff.actorId !== requestContext.actorId) deny('DOWNLOAD_GRANT_ACTOR_MISMATCH');
+  if (handoff.scopeId !== requestContext.scopeId) deny('DOWNLOAD_GRANT_SCOPE_MISMATCH');
+  if (typeof storage?.createTemporaryDownload !== 'function') throw new Error('private storage adapter is required');
+  return storage.createTemporaryDownload(handoff.objectId, { actorId: requestContext.actorId, scopeId: requestContext.scopeId, allowedClassifications: requestContext.allowedClassifications ?? [] }, now, ttlMs);
 }
 
 export function consumeArtifactDownload({ handoff, requestContext, document, storage, audit, now = new Date() }) {
   required(requestContext?.actorId, 'requestContext.actorId');
   required(requestContext?.scopeId, 'requestContext.scopeId');
-  if (!verifyArtifactBinding(handoff, {
-    documentId: document?.documentId,
-    artifactId: document?.artifactId,
-    artifactSha256: document?.artifactSha256,
-    objectId: document?.objectId,
-  })) deny('ARTIFACT_BINDING_MISMATCH');
-  const consumed = consumeArtifactHandoff(handoff, {
-    actorId: requestContext.actorId,
-    scopeId: requestContext.scopeId,
-    objectId: document.objectId,
-    now,
-  });
-  const content = storage.consumeTemporaryDownload(handoff.grantId, {
-    actorId: requestContext.actorId,
-    scopeId: requestContext.scopeId,
-    allowedClassifications: requestContext.allowedClassifications ?? [],
-  }, now.getTime());
-  audit({
-    eventType: 'ARTIFACT_DOWNLOAD_COMPLETED',
-    aggregateType: 'DOCUMENT',
-    aggregateId: document.documentId,
-    actorId: requestContext.actorId,
-    scopeId: requestContext.scopeId,
-    correlationId: requestContext.correlationId,
-    payload: { grantId: handoff.grantId, artifactId: handoff.artifactId, objectId: handoff.objectId },
-  });
+  if (!verifyArtifactBinding(handoff, { documentId: document?.documentId, artifactId: document?.artifactId, artifactSha256: document?.artifactSha256, objectId: document?.objectId })) deny('ARTIFACT_BINDING_MISMATCH');
+  const consumed = consumeArtifactHandoff(handoff, { actorId: requestContext.actorId, scopeId: requestContext.scopeId, objectId: document.objectId, now });
+  if (typeof storage?.consumeTemporaryDownload !== 'function') throw new Error('private storage adapter is required');
+  const content = storage.consumeTemporaryDownload(handoff.grantId, { actorId: requestContext.actorId, scopeId: requestContext.scopeId, allowedClassifications: requestContext.allowedClassifications ?? [] }, now.getTime());
+  if (typeof audit === 'function') audit({ eventType: 'ARTIFACT_DOWNLOAD_COMPLETED', aggregateType: 'DOCUMENT', aggregateId: document.documentId, actorId: requestContext.actorId, scopeId: requestContext.scopeId, correlationId: requestContext.correlationId, payload: { grantId: handoff.grantId, artifactId: handoff.artifactId, objectId: handoff.objectId } });
   return Object.freeze({ consumed, content });
 }
