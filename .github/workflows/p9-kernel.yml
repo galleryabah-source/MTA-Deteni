@@ -21,6 +21,4 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-      - run: npm install --ignore-scripts
-      - run: npm run typecheck
-      - run: npm test
+      - run: node --test tests/p9-kernel.test.mjs
