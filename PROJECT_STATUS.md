@@ -1,6 +1,6 @@
 # MTA DETENI — Project Status
 
-**Version:** P10.34 Security Certification Readiness  
+**Version:** P10.37 Release Candidate Evidence Decision Record  
 **Branch:** `phase10.14-database-verification-package`  
 **Certification:** NOT CERTIFIED  
 **Migration Freeze:** TRUE  
@@ -9,42 +9,15 @@
 
 ## Completed checkpoints
 
-- P9 kernel configuration, authorization, audit, transaction, idempotency, outbox, storage, observability and deterministic test foundations;
-- P10.1–P10.5 operational domain, placement, movement ledger, operational identity, document authorization and lifecycle foundations;
-- P10.6 deterministic template manifest and field-validation boundary;
-- P10.7 deterministic DOCX artifact renderer and checksum boundary;
-- P10.8–P10.9 artifact handoff and secure distribution boundaries;
-- P10.10 persistent artifact-grant repository contract and atomic consume/revoke operations;
-- P10.11 persistent grant transaction orchestration boundary;
-- P10.12 database integration package, RLS contract, concurrency plan and rollback plan;
-- P10.13 identity/scope RLS finalization and approved database integration gate;
-- P10.14 database integration verification package;
-- P10.15 controlled database execution harness;
-- P10.16 database role/RLS verification specification;
-- P10.17 persistent artifact-grant synthetic E2E verification contract;
-- P10.18 document output operationalization package;
-- P10.19 DOCX artifact contract tests and synthetic output fixtures;
-- P10.20 document output runtime integration contract;
-- P10.21 executable synthetic runtime integration contract tests;
-- P10.22 deterministic CI evidence hardening and runtime regression gate;
-- P10.23 runtime evidence integrity and release-gate consolidation;
-- P10.24 repository release-readiness and controlled-runtime safety contract;
-- P10.25 controlled runtime boundary preparation;
-- P10.26 runtime enforcement matrix;
-- P10.27 authorization enforcement adapter contract;
-- P10.28 runtime RBAC negative-test matrix;
-- P10.29 document API boundary contract;
-- P10.30 document API synthetic contract test specification;
-- P10.31 audit/correlation release contract;
-- P10.32 critical transaction release matrix;
-- P10.33 security boundary finalization;
-- P10.34 security certification readiness.
+P9 kernel foundations; P10.1–P10.13 operational/domain/database-contract foundations; P10.14–P10.17 controlled database verification packages; P10.18–P10.21 document-output operationalization and runtime integration contracts; P10.22–P10.24 CI evidence, release-readiness and safety consolidation; P10.25–P10.34 runtime, authorization, document API, audit, transaction and security certification-readiness contracts; P10.35 release-candidate hardening; P10.36 operational scenario and failure-injection matrix; P10.37 release-candidate evidence bundle and certification decision record.
 
-## P10.25–P10.34 consolidated architecture
+## Integrated architecture
 
-The runtime boundary is specified as one fail-closed path: HTTP request → authentication → authorization → scope/duty/classification/SoD enforcement → validation → domain command → critical transaction → audit → outbox → post-commit provider. Document generation and artifact download remain bound to immutable template/artifact identity and persistent single-use grants. Administrative RBAC authority remains separate from operational authority.
+The system remains one fail-closed application path: HTTP request → authentication → authorization → scope/duty/classification/SoD enforcement → validation → domain command → critical transaction → audit → outbox → commit → post-commit provider. Document generation and download remain bound to immutable template/artifact identity and persistent single-use grants. Administrative RBAC authority remains separate from operational authority.
 
-P10.25–P10.34 are contract/readiness checkpoints. They do not represent production activation. No migration, production database operation, AI activation, real detainee data, credentials, or production provider action is included.
+## Certification decision
+
+**NOT CERTIFIED.** P10.35–P10.37 consolidate release-candidate readiness but do not activate production behavior. Certification requires independently observable CI evidence plus controlled resolution of all production blockers.
 
 ## Certification blockers
 
@@ -65,7 +38,7 @@ P10.25–P10.34 are contract/readiness checkpoints. They do not represent produc
 ## Safety rules
 
 - no schema migration;
-- no production database connection;
+- no production database operation;
 - no real detainee data;
 - no production credentials or secrets;
 - AI remains OFF;
@@ -74,4 +47,4 @@ P10.25–P10.34 are contract/readiness checkpoints. They do not represent produc
 
 ## Next checkpoint
 
-P10.35 — Release Candidate Hardening: consolidate the complete runtime/document/security contract into a release-candidate gate, then re-verify observable CI before any governance decision about Migration Freeze.
+P10.38 — Production-Readiness Traceability Matrix and Final Pre-Governance Gate.
