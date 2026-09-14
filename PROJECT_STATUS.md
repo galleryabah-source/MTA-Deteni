@@ -1,7 +1,7 @@
 # MTA DETENI — Project Status
 
-**Version:** P10.21 Runtime Integration Contract Tests  
-**Branch:** `phase10.18-document-output-operationalization`  
+**Version:** P10.22 CI Evidence Hardening & Runtime Regression Gate  
+**Branch:** `phase10.14-database-verification-package`  
 **Certification:** NOT CERTIFIED  
 **Migration Freeze:** TRUE  
 **AI:** OFF  
@@ -27,11 +27,19 @@
 - P10.20 document output runtime integration contract;
 - P10.21 executable synthetic runtime integration contract tests.
 
-## P10.21 verification scope
+## P10.22 implementation
 
-The executable synthetic suite now covers both required Word outputs (`TEMPORARY_EXIT_PERMISSION` and `ESCORT_ASSIGNMENT_LETTER`) and verifies deterministic DOCX generation, SHA-256 integrity, lifecycle/SoD, authorization-bound handoff, single-use consume, transaction rollback, provider isolation and idempotency replay/conflict behavior.
+The runtime workflow now has an explicit deterministic regression gate. It enforces the synthetic safety contract (`APP_ENV=test`, `AI_ENABLED=false`, `MIGRATION_FREEZE=true`), verifies all required regression test files, runs the complete P10 synthetic suite, classifies the outcome as PASS/FAIL/BLOCKED, and emits sanitized operational evidence under `artifacts/p10-runtime/`.
 
-The P10 workflow now executes only files present in the repository, includes the P10.18 branch in push triggers, explicitly verifies required test files before execution, and uploads test diagnostics for observable evidence.
+The workflow uploads the evidence directory with `if: always()` so failures in the regression command do not erase diagnostic evidence. A manual `workflow_dispatch` trigger is available without changing safety controls.
+
+An obsolete P10.19 placeholder file was removed. No migration, production database operation, AI activation, real detainee data, credential, or production provider action is part of this checkpoint.
+
+## Current verification state
+
+The latest GitHub Actions runs for the previous P10 runtime commit returned completed failures with zero exposed steps and log retrieval `BlobNotFound`. This is insufficient evidence to classify the application suite as PASS or FAIL. Reruns were requested, but independently observable step-level evidence remains a certification requirement.
+
+P10.22 therefore remains **IMPLEMENTED — AWAITING OBSERVABLE CI EVIDENCE** rather than certified.
 
 ## Certification blockers
 
@@ -61,4 +69,4 @@ The P10 workflow now executes only files present in the repository, includes the
 
 ## Next checkpoint
 
-P10.22 — CI Evidence Hardening & Runtime Regression Gate: consume observable workflow results, preserve diagnostics, and add a deterministic release gate without lifting Migration Freeze or enabling AI.
+P10.23 — Runtime Evidence Integrity & Release-Gate Consolidation: verify that CI evidence itself is complete, sanitized, attributable to the tested commit, and cannot be mistaken for production certification.
