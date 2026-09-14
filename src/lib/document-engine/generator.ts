@@ -1,6 +1,6 @@
 import type { DocumentContract, DocumentKind } from "./types";
 import { mergeTemplate } from "./merge";
-import { validateDocumentData } from "./validation";
+import { validateDocumentInput } from "./validation";
 import { sha256 } from "./integrity";
 import {
   assertTemplateContractCompatibility,
@@ -21,8 +21,9 @@ export interface GeneratedDocumentBinding {
 
 export interface GenerateDocumentInput {
   readonly contract: DocumentContract;
-  readonly data: Record<string, unknown>;
-  readonly templateId?: string;
+  readonly data: Record<string, string | number | boolean>;
+  readonly templateId: string;
+  readonly templateVersion: string;
   readonly generatedAt: string;
 }
 
@@ -31,29 +32,16 @@ export interface GeneratedDocument {
   readonly artifact: RenderedDocumentArtifact;
 }
 
-const contractFields = (contract: DocumentContract) => contract.fields;
-
 export async function generateDocument(
   input: GenerateDocumentInput,
   registry: TemplateRegistry,
   renderer: DocumentRenderer,
 ): Promise<GeneratedDocument> {
-  const template: TemplateRegistryEntry | undefined = input.templateId
-    ? registry.get(input.templateId, registry.get(input.templateId, "")?.version ?? "")
-    : registry.resolve({ documentKind: input.contract.kind, at: input.generatedAt });
-
-  // Explicit template IDs must be bound by an exact version. Callers needing an
-  // exact historical binding should resolve the version first and pass a registry
-  // implementation that exposes that exact entry. No fallback to another template.
+  const template: TemplateRegistryEntry | undefined = registry.get(input.templateId, input.templateVersion);
   if (!template) throw new Error("TEMPLATE_NOT_FOUND");
 
   assertTemplateContractCompatibility(template, input.contract);
-
-  const validation = validateDocumentData(
-    contractFields(input.contract),
-    input.data,
-    template.placeholders,
-  );
+  const validation = validateDocumentInput(input.contract, template, input.data);
   if (!validation.valid) {
     throw new Error(
       `DOCUMENT_VALIDATION_FAILED:${[
@@ -64,15 +52,14 @@ export async function generateDocument(
     );
   }
 
-  const mergedContent = mergeTemplate(template.placeholders, input.data);
+  const merged = mergeTemplate(template.content, input.data);
   const artifact = await renderer.render({
     documentKind: input.contract.kind,
-    mergedContent,
+    mergedContent: merged.content,
     templateId: template.templateId,
     templateVersion: template.version,
   });
 
-  const generatedContentHash = sha256(artifact.content);
   return {
     binding: {
       documentKind: input.contract.kind,
@@ -81,7 +68,7 @@ export async function generateDocument(
       templateId: template.templateId,
       templateVersion: template.version,
       templateContentHash: template.contentHash,
-      generatedContentHash,
+      generatedContentHash: sha256(artifact.content),
     },
     artifact,
   };
