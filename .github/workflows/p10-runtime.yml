@@ -2,19 +2,12 @@ name: P10 Runtime Domain
 
 on:
   push:
-    branches:
-      - phase9-kernel-implementation
-      - phase10.10-persistent-grant-boundary
-      - phase10.13-approved-db-integration-gate
-      - phase10.14-database-verification-package
-      - phase10.18-document-output-operationalization
+    branches: [phase9-kernel-implementation, phase10.10-persistent-grant-boundary, phase10.13-approved-db-integration-gate, phase10.14-database-verification-package, phase10.18-document-output-operationalization]
   pull_request:
     branches: [main]
   workflow_dispatch:
-
 permissions:
   contents: read
-
 jobs:
   runtime-domain:
     runs-on: ubuntu-latest
@@ -39,21 +32,18 @@ jobs:
           test "$MIGRATION_FREEZE" = true
           test ! -f .env
           test ! -f .env.local
-      - name: Verify required regression gate and test files
+      - name: Verify consolidated regression suite
         run: |
           set -euxo pipefail
           test -f scripts/p10-runtime-regression-gate.mjs
           test -f scripts/p10-evidence-integrity-gate.mjs
-          test -f test/p10.21-runtime-integration-contract.test.mjs
-          test -f test/p10.19-docx-output-contract.test.mjs
-          test -f test/p10.19-docx-artifact-contract.test.mjs
-          test -f test/p10.24-release-readiness.test.mjs
-      - name: Run deterministic P10.22/P10.24 regression gate
+          for f in test/p10.21-runtime-integration-contract.test.mjs test/p10.24-release-readiness.test.mjs test/p10.25-controlled-runtime-boundary.test.mjs test/p10.26-runtime-enforcement-matrix.test.mjs test/p10.28-runtime-rbac-negative.test.mjs test/p10.30-document-api-contract.test.mjs test/p10.32-critical-transaction-release.test.mjs test/p10.33-security-boundary.test.mjs test/p10.34-certification-readiness.test.mjs; do test -f "$f"; done
+      - name: Run deterministic P10 regression gate
         run: node scripts/p10-runtime-regression-gate.mjs
       - name: Verify P10.23 evidence integrity
         if: always()
         run: node scripts/p10-evidence-integrity-gate.mjs
-      - name: Upload P10.22-P10.24 evidence
+      - name: Upload P10 evidence
         if: always()
         uses: actions/upload-artifact@v4
         with:
