@@ -11,7 +11,7 @@ export function assertTestEnvironment(env = process.env) {
 }
 
 export function recordTest(registry, input) {
-  if (!/^([A-Z]+|KERNEL-CERT)-\d{3}$/.test(input.testId)) throw new Error('TEST_ID_INVALID');
+  if (!/^(?:[A-Z]+|KERNEL-CERT)-\d{3}$/.test(input.testId)) throw new Error('TEST_ID_INVALID');
   if (!ALLOWED_RESULTS.has(input.result)) throw new Error('TEST_RESULT_INVALID');
   registry.push(Object.freeze({ testId: input.testId, requirement: input.requirement ?? null, sourceContract: input.sourceContract ?? null, result: input.result, severity: input.severity ?? 'P1', evidence: input.evidence ?? null }));
 }
