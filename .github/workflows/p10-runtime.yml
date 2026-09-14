@@ -33,7 +33,7 @@ jobs:
       - name: Run P10 domain integration suites
         run: |
           set -euxo pipefail
-          node --test test/p10.1-runtime-domain-integration.test.mjs test/p10.2-placement-domain-boundary.test.mjs test/p10.3-movement-ledger-headcount.test.mjs test/p10.5-document-lifecycle.test.mjs test/p10.6-template-manifest.test.mjs test/p10.7-docx-renderer.test.mjs test/p10.8-artifact-handoff.test.mjs test/p10.9-artifact-distribution.test.mjs test/p10.10-persistent-grant-contract.test.mjs test/p10.10-persistent-grant-repository.test.mjs test/p10.11-persistent-grant-integration-readiness.test.mjs | tee p10-runtime-test-output.txt
+          node --test test/p10.1-runtime-domain-integration.test.mjs test/p10.2-placement-domain-boundary.test.mjs test/p10.3-movement-ledger-headcount.test.mjs test/p10.5-document-lifecycle.test.mjs test/p10.6-template-manifest.test.mjs test/p10.7-docx-renderer.test.mjs test/p10.8-artifact-handoff.test.mjs test/p10.9-artifact-distribution.test.mjs test/p10.10-persistent-grant-contract.test.mjs test/p10.10-persistent-grant-repository.test.mjs test/p10.11-persistent-grant-integration-readiness.test.mjs test/p10.12-database-package-contract.test.mjs | tee p10-runtime-test-output.txt
       - name: Upload runtime diagnostics
         if: always()
         uses: actions/upload-artifact@v4
