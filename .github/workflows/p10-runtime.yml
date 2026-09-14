@@ -28,4 +28,14 @@ jobs:
           test "$APP_ENV" = test
           test "$AI_ENABLED" = false
           test "$MIGRATION_FREEZE" = true
-          node --test test/p10.1-runtime-domain-integration.test.mjs
+      - name: Run P10 domain integration suites
+        run: |
+          set -euxo pipefail
+          node --test test/p10.1-runtime-domain-integration.test.mjs test/p10.2-placement-domain-boundary.test.mjs | tee p10-runtime-test-output.txt
+      - name: Upload runtime diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: p10-runtime-diagnostics
+          path: p10-runtime-test-output.txt
+          if-no-files-found: ignore
