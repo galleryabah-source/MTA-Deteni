@@ -1,6 +1,6 @@
 # MTA DETENI — Project Status
 
-**Version:** P10.24 Repository Release Readiness & Controlled Runtime Boundary  
+**Version:** P10.34 Security Certification Readiness  
 **Branch:** `phase10.14-database-verification-package`  
 **Certification:** NOT CERTIFIED  
 **Migration Freeze:** TRUE  
@@ -28,22 +28,27 @@
 - P10.21 executable synthetic runtime integration contract tests;
 - P10.22 deterministic CI evidence hardening and runtime regression gate;
 - P10.23 runtime evidence integrity and release-gate consolidation;
-- P10.24 repository release-readiness and controlled-runtime safety contract.
+- P10.24 repository release-readiness and controlled-runtime safety contract;
+- P10.25 controlled runtime boundary preparation;
+- P10.26 runtime enforcement matrix;
+- P10.27 authorization enforcement adapter contract;
+- P10.28 runtime RBAC negative-test matrix;
+- P10.29 document API boundary contract;
+- P10.30 document API synthetic contract test specification;
+- P10.31 audit/correlation release contract;
+- P10.32 critical transaction release matrix;
+- P10.33 security boundary finalization;
+- P10.34 security certification readiness.
 
-## P10.24 implementation
+## P10.25–P10.34 consolidated architecture
 
-The repository now has an executable release-readiness contract test covering the presence of the runtime/evidence gates, required implementation documentation, removal of the obsolete placeholder, immutable synthetic CI settings, diagnostic preservation, manual dispatch, and explicit prohibition of migration commands or an unsafe freeze setting in the P10 workflow.
+The runtime boundary is specified as one fail-closed path: HTTP request → authentication → authorization → scope/duty/classification/SoD enforcement → validation → domain command → critical transaction → audit → outbox → post-commit provider. Document generation and artifact download remain bound to immutable template/artifact identity and persistent single-use grants. Administrative RBAC authority remains separate from operational authority.
 
-The P10 regression gate includes this release-readiness test in its controlled synthetic suite. Evidence remains commit-bound and SHA-256 self-consistent through the P10.23 integrity gate.
-
-No migration, production database operation, AI activation, real detainee data, credential, or production provider action is part of this checkpoint.
-
-## Current verification state
-
-GitHub Actions previously returned failures with zero exposed steps and `BlobNotFound` log retrieval. New commits have been structured to produce deterministic, commit-attributable evidence and upload it even when the regression command fails. Certification is still not claimed until a fresh workflow run exposes valid step-level evidence and the application suite itself is classified.
+P10.25–P10.34 are contract/readiness checkpoints. They do not represent production activation. No migration, production database operation, AI activation, real detainee data, credentials, or production provider action is included.
 
 ## Certification blockers
 
+- fresh independently observable GitHub Actions step-level evidence;
 - explicit governance approval to lift Migration Freeze;
 - controlled migration execution and schema verification;
 - final approved actor-to-identity and scope RLS policy;
@@ -55,8 +60,7 @@ GitHub Actions previously returned failures with zero exposed steps and `BlobNot
 - production deployment evidence;
 - approved production DOCX templates/signature infrastructure;
 - scanner/device integration;
-- provider retry/dead-letter/idempotency evidence;
-- independently observable GitHub Actions evidence.
+- provider retry/dead-letter/idempotency evidence.
 
 ## Safety rules
 
@@ -70,4 +74,4 @@ GitHub Actions previously returned failures with zero exposed steps and `BlobNot
 
 ## Next checkpoint
 
-P10.25 — Controlled Runtime Boundary Preparation: formalize the application HTTP/runtime contract, authorization enforcement points, and production-boundary test matrix without activating production infrastructure.
+P10.35 — Release Candidate Hardening: consolidate the complete runtime/document/security contract into a release-candidate gate, then re-verify observable CI before any governance decision about Migration Freeze.
