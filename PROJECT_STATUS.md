@@ -1,6 +1,6 @@
 # MTA DETENI — Project Status
 
-**Version:** P10.7 DOCX Renderer / Artifact Integrity Boundary  
+**Version:** P10.8 Controlled Artifact Handoff / Private Download Boundary  
 **Branch:** `phase9-kernel-implementation`  
 **Certification:** NOT CERTIFIED  
 **Migration Freeze:** TRUE  
@@ -27,36 +27,37 @@
 - P10.4 operational identity / barcode-QR security boundary;
 - P10.5 document / exit authorization binding and lifecycle foundation;
 - P10.6 deterministic template manifest and field-validation boundary;
-- P10.7 deterministic DOCX artifact renderer and checksum boundary.
+- P10.7 deterministic DOCX artifact renderer and checksum boundary;
+- P10.8 controlled artifact handoff boundary.
 
-## P10.7 executable flow
+## P10.8 executable flow
 
-`Approved Manifest → Fail-Closed Field Validation → Deterministic OOXML Package → SHA-256 → Artifact Identity`
+`ISSUED Document → Artifact Binding → Scoped Download Grant → Expiry / Revocation → Single-use Consumption → Audit / Outbox Handoff`
 
-The P10.7 adapter produces a dependency-free OOXML `.docx` package from the governed manifest/data contract. ZIP metadata is fixed for reproducibility, field values are XML-escaped, and artifact identity is derived from the SHA-256 digest.
+The P10.8 boundary binds the document ID, artifact ID, artifact SHA-256 and private storage object identity into a scoped download grant. A grant is actor-bound, scope-bound, time-limited and single-use. Consumption changes the grant to `CONSUMED`; revocation changes it to `REVOKED`; replay, wrong actor, wrong scope, wrong object and expiry fail closed.
 
-This is a synthetic/reference renderer boundary only. It does not embed an official production template and does not claim final government template fidelity.
+This remains a domain/test boundary. Persistence of grants, storage-provider execution and audit/outbox commit behavior remain downstream integration gates.
 
 ## Required MVP document outputs
 
 - `TEMPORARY_EXIT_PERMISSION` — Surat Izin Keluar Sementara;
 - `ESCORT_ASSIGNMENT_LETTER` — Surat Tugas Pengawalan.
 
-The renderer contract targets Word `.docx` artifacts from approved templates. Artifact issuance remains downstream of authorization, lifecycle approval, integrity verification and private storage controls.
+The artifact handoff layer does not authorize issuance by itself. Existing authorization, document lifecycle, scope, classification and SoD controls remain prerequisites.
 
-## P10.7 controls
+## P10.8 controls
 
-- versioned template manifest;
-- unique, explicitly typed fields;
-- allowed field sources limited to authorization/document/system;
-- required-field validation;
-- deterministic field ordering/canonicalization;
-- deterministic DOCX package generation;
-- XML escaping against markup injection;
-- SHA-256 checksum and digest-derived artifact identity;
-- no arbitrary client field source;
-- existing authorization, scope, classification and SoD controls remain mandatory;
-- AI remains OFF and is not a rendering dependency.
+- document must already be `ISSUED`;
+- artifact ID and SHA-256 must be present;
+- immutable private object identity binding;
+- actor and scope binding;
+- short-lived grant with explicit expiry;
+- single-use consumption;
+- explicit revocation;
+- fail-closed replay protection;
+- artifact/document/object identity consistency check;
+- no production storage credentials or real files;
+- AI remains OFF and is not a distribution dependency.
 
 ## Certification blockers
 
@@ -64,8 +65,9 @@ The following remain intentionally `NOT_RUN` or externally unverified:
 
 - real PostgreSQL transaction/isolation/concurrency behavior;
 - real capacity concurrency enforcement;
-- real storage provider security;
-- persistent revocation/database-backed identity mapping;
+- persistent download-grant storage and revocation;
+- real storage provider security and private bucket policy;
+- persistent database-backed identity mapping;
 - real scanner/device policy integration;
 - real external provider idempotency/retry behavior;
 - runtime HTTP/RBAC integration;
@@ -73,6 +75,7 @@ The following remain intentionally `NOT_RUN` or externally unverified:
 - final database contract reconciliation;
 - binary `.docx` renderer/storage integration against approved production templates;
 - real template governance and signature infrastructure;
+- end-to-end audit/outbox persistence for artifact distribution;
 - CI step-level evidence where GitHub currently exposes a failed run without accessible job logs.
 
 CI evidence must still be independently observed before certification. A completed CI failure without accessible step evidence is not converted to PASS.
@@ -89,4 +92,4 @@ CI evidence must still be independently observed before certification. A complet
 
 ## Next checkpoint
 
-P10.8 — Controlled Artifact Handoff / Private Download Boundary: bind generated artifact identity to lifecycle state, private storage object identity, scoped access, single-use download grant, revocation and audit/outbox handoff without schema changes.
+P10.9 — Runtime HTTP/RBAC Artifact Distribution Boundary: connect the P10.8 grant contract to authenticated request context, deny-by-default authorization, private storage access and transactional audit/outbox orchestration without weakening existing security invariants.
