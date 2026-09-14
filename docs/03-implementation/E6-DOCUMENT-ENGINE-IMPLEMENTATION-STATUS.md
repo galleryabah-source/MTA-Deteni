@@ -18,7 +18,12 @@ Status: INTEGRATION KERNEL — PARTIAL
 - Security-aware document authorization adapter connected to the existing D2 AuthorizationEngine and policy guardrails.
 - Authorization correlation identity is checked before approval proceeds.
 - Document security domain is derived from document kind: temporary-exit documents use TEMPORARY_EXIT and escort documents use ESCORT.
-- Unit tests for contract presence, deterministic merge, lifecycle ordering, integrity, template immutability, historical resolution, generation and authorization integration.
+- Document artifact integrity now verifies SHA-256 against the actual stored bytes, not only hash format.
+- Persistence-neutral immutable DocumentArtifactStore contract with an in-memory reference implementation.
+- Artifact retrieval returns defensive byte copies and rejects duplicate artifact IDs rather than overwriting history.
+- Persistence-neutral append-only DocumentAuditRepository contract with sequence numbers and a tamper-evident SHA-256 event chain.
+- Audit repository rejects duplicate event IDs and exposes chain integrity verification.
+- Unit tests for contract presence, deterministic merge, lifecycle ordering, integrity, template immutability, historical resolution, generation, authorization integration, artifact immutability and audit-chain integrity.
 
 ## Security invariants
 - Document generation is deterministic and does not require AI.
@@ -29,12 +34,15 @@ Status: INTEGRATION KERNEL — PARTIAL
 - Template/contract identity and version must match before generation.
 - Missing/unknown fields and missing placeholders fail closed.
 - Archived documents cannot transition back into active states.
-- Generated content integrity is represented by SHA-256.
+- Generated/stored content integrity is represented by SHA-256 and is verified against artifact bytes.
 - Sensitive field markers remain part of the contract; authorization belongs to the security control plane.
 - Document approval does not trust client-supplied authorization state; the authorization result is derived server-side from AuthorizationEngine.
 - Authorization decisions must retain and validate the same correlation ID as the document approval request.
 - Policy guardrails are evaluated after the authorization decision and before the document approval gate.
 - Security domain is derived from the document kind rather than accepted from the client.
+- Artifact IDs are immutable; no overwrite operation exists in the storage contract.
+- Audit events are append-only; duplicate event IDs are rejected.
+- Audit integrity can be independently verified from the persisted sequence/hash chain.
 - No real detainee data, credentials or production secrets are included.
 - No database schema or migration is introduced by E6.
 
@@ -46,5 +54,7 @@ Status: INTEGRATION KERNEL — PARTIAL
 - Approval/signature workflow integration and authorization gates.
 - Download/distribution/archive audit event persistence.
 - Final document artifact persistence, retrieval and retention controls.
+
+The persistence contracts introduced in this phase are deliberately database-neutral. PostgreSQL/object-storage adapters must be added only after the domain model, authorization model, retention policy and deployment boundary are approved.
 
 These steps must not bypass authorization, workflow, data-governance or audit-integrity controls.
