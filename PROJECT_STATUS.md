@@ -1,7 +1,7 @@
 # MTA DETENI — Project Status
 
-**Version:** P10.20 Document Output Runtime Integration Contract  
-**Branch:** `phase10.14-database-verification-package`  
+**Version:** P10.21 Runtime Integration Contract Tests  
+**Branch:** `phase10.18-document-output-operationalization`  
 **Certification:** NOT CERTIFIED  
 **Migration Freeze:** TRUE  
 **AI:** OFF  
@@ -9,46 +9,29 @@
 
 ## Completed checkpoints
 
-- P9 kernel configuration and fail-closed environment contract;
-- deny-by-default authorization with scope, duty, classification and operational-bypass controls;
-- canonical audit hash-chain foundation;
-- transactional command boundary with rollback model;
-- idempotency and outbox lifecycle/lease model;
-- private storage boundary;
-- observability/redaction foundation;
-- deterministic test harness;
-- CI quality-gate foundation;
-- P9.11 concurrency/failure/security checkpoint coverage;
-- P9.13 deterministic certification evidence evaluator;
-- P9 kernel invariant audit;
-- P10.1 temporary-exit runtime/domain integration foundation;
-- P10.2 placement domain boundary and synthetic integration coverage;
-- P10.3 append-only movement ledger and deterministic headcount projection foundation;
-- P10.4 operational identity / barcode-QR security boundary;
-- P10.5 document / exit authorization binding and lifecycle foundation;
+- P9 kernel configuration, authorization, audit, transaction, idempotency, outbox, storage, observability and deterministic test foundations;
+- P10.1–P10.5 operational domain, placement, movement ledger, operational identity, document authorization and lifecycle foundations;
 - P10.6 deterministic template manifest and field-validation boundary;
 - P10.7 deterministic DOCX artifact renderer and checksum boundary;
-- P10.8 controlled artifact handoff boundary;
-- P10.9 runtime artifact distribution security boundary;
-- P10.10 persistent artifact-grant repository contract, parameterized atomic consume/revoke operations, and fail-closed affected-row enforcement;
-- P10.11 persistent grant integration readiness contract and transaction orchestration boundary;
-- P10.12 database integration package: proposed migration, RLS contract, PostgreSQL concurrency test plan, rollback plan, and static package contract test;
-- P10.13 identity/scope RLS finalization contract and approved database integration execution gate;
-- P10.14 database integration verification package and executable verification matrix;
-- P10.15 controlled database execution harness contract and fail-closed execution test;
-- P10.16 database role/RLS verification specification and synthetic isolation matrix;
-- P10.17 persistent artifact-grant end-to-end synthetic runtime verification contract;
+- P10.8–P10.9 artifact handoff and secure distribution boundaries;
+- P10.10 persistent artifact-grant repository contract and atomic consume/revoke operations;
+- P10.11 persistent grant transaction orchestration boundary;
+- P10.12 database integration package, RLS contract, concurrency plan and rollback plan;
+- P10.13 identity/scope RLS finalization and approved database integration gate;
+- P10.14 database integration verification package;
+- P10.15 controlled database execution harness;
+- P10.16 database role/RLS verification specification;
+- P10.17 persistent artifact-grant synthetic E2E verification contract;
 - P10.18 document output operationalization package;
-- P10.19 DOCX artifact contract test and synthetic output fixture package;
-- P10.20 document output runtime integration contract.
+- P10.19 DOCX artifact contract tests and synthetic output fixtures;
+- P10.20 document output runtime integration contract;
+- P10.21 executable synthetic runtime integration contract tests.
 
-## P10.20 preparation
+## P10.21 verification scope
 
-`Authorize → Validate State/Template → Render DOCX → SHA-256 → Artifact Binding → Lifecycle/SoD → Audit/Outbox → Commit → Persistent Grant → Secure Consume`
+The executable synthetic suite now covers both required Word outputs (`TEMPORARY_EXIT_PERMISSION` and `ESCORT_ASSIGNMENT_LETTER`) and verifies deterministic DOCX generation, SHA-256 integrity, lifecycle/SoD, authorization-bound handoff, single-use consume, transaction rollback, provider isolation and idempotency replay/conflict behavior.
 
-P10.20 binds the existing renderer, document lifecycle, private artifact storage and persistent grant boundary into one deterministic orchestration contract. Unknown document kinds, arbitrary template paths, incomplete authorization, invalid lifecycle state, missing approval/SoD, checksum mismatch and incomplete grant context fail closed.
-
-External provider/network activity remains strictly after transaction commit. Idempotency prevents duplicate official artifacts or grants and rejects conflicting payloads under the same idempotency identity.
+The P10 workflow now executes only files present in the repository, includes the P10.18 branch in push triggers, explicitly verifies required test files before execution, and uploads test diagnostics for observable evidence.
 
 ## Certification blockers
 
@@ -64,7 +47,7 @@ External provider/network activity remains strictly after transaction commit. Id
 - approved production DOCX templates/signature infrastructure;
 - scanner/device integration;
 - provider retry/dead-letter/idempotency evidence;
-- GitHub Actions step-level evidence.
+- independently observable GitHub Actions evidence.
 
 ## Safety rules
 
@@ -78,4 +61,4 @@ External provider/network activity remains strictly after transaction commit. Id
 
 ## Next checkpoint
 
-P10.21 — Runtime Integration Contract Tests: implement executable synthetic orchestration tests for the complete document-output path and verify transaction, idempotency, lifecycle, grant and provider-order invariants.
+P10.22 — CI Evidence Hardening & Runtime Regression Gate: consume observable workflow results, preserve diagnostics, and add a deterministic release gate without lifting Migration Freeze or enabling AI.
