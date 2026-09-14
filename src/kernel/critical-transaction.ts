@@ -1,10 +1,11 @@
+import type { PoolClient } from 'pg';
 import type { Database } from './db';
 
 export type CriticalTransactionInput<T> = {
   db: Database;
-  mutateDomain: (client: Parameters<Database['transaction']>[0] extends (client: infer C) => Promise<unknown> ? C : never) => Promise<T>;
-  appendAudit: (client: Parameters<Database['transaction']>[0] extends (client: infer C) => Promise<unknown> ? C : never) => Promise<void>;
-  enqueueOutbox: (client: Parameters<Database['transaction']>[0] extends (client: infer C) => Promise<unknown> ? C : never) => Promise<void>;
+  mutateDomain: (client: PoolClient) => Promise<T>;
+  appendAudit: (client: PoolClient) => Promise<void>;
+  enqueueOutbox: (client: PoolClient) => Promise<void>;
 };
 
 /**
