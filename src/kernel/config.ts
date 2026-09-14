@@ -35,25 +35,31 @@ export function loadConfig(env: Record<string, string | undefined> = process.env
   if (!['development', 'test', 'staging', 'production'].includes(appEnv)) throw new Error('Invalid APP_ENV');
 
   const aiEnabled = env.AI_ENABLED === 'true';
+  let aiProvider: string | undefined;
+  let aiApiKey: string | undefined;
   if (aiEnabled) {
-    required(env, 'AI_PROVIDER');
-    required(env, 'AI_API_KEY');
+    aiProvider = required(env, 'AI_PROVIDER');
+    aiApiKey = required(env, 'AI_API_KEY');
   }
 
   const criticalRequired = appEnv === 'production';
+  const databaseUrl = criticalRequired ? required(env, 'DATABASE_URL') : env.DATABASE_URL?.trim();
+  const authSecret = criticalRequired ? required(env, 'AUTH_SECRET') : env.AUTH_SECRET?.trim();
+  const sessionSecret = criticalRequired ? required(env, 'SESSION_SECRET') : env.SESSION_SECRET?.trim();
+
   return Object.freeze({
     appName: env.APP_NAME?.trim() || 'MTA DETENI',
     appVersion: env.APP_VERSION?.trim() || '0.1.0',
     appEnv,
     logLevel: (env.LOG_LEVEL as AppConfig['logLevel'] | undefined) ?? 'info',
-    databaseUrl: criticalRequired ? required(env, 'DATABASE_URL') : env.DATABASE_URL?.trim(),
+    ...(databaseUrl ? { databaseUrl } : {}),
     databasePoolSize: integer(env, 'DATABASE_POOL_SIZE', 10),
     databaseTimeoutMs: integer(env, 'DATABASE_TIMEOUT_MS', 5000),
-    authSecret: criticalRequired ? required(env, 'AUTH_SECRET') : env.AUTH_SECRET?.trim(),
-    sessionSecret: criticalRequired ? required(env, 'SESSION_SECRET') : env.SESSION_SECRET?.trim(),
+    ...(authSecret ? { authSecret } : {}),
+    ...(sessionSecret ? { sessionSecret } : {}),
     sessionTtlSeconds: integer(env, 'SESSION_TTL_SECONDS', 28800),
     aiEnabled,
-    aiProvider: env.AI_PROVIDER?.trim(),
-    aiApiKey: aiEnabled ? env.AI_API_KEY?.trim() : undefined,
+    ...(aiProvider ? { aiProvider } : {}),
+    ...(aiApiKey ? { aiApiKey } : {}),
   });
 }
