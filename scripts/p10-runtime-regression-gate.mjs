@@ -1,4 +1,5 @@
 import { accessSync, constants, mkdirSync, writeFileSync } from 'node:fs';
+import { createHash } from 'node:crypto';
 import { spawnSync } from 'node:child_process';
 
 const requiredTests = [
@@ -68,26 +69,29 @@ if (!safeGate) {
   exitCode = result.status === 0 ? 0 : 1;
 }
 
+const testOutput = testResult ? `${testResult.stdout}${testResult.stderr}` : `classification=${classification}\n`;
+const testOutputSha256 = createHash('sha256').update(testOutput).digest('hex');
+
 const evidence = {
   schemaVersion: 'p10.22.v1',
   checkpoint: 'P10.22',
   classification,
   syntheticOnly: true,
   safety,
+  commitSha: process.env.GITHUB_SHA ?? null,
+  workflowRunId: process.env.GITHUB_RUN_ID ?? null,
+  nodeVersion: process.version,
   requiredTestCount: requiredTests.length,
   missingTests: missing,
   testResult: testResult
     ? { exitCode: testResult.exitCode, signal: testResult.signal }
     : null,
+  testOutputSha256,
   generatedAt: new Date().toISOString(),
 };
 
 writeFileSync(`${evidenceDir}/classification.json`, `${JSON.stringify(evidence, null, 2)}\n`, 'utf8');
-writeFileSync(
-  `${evidenceDir}/test-output.txt`,
-  testResult ? `${testResult.stdout}${testResult.stderr}` : `classification=${classification}\n`,
-  'utf8',
-);
+writeFileSync(`${evidenceDir}/test-output.txt`, testOutput, 'utf8');
 
 console.log(JSON.stringify(evidence, null, 2));
 process.exit(exitCode);
