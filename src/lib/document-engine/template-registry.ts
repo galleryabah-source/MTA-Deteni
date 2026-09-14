@@ -3,6 +3,7 @@ import type { DocumentKind, DocumentContract, TemplateVersion } from "./types";
 export interface TemplateRegistryEntry extends TemplateVersion {
   readonly contractId: string;
   readonly contractVersion: string;
+  readonly content: string;
 }
 
 export interface TemplateSelectionContext {
@@ -33,19 +34,18 @@ export class InMemoryTemplateRegistry implements TemplateRegistry {
     if (!template.templateId || !template.version || !template.contractId || !template.contractVersion) {
       throw new Error("INVALID_TEMPLATE_IDENTITY");
     }
+    if (!template.content.trim()) throw new Error("EMPTY_TEMPLATE_CONTENT");
 
     const effectiveFrom = assertValidDate(template.effectiveFrom, "effectiveFrom");
     const effectiveTo = template.effectiveTo === undefined
       ? undefined
       : assertValidDate(template.effectiveTo, "effectiveTo");
-
     if (effectiveTo !== undefined && effectiveTo <= effectiveFrom) {
       throw new Error("INVALID_TEMPLATE_EFFECTIVE_RANGE");
     }
 
     const key = keyOf(template.templateId, template.version);
     if (this.entries.has(key)) throw new Error("TEMPLATE_VERSION_IMMUTABLE");
-
     this.entries.set(key, Object.freeze({ ...template }));
   }
 
@@ -55,16 +55,14 @@ export class InMemoryTemplateRegistry implements TemplateRegistry {
 
   resolve(context: TemplateSelectionContext): TemplateRegistryEntry | undefined {
     const at = assertValidDate(context.at, "at");
-    const candidates = [...this.entries.values()]
+    return [...this.entries.values()]
       .filter((entry) => entry.documentKind === context.documentKind)
       .filter((entry) => {
         const from = Date.parse(entry.effectiveFrom);
         const to = entry.effectiveTo === undefined ? Number.POSITIVE_INFINITY : Date.parse(entry.effectiveTo);
         return at >= from && at < to;
       })
-      .sort((a, b) => Date.parse(b.effectiveFrom) - Date.parse(a.effectiveFrom));
-
-    return candidates[0];
+      .sort((a, b) => Date.parse(b.effectiveFrom) - Date.parse(a.effectiveFrom))[0];
   }
 }
 
