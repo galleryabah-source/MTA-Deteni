@@ -1,6 +1,6 @@
 # MTA DETENI — Project Status
 
-**Version:** P10.19 DOCX Artifact Contract Tests & Synthetic Output Fixtures  
+**Version:** P10.20 Document Output Runtime Integration Contract  
 **Branch:** `phase10.14-database-verification-package`  
 **Certification:** NOT CERTIFIED  
 **Migration Freeze:** TRUE  
@@ -39,15 +39,16 @@
 - P10.16 database role/RLS verification specification and synthetic isolation matrix;
 - P10.17 persistent artifact-grant end-to-end synthetic runtime verification contract;
 - P10.18 document output operationalization package;
-- P10.19 DOCX artifact contract test and synthetic output fixture package.
+- P10.19 DOCX artifact contract test and synthetic output fixture package;
+- P10.20 document output runtime integration contract.
 
-## P10.19 preparation
+## P10.20 preparation
 
-`Synthetic Template Fixtures → Manifest Integrity → Field Validation → DOCX Contract → SHA-256 Binding → Lifecycle/SoD → Secure Grant → Evidence`
+`Authorize → Validate State/Template → Render DOCX → SHA-256 → Artifact Binding → Lifecycle/SoD → Audit/Outbox → Commit → Persistent Grant → Secure Consume`
 
-P10.19 adds deterministic synthetic fixtures for both required MVP Word outputs and a fail-closed contract suite covering template/version/checksum metadata, document lifecycle and separation of duties, artifact integrity, single-use handoff, replay/isolation denial, transaction/provider ordering, and synthetic-only evidence.
+P10.20 binds the existing renderer, document lifecycle, private artifact storage and persistent grant boundary into one deterministic orchestration contract. Unknown document kinds, arbitrary template paths, incomplete authorization, invalid lifecycle state, missing approval/SoD, checksum mismatch and incomplete grant context fail closed.
 
-The fixture values are opaque test identifiers and contain no detainee names, health information, production document contents, credentials, tokens or provider secrets.
+External provider/network activity remains strictly after transaction commit. Idempotency prevents duplicate official artifacts or grants and rejects conflicting payloads under the same idempotency identity.
 
 ## Certification blockers
 
@@ -77,4 +78,4 @@ The fixture values are opaque test identifiers and contain no detainee names, he
 
 ## Next checkpoint
 
-P10.20 — Document Output Runtime Integration Contract: bind the existing renderer, document lifecycle, artifact storage and persistent grant boundary into a deterministic runtime orchestration contract, still without production database execution or real templates.
+P10.21 — Runtime Integration Contract Tests: implement executable synthetic orchestration tests for the complete document-output path and verify transaction, idempotency, lifecycle, grant and provider-order invariants.
