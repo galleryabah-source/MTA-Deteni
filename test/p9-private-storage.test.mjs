@@ -3,6 +3,11 @@ import assert from 'node:assert/strict';
 import { buildStorageKey, PrivateStorageTestDouble, sha256 } from '../src/kernel/private-storage.mjs';
 
 const base = { objectClass: 'INTAKE_ORIGINAL', scopeId: 'scope-1', classification: 'L3', correlationId: 'corr-1', sourceType: 'UPLOAD', uploadedBy: 'u-1', detectedMimeType: 'application/pdf' };
+const access = { actorId: 'u-1', scopeId: 'scope-1', allowedClassifications: ['L3'] };
+
+function upload(storage, content = '%PDF-test') {
+  return storage.put({ ...base, content: Buffer.from(content), originalFilename: 'intake.pdf' });
+}
 
 test('STO-001 protected storage uses server-generated opaque key', () => {
   const key = buildStorageKey({ environment: 'test', ...base, objectClass: base.objectClass, objectId: 'obj-1', randomName: 'blob-1' });
@@ -15,11 +20,19 @@ test('STO-006/STO-007 client key injection and traversal are blocked', () => {
   assert.throws(() => buildStorageKey({ environment: 'test', objectClass: 'INTAKE_ORIGINAL', scopeId: 's', objectId: '..\\escape' }), /STORAGE_KEY_INPUT_INVALID/);
 });
 
+test('STO-002/STO-003/STO-004 storage access fails closed for missing, wrong scope or classification context', () => {
+  const storage = new PrivateStorageTestDouble();
+  const metadata = upload(storage); storage.makeAvailable(metadata.objectId);
+  assert.throws(() => storage.getMetadata(metadata.objectId), /STORAGE_ACCESS_CONTEXT_REQUIRED/);
+  assert.throws(() => storage.getMetadata(metadata.objectId, { ...access, scopeId: 'other' }), /STORAGE_SCOPE_DENIED/);
+  assert.throws(() => storage.getMetadata(metadata.objectId, { ...access, allowedClassifications: ['L2'] }), /STORAGE_CLASSIFICATION_DENIED/);
+  assert.equal(storage.getMetadata(metadata.objectId, access).status, 'AVAILABLE');
+});
+
 test('STO-011 upload enters quarantine before availability', () => {
   const storage = new PrivateStorageTestDouble();
-  const metadata = storage.put({ ...base, content: Buffer.from('%PDF-test'), originalFilename: 'intake.pdf' });
+  const metadata = upload(storage);
   assert.equal(metadata.status, 'QUARANTINED');
-  assert.equal(storage.getMetadata(metadata.objectId).status, 'QUARANTINED');
   assert.equal(storage.makeAvailable(metadata.objectId).status, 'AVAILABLE');
 });
 
@@ -33,17 +46,34 @@ test('STO-012 checksum is SHA-256 and integrity verification passes', () => {
 
 test('STO-013 checksum integrity is based on stored bytes and recorded size', () => {
   const storage = new PrivateStorageTestDouble();
-  const metadata = storage.put({ ...base, content: Buffer.from('original'), originalFilename: 'evidence.bin' });
+  const metadata = upload(storage, 'original');
   const result = storage.verifyIntegrity(metadata.objectId);
   assert.equal(result.ok, true);
   assert.equal(result.expectedChecksum, metadata.checksumSha256);
   assert.equal(result.actualChecksum, metadata.checksumSha256);
 });
 
+test('STO-014 temporary download grants expire and are actor-bound', () => {
+  const storage = new PrivateStorageTestDouble();
+  const metadata = upload(storage); storage.makeAvailable(metadata.objectId);
+  const grant = storage.createTemporaryDownload(metadata.objectId, access, 1000, 1000);
+  assert.deepEqual(storage.consumeTemporaryDownload(grant.grantId, access, 1500).toString(), '%PDF-test');
+  assert.throws(() => storage.consumeTemporaryDownload(grant.grantId, access, 1501), /STORAGE_DOWNLOAD_GRANT_DENIED/);
+  const second = storage.createTemporaryDownload(metadata.objectId, access, 2000, 1000);
+  assert.throws(() => storage.consumeTemporaryDownload(second.grantId, { ...access, actorId: 'other' }, 2001), /STORAGE_DOWNLOAD_GRANT_DENIED/);
+  assert.throws(() => storage.createTemporaryDownload(metadata.objectId, access, 0, 300001), /STORAGE_GRANT_TTL_INVALID/);
+});
+
+test('STO-015 revoked object cannot receive a new download grant', () => {
+  const storage = new PrivateStorageTestDouble();
+  const metadata = upload(storage); storage.makeAvailable(metadata.objectId); storage.revoke(metadata.objectId, 'policy');
+  assert.throws(() => storage.createTemporaryDownload(metadata.objectId, access), /STORAGE_OBJECT_STATE_DENIED/);
+});
+
 test('STO-017 original artifact is not overwritten by a second upload', () => {
   const storage = new PrivateStorageTestDouble();
-  const first = storage.put({ ...base, content: Buffer.from('v1'), originalFilename: 'original.pdf' });
-  const second = storage.put({ ...base, content: Buffer.from('v2'), originalFilename: 'original.pdf' });
+  const first = upload(storage, 'v1');
+  const second = upload(storage, 'v2');
   assert.notEqual(first.objectId, second.objectId);
   assert.notEqual(first.checksumSha256, second.checksumSha256);
 });
@@ -55,6 +85,5 @@ test('STO-005 invalid classification fails closed', () => {
 
 test('STO-019 storage does not require AI', () => {
   const storage = new PrivateStorageTestDouble();
-  const metadata = storage.put({ ...base, content: Buffer.from('x'), originalFilename: 'artifact.bin' });
-  assert.equal(metadata.status, 'QUARANTINED');
+  assert.equal(upload(storage).status, 'QUARANTINED');
 });
