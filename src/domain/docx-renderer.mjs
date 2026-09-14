@@ -1,7 +1,5 @@
 import { createHash } from 'node:crypto';
 
-const encoder = new TextEncoder();
-
 function xmlEscape(value) {
   return String(value)
     .replaceAll('&', '&amp;')
@@ -53,7 +51,7 @@ function zipStore(entries) {
 
 function paragraph(text, bold = false) {
   const rPr = bold ? '<w:rPr><w:b/></w:rPr>' : '';
-  return `<w:p><w:r><w:rPr>${rPr}</w:rPr><w:t xml:space="preserve">${xmlEscape(text)}</w:t></w:r></w:p>`;
+  return `<w:p><w:r><w:t xml:space="preserve">${xmlEscape(text)}</w:t>${rPr}</w:r></w:p>`;
 }
 
 function documentXml(title, manifest, data) {
@@ -87,12 +85,13 @@ export function renderDocx({ manifest, data, title = manifest?.documentKind }) {
     { name: 'word/styles.xml', data: STYLES },
   ];
   const buffer = zipStore(entries);
+  const digest = sha256(buffer);
   return Object.freeze({
     mimeType: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
     fileExtension: '.docx',
     buffer,
-    sha256: sha256(buffer),
-    artifactId: `docx-${sha256(buffer).slice(0, 32)}`,
+    sha256: digest,
+    artifactId: `docx-${digest.slice(0, 32)}`,
     templateId: manifest.templateId,
     templateVersion: manifest.templateVersion,
     rendererVersion: manifest.rendererVersion,
