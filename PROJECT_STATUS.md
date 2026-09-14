@@ -1,7 +1,7 @@
 # MTA DETENI — Project Status
 
-**Version:** P10.9 Runtime HTTP/RBAC Artifact Distribution Boundary  
-**Branch:** `phase9-kernel-implementation`  
+**Version:** P10.10 Persistent Grant / Revocation Transaction Boundary  
+**Branch:** `phase10.10-persistent-grant-boundary`  
 **Certification:** NOT CERTIFIED  
 **Migration Freeze:** TRUE  
 **AI:** OFF  
@@ -29,15 +29,29 @@
 - P10.6 deterministic template manifest and field-validation boundary;
 - P10.7 deterministic DOCX artifact renderer and checksum boundary;
 - P10.8 controlled artifact handoff boundary;
-- P10.9 runtime artifact distribution security boundary.
+- P10.9 runtime artifact distribution security boundary;
+- P10.10 persistent artifact-grant repository contract, parameterized atomic consume/revoke operations, and fail-closed affected-row enforcement.
 
-## P10.9 executable flow
+## P10.10 executable contract
 
-`Authenticated Request → Authorization → ISSUED/Artifact/Scope Validation → Critical Transaction (Audit + Outbox) → Commit → Outbox Worker → Storage Provider Grant → Single-use Download`
+`ISSUED Artifact → Persistent Grant Insert → Commit (Audit + Outbox) → Post-commit Provider Handoff → Atomic ACTIVE/Unexpired/Actor/Scope/Object Consume → Single-use Download`
 
-P10.9 binds the P10.8 grant contract to authenticated request context and deny-by-default authorization. Document state, artifact identity/checksum, scope and private-storage metadata are validated before the audit/outbox boundary. Provider/storage network calls are explicitly excluded from the critical transaction and are represented as post-commit outbox work.
+P10.10 replaces the purely in-memory persistence assumption with an explicit repository boundary. Grant creation uses parameterized PostgreSQL INSERT semantics. Consumption is a single conditional UPDATE requiring ACTIVE status, non-expiry, actor binding, scope binding and object binding; exactly one affected row is required. Revocation is likewise a single conditional UPDATE requiring ACTIVE status and actor/scope binding. Zero affected rows fail closed.
 
-This remains a synthetic/runtime adapter boundary. It does not claim production HTTP middleware, persistent grant storage, PostgreSQL concurrency, or production object-storage evidence.
+The repository adapter does not execute DDL or create schema. It is intentionally compatible with the active Migration Freeze. No production database schema, grant table, or migration was created by this checkpoint.
+
+## P10.10 controls
+
+- parameterized SQL only; no string interpolation of request values;
+- single-row conditional state transitions;
+- ACTIVE-only consumption and revocation;
+- consumption requires unexpired grant;
+- actor, scope and object binding enforced in the database predicate;
+- exactly-one-row transition required; zero/multiple rows fail closed;
+- provider/network storage calls remain post-commit outbox work;
+- AI remains OFF;
+- tests use synthetic fixtures and a database-client test double only;
+- no real detainee data, production files, credentials or secrets.
 
 ## Required MVP document outputs
 
@@ -46,29 +60,14 @@ This remains a synthetic/runtime adapter boundary. It does not claim production 
 
 Artifacts remain downstream of authorization, document lifecycle, approval/SoD, template governance, checksum integrity and private storage controls. The runtime distribution boundary cannot authorize issuance by itself.
 
-## P10.9 controls
-
-- authenticated active session required;
-- permission `deteni.document.artifact.download` required;
-- scope, assignment/duty, classification and policy checks remain deny-by-default;
-- document must already be `ISSUED`;
-- artifact ID, SHA-256 and private object ID remain bound;
-- storage object must be `AVAILABLE` and checksum must match;
-- audit and outbox are transaction participants;
-- provider/network storage calls are post-commit only;
-- actor/scope-bound short-lived single-use grant;
-- replay, wrong actor, wrong scope, invalid state and checksum mismatch fail closed;
-- Super Admin operational bypass remains denied;
-- no production storage credentials or real files;
-- AI remains OFF and is not a distribution dependency.
-
 ## Certification blockers
 
 The following remain intentionally `NOT_RUN` or externally unverified:
 
+- real PostgreSQL schema and migration under an explicitly approved migration window;
 - real PostgreSQL transaction/isolation/concurrency behavior;
 - real capacity concurrency enforcement;
-- persistent download-grant storage and revocation;
+- persistent download-grant storage against the approved schema;
 - real storage provider security and private bucket policy;
 - persistent database-backed identity mapping;
 - real scanner/device policy integration;
@@ -95,4 +94,4 @@ CI evidence must still be independently observed before certification. A complet
 
 ## Next checkpoint
 
-P10.10 — Persistent Grant / Revocation Transaction Boundary: replace the in-memory P10.8 grant lifecycle with a database-backed transactional contract, including concurrency-safe single-use consumption and revocation, without lifting the migration freeze until the database contract is explicitly approved and integration evidence is available.
+P10.11 — Persistent Grant Integration Readiness: reconcile the repository contract with the approved database model, transaction boundary, audit/outbox event contract, RLS/RBAC policy surface, and production storage-provider handoff prerequisites. Migration remains frozen until explicit approval and observable integration evidence are available.
