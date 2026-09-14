@@ -22,6 +22,7 @@ const requiredTests = [
   'test/p10.19-docx-output-contract.test.mjs',
   'test/p10.19-docx-artifact-contract.test.mjs',
   'test/p10.21-runtime-integration-contract.test.mjs',
+  'test/p10.24-release-readiness.test.mjs',
 ];
 
 const evidenceDir = 'artifacts/p10-runtime';
