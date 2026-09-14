@@ -1,6 +1,6 @@
 # MTA DETENI — Project Status
 
-**Version:** P10.22 CI Evidence Hardening & Runtime Regression Gate  
+**Version:** P10.23 Runtime Evidence Integrity & Release-Gate Consolidation  
 **Branch:** `phase10.14-database-verification-package`  
 **Certification:** NOT CERTIFIED  
 **Migration Freeze:** TRUE  
@@ -25,21 +25,21 @@
 - P10.18 document output operationalization package;
 - P10.19 DOCX artifact contract tests and synthetic output fixtures;
 - P10.20 document output runtime integration contract;
-- P10.21 executable synthetic runtime integration contract tests.
+- P10.21 executable synthetic runtime integration contract tests;
+- P10.22 deterministic CI evidence hardening and runtime regression gate;
+- P10.23 runtime evidence integrity and release-gate consolidation.
 
-## P10.22 implementation
+## P10.22–P10.23 implementation
 
-The runtime workflow now has an explicit deterministic regression gate. It enforces the synthetic safety contract (`APP_ENV=test`, `AI_ENABLED=false`, `MIGRATION_FREEZE=true`), verifies all required regression test files, runs the complete P10 synthetic suite, classifies the outcome as PASS/FAIL/BLOCKED, and emits sanitized operational evidence under `artifacts/p10-runtime/`.
+The CI path now has two explicit layers: the P10.22 regression gate executes the complete synthetic runtime suite and classifies it as PASS/FAIL/BLOCKED; the P10.23 evidence gate verifies that the resulting evidence is structurally valid, synthetic-only, attributable to the tested Git commit when running in GitHub Actions, and internally consistent through a SHA-256 test-output digest.
 
-The workflow uploads the evidence directory with `if: always()` so failures in the regression command do not erase diagnostic evidence. A manual `workflow_dispatch` trigger is available without changing safety controls.
+Diagnostics are uploaded with `if: always()`. The workflow also supports controlled manual dispatch without changing the safety environment.
 
-An obsolete P10.19 placeholder file was removed. No migration, production database operation, AI activation, real detainee data, credential, or production provider action is part of this checkpoint.
+The obsolete P10.19 placeholder was removed. No migration, production database operation, AI activation, real detainee data, credential, or production provider action is part of these checkpoints.
 
 ## Current verification state
 
-The latest GitHub Actions runs for the previous P10 runtime commit returned completed failures with zero exposed steps and log retrieval `BlobNotFound`. This is insufficient evidence to classify the application suite as PASS or FAIL. Reruns were requested, but independently observable step-level evidence remains a certification requirement.
-
-P10.22 therefore remains **IMPLEMENTED — AWAITING OBSERVABLE CI EVIDENCE** rather than certified.
+The previous GitHub Actions infrastructure returned completed failures with zero exposed steps and `BlobNotFound` when logs were requested. Therefore those historical runs cannot be interpreted as application PASS or FAIL evidence. Reruns were requested, but certification still requires independently observable step-level evidence from the hardened workflow.
 
 ## Certification blockers
 
@@ -69,4 +69,4 @@ P10.22 therefore remains **IMPLEMENTED — AWAITING OBSERVABLE CI EVIDENCE** rat
 
 ## Next checkpoint
 
-P10.23 — Runtime Evidence Integrity & Release-Gate Consolidation: verify that CI evidence itself is complete, sanitized, attributable to the tested commit, and cannot be mistaken for production certification.
+P10.24 — Repository Release Readiness & Controlled Runtime Boundary: consolidate executable contracts, repository hygiene, and release metadata without lifting Migration Freeze.
