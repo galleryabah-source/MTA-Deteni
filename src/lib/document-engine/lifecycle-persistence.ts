@@ -37,11 +37,11 @@ export class InMemoryDocumentLifecycleRepository implements DocumentLifecycleRep
     if (!input.documentId.trim() || !input.actorUserId.trim() || !input.correlationId.trim()) {
       throw new Error("INVALID_LIFECYCLE_TRANSITION");
     }
-    if (input.auditCorrelationId !== undefined) {
-      throw new Error("UNSUPPORTED_AUDIT_OVERRIDE");
-    }
     if (audit.documentId !== input.documentId || audit.correlationId !== input.correlationId) {
       throw new Error("AUDIT_TRANSITION_MISMATCH");
+    }
+    if (audit.actorUserId !== input.actorUserId || audit.occurredAt !== input.occurredAt) {
+      throw new Error("AUDIT_ACTOR_TIME_MISMATCH");
     }
     if (audit.fromLifecycle !== input.from || audit.toLifecycle !== input.to) {
       throw new Error("AUDIT_LIFECYCLE_MISMATCH");
@@ -49,7 +49,6 @@ export class InMemoryDocumentLifecycleRepository implements DocumentLifecycleRep
     const current = this.states.get(input.documentId) ?? input.from;
     if (current !== input.from) throw new Error("STALE_DOCUMENT_LIFECYCLE");
     assertLifecycleTransition(input.from, input.to);
-    if (input.to === "ARCHIVED" && current === "ARCHIVED") throw new Error("DOCUMENT_ALREADY_ARCHIVED");
     this.states.set(input.documentId, input.to);
   }
 
