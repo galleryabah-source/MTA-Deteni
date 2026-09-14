@@ -1,0 +1,52 @@
+name: P9 Kernel
+
+on:
+  push:
+    branches: [main, phase9-kernel-implementation]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  kernel:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      APP_ENV: test
+      AI_ENABLED: 'false'
+      MIGRATION_FREEZE: 'true'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Capture runner diagnostics
+        if: always()
+        run: |
+          set -eux
+          node --version
+          npm --version
+          git --version
+          git status --short
+          test -f tests/p9-kernel.test.mjs
+          test -f test/p9-transaction-outbox.test.mjs
+          test -f test/p9-transaction-boundary.test.mjs
+          test -f test/p9-private-storage.test.mjs
+          test -f test/p9-observability.test.mjs
+          test -f test/p9-test-harness.test.mjs
+          test -f test/p9.11-concurrency-failure-security.test.mjs
+          test -f test/p9.12-ci-quality-gate.test.mjs
+          test -f test/p9.13-certification-evidence.test.mjs
+      - name: Run dependency-free kernel tests
+        run: |
+          set -euxo pipefail
+          node --test tests/p9-kernel.test.mjs test/p9-transaction-outbox.test.mjs test/p9-transaction-boundary.test.mjs test/p9-private-storage.test.mjs test/p9-observability.test.mjs test/p9-test-harness.test.mjs test/p9.11-concurrency-failure-security.test.mjs test/p9.12-ci-quality-gate.test.mjs test/p9.13-certification-evidence.test.mjs | tee p9-test-output.txt
+      - name: Upload test diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: p9-kernel-diagnostics
+          path: p9-test-output.txt
+          if-no-files-found: ignore
