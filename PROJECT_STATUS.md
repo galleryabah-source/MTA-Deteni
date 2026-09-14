@@ -1,54 +1,57 @@
 # MTA DETENI — Project Status
 
-**Version:** Foundation v1.1  
-**Current Phase:** D0 — Governance & Discovery  
-**Branch:** `main`
+**Version:** P10.1 Runtime / Domain Integration Foundation  
+**Branch:** `phase9-kernel-implementation`  
+**Certification:** NOT CERTIFIED  
+**Migration Freeze:** TRUE  
+**AI:** OFF  
+**Data Boundary:** SYNTHETIC ONLY
 
-## Completed
+## Completed checkpoints
 
-- repository initialized;
-- MTA DETENI naming established;
-- PKP governance positioning documented;
-- master blueprint v1.0 created;
-- system requirements baseline created;
-- roadmap D0–D10 created;
-- security/privacy principles established;
-- synthetic-data-only repository boundary established;
-- RBAC/ABAC authority matrix v1.0 added;
-- RAP, PERKES, KAMTIB, Subbagian Tata Usaha, and Head Rudenim authority boundaries documented;
-- leadership petunjuk/arah/rekomendasi/disposisi layer documented;
-- AS-IS → TO-BE cross-section process baseline added;
-- temporary-exit → escort → assignment-letter document chain documented;
-- acceptance criteria baseline added.
+- P9 kernel configuration and fail-closed environment contract;
+- deny-by-default authorization with scope, duty, classification and operational-bypass controls;
+- canonical audit hash-chain foundation;
+- transactional command boundary with rollback model;
+- idempotency and outbox lifecycle/lease model;
+- private storage boundary;
+- observability/redaction foundation;
+- deterministic test harness;
+- CI quality-gate foundation;
+- P9.11 concurrency/failure/security checkpoint coverage;
+- P9.13 deterministic certification evidence evaluator;
+- P9 kernel invariant audit;
+- P10.1 first runtime/domain integration foundation for temporary-exit command.
 
-## Current Governance Model
+## P10.1 executable flow
 
-**RAP:** registrasi, administrasi, pelaporan, initial data/documents, requests, detainee-property administration, notifications, administrative recommendations.
+`Request Context → Authorization → Domain Command → Transaction → Audit → Outbox`
 
-**PERKES:** initial examination, health records/history, health scheduling/notifications, medical recommendations, food/goods needs related to health.
+The first command boundary currently models a synthetic temporary-exit request and transitions the detainee aggregate from `ACTIVE` to `EXIT_REQUESTED`.
 
-**KAMTIB:** operational control, placement, movement, headcount, temporary exit process, escort operations, barcode/QR, block/room lists, operational notifications and recommendations.
+## Certification blockers
 
-**SUBBAG TU:** administrative handling of assignment letters for Rudenim personnel escorting temporary exits, registration/numbering, document generation, distribution, and archiving within its authority.
+The following remain intentionally `NOT_RUN` or externally unverified:
 
-**HEAD RUDENIM:** overall visibility and timeline oversight, read-only on operational records, with authority to issue petunjuk, arahan, rekomendasi, and disposisi. No direct operational editing through oversight functions.
+- real PostgreSQL transaction/isolation/concurrency behavior;
+- real storage provider security;
+- real external provider idempotency/retry behavior;
+- runtime HTTP/RBAC integration;
+- production deployment evidence;
+- final database contract reconciliation.
 
-## Next Gate
+CI has produced a completed failure run, but the available GitHub API surface does not expose its step logs; therefore the failure is not converted to a guessed root cause or PASS.
 
-1. validate authority matrix with actual organizational mandate;
-2. finalize detailed AS-IS interviews/process maps;
-3. finalize TO-BE BPMN/workflow states;
-4. finalize data dictionary and classification;
-5. define permission/attribute policy at action and field/domain level;
-6. define threat model and security baseline;
-7. define document templates and approval/signature chain;
-8. define KPI baseline and pilot measurement plan;
-9. only then design database contracts and implementation.
+## Safety rules
 
-## Explicit Non-Goals
-
-- no real detainee data in GitHub;
+- no schema migration;
+- no production database connection;
+- no real detainee data;
 - no production credentials or secrets;
-- no direct WhatsApp-to-database ingestion;
-- no autonomous AI decision-making;
-- no schema migration before the data model and controls are approved.
+- AI remains OFF;
+- domain tests use synthetic fixtures only;
+- certification is fail-closed.
+
+## Next checkpoint
+
+P10.2 — Placement domain boundary, reusing the same authorization, transaction, audit, idempotency and outbox invariants. Database integration remains gated behind contract reconciliation and explicit evidence.
