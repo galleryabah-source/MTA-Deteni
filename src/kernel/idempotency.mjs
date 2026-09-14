@@ -1,13 +1,23 @@
 import { createHash } from 'node:crypto';
 
+function canonicalize(value) {
+  if (value === null || typeof value !== 'object') return value;
+  if (Array.isArray(value)) return value.map(canonicalize);
+  return Object.fromEntries(
+    Object.keys(value)
+      .sort()
+      .map((key) => [key, canonicalize(value[key])]),
+  );
+}
+
 export function fingerprint(input) {
-  const canonical = JSON.stringify({
+  const canonical = JSON.stringify(canonicalize({
     operation: input.operation,
     actorId: input.actorId,
     scope: input.scope,
     resourceId: input.resourceId ?? null,
     payload: input.payload ?? null,
-  });
+  }));
   return createHash('sha256').update(canonical, 'utf8').digest('hex');
 }
 
