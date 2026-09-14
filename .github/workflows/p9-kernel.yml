@@ -21,4 +21,5 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-      - run: node --test tests/p9-kernel.test.mjs
+      - name: Run dependency-free kernel tests
+        run: node --test tests/p9-kernel.test.mjs test/p9-transaction-outbox.test.mjs test/p9-transaction-boundary.test.mjs test/p9-private-storage.test.mjs
