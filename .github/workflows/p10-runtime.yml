@@ -43,12 +43,16 @@ jobs:
         run: |
           set -euxo pipefail
           test -f scripts/p10-runtime-regression-gate.mjs
+          test -f scripts/p10-evidence-integrity-gate.mjs
           test -f test/p10.21-runtime-integration-contract.test.mjs
           test -f test/p10.19-docx-output-contract.test.mjs
           test -f test/p10.19-docx-artifact-contract.test.mjs
       - name: Run deterministic P10.22 regression gate
         run: node scripts/p10-runtime-regression-gate.mjs
-      - name: Upload P10.22 evidence
+      - name: Verify P10.23 evidence integrity
+        if: always()
+        run: node scripts/p10-evidence-integrity-gate.mjs
+      - name: Upload P10.22/P10.23 evidence
         if: always()
         uses: actions/upload-artifact@v4
         with:
