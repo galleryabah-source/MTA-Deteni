@@ -1,6 +1,6 @@
 # MTA DETENI — Project Status
 
-**Version:** P10.11 Persistent Grant Integration Readiness  
+**Version:** P10.12 Database Integration Package  
 **Branch:** `phase10.10-persistent-grant-boundary`  
 **Certification:** NOT CERTIFIED  
 **Migration Freeze:** TRUE  
@@ -31,58 +31,42 @@
 - P10.8 controlled artifact handoff boundary;
 - P10.9 runtime artifact distribution security boundary;
 - P10.10 persistent artifact-grant repository contract, parameterized atomic consume/revoke operations, and fail-closed affected-row enforcement;
-- P10.11 persistent grant integration readiness contract and transaction orchestration boundary.
+- P10.11 persistent grant integration readiness contract and transaction orchestration boundary;
+- P10.12 database integration package: proposed migration, RLS contract, PostgreSQL concurrency test plan, rollback plan, and static package contract test.
 
-## P10.11 executable contract
+## P10.12 executable preparation
 
-`Authorization → ISSUED/Artifact Binding → BEGIN → Persistent Grant INSERT → Audit → Outbox → COMMIT → Worker Claim → Provider Call → Atomic Grant Consume → Completion Audit`
+`Schema Review → Migration Approval → Controlled Migration Window → Schema Verification → Repository Integration → RLS Verification → PostgreSQL Concurrency Test → Rollback Drill → Evidence Review`
 
-P10.11 reconciles the P10.10 repository with the existing document lifecycle, deny-by-default authorization, critical transaction, audit and outbox boundaries. Grant insertion, audit and outbox callbacks are explicitly orchestrated on the same transaction client. Provider/network operations remain outside this boundary and are permitted only after durable outbox claim and commit.
+The proposed migration creates `artifact_download_grants` with lifecycle constraints, checksum validation, expiry ordering, timestamps, indexes, RLS enabled, and explicit revocation of anonymous/authenticated/public table privileges. It is a review artifact only and has not been executed.
 
-The future database model must bind grant identity, document/artifact/object identity, checksum, actor, scope, issuance/expiry and lifecycle state. Consumption and revocation remain atomic conditional updates with exactly-one-row success semantics.
+The RLS contract deliberately avoids permissive placeholder policies. Final actor-to-identity and scope mapping must be approved before direct authenticated access is enabled. Server-side repository access remains subject to the application Authorization Control Plane.
 
-## P10.11 controls
-
-- application authorization remains authoritative;
-- persistent grant cannot grant permission by itself;
-- `ISSUED` document state remains mandatory;
-- document/artifact/object/checksum binding remains mandatory;
-- grant identity is opaque and contains no detainee PII;
-- actor and scope are persisted and enforced in state transitions;
-- expiry is enforced in the consume predicate;
-- lifecycle is `ACTIVE → CONSUMED` or `ACTIVE → REVOKED`;
-- grant insert + audit + outbox share one critical transaction client;
-- provider/network calls are post-commit only;
-- anonymous/public access to grants is prohibited by future database policy contract;
-- AI remains OFF;
-- no production data or secrets are used.
+The concurrency plan requires independent PostgreSQL connections and observable row counts proving that only one concurrent consume can succeed. The rollback plan requires schema/privilege/RLS evidence and protects audit/retention requirements from destructive rollback.
 
 ## Required MVP document outputs
 
 - `TEMPORARY_EXIT_PERMISSION` — Surat Izin Keluar Sementara;
 - `ESCORT_ASSIGNMENT_LETTER` — Surat Tugas Pengawalan.
 
-Artifacts remain downstream of authorization, document lifecycle, approval/SoD, template governance, checksum integrity and private storage controls. The runtime distribution boundary cannot authorize issuance by itself.
+Artifacts remain downstream of authorization, document lifecycle, approval/SoD, template governance, checksum integrity and private storage controls.
 
 ## Certification blockers
 
-The following remain intentionally `NOT_RUN` or externally unverified:
-
-- real PostgreSQL schema/migration;
-- real PostgreSQL isolation/concurrency testing;
-- RLS enforcement against the approved identity/scope model;
-- persistent grant storage against a deployed schema;
-- real private object storage and provider security;
-- persistent database-backed identity mapping;
-- scanner/device integration;
-- provider idempotency/retry/dead-letter behavior;
+- migration execution and schema verification;
+- real PostgreSQL isolation/concurrency evidence;
+- final actor-to-identity and scope RLS policy;
+- persistent grant integration against deployed schema;
+- end-to-end persistent audit/outbox evidence;
+- real private object storage/provider security;
 - runtime HTTP middleware/RBAC integration;
 - production deployment evidence;
-- approved production DOCX templates and signature infrastructure;
-- end-to-end persistent audit/outbox evidence;
-- GitHub Actions step-level evidence while recent jobs fail before exposing executable steps/logs.
+- approved production DOCX templates/signature infrastructure;
+- scanner/device integration;
+- provider retry/dead-letter/idempotency evidence;
+- GitHub Actions step-level evidence.
 
-CI failures with no observable steps remain infrastructure/evidence failures, not application PASS/FAIL evidence.
+The latest P10 workflow still fails before exposing executable steps; the job reports `failure` with no observable steps/logs. This remains an infrastructure/evidence blocker, not application PASS/FAIL evidence.
 
 ## Safety rules
 
@@ -91,9 +75,9 @@ CI failures with no observable steps remain infrastructure/evidence failures, no
 - no real detainee data;
 - no production credentials or secrets;
 - AI remains OFF;
-- domain/integration tests use synthetic fixtures and test doubles;
+- synthetic fixtures/test doubles only;
 - certification is fail-closed.
 
 ## Next checkpoint
 
-P10.12 — Database Integration Package: prepare the approved migration package, RLS policy contract, repository integration tests, PostgreSQL concurrency test plan, and rollback plan. Do not execute migration/DDL while the Migration Freeze remains TRUE.
+P10.13 — Approved Database Integration Execution Gate: verify governance approval, finalize identity/scope RLS policy, execute the migration only when the Migration Freeze is explicitly lifted, then run real PostgreSQL integration/concurrency/rollback evidence.
