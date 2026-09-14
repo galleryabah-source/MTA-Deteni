@@ -13,7 +13,7 @@ if (evidence.syntheticOnly !== true) failures.push('NON_SYNTHETIC_EVIDENCE');
 if (evidence.safety?.APP_ENV !== 'test') failures.push('UNSAFE_APP_ENV');
 if (evidence.safety?.AI_ENABLED !== 'false') failures.push('AI_NOT_DISABLED');
 if (evidence.safety?.MIGRATION_FREEZE !== 'true') failures.push('MIGRATION_FREEZE_NOT_ACTIVE');
-if (evidence.requiredTestCount !== 19) failures.push('UNEXPECTED_REQUIRED_TEST_COUNT');
+if (evidence.requiredTestCount !== 20) failures.push('UNEXPECTED_REQUIRED_TEST_COUNT');
 if (!Array.isArray(evidence.missingTests) || evidence.missingTests.length !== 0) failures.push('MISSING_REQUIRED_TESTS');
 if (!['PASS', 'FAIL', 'BLOCKED'].includes(evidence.classification)) failures.push('INVALID_CLASSIFICATION');
 
