@@ -23,7 +23,9 @@ Status: INTEGRATION KERNEL — PARTIAL
 - Artifact retrieval returns defensive byte copies and rejects duplicate artifact IDs rather than overwriting history.
 - Persistence-neutral append-only DocumentAuditRepository contract with sequence numbers and a tamper-evident SHA-256 event chain.
 - Audit repository rejects duplicate event IDs and exposes chain integrity verification.
-- Unit tests for contract presence, deterministic merge, lifecycle ordering, integrity, template immutability, historical resolution, generation, authorization integration, artifact immutability and audit-chain integrity.
+- Persistence-neutral immutable DocumentBinding contract connecting document identity to exact contract/template/artifact identity and hash.
+- Binding repository rejects duplicate document IDs and prevents one artifact from being bound to multiple documents.
+- Unit tests for contract presence, deterministic merge, lifecycle ordering, integrity, template immutability, historical resolution, generation, authorization integration, artifact immutability, audit-chain integrity and document binding.
 
 ## Security invariants
 - Document generation is deterministic and does not require AI.
@@ -41,6 +43,8 @@ Status: INTEGRATION KERNEL — PARTIAL
 - Policy guardrails are evaluated after the authorization decision and before the document approval gate.
 - Security domain is derived from the document kind rather than accepted from the client.
 - Artifact IDs are immutable; no overwrite operation exists in the storage contract.
+- Document bindings are immutable; corrections require a new document/artifact identity.
+- Binding requires exact contract, template and artifact hash identity.
 - Audit events are append-only; duplicate event IDs are rejected.
 - Audit integrity can be independently verified from the persisted sequence/hash chain.
 - No real detainee data, credentials or production secrets are included.
