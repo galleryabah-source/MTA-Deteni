@@ -1,6 +1,7 @@
 import type {
   AuthorizationDecision,
   AuthorizationRequest,
+  SecurityDomain,
 } from "../security/types";
 import { AuthorizationEngine } from "../security/authorization";
 import { evaluatePolicyGuardrails } from "../security/policy";
@@ -24,6 +25,11 @@ export interface DocumentAuthorizationDecision extends DocumentApprovalDecision 
 const toSecurityAction = (action: DocumentApprovalAction): AuthorizationRequest["action"] =>
   action === "APPROVE" ? "APPROVE" : "ISSUE";
 
+const toSecurityDomain = (
+  kind: DocumentApprovalRequest["documentKind"],
+): SecurityDomain =>
+  kind === "SURAT_IZIN_KELUAR_SEMENTARA" ? "TEMPORARY_EXIT" : "ESCORT";
+
 export const buildDocumentAuthorizationRequest = (
   input: DocumentAuthorizationInput,
 ): AuthorizationRequest => ({
@@ -31,7 +37,7 @@ export const buildDocumentAuthorizationRequest = (
   permission: input.permission,
   action: toSecurityAction(input.approval.action),
   resource: {
-    domain: "DOCUMENT_ENGINE",
+    domain: toSecurityDomain(input.approval.documentKind),
     resourceId: input.approval.documentId,
     ownerUnit: input.ownerUnit,
     workflowState: input.approval.currentLifecycle,
@@ -73,7 +79,7 @@ export const evaluateDocumentAuthorization = (
 
   const approval = evaluateDocumentApproval({
     ...input.approval,
-    // Authorization is derived exclusively from the security control plane.
+    // This value is derived server-side from AuthorizationEngine; it is not client proof.
     isAuthorized: authorization.allowed,
   });
 
