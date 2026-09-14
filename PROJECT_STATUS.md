@@ -1,6 +1,6 @@
 # MTA DETENI — Project Status
 
-**Version:** P10.6 Document Artifact / Template Manifest Boundary  
+**Version:** P10.7 DOCX Renderer / Artifact Integrity Boundary  
 **Branch:** `phase9-kernel-implementation`  
 **Certification:** NOT CERTIFIED  
 **Migration Freeze:** TRUE  
@@ -26,13 +26,16 @@
 - P10.3 append-only movement ledger and deterministic headcount projection foundation;
 - P10.4 operational identity / barcode-QR security boundary;
 - P10.5 document / exit authorization binding and lifecycle foundation;
-- P10.6 deterministic template manifest and field-validation boundary.
+- P10.6 deterministic template manifest and field-validation boundary;
+- P10.7 deterministic DOCX artifact renderer and checksum boundary.
 
-## P10.6 executable flow
+## P10.7 executable flow
 
-`Approved Template → Manifest Validation → Authorized Field Merge → Deterministic Renderer → SHA-256 → Private Artifact Storage`
+`Approved Manifest → Fail-Closed Field Validation → Deterministic OOXML Package → SHA-256 → Artifact Identity`
 
-The template manifest defines the document kind, template/version, renderer version, allowed field names, types and trusted sources. Field data is validated against that contract before rendering.
+The P10.7 adapter produces a dependency-free OOXML `.docx` package from the governed manifest/data contract. ZIP metadata is fixed for reproducibility, field values are XML-escaped, and artifact identity is derived from the SHA-256 digest.
+
+This is a synthetic/reference renderer boundary only. It does not embed an official production template and does not claim final government template fidelity.
 
 ## Required MVP document outputs
 
@@ -41,15 +44,17 @@ The template manifest defines the document kind, template/version, renderer vers
 
 The renderer contract targets Word `.docx` artifacts from approved templates. Artifact issuance remains downstream of authorization, lifecycle approval, integrity verification and private storage controls.
 
-## P10.6 controls
+## P10.7 controls
 
 - versioned template manifest;
 - unique, explicitly typed fields;
 - allowed field sources limited to authorization/document/system;
 - required-field validation;
 - deterministic field ordering/canonicalization;
+- deterministic DOCX package generation;
+- XML escaping against markup injection;
+- SHA-256 checksum and digest-derived artifact identity;
 - no arbitrary client field source;
-- artifact SHA-256 integrity binding;
 - existing authorization, scope, classification and SoD controls remain mandatory;
 - AI remains OFF and is not a rendering dependency.
 
@@ -66,7 +71,7 @@ The following remain intentionally `NOT_RUN` or externally unverified:
 - runtime HTTP/RBAC integration;
 - production deployment evidence;
 - final database contract reconciliation;
-- binary `.docx` renderer/storage integration;
+- binary `.docx` renderer/storage integration against approved production templates;
 - real template governance and signature infrastructure;
 - CI step-level evidence where GitHub currently exposes a failed run without accessible job logs.
 
@@ -84,4 +89,4 @@ CI evidence must still be independently observed before certification. A complet
 
 ## Next checkpoint
 
-P10.7 — `.docx` Renderer / Artifact Integrity Boundary: implement a deterministic Word artifact generation adapter, private artifact handoff contract, and integrity verification without introducing production templates, data, secrets, or schema changes.
+P10.8 — Controlled Artifact Handoff / Private Download Boundary: bind generated artifact identity to lifecycle state, private storage object identity, scoped access, single-use download grant, revocation and audit/outbox handoff without schema changes.
