@@ -1,7 +1,7 @@
 # MTA DETENI — Project Status
 
-**Version:** P10.13 Approved Database Integration Execution Gate  
-**Branch:** `phase10.13-approved-db-integration-gate`  
+**Version:** P10.14 Database Integration Verification Package  
+**Branch:** `phase10.14-database-verification-package`  
 **Certification:** NOT CERTIFIED  
 **Migration Freeze:** TRUE  
 **AI:** OFF  
@@ -33,15 +33,16 @@
 - P10.10 persistent artifact-grant repository contract, parameterized atomic consume/revoke operations, and fail-closed affected-row enforcement;
 - P10.11 persistent grant integration readiness contract and transaction orchestration boundary;
 - P10.12 database integration package: proposed migration, RLS contract, PostgreSQL concurrency test plan, rollback plan, and static package contract test;
-- P10.13 identity/scope RLS finalization contract and approved database integration execution gate.
+- P10.13 identity/scope RLS finalization contract and approved database integration execution gate;
+- P10.14 database integration verification package and executable verification matrix.
 
-## P10.13 preparation
+## P10.14 preparation
 
-`Governance Approval → Environment Verification → Migration Checksum Verification → Controlled Migration → Schema Verification → RLS Deployment → Role Tests → Repository Integration → Concurrency Tests → Rollback Drill → Evidence Review`
+`Artifact Integrity → Schema Contract → Privilege/RLS Verification → Identity/Scope Isolation → Repository Verification → Transaction Atomicity → Concurrency → Rollback → Evidence Completeness`
 
-P10.13 explicitly remains a preparation gate while `MIGRATION_FREEZE=TRUE`. The branch adds the authoritative identity/scope mapping contract, execution preconditions/hard stops, evidence requirements, and static contract coverage. No DDL or production database operation has been executed.
+P10.14 defines V1–V16 verification cases covering database identity, migration checksum, schema constraints, RLS/privileges, actor/scope/object isolation, expiry/replay, concurrency, revoke races, transaction rollback, provider isolation and evidence completeness. Execution remains blocked while `MIGRATION_FREEZE=TRUE`.
 
-The identity contract requires authoritative actor and scope mapping, server-side trust boundaries, and fail-closed behavior for missing, inactive, revoked, ambiguous or client-mismatched identity/scope context. Direct browser grant writes remain prohibited.
+A safety-gated result is explicitly `SKIPPED_BY_SAFETY_GATE`, never PASS. No production database operation or DDL has been executed by this checkpoint.
 
 ## Required MVP document outputs
 
@@ -66,7 +67,7 @@ Artifacts remain downstream of authorization, document lifecycle, approval/SoD, 
 - provider retry/dead-letter/idempotency evidence;
 - GitHub Actions step-level evidence.
 
-The latest P10 workflow has historically failed before exposing executable steps. Until a run exposes step-level evidence, CI cannot be treated as application PASS/FAIL evidence.
+Latest observed P10 workflow run #115 failed with a job exposing zero steps; its log endpoint returned BlobNotFound. Therefore CI remains an infrastructure/evidence blocker, not application PASS/FAIL evidence.
 
 ## Safety rules
 
@@ -80,4 +81,4 @@ The latest P10 workflow has historically failed before exposing executable steps
 
 ## Next checkpoint
 
-P10.14 — Database Integration Verification Package: prepare executable role/RLS verification, repository-to-schema integration tests, and evidence collection contracts. Actual migration execution remains blocked until the Migration Freeze is explicitly lifted.
+P10.15 — Controlled Database Execution Harness: prepare a fail-closed execution runner and evidence schema. It may only execute after explicit Migration Freeze lift and approved target verification.
