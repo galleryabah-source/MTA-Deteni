@@ -15,10 +15,10 @@ test("P13.9601-9720: unified envelope binds session, certification, reconciliati
   const certification = { certificationId: "CONT-S-1", journeyId: "J-1", executionId: "EXEC-1", sessionId: "S-1", deviceId: "DEV-1", installationId: "INST-1", networkScopeId: "NET-1", lifecycleJourneyId: "J-1", recoveryJourneyId: "J-1", runtimeDecision: "READY", backupDecision: "READY", projectionVersion: 1, lifecycleVersion: 1, certified: true, syntheticOnly: true } as ContinuityCertification;
   const reconciliation = { sessionId: "S-1", executionId: "EXEC-1", admittedCount: 2, reconciledCount: 2, receiptIds: ["R-1", "R-2"], complete: true, syntheticOnly: true } as SessionReconciliationProof;
   const backup = { decision: "READY", syntheticOnly: true } as BackupContinuityAssessment;
-  const handoff = createRuntimeHandoff({ executionId: "EXEC-1", fromMode: "CLOUD", toMode: "LAN", queuePending: false });
+  const handoff = createRuntimeHandoff({ executionId: "EXEC-1", fromMode: "CLOUD", toMode: "LAN", fromDeviceId: "DEV-CLOUD", toDeviceId: "DEV-1", fromNetworkScopeId: "NET-CLOUD", toNetworkScopeId: "NET-1", authorizationId: "AUTH-1", queuePending: false });
   const envelope = createUnifiedContinuityEnvelope({ envelopeId: "ENV-1", certification, session, reconciliation, handoff, backup });
   assertUnifiedContinuityEnvelope(envelope);
-  assert.equal(envelope.admittedCount, 2);
+  assert.equal(envelope.reconciliation.admittedCount, 2);
   assert.equal(envelope.reconciliation.receiptIds.length, 2);
 });
 
