@@ -1,31 +1,24 @@
 # MTA DETENI — Project Status
 
 **Foundation:** v1.60+
-**Current Track:** P13.5921–5960 browser/RBAC/LAN runtime contract expansion / observation pending
+**Current Track:** P13.5961–6040 runtime implementation boundary / observation pending
 **Branch:** `main`
-**Latest implementation checkpoint:** P13.5921–5960
+**Latest implementation checkpoint:** P13.5961–5962
 
 ## Latest progress
 
-- P13.5921–5960 — added responsive application-surface invariants for desktop/tablet/smartphone, role-aware deny-by-default navigation, multi-device LAN identity, local-PC service boundary, synthetic backup/restore identity and continuity evidence binding;
-- P13.5901–5920 — added deterministic runtime capability contract for CLOUD, LAN and LOCAL modes, including offline-write and local-backup safety invariants;
-- P13.5881–5900 — added deterministic offline command queue, idempotency-aware reconnect reconciliation and conflict-review contract;
-- P13.5841–5880 — contextual QR semantics, immutable reporting snapshot and integrated cross-domain synthetic journey;
-- P13.5827–5840 — canonical actor cleanup plus deterministic movement, placement, authorization and SoD synthetic contract tests.
+- P13.5961 — added browser transport boundary requiring request identity, authenticated LAN device identity and idempotency for mutations;
+- P13.5962 — added versioned synthetic backup manifest identity and validation;
+- P13.5921–5960 — responsive application-surface invariants, role-aware navigation, multi-device LAN identity, local-PC service boundary, synthetic backup/restore identity and continuity evidence binding;
+- P13.5901–5920 — runtime capability contract for CLOUD, LAN and LOCAL modes;
+- P13.5881–5900 — offline command queue, idempotency-aware reconnect reconciliation and conflict-review contract;
+- P13.5841–5880 — contextual QR semantics, immutable reporting snapshot and integrated cross-domain synthetic journey.
 
-## Integrated application model
+## Runtime implementation boundary
 
-RAP owns registration, administration and reporting; PERKES owns health records and health workflows; KAMTIB owns placement, movement, headcount, temporary exit, escort and operational QR; SUBBAG TU owns escort-document administration; HEAD RUDENIM has oversight, read-only operational visibility and authority for petunjuk, arahan, rekomendasi and disposisi without direct operational editing.
+The next implementation layer is intentionally adapter-based. `BrowserTransportRequest` defines the request identity and idempotency boundary without binding the application to a specific HTTP framework. `PersistentQueueAdapter<T>` defines the storage seam without assuming IndexedDB or another browser store. `BackupManifest` defines the recovery identity seam without implementing real backup transfer or restore.
 
-The application chain remains:
-
-`UI/API Command → Authorization Policy → Canonical Operational Envelope → Domain Aggregate → Transaction Context → Idempotency → Domain Workflow → Immutable Timeline/Audit → Operational Evidence → Reconciliation → Outbox → Projection Checkpoint → Read Model → QR/Movement/Temporary Exit → Reporting Snapshot → Review/Approval → Generated Artifact`
-
-## Runtime continuity model
-
-`CLOUD` is online-only; `LAN` supports multi-device local network continuity plus local backup; `LOCAL` supports device-local/offline writes and local backup. Offline commands carry command identity, aggregate identity, payload hash and idempotency key. Reconnect must skip duplicates, apply only when aggregate revision matches, and route revision conflicts to review rather than silently overwrite. Runtime capability claims fail closed when contradictory.
-
-P13.5921–5960 now binds the application surface to responsive invariants and role-aware navigation, while LAN identity and local-PC service boundaries remain explicit contracts rather than claims of a running local server. Backup/restore identity and continuity evidence are synthetic metadata contracts; cryptographic artifact storage and real runtime observation remain later gates.
+This preserves the architecture: UI/API Command → Authorization → Domain Workflow → Immutable Evidence → Reconciliation → Projection → Reporting. Runtime adapters must not bypass authorization, idempotency or audit/evidence controls.
 
 ## Governance locks
 
@@ -39,10 +32,10 @@ P13.5921–5960 now binds the application surface to responsive invariants and r
 
 ## Current certification state
 
-**P13.5921–5960 — IMPLEMENTED CONTRACTS / OBSERVATION PENDING**
+**P13.5961–6040 — IMPLEMENTED CONTRACTS / OBSERVATION PENDING**
 
-The new contracts and synthetic tests have been committed, but they are not certified by execution while GitHub Actions exposes no usable job-step telemetry. No application PASS or application test FAIL is inferred from that infrastructure observation gap.
+GitHub Actions remains an observation blocker when job-step telemetry is unavailable. Repository commits are therefore not represented as runtime PASS. All current tests are synthetic contracts only.
 
 ## Next gate
 
-**P13.5961–6040 — runtime implementation boundary:** local-PC service adapter, browser transport boundary, persistent offline queue adapter, LAN discovery/session contract, backup manifest/recovery protocol, and end-to-end synthetic runtime journey. Implementation remains non-production and must preserve Migration Freeze, AI OFF and production access block.
+**P13.5963–6040 — adapter-level synthetic runtime journey:** persistent queue adapter behavior, LAN session binding, local-PC service adapter fail-closed behavior, backup manifest chain and end-to-end offline → reconnect → reconciliation → reporting evidence journey. No production deployment or live database.
