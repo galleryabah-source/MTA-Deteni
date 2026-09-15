@@ -1,8 +1,8 @@
 # MTA DETENI — Project Status
 
-**Version:** Foundation v1.15
-**Current Phase:** P10.809–P10.904 application-surface and release-readiness hardening
-**Implementation Track:** P10.904
+**Version:** Foundation v1.16
+**Current Phase:** P10.905–P10.936 synthetic release-candidate and pre-authorisation audit
+**Implementation Track:** P10.936
 **Branch:** `main`
 
 ## Latest Progress
@@ -14,7 +14,8 @@
 - P10.777–P10.808 application-surface implementation boundary;
 - P10.809–P10.840 application-surface composition and synthetic regression;
 - P10.841–P10.872 responsive operator workflow UI contract;
-- P10.873–P10.904 release-readiness boundary.
+- P10.873–P10.904 release-readiness boundary;
+- P10.905–P10.936 synthetic release-candidate matrix and final pre-authorisation application-boundary audit.
 
 ## Integrated Application Model
 
@@ -34,10 +35,12 @@ RAP owns registration, administration and reporting; PERKES owns health records 
 
 ## Current Gate
 
-**P10.904 — RELEASE-CANDIDATE CONTRACT READY / EXECUTION EVIDENCE REQUIRED**
+**P10.936 — SYNTHETIC RELEASE-CANDIDATE CONTRACT + PRE-AUTHORISATION BOUNDARY AUDIT READY**
 
-The application surface now has explicit UI/read-model, QR, reporting and operator-workflow boundaries. Release readiness remains evidence-based; no CI PASS, live database PASS, or production readiness is claimed without observable evidence.
+The repository now defines a deterministic synthetic release-candidate matrix and a fail-closed application-boundary audit. This is a contract/test milestone, not a claim of CI PASS, database PASS, production readiness, or operational authorisation.
 
 ## Next Gate
 
-**P10.905–936 — synthetic release-candidate test matrix, evidence packet composition, and final pre-authorisation audit of application boundaries.**
+**P10.937+ — execute/observe the synthetic release-candidate matrix, collect immutable evidence, and resolve any failures before considering a controlled non-production integration request.**
+
+No production or live-database step is implied by this next gate.
