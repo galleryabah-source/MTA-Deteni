@@ -6,7 +6,8 @@
   "scripts": {
     "test": "node --test",
     "test:unit": "tsx --test test/**/*.test.ts",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "typecheck:test": "tsc -p tsconfig.test.json --noEmit"
   },
   "devDependencies": {
     "tsx": "^4.19.2",
