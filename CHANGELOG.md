@@ -1,5 +1,15 @@
 # Changelog
 
+## P13.6043–6120 — Reconnect State and Evidence Hardening
+
+- Added explicit reconnect transition contract for `APPLY`, `SKIP_DUPLICATE` and `REVIEW_CONFLICT` decisions.
+- Enforced deterministic queue transitions: `PENDING/SYNCING → SYNCED` for apply/duplicate and `PENDING/SYNCING → CONFLICT` for revision mismatch.
+- Bound reconnect transitions to stable `commandId` and current queue state; invalid identity or source state fails closed.
+- Added synthetic regression coverage for successful reconnect, duplicate suppression, revision conflict and transition guards.
+- Preserved the existing authorization/idempotency/evidence application chain; no runtime adapter bypass was introduced.
+- Preserved Migration Freeze, AI OFF, synthetic-only repository data, production authorization FALSE and live PostgreSQL block.
+- No schema migration introduced.
+
 ## P13.6041–6080 — Stable Runtime Adapter Identity
 
 - Strengthened persistent queue replacement around stable domain identity (`commandId`) rather than object reference.
