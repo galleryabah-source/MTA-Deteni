@@ -21,6 +21,10 @@ export function createSyntheticTemporaryExitPersistentAdapter({ scopeResolver = 
         throw error;
       }
     },
+    injectFailure(stage) {
+      if (!['DOMAIN', 'AUDIT', 'OUTBOX', 'COMMIT'].includes(stage)) throw new Error('INVALID_FAILURE_STAGE');
+      store.injectFailure(stage);
+    },
     checkIdempotency({ idempotencyKey, request }) {
       if (!idempotencyKey?.trim()) throw new Error('IDEMPOTENCY_KEY_REQUIRED');
       return { fingerprint: fingerprint(request), key: idempotencyKey };
@@ -51,6 +55,7 @@ export function createSyntheticTemporaryExitPersistentAdapter({ scopeResolver = 
           idempotencyKey,
           request: { ...request, resourceId },
           domainMutation: ({ set }) => {
+            if (typeof mutation !== 'function') throw new Error('MUTATION_REQUIRED');
             const next = structuredClone(mutation(records.get(resourceId) ?? null));
             set(resourceId, next);
             records.set(resourceId, next);
