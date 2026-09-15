@@ -1,7 +1,7 @@
 # MTA DETENI — Next Gate
 
-**Foundation:** v1.66+
-**Current:** P13.7681–7800 — synthetic end-to-end lifecycle certification contract implemented; CI observation pending
+**Foundation:** v1.67
+**Current:** P13.7801–7920 — deterministic failure-injection and recovery contract implemented; CI observation pending
 
 ## Completed
 
@@ -55,12 +55,16 @@
 48. reporting projection freshness certification;
 49. audit/outbox cardinality integrity guard;
 50. lifecycle drift and duplicate-effect fail-closed regression;
-51. no concrete PostgreSQL driver, database connection, or production persistence;
-52. no schema migration, AI activation or real detainee data.
+51. deterministic failure matrix for authorization, stale version, idempotency, repository, outbox, projection and offline reconnect failures;
+52. terminal state, reason code and recoverability classification for each governed failure;
+53. explicit compensation boundary without distributed-rollback claims;
+54. synthetic regression coverage for pre-commit rejection, post-commit retry and compensation-boundary semantics;
+55. no concrete PostgreSQL driver, database connection, or production persistence;
+56. no schema migration, AI activation or real detainee data.
 
-## Next gate: P13.7801–7920
+## Next gate: P13.7921–8040
 
-Harden the certified lifecycle into a deterministic failure-injection and recovery matrix: authorization denial, stale version, idempotency conflict, repository conflict, outbox failure, reporting refresh failure, and offline reconnect conflict. Define compensation boundaries without pretending distributed rollback is atomic. Extend synthetic evidence so every failure has a terminal state, reason code and recoverability classification. Preserve RBAC/SoD, transaction, idempotency, audit, outbox, offline/LAN continuity and fail-closed governance.
+Integrate failure recovery with lifecycle orchestration and continuity: propagate failure classification into command/event evidence, preserve expected-version checks, make outbox/projection retries idempotent, and bind offline reconnect conflicts to reconciliation outcomes. Add a synthetic recovery journey proving that failed commands do not create duplicate audit/outbox effects and that committed mutations remain recoverable without pretending cross-system rollback is atomic.
 
 ## Governance lock
 
