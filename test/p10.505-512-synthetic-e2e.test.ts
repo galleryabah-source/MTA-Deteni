@@ -28,7 +28,7 @@ test("synthetic temporary-exit happy path cannot bypass governance gates", async
 
   await workflow.advance({ exitId: "SYN-EXIT-0001", from: "REQUESTED", to: "VALIDATED", actor: actor("kamtib-1", "KAMTIB") });
   approved = true;
-  await workflow.advance({ exitId: "SYN-EXIT-0001", from: "VALIDATED", to: "APPROVED", actor: actor("leader-1", "LEADERSHIP") });
+  await workflow.advance({ exitId: "SYN-EXIT-0001", from: "VALIDATED", to: "APPROVED", actor: actor("head-1", "HEAD_RUDENIM") });
   documented = true;
   await workflow.advance({ exitId: "SYN-EXIT-0001", from: "APPROVED", to: "DOCUMENTED", actor: actor("tu-1", "SUBBAG_TU") });
   escorted = true;
