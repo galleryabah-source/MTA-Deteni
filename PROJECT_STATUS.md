@@ -1,8 +1,8 @@
 # MTA DETENI — Project Status
 
-**Version:** Foundation v1.6
-**Current Phase:** D3/D4/D5/D6 implementation foundation
-**Implementation Track:** P10.447
+**Version:** Foundation v1.7
+**Current Phase:** D3/D4/D5/D6 implementation + domain verification foundation
+**Implementation Track:** P10.480
 **Branch:** `main`
 
 ## Implementation / Verification Progress
@@ -45,7 +45,12 @@
 - P10.437–P10.444 approval/leadership service foundation implemented with separation-of-duties guard;
 - P10.445 application workflow composition boundary established;
 - P10.446 minimal TypeScript project manifest established;
-- P10.447 strict TypeScript compiler contract established.
+- P10.447 strict TypeScript compiler contract established;
+- P10.448–P10.455 synthetic TypeScript service-contract tests added;
+- P10.456–P10.463 idempotency, authorization, transaction, audit/outbox and failure-semantics ports established;
+- P10.464–P10.471 governed temporary-exit orchestration added with approval/document/escort prerequisites and stale-state protection;
+- P10.472–P10.479 document template effectiveness, required-field, numbering and approval-binding contracts added;
+- P10.480 repository CI harness added for Node 24 typecheck and regression/domain tests.
 
 ## Current Governance Model
 
@@ -73,14 +78,14 @@
 
 ## Current Gate
 
-**P10.447 — Domain Service + Application Composition Foundation: READY FOR LOCAL/CI TYPECHECK AND INTEGRATION TESTING**
+**P10.480 — Domain Verification + CI Foundation: IN PROGRESS / VERIFICATION REQUIRED**
 
-The repository now has the first service layer across core administration, placement, movement/headcount, temporary exit, escort, document artifacts, and approval/leadership, plus an application composition boundary and strict TypeScript project contract. Services are port-driven and do not require a database migration. This is an implementation foundation, not production authorization. Runtime/typecheck status is **NOT_RUN in this environment**.
+The repository now has service-contract tests, fail-closed idempotency boundaries, transaction/audit/outbox ports, governed temporary-exit orchestration, document template/numbering/approval binding contracts, and a GitHub Actions CI harness. Earlier CI attempts failed before meaningful code verification because the workflow enabled npm dependency caching without a committed lockfile; the cache prerequisite has now been removed. The latest CI run must be observed before claiming typecheck/test PASS.
 
 ## Next Checkpoints
 
-1. P10.448–P10.455 — repository-wide service contract tests using synthetic fixtures;
-2. P10.456–P10.463 — idempotency, optimistic-concurrency, audit/outbox ports and failure semantics;
-3. P10.464–P10.471 — integrated temporary-exit orchestration invariants;
-4. P10.472–P10.479 — document numbering/template/approval binding contracts;
-5. P10.480+ — persistence adapter boundary and non-production runtime harness, still migration-frozen until governance gate.
+1. P10.481–P10.488 — resolve and verify CI/typecheck findings;
+2. P10.489–P10.496 — persistence adapter interfaces and optimistic-concurrency semantics;
+3. P10.497–P10.504 — append-only audit/event and outbox adapter contracts;
+4. P10.505–P10.512 — application composition/E2E synthetic execution harness;
+5. P10.513+ — non-production runtime adapter, still migration-frozen until governance gate.
