@@ -4,6 +4,16 @@ import { enqueueOfflineCommand, reconcileOfflineCommand } from "../src/applicati
 import { assertBackupChain, assertBackupManifest, assertBrowserTransportRequest, assertLanSession, assertLocalAdapterBoundary, MemoryQueueAdapter, type BackupManifest } from "../src/application/runtime-adapters.js";
 import { DEFAULT_LOCAL_SERVICE_BOUNDARY, type LanDeviceIdentity } from "../src/application/runtime-surface.js";
 
+test("P13.6041 stable queue identity replaces an equivalent command object", async () => {
+  const queue = new MemoryQueueAdapter();
+  const original = enqueueOfflineCommand({ commandId: "cmd-identity", aggregateId: "det-identity", commandType: "TEMPORARY_EXIT_REQUEST", payloadHash: "hash-001", idempotencyKey: "idem-identity", createdAt: "2026-09-15T12:00:00Z" });
+  const replacement = { ...original, state: "SYNCED" as const };
+  await queue.append(original);
+  await queue.replaceByIdentity(replacement, (item) => item.commandId);
+  assert.equal((await queue.list())[0]?.state, "SYNCED");
+  assert.throws(() => queue.replaceByIdentity({ ...replacement, commandId: "missing" }, (item) => item.commandId), /not present/);
+});
+
 test("P13.5963 persistent queue preserves offline command identity", async () => {
   const queue = new MemoryQueueAdapter();
   const command = enqueueOfflineCommand({ commandId: "cmd-001", aggregateId: "det-001", commandType: "TEMPORARY_EXIT_REQUEST", payloadHash: "hash-001", idempotencyKey: "idem-001", createdAt: "2026-09-15T12:00:00Z" });
