@@ -1,23 +1,23 @@
 # MTA DETENI — Project Status
 
-**Version:** Foundation v1.38
-**Current Phase:** P13.601–P13.840 controlled operator workbench and operational board
-**Implementation Track:** P13.840
+**Version:** Foundation v1.39
+**Current Phase:** P13.841–P13.1040 reporting, timeline and notification boundaries
+**Implementation Track:** P13.1040
 **Branch:** `phase-p12.961-13.200`
 
 ## Latest Progress
 
 - P12.1121–P12.1360 domain, reconciliation, reporting and controlled operator surface;
-- P13.361–P13.420 controlled application orchestration;
-- P13.421–P13.480 operator dashboard/read-model composition;
-- P13.481–P13.520 reporting preview contract;
-- P13.521–P13.560 synthetic acceptance catalog;
-- P13.561–P13.600 integrated surface governance and roadmap alignment;
+- P13.361–P13.600 controlled application surface;
 - P13.601–P13.660 controlled operator workbench;
 - P13.661–P13.720 role-scoped navigation contract;
 - P13.721–P13.780 QR verification surface contract;
 - P13.781–P13.820 movement/headcount operational board;
-- P13.821–P13.840 synthetic end-to-end acceptance composition.
+- P13.821–P13.840 synthetic end-to-end acceptance composition;
+- P13.841–P13.900 controlled reporting workspace;
+- P13.901–P13.960 immutable operator timeline composition;
+- P13.961–P13.1000 notification/recommendation boundaries;
+- P13.1001–P13.1040 integrated synthetic regression boundary.
 
 ## Integrated Application Model
 
@@ -25,9 +25,9 @@ RAP owns registration, administration and reporting; PERKES owns health records 
 
 ## Operational Application Chain
 
-`UI/API Command → Authorization Policy → Canonical Operational Envelope → Domain Aggregate → Transaction Context → Idempotency → Domain Workflow → Immutable Timeline/Audit → Operational Evidence → Reconciliation → Outbox → Projection Checkpoint → Read Model → Dashboard/Workbench/Navigation → QR/Movement/Headcount/Temporary Exit → Reporting Snapshot → Report Preview → Report Artifact → Review → Approval → Generated Output`
+`UI/API Command → Authorization Policy → Canonical Operational Envelope → Domain Aggregate → Transaction Context → Idempotency → Domain Workflow → Immutable Timeline/Audit → Operational Evidence → Reconciliation → Outbox → Projection Checkpoint → Read Model → Dashboard/Workbench/Navigation → QR/Movement/Headcount/Temporary Exit → Reporting Workspace/Timeline → Reporting Snapshot → Report Preview → Report Artifact → Notification/Recommendation → Review → Approval → Generated Output`
 
-P13.601–840 establishes a controlled operator workbench derived from the read model, role-scoped navigation, contextual QR verification, and a reconciliation-gated movement/headcount board. These remain application contracts and derived surfaces; command authorization and authoritative operational evidence remain upstream controls.
+P13.841–1040 adds a report workspace gate, immutable aggregate-scoped operator timeline, evidence-backed notifications and a recommendation boundary that explicitly requires human decision. These remain downstream/derived application surfaces and do not replace authoritative evidence or authorization.
 
 ## Safety / Governance
 
@@ -45,17 +45,17 @@ P13.601–840 establishes a controlled operator workbench derived from the read 
 
 Temporary-exit `COMPLETED` is not a deportation event. Deportation remains a separate operational workflow and QR context.
 
-QR is an operational verification point, not a free-form data-entry path. P13 QR verification requires token, detainee identity, context and validity-window evaluation.
+QR is an operational verification point, not a free-form data-entry path. Verification remains contextual and validity-window constrained.
 
 Leadership remains oversight-read/directive only and is denied direct operational mutation.
 
-Read models, dashboard views, workbench navigation, operational boards, report previews and report artifacts remain derived state. Committed operational evidence remains authoritative and rebuildable.
+Read models, dashboard views, workbench navigation, operational boards, reporting workspace, timelines, notifications, report previews and report artifacts remain derived state. Committed operational evidence remains authoritative and rebuildable.
 
 ## Current Gate
 
-**P13.840 — CONTROLLED OPERATOR WORKBENCH / QR / OPERATIONAL BOARD CONTRACT-READY / EXECUTION-CERTIFICATION PENDING**
+**P13.1040 — REPORTING / TIMELINE / NOTIFICATION BOUNDARIES CONTRACT-READY / EXECUTION-CERTIFICATION PENDING**
 
-Synthetic acceptance coverage has been added for workbench composition, role-scoped navigation, QR identity/window validation, reconciliation-gated operational board and end-to-end composition. Observable GitHub execution telemetry is still not available in this work session, so these controls are not certified as executed.
+Synthetic regression coverage has been added for reporting workspace validation, aggregate-scoped timeline integrity, notification evidence binding and human-decision recommendation semantics. Observable GitHub execution telemetry remains unavailable in this work session, so these controls are not certified as executed.
 
 ## Execution Certification Rule
 
@@ -63,6 +63,6 @@ CI or local execution may be certified only from observable command/job telemetr
 
 ## Next Gate
 
-**P13.841–P13.1040 — reporting workspace, immutable operator timeline composition, notification/recommendation boundaries, and stronger synthetic regression coverage.**
+**P13.1041–P13.1240 — document/output workspace, approval binding hardening, operational audit views, and stronger cross-domain synthetic acceptance.**
 
 No production or live-database step is implied by this next gate.
