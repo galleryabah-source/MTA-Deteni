@@ -1,8 +1,8 @@
 # MTA DETENI — Project Status
 
-**Version:** Foundation v1.27
-**Current Phase:** P11.817–P11.960 operational integrity gate
-**Implementation Track:** P11.960
+**Version:** Foundation v1.28
+**Current Phase:** P11.961–P12.120 controlled application composition
+**Implementation Track:** P12.120
 **Branch:** `main`
 
 ## Latest Progress
@@ -18,11 +18,21 @@
 - P11.817–P11.872 immutable operational timeline composition;
 - P11.873–P11.904 audit/outbox correlation binding;
 - P11.905–P11.936 idempotency-aware mutation identity;
-- P11.937–P11.960 synthetic authorization regression.
+- P11.937–P11.960 synthetic authorization regression;
+- P11.961–P11.1024 transactional mutation orchestration;
+- P11.1025–P11.1088 operator command/read surface;
+- P11.1089–P11.1160 temporary-exit command adapter to canonical workflow;
+- P11.1161–P12.120 command-to-read-model application composition.
 
 ## Integrated Application Model
 
 RAP owns registration, administration and reporting; PERKES owns health records and health workflows; KAMTIB owns placement, movement, headcount, temporary exit, escort and operational QR; SUBBAG TU owns escort assignment/document administration; HEAD RUDENIM has oversight, read-only operational visibility and authority for petunjuk, arahan, rekomendasi and disposisi without direct operational editing.
+
+## Operational Application Chain
+
+`UI/API Command → Authorization → Transaction → Idempotency → Domain Workflow → Immutable Timeline/Audit → Outbox → Read Model → QR/Movement/Temporary Exit → Reporting`
+
+Operator commands now carry command identity, actor context, permission, fingerprint and payload. Temporary-exit commands are routed through `MtaWorkflowService`; the application facade projects successful mutation envelopes into the operator read-model boundary.
 
 ## Safety / Governance
 
@@ -40,13 +50,13 @@ RAP owns registration, administration and reporting; PERKES owns health records 
 
 Temporary-exit `COMPLETED` is not a deportation event. Deportation remains a separate operational workflow and QR context.
 
-Operational mutations now have a contract-level integrity chain: authorization → idempotency → domain mutation → immutable timeline/audit → outbox → read model/report.
+The application layer now has a contract-level composition from authorized operator command through transactional mutation and evidence to read-model projection. Concrete persistence adapters must preserve the same transaction context across domain mutation, audit, outbox and idempotency completion.
 
 ## Current Gate
 
-**P11.960 — OPERATIONAL INTEGRITY CONTRACT-READY / EXECUTION TELEMETRY STILL REQUIRED**
+**P12.120 — CONTROLLED APPLICATION COMPOSITION CONTRACT-READY / EXECUTION TELEMETRY STILL REQUIRED**
 
-The application boundary now explicitly models ordered operational history, audit/outbox correlation, replay-safe mutation identity, and deny-by-default authorization regression. These remain contract-level controls until observable execution evidence exists.
+Static tests were added for transactional ordering, replay/conflict behavior, temporary-exit command routing, and mutation-to-read-model projection. These controls are not execution-certified until observable CI or authorized local telemetry is available.
 
 ## Execution Certification Rule
 
@@ -54,6 +64,6 @@ CI or local execution may be certified only from observable command/job telemetr
 
 ## Next Gate
 
-**P11.961–P12.120 — controlled application service composition, transactional mutation orchestration, audit/outbox atomicity contract, and operator-facing command/read-model integration.**
+**P12.121 onward — concrete non-production adapters: shared transaction context, persistent idempotency, atomic audit/outbox persistence, explicit authorization policy matrix, then operator UI/API integration.**
 
 No production or live-database step is implied by this next gate.
