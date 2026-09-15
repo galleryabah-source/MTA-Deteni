@@ -1,7 +1,7 @@
 # MTA DETENI — Next Gate
 
 **Foundation:** v1.60+
-**Current:** P13.5826 — controlled synthetic domain journey implemented / observation pending
+**Current:** P13.5827–5840 — domain-surface hardening implemented / observation pending
 
 ## Completed
 
@@ -12,11 +12,12 @@
 - P13.5801–5808 — deterministic execution harness, test compilation boundary and evidence upload;
 - P13.5809–5822 — observable execution/evidence acceptance contract and static governance gate;
 - P13.5823 — canonical `HEAD_RUDENIM` domain type enforcement;
-- P13.5824–5826 — deterministic temporary-exit synthetic journey tests.
+- P13.5824–5826 — deterministic temporary-exit synthetic journey tests;
+- P13.5827–5840 — canonical actor cleanup plus movement, placement, authorization and SoD synthetic boundary tests.
 
 ## Next
 
-**P13.5827–5880 — observable CI/evidence identity validation + synthetic movement/placement/authorization/reporting boundary checks.**
+**P13.5841–5880 — reporting snapshot + QR contextual semantics + audit/evidence binding + integrated synthetic domain journey.**
 
 Acceptance targets:
 
@@ -29,7 +30,9 @@ Acceptance targets:
 7. movement and placement boundaries are checked without live DB;
 8. authorization remains deny-by-default for unsupported roles/actions;
 9. reporting remains snapshot-based and deterministic;
-10. no production/migration/real-data boundary is crossed.
+10. QR semantics distinguish initial detainee identity, block context, and individual temporary-exit/deportation operations;
+11. cross-domain synthetic journey preserves RAP → KAMTIB → HEAD_RUDENIM → SUBBAG_TU → KAMTIB boundaries and immutable evidence;
+12. no production/migration/real-data boundary is crossed.
 
 ## Following gate
 
