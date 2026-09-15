@@ -1,7 +1,7 @@
 # MTA DETENI — Next Gate
 
-**Foundation:** v1.60+
-**Current:** P13.6881–6960 — renderer certification and template versioning implemented; CI observation pending
+**Foundation:** v1.61+
+**Current:** P13.6961–7120 — database, transaction, idempotency and outbox boundaries implemented; CI observation pending
 
 ## Completed
 
@@ -26,19 +26,21 @@
 19. strict separation of business/domain snapshot fields from presentation metadata;
 20. evidenced source heading mappings only; unsupported layout facts are not invented;
 21. synthetic PDF/DOCX renderer adapter boundaries behind the renderer abstraction;
-22. adapter regression for deterministic content, identity binding and synthetic-only enforcement;
-23. renderer certification contract with template version `DGRT-1.0`;
-24. stable output identity binding to template, format, snapshot and document number;
-25. deterministic content fingerprint for regression evidence;
-26. fail-closed renderer certification against format, snapshot and content drift;
-27. negative regression coverage for cross-format, snapshot and content tampering;
-28. no binary renderer dependency or production document generation;
-29. no adapter writes to live production systems;
-30. no schema migration, AI activation or real detainee data.
+22. renderer certification contract with template version `DGRT-1.0`;
+23. stable output identity and deterministic content fingerprint;
+24. fail-closed renderer certification against format, snapshot and content drift;
+25. database adapter contract with environment-aware access guard;
+26. explicit schema comparison matrix with migration freeze;
+27. critical mutation transaction boundary;
+28. critical mutation idempotency contract and replay/conflict detection;
+29. transactional outbox event contract and payload-drift detection;
+30. synthetic regression coverage for all P13.6961–7120 boundaries;
+31. no database connection or live PostgreSQL execution;
+32. no schema migration, AI activation or real detainee data.
 
-## Next gate: P13.6961–7040
+## Next gate: P13.7121–7200
 
-Build the final report-output boundary around the certified renderer: output envelope, filename/content-type policy, artifact verification, and end-to-end daily guard export certification. Preserve the source-grounded presentation contract and do not add unsupported fields or visual assumptions. Keep actual binary PDF/DOCX generation behind an explicit dependency/runtime approval gate.
+Build the application integration seam that composes authentication → authorization → validation → transaction → domain mutation → mandatory audit → outbox, while preserving fail-closed behavior. Then establish the first non-production repository interfaces without binding to a concrete database driver. Keep production persistence blocked.
 
 ## Governance lock
 
@@ -46,4 +48,4 @@ Migration Freeze TRUE. AI OFF. Repository SYNTHETIC ONLY. Production access NOT 
 
 ## Observation blocker
 
-GitHub Actions run #326 remains a runner/observation blocker: the job reports failure but exposes no steps, logs return BlobNotFound, and no artifacts are available. Therefore application PASS is not claimed from CI. Implementation checkpoints above are repository-state checkpoints, not runtime certification.
+GitHub Actions runner/observation remains unreliable: recent runs terminate with failure while exposing no step telemetry. Therefore application PASS is not claimed from CI. Repository-state implementation checkpoints are tracked separately from runtime certification.
