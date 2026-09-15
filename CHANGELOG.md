@@ -1,5 +1,15 @@
 # Changelog
 
+## P13.6801–6880 — Daily Guard Source Presentation Mapping
+
+- Inspected the supplied operational daily guard report and recorded only presentation facts evidenced by the source: report title, organization lines, Rudenim Pontianak location, Bravo morning duty label, 11 September 2026 date, 07.00–14.00 WIB duty interval, closing location/date, and signature labels.
+- Added an explicit presentation contract separate from the business/domain `ReportSnapshot` model.
+- Recorded only evidenced section headings; unsupported layout labels remain intentionally unmapped rather than invented.
+- Added deterministic mapping validation for snapshot sections without changing business data.
+- Added synthetic PDF and DOCX renderer adapter boundaries behind the existing renderer abstraction. These are format contracts only; they do not emit production documents or perform persistence.
+- Added regression coverage for source facts, domain/presentation separation, deterministic PDF/DOCX adapter output, and synthetic-only enforcement.
+- No schema migration, AI activation, production persistence, or live PostgreSQL execution.
+
 ## P13.6481–6520 — Integrated Daily Guard Report Journey
 
 - Added an application-level journey composing operational report preview and validated download as one deterministic flow.
