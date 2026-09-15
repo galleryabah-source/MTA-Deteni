@@ -1,8 +1,8 @@
 # MTA DETENI — Project Status
 
-**Version:** Foundation v1.12
-**Current Phase:** P10.609–P10.632 controlled non-production integration gate
-**Implementation Track:** P10.632
+**Version:** Foundation v1.13
+**Current Phase:** P10.609–P10.640 controlled integration + verification evidence foundation
+**Implementation Track:** P10.640
 **Branch:** `main`
 
 ## Latest Progress
@@ -13,7 +13,12 @@
 - P10.601–P10.608 regu jaga reporting/export contract with provenance, required sections, document numbering and approval binding;
 - P10.609–P10.616 controlled target + schema/RLS reconciliation gate contract;
 - P10.617–P10.624 guarded persistence execution contract;
-- P10.625–P10.632 API/runtime verification contract and synthetic E2E gate.
+- P10.625–P10.632 API/runtime verification contract and synthetic E2E gate;
+- P10.633–P10.640 formal controlled verification evidence gate and fail-closed regression tests;
+- P10.609–P10.615 NodeNext import/declaration consistency hardened across the application/domain TypeScript boundary;
+- P10.616 runtime/read-model integration guard added;
+- P10.617–P10.618 governed reporting export and transport authorization/idempotency guards added;
+- P10.619–P10.620 integration/report export regression tests added.
 
 ## Integrated Application Model
 
@@ -33,10 +38,10 @@ RAP owns registration, administration and reporting; PERKES owns health records 
 
 ## Current Gate
 
-**P10.632 — CONTRACT READY; CONTROLLED EXECUTION BLOCKED UNTIL TARGET AUTHORIZATION**
+**P10.640 — CONTROLLED VERIFICATION EVIDENCE GATE READY; LIVE EXECUTION BLOCKED**
 
-The repository now defines the complete controlled sequence from target authorization and read-only schema/RLS reconciliation through guarded persistence and API/runtime synthetic E2E verification. The gate can only become READY when every required evidence item passes. No live integration has been executed.
+The application now has a fail-closed evidence model covering target authorization, read-only schema/RLS reconciliation, persistence concurrency, audit/outbox, API authorization, runtime readiness and synthetic E2E. A complete synthetic packet can be evaluated as READY, while missing, failed, or target-inconsistent evidence remains BLOCKED. No live database or production integration has been executed.
 
 ## Next Gate
 
-**P10.633+ — implementation of controlled verification harnesses and evidence capture, still synthetic/read-only until governance clearance.**
+**P10.641+ — controlled non-production execution harness implementation.** The next execution sequence remains read-only target authorization/reconciliation first, followed by guarded persistence and API/runtime verification. Migration stays frozen.
