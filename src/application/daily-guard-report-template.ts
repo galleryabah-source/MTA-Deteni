@@ -1,11 +1,10 @@
 import type { DailyGuardSection } from "./daily-guard-report-contract.js";
-import { DAILY_GUARD_SECTION_ORDER, assertDailyGuardSectionOrder } from "./daily-guard-report-contract.js";
+import { DAILY_GUARD_SECTION_ORDER } from "./daily-guard-report-contract.js";
 import type { ReportSnapshot } from "./report-artifact.js";
 
 /**
- * Presentation metadata observed in the supplied daily guard report source.
- * Business data remains in ReportSnapshot; this contract only maps it to the
- * report's evidenced presentation sections and heading labels.
+ * Source-grounded presentation facts only. Business data remains in
+ * ReportSnapshot; layout metadata is deliberately separate.
  */
 export type DailyGuardPresentationContract = Readonly<{
   title: "LAPORAN HARIAN REGU JAGA";
@@ -13,26 +12,16 @@ export type DailyGuardPresentationContract = Readonly<{
     "SEKSI KEAMANAN DAN KETERTIBAN",
     "RUMAH DETENSI IMIGRASI",
   ];
-  locationLine: string;
-  dutyLabel: "PIKET PAGI REGU BRAVO" | string;
-  dateLine: string;
-  dutyTimeLine: string;
-  sectionHeadings: Readonly<Record<DailyGuardSection, string>>;
-  closingLocationDateLine: string;
-  commandSignatureLabel: "Komandan Jaga";
+  locationLine: "RUMAH DETENSI IMIGRASI PONTIANAK";
+  dutyLabel: "PIKET PAGI REGU BRAVO";
+  dateLine: "Jumat, 11 September 2026";
+  dutyTimeLine: "Pukul 07.00 s.d. 14.00 WIB";
+  evidencedSectionHeadings: Readonly<Partial<Record<DailyGuardSection, string>>>;
+  closingLocationDateLine: "Kubu Raya, 11 September 2026";
+  commandSignatureLabel: "Komandan Jaga Bravo";
   acknowledgmentLabel: "Mengetahui";
   acknowledgmentRole: "Kepala Seksi Keamanan dan Ketertiban";
 }>;
-
-export const DAILY_GUARD_SOURCE_HEADINGS: Readonly<Record<DailyGuardSection, string>> = Object.freeze({
-  IDENTITAS_LAPORAN: "LAPORAN HARIAN REGU JAGA",
-  PERSONEL_REGU: "SERAH TERIMA REGU JAGA",
-  KONDISI_DETENI: "PENGECEKAN & KONTROL BLOK DETENI",
-  KEGIATAN_JAGA: "KEGIATAN JAGA",
-  KEJADIAN_PENTING: "KEJADIAN PENTING",
-  SERAH_TERIMA: "SERAH TERIMA REGU JAGA",
-  PENGESAHAN: "PENGESAHAN",
-});
 
 export const DAILY_GUARD_PRESENTATION_CONTRACT: DailyGuardPresentationContract = Object.freeze({
   title: "LAPORAN HARIAN REGU JAGA",
@@ -41,9 +30,13 @@ export const DAILY_GUARD_PRESENTATION_CONTRACT: DailyGuardPresentationContract =
   dutyLabel: "PIKET PAGI REGU BRAVO",
   dateLine: "Jumat, 11 September 2026",
   dutyTimeLine: "Pukul 07.00 s.d. 14.00 WIB",
-  sectionHeadings: DAILY_GUARD_SOURCE_HEADINGS,
+  evidencedSectionHeadings: Object.freeze({
+    IDENTITAS_LAPORAN: "LAPORAN HARIAN REGU JAGA",
+    KONDISI_DETENI: "PENGECEKAN & KONTROL BLOK DETENI",
+    SERAH_TERIMA: "SERAH TERIMA REGU JAGA",
+  }),
   closingLocationDateLine: "Kubu Raya, 11 September 2026",
-  commandSignatureLabel: "Komandan Jaga",
+  commandSignatureLabel: "Komandan Jaga Bravo",
   acknowledgmentLabel: "Mengetahui",
   acknowledgmentRole: "Kepala Seksi Keamanan dan Ketertiban",
 });
@@ -51,15 +44,19 @@ export const DAILY_GUARD_PRESENTATION_CONTRACT: DailyGuardPresentationContract =
 export function assertDailyGuardPresentationContract(contract: DailyGuardPresentationContract): void {
   if (contract.title !== "LAPORAN HARIAN REGU JAGA") throw new Error("Daily guard source title drifted.");
   if (contract.organizationLines.length !== 2) throw new Error("Daily guard organization header is incomplete.");
-  if (!contract.locationLine.trim() || !contract.dutyLabel.trim() || !contract.dateLine.trim() || !contract.dutyTimeLine.trim()) {
+  if (!contract.locationLine || !contract.dutyLabel || !contract.dateLine || !contract.dutyTimeLine) {
     throw new Error("Daily guard identity presentation is incomplete.");
   }
-  assertDailyGuardSectionOrder(Object.keys(contract.sectionHeadings));
-  for (const section of DAILY_GUARD_SECTION_ORDER) {
-    if (!contract.sectionHeadings[section]?.trim()) throw new Error(`Missing source heading mapping: ${section}`);
-  }
-  if (contract.commandSignatureLabel !== "Komandan Jaga" || contract.acknowledgmentLabel !== "Mengetahui") {
+  if (contract.commandSignatureLabel !== "Komandan Jaga Bravo" || contract.acknowledgmentLabel !== "Mengetahui") {
     throw new Error("Daily guard signature labels drifted.");
+  }
+  if (contract.acknowledgmentRole !== "Kepala Seksi Keamanan dan Ketertiban") {
+    throw new Error("Daily guard acknowledgment role drifted.");
+  }
+  for (const [section, label] of Object.entries(contract.evidencedSectionHeadings)) {
+    if (!DAILY_GUARD_SECTION_ORDER.includes(section as DailyGuardSection) || !label?.trim()) {
+      throw new Error("Daily guard evidenced heading mapping is invalid.");
+    }
   }
 }
 
