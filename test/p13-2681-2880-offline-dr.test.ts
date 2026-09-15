@@ -1,7 +1,7 @@
 import { strict as assert } from "node:assert";
 import { assertOfflineSessionAllowsMutation } from "../src/application/p13-2681-2720-offline-session-boundary.js";
 import { assertPairingAllowsSession } from "../src/application/p13-2721-2760-client-pairing.js";
-import { assertReplayIsContiguous } from "../src/application/p13-2761-2800-sync-replay-order.ts";
+import { assertReplayIsContiguous } from "../src/application/p13-2761-2800-sync-replay-order.js";
 import { createIntegrityEnvelope, assertIntegrityEnvelope } from "../src/application/p13-2801-2840-integrity-checksum.js";
 import { assertDisasterRecoveryReady } from "../src/application/p13-2841-2880-disaster-recovery-rehearsal.js";
 
