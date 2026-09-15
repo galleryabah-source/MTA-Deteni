@@ -1,7 +1,7 @@
 # MTA DETENI — Next Gate
 
 **Foundation:** v1.68
-**Current:** P13.7921–8040 — failure recovery integrated with lifecycle and continuity contracts; CI observation pending
+**Current:** P13.7921–8040 — failure recovery integrated with lifecycle and continuity contracts; CI observation blocker confirmed
 
 ## Completed
 
@@ -78,4 +78,4 @@ Migration Freeze TRUE. AI OFF. Repository SYNTHETIC ONLY. Production access NOT 
 
 ## Observation blocker
 
-GitHub Actions runner/observation remains unreliable: recent runs terminate with failure while exposing no step telemetry. Therefore application PASS is not claimed from CI. Repository-state implementation checkpoints are tracked separately from runtime certification.
+Run #416 (head `ded6e6a96b8127a051b02a75baaf4770f9280849`) completed with failure, but its only job exposes zero steps and no logs. Run #415 likewise completed with failure without step telemetry. This is consistent with the existing GitHub Actions runner/observation failure and is not evidence of an application test failure. CI PASS is therefore not claimed.
