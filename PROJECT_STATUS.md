@@ -1,8 +1,8 @@
 # MTA DETENI — Project Status
 
-**Version:** Foundation v1.30
-**Current Phase:** P12.121–P12.280 integrity composition and authorization enforcement
-**Implementation Track:** P12.280
+**Version:** Foundation v1.31
+**Current Phase:** P12.281–P12.360 non-production persistence, outbox projection and controlled API boundary
+**Implementation Track:** P12.360
 **Branch:** `main`
 
 ## Latest Progress
@@ -26,7 +26,10 @@
 - P12.121–P12.160 shared transaction identity/context contract;
 - P12.161–P12.200 persistent idempotency contract;
 - P12.201–P12.240 explicit domain authorization policy matrix;
-- P12.241–P12.280 policy-enforcing authorization boundary.
+- P12.241–P12.280 policy-enforcing authorization boundary;
+- P12.281–P12.320 controlled non-production transaction/idempotency adapters;
+- P12.321–P12.344 outbox-driven read-model projection boundary;
+- P12.345–P12.360 controlled API command boundary and regression coverage.
 
 ## Integrated Application Model
 
@@ -36,7 +39,7 @@ RAP owns registration, administration and reporting; PERKES owns health records 
 
 `UI/API Command → Authorization Policy → Transaction Context → Idempotency → Domain Workflow → Immutable Timeline/Audit → Outbox → Read Model → QR/Movement/Temporary Exit → Reporting`
 
-The application boundary now has explicit domain permission enforcement before mutation. A shared transaction context binds transaction, actor, correlation and aggregate identity. Persistent idempotency binds key, fingerprint, actor, correlation and aggregate identity. Read-model projection remains downstream of committed operational evidence and is not a hidden extension of the mutation transaction.
+The command boundary now performs identity preflight before entering the application surface. Non-production persistence contracts provide controlled staging for audit/outbox effects and persistent-idempotency semantics. Read-model projection is explicitly downstream of committed outbox evidence and remains eventually consistent/rebuildable.
 
 ## Safety / Governance
 
@@ -56,13 +59,13 @@ Temporary-exit `COMPLETED` is not a deportation event. Deportation remains a sep
 
 Leadership is explicitly limited to oversight-read and directive permissions and is denied direct operational mutation permissions.
 
-Concrete persistence adapters must preserve the shared transaction identity across domain mutation, audit, outbox and idempotency completion.
+The P12.281–360 in-memory transaction adapter is a controlled test/non-production implementation. It is **not** certified as PostgreSQL atomic execution. A future PostgreSQL adapter must bind domain mutation, audit, outbox and idempotency state to one actual transaction with observable commit/rollback evidence.
 
 ## Current Gate
 
-**P12.280 — AUTHORIZATION ENFORCEMENT CONTRACT-READY / EXECUTION TELEMETRY STILL REQUIRED**
+**P12.360 — CONTRACT-READY / EXECUTION-CERTIFICATION PENDING**
 
-Static regression coverage was added for transaction identity, persistent idempotency replay safety, domain authorization ownership, policy enforcement and leadership operational-edit prevention. These controls are not execution-certified until observable CI or authorized local telemetry is available.
+Static regression coverage now includes transaction-side-effect commit behavior, persistent idempotency acquire/replay/conflict, outbox projection, and API identity preflight. No execution PASS is claimed because current observable GitHub telemetry remains unavailable.
 
 ## Execution Certification Rule
 
@@ -70,6 +73,6 @@ CI or local execution may be certified only from observable command/job telemetr
 
 ## Next Gate
 
-**P12.281–P12.360 — concrete non-production persistence adapters, atomic audit/outbox/idempotency implementation contract, outbox-driven read-model projection, and controlled API boundary tests.**
+**P12.361–P12.440 — PostgreSQL transaction adapter contract, durable outbox claim/ack semantics, projection replay/rebuild contract, and API error/audit observability matrix.**
 
 No production or live-database step is implied by this next gate.
