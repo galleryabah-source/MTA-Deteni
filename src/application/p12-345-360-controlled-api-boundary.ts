@@ -25,8 +25,8 @@ export type ApiErrorResponse = Readonly<{
 export async function executeControlledCommand<TPayload, TResult>(surface: OperatorCommandSurface<TPayload, TResult>, request: ApiCommandRequest<TPayload>): Promise<ApiCommandResponse<TResult> | ApiErrorResponse> {
   if (!request.commandId.trim() || !request.permission.trim() || !request.fingerprint.trim() || !request.actor.actorId.trim() || !request.actor.correlationId.trim() || !request.actor.idempotencyKey?.trim()) return { ok: false, code: "INVALID_REQUEST" };
   try {
-    const result = await surface.execute({ commandId: request.commandId, permission: request.permission, fingerprint: request.fingerprint, payload: request.payload, actor: request.actor });
-    return { ok: true, commandId: result.commandId, correlationId: result.correlationId, aggregateId: result.aggregateId, result: result.result };
+    const response = await surface.execute({ commandId: request.commandId, permission: request.permission, fingerprint: request.fingerprint, payload: request.payload, actor: request.actor });
+    return { ok: true, commandId: response.commandId, correlationId: response.correlationId, aggregateId: response.aggregateId, result: response.result.result };
   } catch (error) {
     const code = error instanceof Error ? error.message : "INTERNAL_ERROR";
     if (code === "FORBIDDEN") return { ok: false, code: "FORBIDDEN" };
