@@ -6,8 +6,10 @@ on:
   pull_request:
     branches: [main]
   workflow_dispatch:
+
 permissions:
   contents: read
+
 jobs:
   runtime-domain:
     runs-on: ubuntu-latest
@@ -18,9 +20,11 @@ jobs:
       MIGRATION_FREEZE: 'true'
     steps:
       - uses: actions/checkout@v4
+
       - uses: actions/setup-node@v4
         with:
           node-version: 22
+
       - name: Prepare CI transport diagnostic
         if: always()
         run: |
@@ -45,8 +49,19 @@ jobs:
             echo "MIGRATION_FREEZE=${MIGRATION_FREEZE}"
             echo "gitStatusStart=$(git status --short | tr '\n' ' ' || true)"
           } > artifacts/p10-runtime/ci-transport-diagnostic.txt
+
+      - name: Verify immutable synthetic safety gate
+        run: |
+          set -euxo pipefail
+          test "$APP_ENV" = test
+          test "$AI_ENABLED" = false
+          test "$MIGRATION_FREEZE" = true
+          test ! -f .env
+          test ! -f .env.local
+
       - name: Install approved dependencies
         run: npm install --package-lock=false --ignore-scripts --no-audit --no-fund
+
       - name: Record dependency install mode
         if: always()
         run: |
@@ -58,14 +73,7 @@ jobs:
             echo "dependencyInstallMode=$([ "$tracked_lockfile" = true ] && echo npm-ci-required || echo temporary-npm-install)"
             echo "dependencyInstallStepStatus=${{ job.status }}"
           } >> artifacts/p10-runtime/ci-transport-diagnostic.txt
-      - name: Verify immutable synthetic safety gate
-        run: |
-          set -euxo pipefail
-          test "$APP_ENV" = test
-          test "$AI_ENABLED" = false
-          test "$MIGRATION_FREEZE" = true
-          test ! -f .env
-          test ! -f .env.local
+
       - name: Verify dependency reproducibility boundary
         run: |
           set -euxo pipefail
@@ -77,35 +85,22 @@ jobs:
             echo "NO_REVIEWED_LOCKFILE: temporary dependency bootstrap only; production certification remains blocked until package-lock.json is reviewed and committed."
             echo "lockfileInstall=blocked-no-reviewed-lockfile" >> artifacts/p10-runtime/ci-transport-diagnostic.txt
           fi
-      - name: Verify consolidated regression suite
+
+      - name: Verify regression manifest
         run: |
           set -euxo pipefail
           test -f scripts/p10-runtime-regression-gate.mjs
           test -f scripts/p10-evidence-integrity-gate.mjs
-          for f in \
-            test/p10.1-runtime-domain-integration.test.mjs test/p10.2-placement-domain-boundary.test.mjs test/p10.3-movement-ledger-headcount.test.mjs \
-            test/p10.5-document-lifecycle.test.mjs test/p10.6-template-manifest.test.mjs test/p10.7-docx-renderer.test.mjs test/p10.8-artifact-handoff.test.mjs \
-            test/p10.9-artifact-distribution.test.mjs test/p10.10-persistent-grant-contract.test.mjs test/p10.10-persistent-grant-repository.test.mjs \
-            test/p10.11-persistent-grant-integration-readiness.test.mjs test/p10.12-database-package-contract.test.mjs test/p10.13-approved-db-integration-gate.test.mjs \
-            test/p10.14-database-verification-package.test.mjs test/p10.15-controlled-database-execution-harness.test.mjs test/p10.16-database-role-rls-verification.test.mjs \
-            test/p10.19-docx-output-contract.test.mjs test/p10.19-docx-artifact-contract.test.mjs test/p10.21-runtime-integration-contract.test.mjs \
-            test/p10.24-release-readiness.test.mjs test/p10.25-controlled-runtime-boundary.test.mjs test/p10.26-runtime-enforcement-matrix.test.mjs \
-            test/p10.28-runtime-rbac-negative.test.mjs test/p10.30-document-api-contract.test.mjs test/p10.32-critical-transaction-release.test.mjs \
-            test/p10.33-security-boundary.test.mjs test/p10.34-certification-readiness.test.mjs test/p10.35-release-candidate-hardening.test.mjs \
-            test/p10.36-operational-scenario-matrix.test.mjs test/p10.38-traceability-matrix.test.mjs test/p10.39-final-pre-governance-gate.test.mjs \
-            test/p10.41-governance-decision-packet.test.mjs test/p10.42-controlled-postgresql-rls-runbook.test.mjs test/p10.43-post-freeze-evidence-contract.test.mjs \
-            test/p10.44-cutover-rollback-gate.test.mjs test/p10.45-ci-evidence-transport.test.mjs test/p10.46-dependency-lockfile-gate.test.mjs \
-            test/p10.47-ci-transport-diagnostic.test.mjs test/p10.48-lockfile-transport-integrity.test.mjs test/p10.49-temporary-exit-vertical-slice.test.mjs \
-            test/p10.50-http-command-gateway.test.mjs test/p10.51-document-issuance-orchestrator.test.mjs test/p10.52-temporary-exit-timeline.test.mjs \
-            test/p10.53-temporary-exit-workflow.test.mjs; do test -f "$f"; done
+          node --check scripts/p10-runtime-regression-gate.mjs
+          node --check scripts/p10-evidence-integrity-gate.mjs
+
       - name: Run deterministic P10 regression gate
         run: node scripts/p10-runtime-regression-gate.mjs
-      - name: Verify P10.23 evidence integrity
+
+      - name: Verify P10 evidence integrity
         if: always()
         run: node scripts/p10-evidence-integrity-gate.mjs
-      - name: Verify P10.35-53 pre-governance contract
-        if: always()
-        run: node --test test/p10.35-release-candidate-hardening.test.mjs test/p10.36-operational-scenario-matrix.test.mjs test/p10.38-traceability-matrix.test.mjs test/p10.39-final-pre-governance-gate.test.mjs test/p10.41-governance-decision-packet.test.mjs test/p10.42-controlled-postgresql-rls-runbook.test.mjs test/p10.43-post-freeze-evidence-contract.test.mjs test/p10.44-cutover-rollback-gate.test.mjs test/p10.45-ci-evidence-transport.test.mjs test/p10.46-dependency-lockfile-gate.test.mjs test/p10.47-ci-transport-diagnostic.test.mjs test/p10.48-lockfile-transport-integrity.test.mjs test/p10.49-temporary-exit-vertical-slice.test.mjs test/p10.50-http-command-gateway.test.mjs test/p10.51-document-issuance-orchestrator.test.mjs test/p10.52-temporary-exit-timeline.test.mjs test/p10.53-temporary-exit-workflow.test.mjs
+
       - name: Upload P10 evidence
         if: always()
         uses: actions/upload-artifact@v4
