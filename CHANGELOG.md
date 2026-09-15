@@ -1,5 +1,13 @@
 # Changelog
 
+## P13.5967–6040 — Integrated Synthetic Continuity Journey
+
+- Composed the offline command, persistent queue, browser mutation identity/idempotency, LAN session, local-PC fail-closed boundary, backup chain, reconnect reconciliation, reporting snapshot and continuity evidence into one deterministic application-level synthetic journey.
+- Added regression coverage for successful end-to-end composition and expired LAN session fail-closed behavior.
+- Kept the seam framework-neutral with no network, database, filesystem or production-data access.
+- Preserved Migration Freeze, AI OFF, synthetic-only repository data, production authorization FALSE and live PostgreSQL block.
+- No schema migration introduced.
+
 ## P13.5963–6040 — Adapter-Level Synthetic Runtime Journey
 
 - Added persistent queue adapter seam with deterministic in-memory synthetic implementation.
@@ -8,8 +16,6 @@
 - Added local-PC adapter boundary requiring authenticated device identity and forbidding internet exposure.
 - Added versioned, synthetic-only backup manifest chain with exact predecessor binding.
 - Added deterministic synthetic tests covering queue persistence, duplicate reconciliation, LAN session substitution, transport mutation safety, local boundary safety and backup-chain integrity.
-- Preserved Migration Freeze, AI OFF, synthetic-only repository data, production authorization FALSE and live PostgreSQL block.
-- No schema migration introduced.
 
 ## P13.5961–6040 — Runtime Implementation Boundary
 
