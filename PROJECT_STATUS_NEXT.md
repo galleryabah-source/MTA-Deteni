@@ -1,7 +1,7 @@
 # MTA DETENI — Next Gate
 
 **Foundation:** v1.60+
-**Current:** P13.6801–6880 — source-grounded daily guard presentation mapping and synthetic PDF/DOCX adapter boundaries implemented; CI observation pending
+**Current:** P13.6881–6960 — renderer certification and template versioning implemented; CI observation pending
 
 ## Completed
 
@@ -27,12 +27,18 @@
 20. evidenced source heading mappings only; unsupported layout facts are not invented;
 21. synthetic PDF/DOCX renderer adapter boundaries behind the renderer abstraction;
 22. adapter regression for deterministic content, identity binding and synthetic-only enforcement;
-23. no adapter writes to live production systems;
-24. no schema migration, AI activation or real detainee data.
+23. renderer certification contract with template version `DGRT-1.0`;
+24. stable output identity binding to template, format, snapshot and document number;
+25. deterministic content fingerprint for regression evidence;
+26. fail-closed renderer certification against format, snapshot and content drift;
+27. negative regression coverage for cross-format, snapshot and content tampering;
+28. no binary renderer dependency or production document generation;
+29. no adapter writes to live production systems;
+30. no schema migration, AI activation or real detainee data.
 
-## Next gate: P13.6881–6960
+## Next gate: P13.6961–7040
 
-Harden renderer certification and report-template fidelity without introducing production persistence. Add explicit format-adapter invariants, deterministic output identity/content hashing, negative tests for cross-format and snapshot drift, and a template-version contract. Keep binary PDF/DOCX generation behind the adapter boundary until a safe non-production runtime and approved rendering dependency path are available.
+Build the final report-output boundary around the certified renderer: output envelope, filename/content-type policy, artifact verification, and end-to-end daily guard export certification. Preserve the source-grounded presentation contract and do not add unsupported fields or visual assumptions. Keep actual binary PDF/DOCX generation behind an explicit dependency/runtime approval gate.
 
 ## Governance lock
 
