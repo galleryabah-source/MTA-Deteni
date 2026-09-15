@@ -15,24 +15,25 @@ P9 kernel foundations; P10.1–P10.13 operational/domain/database-contract found
 
 - P9 Kernel Run #385 and P10 Runtime Run #529 were observed as `failure`, but their GitHub job records contained no executable steps and their job-log endpoints returned `BlobNotFound`; therefore these runs do not provide evidence of a test assertion failure.
 - Failed jobs were rerun. The rerun remained unsuccessful at the GitHub Actions execution layer without usable step-level evidence.
-- Subsequent check runs on later commits also failed in a few seconds without executable step evidence. This remains an external GitHub Actions runner/execution blocker, not an established application assertion failure.
-- No code change is being represented as a fix for an unobserved runner failure. The system remains fail-closed rather than hiding the failure with `continue-on-error` or skipped tests.
-- P10 CI now uses `scripts/p10-runtime-regression-gate.mjs` as the single regression manifest, including the P9 kernel suite, eliminating duplicated and stale test lists in the workflow.
-- P10 CI no longer includes the active implementation branch in the push trigger, avoiding duplicate push + pull-request workflow executions for PR #7.
-- P9 pull-request execution is scoped to kernel-relevant paths; P10 changes no longer create unrelated P9 workflow noise unless kernel/dependency/workflow files are changed.
-- Regression evidence is aligned to checkpoint P10.140.
+- Subsequent check runs on later commits also failed within seconds without executable step evidence. This remains an external GitHub Actions runner/execution blocker, not an established application assertion failure.
+- No code change is represented as a fix for an unobserved runner failure. The system remains fail-closed rather than hiding the failure with `continue-on-error` or skipped tests.
+- P10 CI uses `scripts/p10-runtime-regression-gate.mjs` as the single authoritative regression manifest, including P9 and P10 tests through P10.132.
+- P10 CI no longer duplicates the regression file list in the workflow and no longer pushes the active implementation branch into a duplicate P10 execution path.
+- P9 pull-request execution is scoped to kernel-relevant paths.
+- The P10 evidence integrity gate was corrected from obsolete P10.22/P10.23 literal checkpoint and test-count expectations to the current P10.140 evidence contract. It now validates structure rather than a stale literal test count.
 - `package-lock.json` remains absent. CI therefore uses a temporary dependency bootstrap; reproducible lockfile-based certification remains blocked until a reviewed lockfile is committed.
+- A formal blocker audit record is maintained at `docs/03-implementation/P10.140-BLOCKER-AUDIT.md`.
 
 ## P10.133–P10.140 technical actions
 
-- P10.133: PostgreSQL verification contract now explicitly separates synthetic modeling from live DB execution.
+- P10.133: PostgreSQL verification contract separates synthetic modeling from live DB execution.
 - P10.134: transaction verification requires BEGIN/COMMIT/ROLLBACK observability and same-client audit/outbox coupling.
 - P10.135: concurrent consume verification requires exactly one affected row across competing requests.
 - P10.136: expiry verification requires the SQL predicate to reject expired grants at the database boundary.
 - P10.137: actor/scope/object mismatch verification remains fail-closed with zero-row rejection.
 - P10.138: revoke race verification requires a single ACTIVE → REVOKED winner.
 - P10.139: provider isolation and migration-freeze controls remain mandatory evidence dimensions.
-- P10.140: governance-ready verification package explicitly records prerequisites, evidence, rollback and abort conditions; it does not execute them.
+- P10.140: governed verification package records prerequisites, evidence, rollback and abort conditions; it does not execute them.
 
 ## Integrated architecture
 
