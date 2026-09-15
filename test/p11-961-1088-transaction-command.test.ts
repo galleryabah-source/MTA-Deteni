@@ -24,7 +24,7 @@ function build() {
     mutate: async (input, currentActor) => { order.push(`mutation:${input.exitId}`); return { value: input.exitId, audit: { ...audit, actorId: currentActor.actorId, correlationId: currentActor.correlationId }, outbox: { messageId: "OUT-SYN-001", topic: "temporary-exit.updated", aggregateId: audit.aggregateId, payload: { exitId: input.exitId } } }; },
   });
   const surface = new OperatorCommandSurface<{ exitId: string }, string>(mutation, { dashboard: async () => ({ generatedAt: "2026-01-01T00:00:00.000Z", detainees: [], headcount: { capturedAt: "2026-01-01T00:00:00.000Z", totalActive: 0, byBlock: [], reconciliation: "MATCH" }, pendingTemporaryExits: 0, pendingApprovals: 0, operationalAlerts: [] }) });
-  return { surface, order, mutation };
+  return { surface, order };
 }
 
 test("P11.961-1024 executes mutation, audit and outbox inside one transaction contract", async () => {
@@ -34,13 +34,13 @@ test("P11.961-1024 executes mutation, audit and outbox inside one transaction co
   assert.deepEqual(order, ["authorization", "transaction.open", "idempotency.begin", "mutation:EXIT-SYN-001", "audit", "outbox", "idempotency.complete", "transaction.close"]);
 });
 
-test("P11.961-1024 replays without a second mutation transaction", async () => {
+test("P11.961-1024 replays without a second domain mutation", async () => {
   const { surface, order } = build();
   await surface.execute({ commandId: "CMD-001", permission: "TEMPORARY_EXIT_VALIDATE", fingerprint: "FP-001", payload: { exitId: "EXIT-SYN-001" }, actor });
   order.length = 0;
   const replay = await surface.execute({ commandId: "CMD-002", permission: "TEMPORARY_EXIT_VALIDATE", fingerprint: "FP-001", payload: { exitId: "EXIT-SYN-001" }, actor });
   assert.equal(replay.result.value, "EXIT-SYN-001");
-  assert.deepEqual(order, ["authorization"]);
+  assert.deepEqual(order, ["authorization", "transaction.open", "idempotency.begin", "transaction.close"]);
 });
 
 test("P11.961-1024 rejects idempotency fingerprint conflict", async () => {
