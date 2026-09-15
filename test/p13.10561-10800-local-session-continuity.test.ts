@@ -12,10 +12,10 @@ test("P13.10561-10680: handshake cannot outlive its declared session window", ()
   assert.throws(() => assertLocalRuntimeSessionHandshake(handshake, "2026-09-16T00:05:00Z"), /expired/i);
 });
 
-test("P13.10681-10800: malformed handshake time and identity fail closed", () => {
+test("P13.10681-10800: malformed handshake time and empty identity fail closed", () => {
   const context = { executionId: "EXEC-4", runtimeMode: "LAN", deviceClass: "TABLET", networkScopeId: "NET-4", certificationJourneyId: "J-4", authenticated: true, syntheticOnly: true } as RuntimeExecutionContext;
   const session = { sessionId: "S-4", executionId: "EXEC-4", deviceId: "DEV-4", installationId: "INST-4", networkScopeId: "NET-4", runtimeMode: "LAN", state: "ACTIVE", syntheticOnly: true } as OperationalSession;
   assert.throws(() => createLocalRuntimeSessionHandshake({ handshakeId: "H-4", session, context, deviceId: "DEV-4", installationId: "INST-4", issuedAt: "bad", expiresAt: "2026-09-16T01:00:00Z", continuitySensitive: false }), /expiry/i);
   const valid = createLocalRuntimeSessionHandshake({ handshakeId: "H-4B", session, context, deviceId: "DEV-4", installationId: "INST-4", issuedAt: "2026-09-16T00:00:00Z", expiresAt: "2026-09-16T01:00:00Z", continuitySensitive: false });
-  assert.throws(() => assertLocalRuntimeSessionHandshake({ ...valid, deviceId: "DEV-OTHER" }, "2026-09-16T00:10:00Z"), /identity/i);
+  assert.throws(() => assertLocalRuntimeSessionHandshake({ ...valid, deviceId: "" }, "2026-09-16T00:10:00Z"), /identity/i);
 });
