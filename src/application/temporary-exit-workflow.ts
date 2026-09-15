@@ -4,6 +4,7 @@ import type { TemporaryExitService } from "../domain/temporary-exit/service.js";
 import type { AuthorizationPort, AuditOutboxPort, TransactionPort } from "./ports.js";
 
 export type ExitWorkflowReadPort = {
+  currentState(exitId: string): Promise<TemporaryExitState | null>;
   approvalState(exitId: string): Promise<"APPROVED" | "REJECTED" | "PENDING">;
   documentState(exitId: string): Promise<"VALID" | "INVALID" | "MISSING">;
   escortState(exitId: string): Promise<"ASSIGNED" | "MISSING" | "CANCELLED">;
@@ -30,6 +31,10 @@ export class TemporaryExitWorkflow {
   ) {}
 
   async advance(input: { exitId: string; from: TemporaryExitState; to: TemporaryExitState; actor: ActorContext }): Promise<TemporaryExitState> {
+    const actual = await this.reads.currentState(input.exitId);
+    if (!actual) throw new DomainError("VALIDATION_FAILED", "Temporary exit not found.");
+    if (actual !== input.from) throw new DomainError("STALE_STATE", "Workflow state is stale; refresh before retrying.", true);
+
     const permission = requiredPermission[input.to];
     if (!permission || !(await this.authorization.authorize(input.actor, permission, input.exitId))) {
       throw new DomainError("FORBIDDEN_SCOPE", "Workflow actor is not authorized for this transition.");
@@ -45,16 +50,16 @@ export class TemporaryExitWorkflow {
     return this.transaction.run(async () => {
       const updated = await this.exitService.advance(input.exitId, input.to, input.actor);
       await this.audit.append({
-        eventId: `AUD-${input.exitId}-${input.to}`,
+        eventId: `AUD-${input.exitId}-${updated.version}`,
         eventType: "TEMPORARY_EXIT_TRANSITION",
         aggregateType: "TEMPORARY_EXIT",
         aggregateId: input.exitId,
         actorId: input.actor.actorId,
         correlationId: input.actor.correlationId,
         occurredAt: new Date().toISOString(),
-        payloadHash: `${input.from}:${input.to}`,
+        payloadHash: `${actual}:${updated.state}:${updated.version}`,
       });
-      await this.audit.enqueue("temporary-exit.transitioned", input.exitId, { from: input.from, to: input.to });
+      await this.audit.enqueue("temporary-exit.transitioned", input.exitId, { from: actual, to: updated.state });
       return updated.state;
     });
   }
