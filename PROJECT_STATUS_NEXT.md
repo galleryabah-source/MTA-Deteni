@@ -1,7 +1,7 @@
 # MTA DETENI — Next Gate
 
-**Foundation:** v1.94
-**Current:** P13.11161–11280 — local runtime regression certification implemented; CI observation blocker remains
+**Foundation:** v1.95
+**Current:** P13.11521–11640 — local runtime failure certification implemented; CI observation blocker remains
 
 ## Completed (through current gate)
 
@@ -21,14 +21,17 @@
 - P13.10561–10680: handshake lifetime and expiry fail-closed regression.
 - P13.10681–10800: continuity-sensitive mutation admission requires certified handoff and ready recovery proof.
 - P13.10801–10920: session continuity transition binds handshake reuse to active session and exact execution/device/install/network identity; closed/interrupted and reconciliation-required states cannot be promoted by handshake reuse.
-- **P13.10921–11040:** local adapter audit envelope produces deterministic synthetic request/response evidence and binds actor/session/execution/device/install/network/request/idempotency identities; evidence drift fails closed.
-- **P13.11041–11160:** local adapter observability contract derives a deterministic `LOCAL_ADAPTER_EXECUTION` observation from audit evidence; observation/audit drift fails closed.
-- **P13.11161–11280:** integrated local runtime regression certification composes routing, handshake, session continuity, audit envelope and observability into one synthetic certification; reconciliation-required continuity cannot be certified READY.
+- P13.10921–11040: local adapter audit envelope produces deterministic synthetic request/response evidence and binds actor/session/execution/device/install/network/request/idempotency identities; evidence drift fails closed.
+- P13.11041–11160: local adapter observability contract derives deterministic `LOCAL_ADAPTER_EXECUTION` observations from audit evidence; observation/audit drift fails closed.
+- P13.11161–11280: integrated local runtime regression certification composes routing, handshake, session continuity, audit envelope and observability into one synthetic certification; reconciliation-required continuity cannot be certified READY.
+- **P13.11281–11400:** deterministic rejected local adapter executions are represented as synthetic failure evidence with stable failure classes and the same identity chain; request/response, session/execution and device-scope drift fail closed.
+- **P13.11401–11520:** local adapter failure observability derives `LOCAL_ADAPTER_FAILURE` observations from certified failure evidence; observation/evidence drift fails closed.
+- **P13.11521–11640:** failure evidence, failure observation and request boundary are composed into one synthetic certification chain; certification identity and evidence consistency are enforced.
 - No database driver, migration, production persistence, real detainee data, production telemetry, or AI activation.
 
-## Next gate: P13.11281–11400
+## Next gate: P13.11641–11760
 
-Build **local adapter failure evidence**: represent deterministic rejected executions as synthetic audit/observability evidence without leaking exception internals; bind the rejection to the same actor/session/execution/device/install/network/request identity chain and preserve fail-closed semantics.
+Build **local adapter failure-injection and recovery matrix**: deterministic synthetic scenarios for malformed request, expired handshake, session scope drift, duplicate/idempotency conflict and reconciliation-required state; each scenario must produce bounded failure evidence and a deterministic recovery disposition without introducing production transport or persistence.
 
 ## Governance lock
 
