@@ -1,17 +1,16 @@
 # MTA DETENI — Project Status
 
-**Version:** Foundation v1.44
-**Current Phase:** P13.1841–P13.2040 command UX, offline/degraded safety, notification center and synthetic release trace
-**Implementation Track:** P13.2040
+**Version:** Foundation v1.45
+**Current Phase:** P13.2041–P13.2200 operator recovery, local-first synchronization, audit correlation and synthetic resilience
+**Implementation Track:** P13.2200
 **Branch:** `phase-p12.961-13.200`
 
 ## Latest Progress
 
-- P13.1841–P13.1880 — governed operator command UX contract;
-- P13.1881–P13.1920 — offline/degraded-state safety boundary;
-- P13.1921–P13.1960 — evidence-aware notification center;
-- P13.1961–P13.2000 — operational alert acknowledgement bound to evidence;
-- P13.2001–P13.2040 — synthetic end-to-end release trace.
+- P13.2041–P13.2080 — operator error/recovery UX boundary;
+- P13.2081–P13.2120 — local-first synchronization contract;
+- P13.2121–P13.2160 — correlation-safe audit chain;
+- P13.2161–P13.2200 — synthetic resilience acceptance.
 
 ## Integrated Application Model
 
@@ -19,9 +18,9 @@ RAP owns registration, administration and reporting; PERKES owns health records 
 
 ## Operational Application Chain
 
-`UI/API Command → Authorization Policy → Canonical Operational Envelope → Domain Aggregate → Transaction Context → Idempotency → Domain Workflow → Immutable Timeline/Audit → Operational Evidence → Reconciliation → Outbox → Projection Checkpoint → Read Model → Dashboard/Workbench/Navigation → QR/Movement/Headcount/Temporary Exit → Reporting Workspace/Timeline → Reporting Snapshot → Report Preview → Report Artifact → Document Output → Template → Notification/Recommendation → Review → Human Approval Binding → Generated Output → Read-only Audit → Synthetic Release Evidence → Operator UI Contract → Responsive Layout → Report Rendering Adapter → Synthetic Release Manifest → Application Shell → Navigation State → Preview/Download → Synthetic Operator Journey → Cross-Module Acceptance → UI Release Evidence → Command UX → Connectivity Safety → Notification Center → Evidence Acknowledgement → Synthetic Release Trace`
+`UI/API Command → Authorization Policy → Canonical Operational Envelope → Domain Aggregate → Transaction Context → Idempotency → Domain Workflow → Immutable Timeline/Audit → Operational Evidence → Reconciliation → Outbox → Projection Checkpoint → Read Model → Dashboard/Workbench/Navigation → QR/Movement/Headcount/Temporary Exit → Reporting Workspace/Timeline → Reporting Snapshot → Report Preview → Report Artifact → Document Output → Template → Notification/Recommendation → Review → Human Approval Binding → Generated Output → Read-only Audit → Synthetic Release Evidence → Operator UI Contract → Responsive Layout → Report Rendering Adapter → Synthetic Release Manifest → Application Shell → Navigation State → Preview/Download → Synthetic Operator Journey → Cross-Module Acceptance → UI Release Evidence → Command UX → Connectivity Safety → Notification Center → Evidence Acknowledgement → Synthetic Release Trace → Error Recovery → Local-First Sync → Audit Correlation → Resilience Acceptance`
 
-P13.1841–2040 hardens the operator-facing control loop. Mutating command UX requires explicit confirmation; offline and degraded connectivity remain read-only; notifications remain evidence-bound; acknowledgements retain the originating evidence identity; the release trace remains synthetic and non-production.
+P13.2041–2200 establishes the safety foundation for intermittent connectivity and operational recovery. Network loss never silently authorizes mutation; conflict becomes blocked until controlled resolution; audit correlation remains aggregate-independent but correlation-scoped; resilience acceptance remains synthetic.
 
 ## Safety / Governance
 
@@ -43,15 +42,15 @@ QR is an operational verification point, not a free-form data-entry path. Verifi
 
 Leadership remains oversight-read/directive only and is denied direct operational mutation.
 
-Read models, dashboard views, workbench navigation, operational boards, reporting workspace, timelines, notifications, report previews, report artifacts, document outputs, templates, dashboard state, UI contracts, rendering adapters, application shell, navigation state, notification center and release traces remain derived/control state. Committed operational evidence remains authoritative and rebuildable.
+Read models, dashboard views, workbench navigation, operational boards, reporting workspace, timelines, notifications, report previews, report artifacts, document outputs, templates, dashboard state, UI contracts, rendering adapters, application shell, navigation state, notification center, release traces and resilience state remain derived/control state. Committed operational evidence remains authoritative and rebuildable.
 
-Offline/degraded state never becomes an authorization bypass. Command UX confirmation is a usability guard, not a replacement for authoritative authorization and transaction controls.
+Local-first synchronization is a continuity mechanism, not an authorization mechanism. Conflicts are fail-closed. Audit correlation preserves evidence identity and does not create new authority.
 
 ## Current Gate
 
-**P13.2040 — COMMAND UX / OFFLINE SAFETY / NOTIFICATION / RELEASE TRACE CONTRACT-READY / EXECUTION-CERTIFICATION PENDING**
+**P13.2200 — RECOVERY / LOCAL-FIRST SYNC / AUDIT CORRELATION / RESILIENCE CONTRACT-READY / EXECUTION-CERTIFICATION PENDING**
 
-Regression coverage has been added for mutation confirmation, offline read-only behavior, evidence-bound acknowledgement and synthetic release-trace invariants. Observable GitHub execution telemetry remains unavailable in this work session, so these controls are not certified as executed.
+Regression coverage has been added for recovery decisions, conflict blocking, audit correlation and synthetic resilience. Observable GitHub execution telemetry remains unavailable in this work session, so these controls are not certified as executed.
 
 ## Execution Certification Rule
 
@@ -59,6 +58,6 @@ CI or local execution may be certified only from observable command/job telemetr
 
 ## Next Gate
 
-**P13.2041–P13.2280 — operator error/recovery UX, local-first synchronization contract, audit-event correlation, and synthetic resilience acceptance.**
+**P13.2201–P13.2440 — local-device runtime packaging contract, sync queue integrity, backup/restore evidence, and synthetic multi-device acceptance.**
 
 No production or live-database step is implied by this next gate.
