@@ -1,5 +1,29 @@
 # Changelog
 
+## P13.9601–9720 — Unified Continuity Certification Envelope
+
+- Added an immutable synthetic certification envelope binding continuity certification, operational session, reconciliation proof and runtime handoff evidence.
+- Enforced equality across session, execution, device, installation, network and journey identities.
+- Required authorized/certification-bound runtime handoff and READY backup continuity before envelope certification.
+- Required complete reconciliation cardinality before clean continuity can be represented.
+
+## P13.9721–9840 — Local/LAN Recovery Boundary
+
+- Added deterministic LOCAL/LAN recovery proof for authenticated synthetic sessions.
+- Preserved installation and network-scope trust as the minimum recovery boundary.
+- Target installation/network drift fails closed before recovery can become READY.
+
+## P13.9841–9960 — Multi-Device LAN Continuity
+
+- Reused the installation/network trust boundary for target-device continuity.
+- Kept device changes admissible only within the same trusted installation and network scope.
+- Preserved synthetic-only recovery semantics without introducing external persistence.
+
+## P13.9961–10080 — Runtime Adapter Integration Boundary
+
+- Kept runtime integration adapter-only and isolated from database/production transport.
+- Established the separation needed for a future browser/tablet/smartphone LOCAL/LAN adapter without weakening current synthetic governance controls.
+
 ## P13.9121–9240 — Integrated Offline-First Continuity Journey
 
 - Added a deterministic contract-level composition from active operational session through local command admission, reconciliation, synchronized runtime continuity, backup continuity, unified continuity certification and clean session close.
