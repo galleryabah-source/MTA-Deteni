@@ -6,8 +6,7 @@ const outputPath = 'artifacts/p10-runtime/test-output.txt';
 const evidence = JSON.parse(readFileSync(evidencePath, 'utf8'));
 const output = readFileSync(outputPath, 'utf8');
 const failures = [];
-
-const EXPECTED_CHECKPOINT = 'P10.180';
+const EXPECTED_CHECKPOINT = 'P10.196';
 
 if (evidence.schemaVersion !== 'p10.22.v1') failures.push('UNSUPPORTED_EVIDENCE_SCHEMA');
 if (evidence.checkpoint !== EXPECTED_CHECKPOINT) failures.push('WRONG_CHECKPOINT');
@@ -18,24 +17,10 @@ if (evidence.safety?.MIGRATION_FREEZE !== 'true') failures.push('MIGRATION_FREEZ
 if (!Number.isInteger(evidence.requiredTestCount) || evidence.requiredTestCount <= 0) failures.push('INVALID_REQUIRED_TEST_COUNT');
 if (!Array.isArray(evidence.missingTests) || evidence.missingTests.length) failures.push('MISSING_REQUIRED_TESTS');
 if (!['PASS', 'FAIL', 'BLOCKED'].includes(evidence.classification)) failures.push('INVALID_CLASSIFICATION');
-
 const expectedSha = process.env.GITHUB_SHA ?? null;
 if (expectedSha && evidence.commitSha !== expectedSha) failures.push('COMMIT_MISMATCH');
 const outputSha = createHash('sha256').update(output).digest('hex');
 if (evidence.testOutputSha256 !== outputSha) failures.push('OUTPUT_HASH_MISMATCH');
-
-const result = {
-  schemaVersion: 'p10.23.v3',
-  checkpoint: EXPECTED_CHECKPOINT,
-  classification: failures.length ? 'FAIL' : 'PASS',
-  evidenceClassification: evidence.classification,
-  evidenceCommitSha: evidence.commitSha ?? null,
-  expectedCommitSha: expectedSha,
-  requiredTestCount: evidence.requiredTestCount,
-  outputSha256: outputSha,
-  failures,
-  verifiedAt: new Date().toISOString(),
-};
-writeFileSync('artifacts/p10-runtime/integrity.json', `${JSON.stringify(result, null, 2)}\n`, 'utf8');
-console.log(JSON.stringify(result, null, 2));
-process.exit(failures.length ? 1 : 0);
+const result = {schemaVersion:'p10.23.v3',checkpoint:EXPECTED_CHECKPOINT,classification:failures.length?'FAIL':'PASS',evidenceClassification:evidence.classification,evidenceCommitSha:evidence.commitSha??null,expectedCommitSha:expectedSha,requiredTestCount:evidence.requiredTestCount,outputSha256:outputSha,failures,verifiedAt:new Date().toISOString()};
+writeFileSync('artifacts/p10-runtime/integrity.json',`${JSON.stringify(result,null,2)}\n`,'utf8');
+console.log(JSON.stringify(result,null,2)); process.exit(failures.length?1:0);
