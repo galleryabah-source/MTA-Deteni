@@ -25,7 +25,6 @@ export function assertLocalRuntimeRequest(request: LocalRuntimeRequest): void {
   if (request.boundary.listenScope !== "LAN_ONLY" && request.boundary.listenScope !== "LOOPBACK_ONLY") throw new Error("Unsupported local service listen scope.");
   if (!request.path.startsWith("/mta-local/")) throw new Error("Local runtime adapter rejects non-local service paths.");
   if (/^https?:\/\//i.test(request.path) || request.path.startsWith("//")) throw new Error("Local runtime adapter rejects absolute or protocol-relative URLs.");
-  if (request.device.installationId !== request.boundary.serviceId && request.boundary.serviceId.trim() === "") throw new Error("Local runtime service identity is invalid.");
 }
 
 export class MemoryLocalRuntimeAdapter implements LocalRuntimeAdapter {
