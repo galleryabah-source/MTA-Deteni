@@ -1,6 +1,6 @@
 # MTA DETENI — Project Status
 
-**Version:** P10.47 CI Transport Diagnostic & Evidence Manifest  
+**Version:** P10.48 Reviewed Lockfile Transport Integrity  
 **Branch:** `phase10.14-database-verification-package`  
 **Certification:** NOT CERTIFIED  
 **Migration Freeze:** TRUE  
@@ -9,15 +9,13 @@
 
 ## Completed checkpoints
 
-P9 kernel foundations; P10.1–P10.13 operational/domain/database-contract foundations; P10.14–P10.17 controlled database verification packages; P10.18–P10.21 document-output operationalization and runtime integration contracts; P10.22–P10.24 CI evidence, release-readiness and safety consolidation; P10.25–P10.34 runtime, authorization, document API, audit, transaction and security certification-readiness contracts; P10.35 release-candidate hardening; P10.36 operational scenario and failure-injection matrix; P10.37 evidence decision record; P10.38 production-readiness traceability; P10.39 final pre-governance gate; P10.40 final pre-governance release manifest; P10.41 controlled governance decision packet; P10.42 controlled PostgreSQL/RLS execution runbook; P10.43 post-freeze verification evidence contract; P10.44 production cutover/rollback gate; P10.45 CI evidence and dependency transport hardening; P10.46 dependency reproducibility/lockfile gate; P10.47 CI transport diagnostic and evidence manifest.
+P9 kernel foundations; P10.1–P10.13 operational/domain/database-contract foundations; P10.14–P10.17 controlled database verification packages; P10.18–P10.21 document-output operationalization and runtime integration contracts; P10.22–P10.24 CI evidence, release-readiness and safety consolidation; P10.25–P10.34 runtime, authorization, document API, audit, transaction and security certification-readiness contracts; P10.35 release-candidate hardening; P10.36 operational scenario and failure-injection matrix; P10.37 evidence decision record; P10.38 production-readiness traceability; P10.39 final pre-governance gate; P10.40 final pre-governance release manifest; P10.41 controlled governance decision packet; P10.42 controlled PostgreSQL/RLS execution runbook; P10.43 post-freeze verification evidence contract; P10.44 production cutover/rollback gate; P10.45 CI evidence and dependency transport hardening; P10.46 dependency reproducibility/lockfile gate; P10.47 CI transport diagnostic and evidence manifest; P10.48 reviewed-lockfile transport integrity.
 
-## P10.46–P10.47 technical findings and actions
+## P10.48 technical finding and action
 
-P10.46 formalizes that a reviewed `package-lock.json` is a production-certification prerequisite. No lockfile was fabricated or generated from guessed dependency resolution. Until a reviewed lockfile is committed, CI may use the temporary `npm install --ignore-scripts --no-audit --no-fund` bootstrap path, but certification remains BLOCKED. Once the lockfile exists, CI must use `npm ci`.
+The CI dependency gate previously inferred lockfile availability from the runner filesystem. That is unsafe because `npm install` can create a new lockfile during CI, making an unreviewed runner-generated file appear equivalent to a reviewed repository artifact. P10.48 changes the boundary to `git ls-files --error-unmatch package-lock.json`: only a lockfile tracked in the repository qualifies for the reproducible-install path. The temporary bootstrap explicitly uses `npm install --package-lock=false`, so CI cannot manufacture a lockfile that satisfies the gate. A tracked lockfile switches the install path to `npm ci`.
 
-P10.47 adds an always-on, non-secret CI transport diagnostic capturing commit SHA, workflow/run identifiers, runner metadata, Node/npm versions, lockfile presence, safety flags, and dependency-install mode. The diagnostic is uploaded with the P10 evidence bundle so a missing GitHub log blob can be classified as BLOCKED/transport loss rather than silently treated as an application PASS.
-
-The consolidated deterministic regression gate is now 38 required contracts. The evidence integrity gate is synchronized to 38.
+A dedicated P10.48 contract test protects this distinction and is included in the consolidated regression gate. The deterministic regression contract is now 39 required test files. No lockfile was fabricated or generated from guessed dependency resolution.
 
 ## Integrated architecture
 
@@ -57,4 +55,4 @@ HTTP request → authentication → server-side authorization → scope/duty/cla
 
 ## Governance boundary
 
-P10.41–P10.47 prepare the controlled path after an authorized governance decision. No code path may infer approval, lift the freeze, execute migrations, enable AI, or activate external providers automatically. Until an authorized decision and independently verifiable execution evidence exist, the database remains untouched and production activation remains blocked.
+P10.41–P10.48 prepare the controlled path after an authorized governance decision. No code path may infer approval, lift the freeze, execute migrations, enable AI, or activate external providers automatically. Until an authorized decision and independently verifiable execution evidence exist, the database remains untouched and production activation remains blocked.
