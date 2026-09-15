@@ -1,8 +1,8 @@
 # MTA DETENI — Project Status
 
-**Version:** Foundation v1.25
-**Current Phase:** P11.353–P11.544 data consistency and QR validity gate
-**Implementation Track:** P11.544
+**Version:** Foundation v1.26
+**Current Phase:** P11.545–P11.816 cross-domain reconciliation gate
+**Implementation Track:** P11.816
 **Branch:** `main`
 
 ## Latest Progress
@@ -11,7 +11,10 @@
 - P11.225–P11.288 placement/movement/headcount and operational QR consistency;
 - P11.289–P11.352 synthetic cross-domain E2E and failure-path regression;
 - P11.353–P11.448 placement/movement/headcount reconciliation contract;
-- P11.449–P11.544 operational QR validity-window and explicit context compatibility contract.
+- P11.449–P11.544 operational QR validity-window and explicit context compatibility contract;
+- P11.545–P11.608 cross-domain detainee/placement/headcount aggregate composition;
+- P11.609–P11.680 reporting snapshot consistency;
+- P11.681–P11.816 integrated synthetic failure-path matrix.
 
 ## Integrated Application Model
 
@@ -31,13 +34,13 @@ RAP owns registration, administration and reporting; PERKES owns health records 
 
 ## Design Integrity Finding Addressed
 
-Temporary-exit `COMPLETED` is not treated as a deportation event. Deportation remains a separate operational QR context. This prevents accidental coupling between temporary-exit lifecycle completion and deportation workflow.
+Temporary-exit `COMPLETED` is not a deportation event. Deportation remains a separate operational workflow and QR context.
 
 ## Current Gate
 
-**P11.544 — DATA CONSISTENCY / QR VALIDITY-WINDOW CONTRACT-READY / EXECUTION TELEMETRY STILL REQUIRED**
+**P11.816 — CROSS-DOMAIN RECONCILIATION / REPORT SNAPSHOT / FAILURE-MATRIX CONTRACT-READY / EXECUTION TELEMETRY STILL REQUIRED**
 
-Cross-domain consistency is now represented at contract level for synthetic data: detainee identity → placement → movement events → headcount reconciliation, plus QR validity interval and context compatibility. This remains contract-level evidence only.
+Cross-domain consistency is now represented at contract level from detainee identity through placement, movement, headcount and reporting snapshot binding. Negative paths are first-class synthetic scenarios.
 
 ## Execution Certification Rule
 
@@ -45,6 +48,6 @@ CI or local execution may be certified only from observable command/job telemetr
 
 ## Next Gate
 
-**P11.545–P11.680 — cross-domain aggregate composition, reconciliation ledger invariants, reporting snapshot consistency, and integrated synthetic failure-path matrix.**
+**P11.817–P11.960 — immutable operational timeline composition, audit/outbox correlation binding, idempotency-aware mutation contracts, and synthetic authorization regression expansion.**
 
 No production or live-database step is implied by this next gate.
