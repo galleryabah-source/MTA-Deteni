@@ -1,5 +1,24 @@
 # Changelog
 
+## P13.6361–6400 — Reporting Governance Boundary
+
+- Added explicit fail-closed reporting governance gate for synthetic-only development.
+- Bound operational report snapshot validation and rendering to the governance gate.
+- Explicitly prohibited schema migration, production persistence and AI runtime dependency within this checkpoint.
+- Added rejection of production provenance in synthetic reporting fixtures.
+- Added regression proving operational rendering passes through the governance boundary.
+- No schema migration introduced.
+
+## P13.6321–6360 — Operational Report Rendering Boundary
+
+- Added deterministic operational report rendering contract over validated report snapshots.
+- Added explicit section-order validation and mandatory-section enforcement.
+- Bound rendered output to snapshot identity and document number.
+- Added fail-closed content-drift verification.
+- Added synthetic regression for deterministic rendering, incomplete/reordered sections, content tampering and missing mandatory sections.
+- Preserved Migration Freeze, AI OFF, synthetic-only repository data, production authorization FALSE and live PostgreSQL block.
+- No schema migration introduced.
+
 ## P13.6281–6320 — Reporting Export Envelope & Binding Contract
 
 - Added framework-neutral export envelope derived only from an integrity-checked reporting artifact.
@@ -18,14 +37,4 @@
 - Added fail-closed artifact verification for snapshot binding and canonical-content tampering.
 - Added regression for valid artifact creation, tampered snapshot rejection and evidence/snapshot mismatch rejection.
 - Preserved synthetic-only execution, Migration Freeze, AI OFF, production authorization FALSE and live PostgreSQL block.
-- No schema migration introduced.
-
-## P13.6201–6240 — Reporting Integrity & End-to-End Continuity Certification
-
-- Hardened reporting snapshot immutability by freezing projected rows as well as the row collection.
-- Added canonical reporting snapshot verification for deterministic export/rendering inputs.
-- Added reconnect reporting integrity guard binding snapshot `sourceRevision`, evidence identity, decision, queue states, payload hash, idempotency key and recording timestamp.
-- Added complete synthetic journey regression: offline command → reconnect transition → synced state → reconnect evidence → reporting projection → canonical snapshot verification.
-- Added negative-path tamper coverage for source revision and evidence material, plus row-level immutability.
-- Preserved Migration Freeze, AI OFF, synthetic-only repository data, production authorization FALSE and live PostgreSQL block.
 - No schema migration introduced.
