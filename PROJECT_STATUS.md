@@ -1,15 +1,16 @@
 # MTA DETENI — Project Status
 
-**Version:** Foundation v1.33
-**Current Phase:** P12.521–P12.680 persistence and projection integrity
-**Implementation Track:** P12.680
+**Version:** Foundation v1.34
+**Current Phase:** P12.681–P12.840 operational evidence and cross-domain integrity
+**Implementation Track:** P12.840
 **Branch:** `main`
 
 ## Latest Progress
 
-- P12.521–P12.560 persistence repository boundary contract;
-- P12.561–P12.600 idempotency observability contract;
-- P12.601–P12.680 projection checkpoint, retry and rebuild integrity contract.
+- P12.681–P12.720 operational evidence ledger contract;
+- P12.721–P12.760 projection failure/recovery matrix;
+- P12.761–P12.800 API audit envelope contract;
+- P12.801–P12.840 cross-domain consistency contract and regression coverage.
 
 ## Integrated Application Model
 
@@ -17,9 +18,9 @@ RAP owns registration, administration and reporting; PERKES owns health records 
 
 ## Operational Application Chain
 
-`UI/API Command → Authorization Policy → Transaction Context → Idempotency → Domain Workflow → Immutable Timeline/Audit → Outbox → Projection Checkpoint → Read Model → QR/Movement/Temporary Exit → Reporting`
+`UI/API Command → Authorization Policy → Transaction Context → Idempotency → Domain Workflow → Immutable Timeline/Audit → Operational Evidence → Outbox → Projection Checkpoint → Read Model → QR/Movement/Temporary Exit → Reporting`
 
-Persistence operations now carry explicit transaction/actor/correlation identity. Idempotency outcomes have an observability contract. Projection progress is checkpointed only after successful processing and remains rebuildable from committed outbox evidence.
+Operational evidence now has an explicit append-only contract. Projection failures have deterministic recovery actions. Accepted API commands require audit evidence, while rejected/failed commands require explicit error classification. Cross-domain records are blocked when detainee, aggregate or correlation identity drifts.
 
 ## Safety / Governance
 
@@ -39,15 +40,15 @@ Temporary-exit `COMPLETED` is not a deportation event. Deportation remains a sep
 
 Leadership is explicitly limited to oversight-read and directive permissions and is denied direct operational mutation permissions.
 
-Persistence and projection contracts are non-production boundaries. They do not authorize database connectivity, migrations, production execution, or operational use.
+Operational evidence is authoritative only when produced through the governed operational chain. Read models and projection checkpoints remain derived state.
 
-Projection checkpoints are derived progress markers; committed audit/outbox evidence remains authoritative and is the source for rebuild.
+Projection identity drift is a HALT condition; checkpoint drift requires rebuild from committed evidence. This prevents silent corruption from being promoted to the operator surface.
 
 ## Current Gate
 
-**P12.680 — PERSISTENCE/PROJECTION CONTRACT-READY / EXECUTION-CERTIFICATION PENDING**
+**P12.840 — OPERATIONAL EVIDENCE/CROSS-DOMAIN CONTRACT-READY / EXECUTION-CERTIFICATION PENDING**
 
-Regression coverage was added for persistence context validation, idempotency observation identity, and deterministic projection checkpoint generation. GitHub execution telemetry remains unavailable, so these controls are not certified as executed.
+Regression coverage was added for evidence identity, recovery decisions, accepted-command audit binding and cross-domain identity consistency. GitHub execution telemetry remains unavailable, so these controls are not certified as executed.
 
 ## Execution Certification Rule
 
@@ -55,6 +56,6 @@ CI or local execution may be certified only from observable command/job telemetr
 
 ## Next Gate
 
-**P12.681–P12.760 — operational evidence ledger contract, projection failure/recovery matrix, API audit envelope, and cross-domain consistency gate.**
+**P12.841–P12.960 — canonical operational aggregate envelope, QR/temporary-exit evidence binding, reporting snapshot integrity, and end-to-end synthetic governance gate.**
 
 No production or live-database step is implied by this next gate.
