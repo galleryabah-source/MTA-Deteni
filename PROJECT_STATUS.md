@@ -1,8 +1,8 @@
 # MTA DETENI — Project Status
 
-**Version:** Foundation v1.39
-**Current Phase:** P13.841–P13.1040 reporting, timeline and notification boundaries
-**Implementation Track:** P13.1040
+**Version:** Foundation v1.40
+**Current Phase:** P13.1041–P13.1240 document/output, approval, audit and cross-domain acceptance
+**Implementation Track:** P13.1240
 **Branch:** `phase-p12.961-13.200`
 
 ## Latest Progress
@@ -17,7 +17,11 @@
 - P13.841–P13.900 controlled reporting workspace;
 - P13.901–P13.960 immutable operator timeline composition;
 - P13.961–P13.1000 notification/recommendation boundaries;
-- P13.1001–P13.1040 integrated synthetic regression boundary.
+- P13.1001–P13.1040 integrated synthetic regression boundary;
+- P13.1041–P13.1100 controlled document output workspace;
+- P13.1101–P13.1160 exact approval-to-artifact/evidence binding;
+- P13.1161–P13.1200 role-scoped read-only operational audit view;
+- P13.1201–P13.1240 cross-domain synthetic acceptance boundary.
 
 ## Integrated Application Model
 
@@ -25,9 +29,9 @@ RAP owns registration, administration and reporting; PERKES owns health records 
 
 ## Operational Application Chain
 
-`UI/API Command → Authorization Policy → Canonical Operational Envelope → Domain Aggregate → Transaction Context → Idempotency → Domain Workflow → Immutable Timeline/Audit → Operational Evidence → Reconciliation → Outbox → Projection Checkpoint → Read Model → Dashboard/Workbench/Navigation → QR/Movement/Headcount/Temporary Exit → Reporting Workspace/Timeline → Reporting Snapshot → Report Preview → Report Artifact → Notification/Recommendation → Review → Approval → Generated Output`
+`UI/API Command → Authorization Policy → Canonical Operational Envelope → Domain Aggregate → Transaction Context → Idempotency → Domain Workflow → Immutable Timeline/Audit → Operational Evidence → Reconciliation → Outbox → Projection Checkpoint → Read Model → Dashboard/Workbench/Navigation → QR/Movement/Headcount/Temporary Exit → Reporting Workspace/Timeline → Reporting Snapshot → Report Preview → Report Artifact → Document Output → Notification/Recommendation → Review → Human Approval Binding → Generated Output → Read-only Audit`
 
-P13.841–1040 adds a report workspace gate, immutable aggregate-scoped operator timeline, evidence-backed notifications and a recommendation boundary that explicitly requires human decision. These remain downstream/derived application surfaces and do not replace authoritative evidence or authorization.
+P13.1041–1240 hardens output provenance and approval integrity, keeps audit views read-only and role scoped, and introduces a cross-domain synthetic acceptance boundary. These are derived/control surfaces and do not replace authoritative evidence or authorization.
 
 ## Safety / Governance
 
@@ -49,13 +53,15 @@ QR is an operational verification point, not a free-form data-entry path. Verifi
 
 Leadership remains oversight-read/directive only and is denied direct operational mutation.
 
-Read models, dashboard views, workbench navigation, operational boards, reporting workspace, timelines, notifications, report previews and report artifacts remain derived state. Committed operational evidence remains authoritative and rebuildable.
+Read models, dashboard views, workbench navigation, operational boards, reporting workspace, timelines, notifications, report previews, report artifacts and document outputs remain derived state. Committed operational evidence remains authoritative and rebuildable.
+
+Approval is human-bound to the exact artifact/report/evidence fingerprint. Cross-domain acceptance is synthetic and governance-gated; it does not authorize production execution.
 
 ## Current Gate
 
-**P13.1040 — REPORTING / TIMELINE / NOTIFICATION BOUNDARIES CONTRACT-READY / EXECUTION-CERTIFICATION PENDING**
+**P13.1240 — DOCUMENT / APPROVAL / AUDIT / CROSS-DOMAIN ACCEPTANCE CONTRACT-READY / EXECUTION-CERTIFICATION PENDING**
 
-Synthetic regression coverage has been added for reporting workspace validation, aggregate-scoped timeline integrity, notification evidence binding and human-decision recommendation semantics. Observable GitHub execution telemetry remains unavailable in this work session, so these controls are not certified as executed.
+Executable regression coverage has been added for document content drift, exact approval binding, role-scoped read-only audit access and governance-safe cross-domain acceptance. Observable GitHub execution telemetry remains unavailable in this work session, so these controls are not certified as executed.
 
 ## Execution Certification Rule
 
@@ -63,6 +69,6 @@ CI or local execution may be certified only from observable command/job telemetr
 
 ## Next Gate
 
-**P13.1041–P13.1240 — document/output workspace, approval binding hardening, operational audit views, and stronger cross-domain synthetic acceptance.**
+**P13.1241–P13.1440 — presentation-ready reporting pipeline, document template contract, operational dashboard state model, and stronger synthetic release evidence.**
 
 No production or live-database step is implied by this next gate.
