@@ -1,7 +1,7 @@
 # MTA DETENI — Next Gate
 
-**Foundation:** v1.67
-**Current:** P13.7801–7920 — deterministic failure-injection and recovery contract implemented; CI observation pending
+**Foundation:** v1.68
+**Current:** P13.7921–8040 — failure recovery integrated with lifecycle and continuity contracts; CI observation pending
 
 ## Completed
 
@@ -60,11 +60,17 @@
 53. explicit compensation boundary without distributed-rollback claims;
 54. synthetic regression coverage for pre-commit rejection, post-commit retry and compensation-boundary semantics;
 55. no concrete PostgreSQL driver, database connection, or production persistence;
-56. no schema migration, AI activation or real detainee data.
+56. no schema migration, AI activation or real detainee data;
+57. explicit lifecycle request-hash field separated from command identity;
+58. failure classification evidence bound to command, event, correlation, aggregate and expected/resulting versions;
+59. idempotent retry contract for committed outbox/projection recovery;
+60. offline reconnect decision bound to reconciliation status with fail-closed conflict handling;
+61. lifecycle certification hardened to canonical five-step order and replay/version semantics;
+62. synthetic recovery/continuity regression coverage for request-hash, recovery evidence, retry deduplication and reconnect conflict binding.
 
-## Next gate: P13.7921–8040
+## Next gate: P13.8041–8160
 
-Integrate failure recovery with lifecycle orchestration and continuity: propagate failure classification into command/event evidence, preserve expected-version checks, make outbox/projection retries idempotent, and bind offline reconnect conflicts to reconciliation outcomes. Add a synthetic recovery journey proving that failed commands do not create duplicate audit/outbox effects and that committed mutations remain recoverable without pretending cross-system rollback is atomic.
+Build the deterministic recovery journey across the lifecycle: bind recovery evidence to actual lifecycle steps, verify pre-commit failures produce zero mutation/audit/outbox effects, verify post-commit outbox/projection failures are retryable without duplication, and certify offline reconnect conflicts through reconciliation. Keep expected-version, idempotency, RBAC/SoD, audit, outbox, reporting, LAN/offline continuity and synthetic-only governance intact.
 
 ## Governance lock
 
