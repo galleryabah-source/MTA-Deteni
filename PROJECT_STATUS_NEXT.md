@@ -1,27 +1,38 @@
 # MTA DETENI — Next Gate
 
 **Foundation:** v1.60+
-**Current:** P13.5800 — controlled execution gate defined / observation pending
+**Current:** P13.5808 — execution harness ready / observation pending
 
 ## Completed
 
-- P13.4921–5040 — controlled execution/evidence convergence;
-- P13.5241–5600 — end-to-end architecture and execution audit;
-- P13.5601–5680 — consolidated execution matrix and stop conditions;
-- P13.5681–5720 — canonical `HEAD_RUDENIM` vocabulary gate;
+- P13.5601–5680 — consolidated controlled execution matrix;
+- P13.5681–5720 — canonical `HEAD_RUDENIM` vocabulary;
 - P13.5721–5760 — DR evidence binding;
-- P13.5761–5800 — report rendering evidence gate.
+- P13.5761–5800 — report rendering evidence gate;
+- P13.5801–5805 — deterministic execution harness;
+- P13.5806–5807 — explicit test compilation/typecheck boundary;
+- P13.5808 — CI execution evidence and artifact upload.
 
 ## Next
 
-**P13.5801–5880 — controlled non-production execution harness and evidence aggregation.**
+**P13.5809–5880 — observable CI execution + evidence validation + controlled application-surface verification.**
 
-The harness must make each observation reproducible and bind results to commit, environment, execution identity, timestamp and artifact identity. Required domains: build, regression, runtime, browser/RBAC, LAN, offline/reconnect, report, recovery and security.
+Acceptance targets:
 
-## Certification rule
+1. CI produces observable step telemetry;
+2. production source typecheck executes;
+3. test-source typecheck executes;
+4. JavaScript regression executes;
+5. TypeScript domain tests execute;
+6. evidence artifact is generated and uploaded;
+7. evidence identity matches the triggering commit/run;
+8. no unexpected control IDs are accepted;
+9. no production/migration/real-data boundary is crossed.
 
-`NOT_RUN` is not PASS. Missing evidence, unexpected control IDs, target mismatch, identity drift, or non-zero results remain blocked.
+## Following gate
+
+**P13.5881–5960 — runtime/browser/RBAC synthetic journey and LAN/offline continuity harness design.**
 
 ## Governance lock
 
-Migration Freeze TRUE. AI OFF. Repository SYNTHETIC ONLY. Production access NOT AUTHORIZED. Live PostgreSQL execution remains blocked until explicit governance clearance and an approved non-production target. No production migration is authorized by this checkpoint.
+Migration Freeze TRUE. AI OFF. Repository SYNTHETIC ONLY. Production access NOT AUTHORIZED. Live PostgreSQL execution remains blocked until explicit governance clearance and an approved non-production target.
