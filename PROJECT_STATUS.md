@@ -1,6 +1,6 @@
 # MTA DETENI — Project Status
 
-**Version:** P10.140 Governed PostgreSQL Verification Readiness + CI Hardening  
+**Version:** P10.148 Governed Verification Evidence & Orchestration  
 **Branch:** `phase10.14-database-verification-package`  
 **Certification:** NOT CERTIFIED  
 **Migration Freeze:** TRUE  
@@ -9,43 +9,36 @@
 
 ## Completed checkpoints
 
-P9 kernel foundations; P10.1–P10.13 operational/domain/database-contract foundations; P10.14–P10.17 controlled database verification packages; P10.18–P10.21 document-output operationalization and runtime integration contracts; P10.22–P10.24 CI evidence, release-readiness and safety consolidation; P10.25–P10.34 runtime, authorization, document API, audit, transaction and security certification-readiness contracts; P10.35–P10.48 evidence and release hardening; P10.49–P10.54 temporary-exit vertical slice and operational execution boundaries; P10.55–P10.60 operational state, read model, repository/unified/transactional boundaries; P10.61–P10.68 command/runtime boundary contracts; P10.69–P10.76 persistence/release gates; P10.77–P10.84 synthetic persistent adapter and transaction verification; P10.85–P10.92 persistent-boundary hardening; P10.93–P10.100 authenticated command, artifact grant and evidence-integrity boundary; P10.101–P10.108 controlled HTTP/application integration; P10.109–P10.116 controlled PostgreSQL adapter specification; P10.117–P10.124 transaction/evidence hardening; P10.125–P10.132 synthetic concurrency/race verification; P10.133–P10.140 governed PostgreSQL verification readiness.
+P9 kernel foundations; P10.1–P10.13 operational/domain/database-contract foundations; P10.14–P10.17 controlled database verification packages; P10.18–P10.21 document-output operationalization and runtime integration contracts; P10.22–P10.24 CI evidence, release-readiness and safety consolidation; P10.25–P10.34 runtime, authorization, document API, audit, transaction and security certification-readiness contracts; P10.35–P10.48 evidence and release hardening; P10.49–P10.54 temporary-exit vertical slice and operational execution boundaries; P10.55–P10.60 operational state, read model, repository/unified/transactional boundaries; P10.61–P10.68 command/runtime boundary contracts; P10.69–P10.76 persistence/release gates; P10.77–P10.84 synthetic persistent adapter and transaction verification; P10.85–P10.92 persistent-boundary hardening; P10.93–P10.100 authenticated command, artifact grant and evidence-integrity boundary; P10.101–P10.108 controlled HTTP/application integration; P10.109–P10.116 controlled PostgreSQL adapter specification; P10.117–P10.124 transaction/evidence hardening; P10.125–P10.132 synthetic concurrency/race verification; P10.133–P10.140 governed PostgreSQL verification readiness; P10.141–P10.148 governed verification evidence and orchestration boundary.
 
-## CI / failed-run audit and remediation
+## P10.141–P10.148 technical actions
 
-- P9 Kernel Run #385 and P10 Runtime Run #529 were observed as `failure`, but their GitHub job records contained no executable steps and their job-log endpoints returned `BlobNotFound`; therefore these runs do not provide evidence of a test assertion failure.
-- Failed jobs were rerun. The rerun remained unsuccessful at the GitHub Actions execution layer without usable step-level evidence.
-- Subsequent check runs on later commits also failed within seconds without executable step evidence. This remains an external GitHub Actions runner/execution blocker, not an established application assertion failure.
-- No code change is represented as a fix for an unobserved runner failure. The system remains fail-closed rather than hiding the failure with `continue-on-error` or skipped tests.
-- P10 CI uses `scripts/p10-runtime-regression-gate.mjs` as the single authoritative regression manifest, including P9 and P10 tests through P10.132.
-- P10 CI no longer duplicates the regression file list in the workflow and no longer pushes the active implementation branch into a duplicate P10 execution path.
-- P9 pull-request execution is scoped to kernel-relevant paths.
-- The P10 evidence integrity gate was corrected from obsolete P10.22/P10.23 literal checkpoint and test-count expectations to the current P10.140 evidence contract. It now validates structure rather than a stale literal test count.
-- `package-lock.json` remains absent. CI therefore uses a temporary dependency bootstrap; reproducible lockfile-based certification remains blocked until a reviewed lockfile is committed.
-- A formal blocker audit record is maintained at `docs/03-implementation/P10.140-BLOCKER-AUDIT.md`.
+- P10.141: verification evidence now requires immutable run identity and tested commit SHA.
+- P10.142: verification safety requires test environment, AI OFF, Migration Freeze TRUE and synthetic-only data.
+- P10.143: verification scenarios are explicit and bounded to transaction, concurrency, expiry, authorization isolation, revoke race, provider isolation and safety controls.
+- P10.144: scenario classification is deterministic: FAIL dominates BLOCKED, BLOCKED dominates PASS, and an empty matrix is BLOCKED.
+- P10.145: live verification is explicitly blocked while Migration Freeze is TRUE; callers cannot self-authorize a freeze lift.
+- P10.146: evidence observations are copied at the boundary to prevent caller mutation.
+- P10.147: identity, scenario and classification inputs fail closed when malformed.
+- P10.148: evidence has no provider, database-credential or detainee-data surface.
 
-## P10.133–P10.140 technical actions
+## CI / evidence hardening
 
-- P10.133: PostgreSQL verification contract separates synthetic modeling from live DB execution.
-- P10.134: transaction verification requires BEGIN/COMMIT/ROLLBACK observability and same-client audit/outbox coupling.
-- P10.135: concurrent consume verification requires exactly one affected row across competing requests.
-- P10.136: expiry verification requires the SQL predicate to reject expired grants at the database boundary.
-- P10.137: actor/scope/object mismatch verification remains fail-closed with zero-row rejection.
-- P10.138: revoke race verification requires a single ACTIVE → REVOKED winner.
-- P10.139: provider isolation and migration-freeze controls remain mandatory evidence dimensions.
-- P10.140: governed verification package records prerequisites, evidence, rollback and abort conditions; it does not execute them.
+The P10 regression gate is the single authoritative test manifest and now includes `test/p10.141-148-governed-verification-evidence.test.mjs`. The evidence integrity gate is aligned to P10.148 and validates current checkpoint, safety state, synthetic-only evidence, structural test-count validity, missing-test absence, classification, commit binding and output SHA-256. fileciteturn300file0
+
+## External blockers
+
+- GitHub Actions runner/evidence transport remains OPEN: prior failed runs had no executable steps or usable logs. This is not treated as an application assertion failure.
+- `package-lock.json` remains OPEN as a reproducibility/certification blocker. No lockfile is fabricated.
+- Live PostgreSQL verification remains OPEN pending governance clearance and an approved non-production target.
 
 ## Integrated architecture
 
 Authenticated HTTP request → CSRF → server-side authentication/authorization/scope/duty/classification/SoD → authoritative command composition → idempotency → unified temporary-exit service → document preparation → approval → issuance → artifact handoff → single-use controlled download grant → download → operational exit → handover → return → duty completion → close → critical transaction → controlled PostgreSQL adapter → audit/outbox intent → COMMIT → post-commit provider.
 
-## Evidence gate
+## Release interpretation
 
-Synthetic concurrency testing is not PostgreSQL certification. A governed DB verification must independently observe transaction boundaries, atomic affected-row semantics, concurrent behavior, expiry enforcement, authorization scope, rollback, provider isolation and migration-freeze state. No PASS or production-readiness claim is permitted without CI/evidence artifacts.
-
-## Current decision
-
-**BLOCKED FOR PRODUCTION / GOVERNANCE DECISION REQUIRED.** No live PostgreSQL verification, migration, schema change, or production write has been executed. The next executable DB step requires explicit governance clearance of the migration-freeze boundary and a controlled non-production database target.
+Synthetic PASS means the software contract passed its synthetic tests. It does not certify PostgreSQL, RLS, production infrastructure, or operational readiness. Production remains **NOT CERTIFIED** until independently observable CI evidence, dependency reproducibility, governed PostgreSQL verification, security controls and explicit governance approval are complete.
 
 ## Safety
 
@@ -60,4 +53,4 @@ Synthetic concurrency testing is not PostgreSQL certification. A governed DB ver
 
 ## Next gates
 
-P10.141+: governed verification evidence schema and controlled test-run orchestration design, still without executing live DB operations until governance clears the freeze.
+P10.149+: strengthen release evidence manifest and cross-check regression/evidence artifacts, then continue toward the governed non-production PostgreSQL verification package without lifting Migration Freeze.
