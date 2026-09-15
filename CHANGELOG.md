@@ -1,5 +1,22 @@
 # Changelog
 
+## P13.9361–9480 — Synthetic Multi-Device Continuity
+
+- Added a synthetic multi-device handoff proof bound to session, execution, installation and network scope.
+- Authorized handoff within the same installation/network scope is admissible.
+- Missing authorization and network-scope drift are fail-closed.
+- Added regression coverage for authorized handoff, network drift and missing authorization.
+
+## P13.9241–9360 — Offline Interruption/Recovery Proof
+
+- Added deterministic interrupted-session records preserving admitted-command boundaries and reconciliation boundaries.
+- Added explicit reconnect authorization bound to session, execution, device, installation and network scope.
+- Added queue rehydration into `SYNCING` before reconciliation.
+- Added recovered-command transitions through the existing APPLY/SKIP_DUPLICATE/REVIEW_CONFLICT contract.
+- Integrated the offline continuity journey now exercises deliberate interruption and authorized reconnect before clean close.
+- Continuity certification now carries session/device/installation/network identity and validates backup source identity against the runtime session.
+- Kept all state synthetic/in-memory with no production persistence or AI activation.
+
 ## P13.9121–9240 — Integrated Offline-First Continuity Journey
 
 - Added a deterministic contract-level composition from active operational session through local command admission, reconciliation, synchronized runtime continuity, backup continuity, unified continuity certification and clean session close.
@@ -15,13 +32,3 @@
 - Added explicit `RECONCILIATION_REQUIRED` session state and a guarded transition back to `ACTIVE` only after complete reconciliation proof.
 - Added execution/session drift and terminated-session regression coverage.
 - Preserved synthetic-only operation and all governance locks.
-
-## P13.8881–9000 — Offline-First Operational Session
-
-- Added a contract-only operational session lifecycle bound to execution, device, installation, network scope and runtime mode.
-- Added authenticated synthetic session admission with LAN/LOCAL-only local command admission and complete command identity validation.
-- Added fail-closed session scope checks for execution, runtime mode, network, device and installation drift.
-- Added deterministic clean session-close evidence bound to synchronized queue state, READY runtime continuity, READY backup continuity and the unified continuity certification.
-- Added explicit `INTERRUPTED` state so an interrupted local/LAN session cannot be represented as a clean operational handoff.
-- Added regression coverage for active admission, scope drift, unauthenticated context, inactive/interrupted sessions, pending queues, reconciliation conflicts, clean close and fabricated close evidence.
-- No database driver, schema migration, production persistence, real detainee data or AI activation.
