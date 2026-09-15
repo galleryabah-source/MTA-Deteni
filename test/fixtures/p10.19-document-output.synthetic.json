@@ -1,0 +1,35 @@
+{
+  "policy": "synthetic-only",
+  "templates": [
+    {
+      "documentKind": "TEMPORARY_EXIT_PERMISSION",
+      "templateId": "tpl-test-exit-001",
+      "version": 1,
+      "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "fields": [
+        {"name": "document_reference", "type": "string", "source": "source_system", "required": true},
+        {"name": "authorized_date", "type": "date", "source": "source_authorization", "required": true},
+        {"name": "purpose_code", "type": "string", "source": "source_authorization", "required": true}
+      ]
+    },
+    {
+      "documentKind": "ESCORT_ASSIGNMENT_LETTER",
+      "templateId": "tpl-test-escort-001",
+      "version": 1,
+      "sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+      "fields": [
+        {"name": "document_reference", "type": "string", "source": "source_system", "required": true},
+        {"name": "assignment_date", "type": "date", "source": "source_authorization", "required": true},
+        {"name": "duty_code", "type": "string", "source": "source_authorization", "required": true}
+      ]
+    }
+  ],
+  "actors": {
+    "preparer": "actor-test-preparer-001",
+    "approver": "actor-test-approver-001",
+    "issuer": "actor-test-issuer-001",
+    "archiver": "actor-test-archiver-001"
+  },
+  "scope": "scope-test-A",
+  "object": "object-test-001"
+}
