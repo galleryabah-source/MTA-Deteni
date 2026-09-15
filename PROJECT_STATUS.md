@@ -1,32 +1,33 @@
 # MTA DETENI — Project Status
 
-**Version:** Foundation v1.59
-**Current Phase:** P13.4921–5040 controlled non-production execution & evidence convergence
-**Implementation Track:** P13.5040
+**Version:** Foundation v1.60
+**Current Phase:** P13.5041–5240 evidence-driven pre-production convergence
+**Implementation Track:** P13.5240
 **Branch:** `phase-p12.961-13.200`
 
 ## Latest Progress
 
-- P13.4681–P4720 — integrated non-production acceptance orchestrator;
-- P13.4721–P4760 — local PC/LAN acceptance evidence boundary;
-- P13.4761–P4800 — role journey evidence matrix with HEAD_RUDENIM oversight-only enforcement;
-- P13.4801–P4840 — report artifact acceptance evidence;
-- P13.4841–P4880 — controlled non-production certification package;
-- P13.4881–P4920 — final pre-production gate contract;
 - P13.4921–P4960 — controlled non-production execution plan;
 - P13.4961–P5000 — evidence coverage validation and unexpected-control rejection;
 - P13.5001–P5040 — explicit final evidence status semantics;
-- regression tests and acceptance documentation added for this block.
+- P13.5041–P5080 — execution observation ledger;
+- P13.5081–P5120 — isolated controlled non-production execution boundary;
+- P13.5121–P5160 — browser/LAN acceptance matrix for PC, tablet and smartphone continuity;
+- P13.5161–P5200 — report source/template fidelity contract with exact binding checks and visual-review evidence;
+- P13.5201–P5240 — evidence-driven pre-production gate;
+- regression tests and implementation documentation added for this block.
 
 ## Current Gate
 
-**P13.5040 — CONTROLLED EXECUTION CONTRACT-READY / OBSERVATION PENDING**
+**P13.5240 — EVIDENCE-DRIVEN PRE-PRODUCTION CONTRACT READY / OBSERVATION PENDING**
 
-The repository now defines a complete observation sequence covering test suite, runtime, browser, LAN, report rendering, recovery and security, with explicit evidence coverage and final status semantics. This remains a contract layer: no runtime, browser, LAN, report visual review, backup/restore or security observation is claimed unless captured from an actual controlled non-production execution.
+The repository now has a structured path for recording actual controlled non-production observations and converging them into a pre-production decision. The new controls do not claim that the runtime, browser, LAN, report, recovery or security executions have occurred. `OBSERVATION_PENDING` remains the truthful default until evidence is captured.
 
-`CERTIFIED` in the final evidence status is reserved for controlled non-production evidence and is not production authorization.
+## Next Gate
 
-GitHub Actions execution remains **NOT CERTIFIED** unless observable workflow evidence is available. No PASS is inferred from source presence alone.
+**P13.5241+ — execution-backed convergence:** execute the existing matrix in a controlled non-production environment, capture observations, verify browser/LAN continuity, render and visually review the approved daily guard report, rehearse recovery, perform security review, and aggregate only observed evidence.
+
+`READY_FOR_HUMAN_APPROVAL` is not production authorization. Production remains blocked until explicit governance approval.
 
 ## Integrated Application Model
 
@@ -42,7 +43,8 @@ RAP owns registration, administration and reporting; PERKES owns health records 
 - No schema migration introduced;
 - No real detainee data, credentials, health records, WhatsApp exports or production PII in GitHub;
 - No autonomous AI decision-making;
-- No direct WhatsApp/OCR/transcript → approved operational record.
+- No direct WhatsApp/OCR/transcript → approved operational record;
+- No fabricated execution evidence.
 
 ## Design Integrity
 
@@ -56,9 +58,3 @@ RAP owns registration, administration and reporting; PERKES owns health records 
 - `NOT_RUN` never becomes PASS.
 - Unexpected evidence/control identities are rejected.
 - Production deployment remains blocked without explicit authorization.
-
-## Next Gate
-
-**P13.5041+ — evidence-driven pre-production convergence:** execute the defined controlled non-production matrix, capture actual observations, connect them to the integrated acceptance package, verify browser/LAN journeys, render the approved daily guard report against the supplied source template, rehearse backup/restore, perform security review, and update certification status only from observed evidence.
-
-**No production deployment or schema migration is authorized by this checkpoint.**
