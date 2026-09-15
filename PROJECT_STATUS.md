@@ -1,8 +1,8 @@
 # MTA DETENI — Project Status
 
-**Version:** Foundation v1.20
-**Current Phase:** P11.033–P11.096 QR/report hardening and integrated verification gate
-**Implementation Track:** P11.096
+**Version:** Foundation v1.21
+**Current Phase:** P11.097–P11.160 evidence-integrity and workflow-ownership gate
+**Implementation Track:** P11.160
 **Branch:** `main`
 
 ## Latest Progress
@@ -29,14 +29,15 @@
 - P11.009–P11.016 mutation/server-boundary regression;
 - P11.017–P11.024 responsive read-model structural regression;
 - P11.025–P11.032 QR/report application-capability boundary regression;
-- P11.033–P11.040 deterministic QR outcome/action mapping;
-- P11.041–P11.048 report snapshot/artifact contract;
-- P11.049–P11.056 report fail-closed validation;
-- P11.057–P11.064 synthetic-only QR/report composition;
-- P11.065–P11.072 application gate composition;
-- P11.073–P11.080 execution-evidence gate composition;
-- P11.081–P11.088 cross-boundary negative-path handling;
-- P11.089–P11.096 final fail-closed integrated verification.
+- P11.033–P11.064 QR/report contract hardening;
+- P11.065–P11.096 integrated synthetic verification gate;
+- P11.097–P11.104 synthetic evidence identity completeness;
+- P11.105–P11.112 cross-boundary negative-path blocking;
+- P11.113–P11.128 synthetic-only evidence-integrity enforcement;
+- P11.129–P11.136 RAP temporary-exit request ownership;
+- P11.137–P11.144 KAMTIB validation ownership;
+- P11.145–P11.152 Leadership approval ownership;
+- P11.153–P11.160 SUBBAG TU document ownership and controlled handoff to KAMTIB.
 
 ## Integrated Application Model
 
@@ -56,9 +57,9 @@ RAP owns registration, administration and reporting; PERKES owns health records 
 
 ## Current Gate
 
-**P11.096 — INTEGRATED SYNTHETIC VERIFICATION CONTRACT-READY / TRUSTWORTHY EXECUTION TELEMETRY STILL REQUIRED**
+**P11.160 — EVIDENCE-INTEGRITY + WORKFLOW-OWNERSHIP CONTRACT-READY / TRUSTWORTHY EXECUTION TELEMETRY STILL REQUIRED**
 
-The application-boundary regression and execution-evidence contracts are now composable. A single blocked component blocks the integrated gate. QR, report, UI mutation-boundary and synthetic evidence controls remain deterministic and fail-closed.
+The synthetic gate now verifies evidence identity/integrity and preserves the controlled temporary-exit ownership chain. These are contract-level controls only; they do not claim real execution, database integration, production readiness, or operational authorisation.
 
 ## Execution Certification Rule
 
@@ -66,6 +67,6 @@ CI or local execution may be certified only from observable command/job telemetr
 
 ## Next Gate
 
-**P11.097–P11.128 — cross-boundary negative-path regression and release-evidence integrity hardening.**
+**P11.161–P11.224 — temporary-exit lifecycle composition, movement/headcount consistency, QR context enforcement, and synthetic cross-domain E2E expansion.**
 
 No production or live-database step is implied by this next gate.
