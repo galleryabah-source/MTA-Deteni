@@ -7,8 +7,10 @@ const evidence = JSON.parse(readFileSync(evidencePath, 'utf8'));
 const output = readFileSync(outputPath, 'utf8');
 const failures = [];
 
+const EXPECTED_CHECKPOINT = 'P10.180';
+
 if (evidence.schemaVersion !== 'p10.22.v1') failures.push('UNSUPPORTED_EVIDENCE_SCHEMA');
-if (evidence.checkpoint !== 'P10.148') failures.push('WRONG_CHECKPOINT');
+if (evidence.checkpoint !== EXPECTED_CHECKPOINT) failures.push('WRONG_CHECKPOINT');
 if (evidence.syntheticOnly !== true) failures.push('NON_SYNTHETIC_EVIDENCE');
 if (evidence.safety?.APP_ENV !== 'test') failures.push('UNSAFE_APP_ENV');
 if (evidence.safety?.AI_ENABLED !== 'false') failures.push('AI_NOT_DISABLED');
@@ -24,7 +26,7 @@ if (evidence.testOutputSha256 !== outputSha) failures.push('OUTPUT_HASH_MISMATCH
 
 const result = {
   schemaVersion: 'p10.23.v3',
-  checkpoint: 'P10.148',
+  checkpoint: EXPECTED_CHECKPOINT,
   classification: failures.length ? 'FAIL' : 'PASS',
   evidenceClassification: evidence.classification,
   evidenceCommitSha: evidence.commitSha ?? null,
