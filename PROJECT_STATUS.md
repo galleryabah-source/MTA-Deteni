@@ -1,6 +1,6 @@
 # MTA DETENI — Project Status
 
-**Version:** P10.140 Governed PostgreSQL Verification Readiness  
+**Version:** P10.140 Governed PostgreSQL Verification Readiness + CI Hardening  
 **Branch:** `phase10.14-database-verification-package`  
 **Certification:** NOT CERTIFIED  
 **Migration Freeze:** TRUE  
@@ -10,6 +10,15 @@
 ## Completed checkpoints
 
 P9 kernel foundations; P10.1–P10.13 operational/domain/database-contract foundations; P10.14–P10.17 controlled database verification packages; P10.18–P10.21 document-output operationalization and runtime integration contracts; P10.22–P10.24 CI evidence, release-readiness and safety consolidation; P10.25–P10.34 runtime, authorization, document API, audit, transaction and security certification-readiness contracts; P10.35–P10.48 evidence and release hardening; P10.49–P10.54 temporary-exit vertical slice and operational execution boundaries; P10.55–P10.60 operational state, read model, repository/unified/transactional boundaries; P10.61–P10.68 command/runtime boundary contracts; P10.69–P10.76 persistence/release gates; P10.77–P10.84 synthetic persistent adapter and transaction verification; P10.85–P10.92 persistent-boundary hardening; P10.93–P10.100 authenticated command, artifact grant and evidence-integrity boundary; P10.101–P10.108 controlled HTTP/application integration; P10.109–P10.116 controlled PostgreSQL adapter specification; P10.117–P10.124 transaction/evidence hardening; P10.125–P10.132 synthetic concurrency/race verification; P10.133–P10.140 governed PostgreSQL verification readiness.
+
+## CI / failed-run audit
+
+- P9 Kernel Run #385 and P10 Runtime Run #529 were observed as `failure`, but their GitHub job records contained no executable steps and their job-log endpoints returned `BlobNotFound`; therefore these runs do not provide evidence of a test assertion failure.
+- Failed jobs were rerun. The rerun remained unsuccessful at the GitHub Actions execution layer without usable step-level evidence.
+- No code change is being represented as a fix for an unobserved runner failure. This is intentionally treated as an infrastructure/evidence blocker rather than guessed application behavior.
+- P10 CI was hardened to use `scripts/p10-runtime-regression-gate.mjs` as the single test manifest, removing a stale duplicated file list that only covered older checkpoints.
+- The regression evidence checkpoint is aligned to P10.140.
+- `package-lock.json` remains absent. CI therefore uses a temporary dependency bootstrap; reproducible lockfile-based certification remains blocked until a reviewed lockfile is committed.
 
 ## P10.133–P10.140 technical actions
 
