@@ -1,5 +1,15 @@
 # Changelog
 
+## P13.6281–6320 — Reporting Export Envelope & Binding Contract
+
+- Added framework-neutral export envelope derived only from an integrity-checked reporting artifact.
+- Bound export identity to `artifactId`, `snapshotId` and `sourceRevision`.
+- Reused the artifact canonical snapshot as deterministic export content; no alternate serialization was introduced.
+- Added fail-closed verification for export binding and content tampering.
+- Added synthetic regression for valid export, altered content and snapshot/artifact binding drift.
+- Preserved Migration Freeze, AI OFF, synthetic-only repository data, production authorization FALSE and live PostgreSQL block.
+- No schema migration introduced.
+
 ## P13.6241–6280 — Reporting Artifact Integrity & Export Contract
 
 - Added framework-neutral reporting artifact contract derived only from an integrity-checked reconnect reporting snapshot.
@@ -19,11 +29,3 @@
 - Added negative-path tamper coverage for source revision and evidence material, plus row-level immutability.
 - Preserved Migration Freeze, AI OFF, synthetic-only repository data, production authorization FALSE and live PostgreSQL block.
 - No schema migration introduced.
-
-## P13.6161–6200 — Reconnect Reporting Projection
-
-- Added framework-neutral reporting projection consuming immutable reconnect evidence.
-- Preserved command identity, aggregate identity, reconciliation decision and queue-state transition in reporting rows.
-- Bound reporting snapshot `sourceRevision` to the reconnect `commandId`.
-- Added deterministic regression for APPLY, SKIP_DUPLICATE and REVIEW_CONFLICT reporting semantics.
-- Kept projection synthetic-only with no production persistence, database execution or schema migration.
