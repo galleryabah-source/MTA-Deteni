@@ -1,5 +1,23 @@
 # Changelog
 
+## P13.10081–10200 — Local Runtime Adapter Contract
+
+- Added a narrow synthetic LOCAL/LAN adapter contract for browser, tablet and smartphone clients.
+- Required request identity, authenticated device identity, local service boundary and idempotency for mutations.
+- Preserved the separation between adapter contracts and external transport/persistence.
+
+## P13.10201–10320 — Local Runtime Routing Safety
+
+- Rejected absolute and protocol-relative URLs from the local runtime adapter.
+- Restricted adapter paths to the `/mta-local/` service boundary.
+- Prevented accidental routing of local operations to external services.
+
+## P13.10321–10440 — Synthetic Adapter Execution Boundary
+
+- Added deterministic in-memory adapter execution returning contract-level acceptance only.
+- Added regression coverage for authenticated LAN mutations, missing idempotency, external/non-local paths and unsafe authentication boundaries.
+- Preserved migration freeze, synthetic-only data and no production connectivity.
+
 ## P13.9601–9720 — Unified Continuity Certification Envelope
 
 - Added an immutable synthetic certification envelope binding continuity certification, operational session, reconciliation proof and runtime handoff evidence.
