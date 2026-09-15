@@ -40,10 +40,8 @@ export class TransactionalMutationService<T, TInput = void> {
     if (!(await this.deps.authorization.authorize(command.actor, command.permission))) throw new Error("FORBIDDEN");
 
     const key = command.actor.idempotencyKey;
-    const replay = await this.deps.idempotency.replay(key);
-    if (replay) return replay;
-
     return this.deps.transaction.run(async () => {
+      // The idempotency decision is made inside the same transaction as the mutation.
       const decision = await this.deps.idempotency.begin(key, command.fingerprint);
       if (decision === "CONFLICT") throw new Error("IDEMPOTENCY_CONFLICT");
       if (decision === "REPLAY") {
