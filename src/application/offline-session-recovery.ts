@@ -2,7 +2,7 @@ import type { OfflineCommand, ReconciliationDecision } from "./offline-continuit
 import { applyReconnectTransition, createReconnectTransition } from "./runtime-adapters.js";
 import type { RuntimeExecutionContext } from "./runtime-execution-boundary.js";
 import type { OperationalSession } from "./offline-operational-session.js";
-import { assertSessionScope, markSessionReconciliationRequired } from "./offline-operational-session.js";
+import { assertSessionScope } from "./offline-operational-session.js";
 
 export type InterruptedSessionRecord = Readonly<{
   recordId: string;
@@ -39,16 +39,7 @@ export type ReconnectRecovery = Readonly<{
   syntheticOnly: true;
 }>;
 
-export function captureInterruptedSession(input: {
-  session: OperationalSession;
-  context: RuntimeExecutionContext;
-  deviceId: string;
-  installationId: string;
-  admittedCommands: readonly OfflineCommand[];
-  reconciledCommands?: readonly OfflineCommand[];
-  interruptedAt: string;
-  reason: string;
-}): InterruptedSessionRecord {
+export function captureInterruptedSession(input: { session: OperationalSession; context: RuntimeExecutionContext; deviceId: string; installationId: string; admittedCommands: readonly OfflineCommand[]; reconciledCommands?: readonly OfflineCommand[]; interruptedAt: string; reason: string }): InterruptedSessionRecord {
   assertSessionScope(input.session, input.context, input.deviceId, input.installationId);
   if (input.session.state !== "ACTIVE" && input.session.state !== "RECONCILIATION_REQUIRED") throw new Error("Only an open session can be interrupted.");
   if (!input.interruptedAt.trim() || !input.reason.trim()) throw new Error("Interruption evidence requires timestamp and reason.");
@@ -76,7 +67,7 @@ export function recoverInterruptedSession(input: { record: InterruptedSessionRec
   if (input.queuedCommands.some((command) => !expected.has(command.commandId))) throw new Error("Rehydrated queue contains command outside the interrupted admission boundary.");
   if (input.queuedCommands.length !== expected.size) throw new Error("Rehydrated queue does not cover the interrupted admission boundary.");
   const rehydratedCommands = Object.freeze(input.queuedCommands.map((command) => Object.freeze({ ...command, state: "SYNCING" as const })));
-  const reconciled = markSessionReconciliationRequired(input.session);
+  const reconciled = Object.freeze({ ...input.session, state: "RECONCILIATION_REQUIRED" as const });
   return Object.freeze({ record: input.record, authorization: input.authorization, session: reconciled, rehydratedCommands, state: "RECONCILIATION_REQUIRED", syntheticOnly: true });
 }
 
