@@ -1,27 +1,18 @@
 # MTA DETENI — Project Status
 
-**Version:** Foundation v1.51
-**Current Phase:** P13.3321–P13.3480 synthetic integration matrix, report reconciliation, QR/movement acceptance and pre-certification evidence
-**Implementation Track:** P13.3480
+**Version:** Foundation v1.52
+**Current Phase:** P13.3481–P13.3720 integrated synthetic journey and pre-certification
+**Implementation Track:** P13.3720
 **Branch:** `phase-p12.961-13.200`
 
 ## Latest Progress
 
-- P13.2881–P13.2920 — continuity session lifecycle;
-- P13.2921–P13.2960 — fail-closed device revocation;
-- P13.2961–P13.3000 — deterministic sync conflict resolution;
-- P13.3001–P13.3040 — evidence chain sealing;
-- P13.3041–P13.3080 — synthetic continuity end-to-end acceptance;
-- P13.3081–P13.3120 — continuity release gate;
-- P13.3121–P13.3160 — cross-domain operational invariants;
-- P13.3161–P13.3200 — operational data-contract audit boundary;
-- P13.3201–P13.3240 — report-template fidelity contract;
-- P13.3241–P13.3280 — synthetic integration certification contract;
-- P13.3281–P13.3320 — production authorization barrier;
-- P13.3321–P13.3360 — synthetic contract integration matrix;
-- P13.3361–P13.3400 — report source-field reconciliation;
-- P13.3401–P13.3440 — QR/movement/temporary-exit cross-domain acceptance;
-- P13.3441–P13.3480 — observable pre-certification evidence bundle.
+- P13.3481–P13.3520 — full synthetic journey composition;
+- P13.3521–P13.3560 — deterministic report artifact generation;
+- P13.3561–P13.3600 — role/permission regression boundary;
+- P13.3601–P13.3640 — offline-to-online reconciliation acceptance;
+- P13.3641–P13.3680 — certification evidence packaging;
+- P13.3681–P13.3720 — integrated pre-certification gate.
 
 ## Integrated Application Model
 
@@ -29,7 +20,7 @@ RAP owns registration, administration and reporting; PERKES owns health records 
 
 ## Operational Chain
 
-`UI/API Command → Authorization Policy → Canonical Operational Envelope → Domain Aggregate → Transaction Context → Idempotency → Domain Workflow → Immutable Timeline/Audit → Operational Evidence → Reconciliation → Outbox → Projection Checkpoint → Read Model → Dashboard/Workbench/Navigation → QR/Movement/Headcount/Temporary Exit → Reporting Workspace/Timeline → Reporting Snapshot → Report Preview → Report Artifact → Document Output → Template → Notification/Recommendation → Review → Human Approval Binding → Generated Output → Read-only Audit → Synthetic Release Evidence → Operator UI Contract → Responsive Layout → Report Rendering Adapter → Synthetic Release Manifest → Application Shell → Navigation State → Preview/Download → Synthetic Operator Journey → Cross-Module Acceptance → UI Release Evidence → Command UX → Connectivity Safety → Notification Center → Evidence Acknowledgement → Synthetic Release Trace → Error Recovery → Local-First Sync → Audit Correlation → Resilience Acceptance → Local Device Runtime → Sync Queue Integrity → Backup/Restore Evidence → Multi-Device Acceptance → Continuity Gate → Local Server Bootstrap → LAN Client Discovery → Durable Sync Journal → Controlled Backup Rotation → Continuity Runtime Gate → Offline Session → Client Pairing → Sync Replay → Integrity Checksum → Disaster Recovery Rehearsal → Continuity Session Lifecycle → Device Revocation → Sync Conflict Resolution → Evidence Chain Sealing → Synthetic Continuity E2E → Continuity Release Gate → Cross-Domain Invariants → Operational Data Contract → Report Template Fidelity → Synthetic Certification → Production Barrier → Synthetic Contract Matrix → Report Source Reconciliation → QR/Movement/Temporary-Exit Acceptance → Pre-Certification Evidence Bundle`
+`UI/API Command → Authorization Policy → Canonical Operational Envelope → Domain Aggregate → Transaction Context → Idempotency → Domain Workflow → Immutable Timeline/Audit → Operational Evidence → Reconciliation → Outbox → Projection Checkpoint → Read Model → Dashboard/Workbench/Navigation → QR/Movement/Headcount/Temporary Exit → Reporting Workspace/Timeline → Reporting Snapshot → Report Preview → Report Artifact → Document Output → Template → Notification/Recommendation → Review → Human Approval Binding → Generated Output → Read-only Audit → Synthetic Release Evidence → Operator UI Contract → Responsive Layout → Report Rendering Adapter → Synthetic Release Manifest → Application Shell → Navigation State → Preview/Download → Synthetic Operator Journey → Cross-Module Acceptance → UI Release Evidence → Command UX → Connectivity Safety → Notification Center → Evidence Acknowledgement → Synthetic Release Trace → Error Recovery → Local-First Sync → Audit Correlation → Resilience Acceptance → Local Device Runtime → Sync Queue Integrity → Backup/Restore Evidence → Multi-Device Acceptance → Continuity Gate → Local Server Bootstrap → LAN Client Discovery → Durable Sync Journal → Controlled Backup Rotation → Continuity Runtime Gate → Offline Session → Client Pairing → Sync Replay → Integrity Checksum → Disaster Recovery Rehearsal → Continuity Session Lifecycle → Device Revocation → Sync Conflict Resolution → Evidence Chain Sealing → Synthetic Continuity E2E → Continuity Release Gate → Cross-Domain Invariants → Operational Data Contract → Report Template Fidelity → Synthetic Certification → Production Barrier → Synthetic Contract Matrix → Report Source Reconciliation → QR/Movement/Temporary-Exit Acceptance → Pre-Certification Evidence Bundle → Full Synthetic Journey → Report Artifact Determinism → Role/Permission Regression → Offline/Online Reconciliation → Certification Evidence Package → Pre-Certification Gate`
 
 ## Safety / Governance
 
@@ -52,15 +43,16 @@ RAP owns registration, administration and reporting; PERKES owns health records 
 - Device revocation is fail-closed and blocks continued continuity use.
 - Sync conflicts are never silently resolved by last-write-wins; human review is required.
 - Evidence-chain sealing occurs only after integrity verification.
-- Report fidelity is represented as a contract with source-field mapping and deterministic element order; exact visual reproduction still requires the approved source template and execution evidence.
-- Cross-domain compatibility, report source reconciliation and QR context are now explicit synthetic contracts.
-- Pre-certification evidence requires observable evidence; source-code presence alone is not certification.
+- Report artifacts are deterministic for the same template and source snapshot input.
+- Role/permission regression remains deny-by-default at the contract boundary.
+- Offline-to-online reconciliation requires exact version and operation-fingerprint agreement; mismatch remains blocked.
+- Certification evidence requires observable execution evidence and output identity; `NOT_RUN` is never promoted to PASS.
 
 ## Current Gate
 
-**P13.3480 — SYNTHETIC CONTRACT MATRIX / REPORT SOURCE RECONCILIATION / QR-MOVEMENT ACCEPTANCE / PRE-CERTIFICATION EVIDENCE CONTRACT-READY / EXECUTION-CERTIFICATION PENDING**
+**P13.3720 — FULL SYNTHETIC JOURNEY / REPORT DETERMINISM / ROLE-PERMISSION REGRESSION / OFFLINE-ONLINE RECONCILIATION / CERTIFICATION EVIDENCE / PRE-CERTIFICATION CONTRACT-READY / EXECUTION-CERTIFICATION PENDING**
 
-Synthetic regression coverage has been added for contract compatibility, report source-field equality, QR temporary-exit context separation and observable evidence requirements. No execution PASS is claimed without observable telemetry.
+Synthetic tests have been added for the integrated journey, deterministic report artifacts, role/permission boundaries, reconciliation and certification evidence packaging. These are source-level test contracts; no execution PASS is claimed without observable telemetry.
 
 ## Execution Certification Rule
 
@@ -68,6 +60,6 @@ CI or local execution may be certified only from observable command/job telemetr
 
 ## Next Gate
 
-**P13.3481–P13.3720 — full synthetic journey composition, report artifact determinism, role/permission regression matrix, offline-to-online reconciliation acceptance, and certification evidence packaging.**
+**P13.3721–P13.3960 — synthetic test-harness execution, application-shell integration review, report-output fidelity implementation boundary, and release-candidate evidence assembly.**
 
 No production or live-database step is implied by this next gate.
