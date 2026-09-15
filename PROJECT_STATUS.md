@@ -1,8 +1,8 @@
 # MTA DETENI — Project Status
 
-**Version:** Foundation v1.19
-**Current Phase:** P11.001–P11.032 application-boundary regression gate
-**Implementation Track:** P11.032
+**Version:** Foundation v1.20
+**Current Phase:** P11.033–P11.096 QR/report hardening and integrated verification gate
+**Implementation Track:** P11.096
 **Branch:** `main`
 
 ## Latest Progress
@@ -28,7 +28,15 @@
 - P11.001–P11.008 supported application-surface identity;
 - P11.009–P11.016 mutation/server-boundary regression;
 - P11.017–P11.024 responsive read-model structural regression;
-- P11.025–P11.032 QR/report application-capability boundary regression.
+- P11.025–P11.032 QR/report application-capability boundary regression;
+- P11.033–P11.040 deterministic QR outcome/action mapping;
+- P11.041–P11.048 report snapshot/artifact contract;
+- P11.049–P11.056 report fail-closed validation;
+- P11.057–P11.064 synthetic-only QR/report composition;
+- P11.065–P11.072 application gate composition;
+- P11.073–P11.080 execution-evidence gate composition;
+- P11.081–P11.088 cross-boundary negative-path handling;
+- P11.089–P11.096 final fail-closed integrated verification.
 
 ## Integrated Application Model
 
@@ -48,9 +56,9 @@ RAP owns registration, administration and reporting; PERKES owns health records 
 
 ## Current Gate
 
-**P11.032 — APPLICATION BOUNDARY REGRESSION CONTRACT-READY / EXECUTION TELEMETRY STILL REQUIRED**
+**P11.096 — INTEGRATED SYNTHETIC VERIFICATION CONTRACT-READY / TRUSTWORTHY EXECUTION TELEMETRY STILL REQUIRED**
 
-The synthetic regression gate now covers all six supported UI surfaces, explicit server-bound mutation identifiers, read-model collection shape, and the QR/report capability boundary. This is a contract-level milestone and does not claim that tests actually executed.
+The application-boundary regression and execution-evidence contracts are now composable. A single blocked component blocks the integrated gate. QR, report, UI mutation-boundary and synthetic evidence controls remain deterministic and fail-closed.
 
 ## Execution Certification Rule
 
@@ -58,6 +66,6 @@ CI or local execution may be certified only from observable command/job telemetr
 
 ## Next Gate
 
-**P11.033–P11.064 — QR/report contract regression hardening and composition of application-boundary checks with synthetic execution evidence.**
+**P11.097–P11.128 — cross-boundary negative-path regression and release-evidence integrity hardening.**
 
 No production or live-database step is implied by this next gate.
