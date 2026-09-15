@@ -1,26 +1,26 @@
 # MTA DETENI — Project Status
 
-**Version:** Foundation v1.54
-**Current Phase:** P13.3961–P13.4200 release-candidate convergence
-**Implementation Track:** P13.4200
+**Version:** Foundation v1.55
+**Current Phase:** P13.4201–P13.4440 release-integration convergence
+**Implementation Track:** P13.4440
 **Branch:** `phase-p12.961-13.200`
 
 ## Latest Progress
 
-- P13.3961–P13.4000 — executable synthetic harness refinement;
-- P13.4001–P13.4040 — application-shell contract convergence;
-- P13.4041–P13.4080 — exact report-template execution boundary;
-- P13.4081–P13.4120 — release-candidate traceability matrix;
-- P13.4121–P13.4160 — release-candidate governance barrier;
-- P13.4161–P13.4200 — integrated release-candidate gate.
+- P13.4201–P13.4240 — integrated executable release harness;
+- P13.4241–P13.4280 — report rendering verification boundary;
+- P13.4281–P13.4320 — end-to-end role journey matrix;
+- P13.4321–P13.4360 — offline continuity drill;
+- P13.4361–P13.4400 — release-candidate evidence manifest;
+- P13.4401–P13.4440 — integrated pre-release gate.
 
 ## Current Gate
 
-**P13.4200 — RELEASE-CANDIDATE CONTRACT-READY / EXECUTION-CERTIFICATION PENDING**
+**P13.4440 — PRE-RELEASE CONTRACT-READY / OBSERVED EXECUTION EVIDENCE PENDING**
 
-The release candidate now has explicit contracts for the synthetic harness, responsive/authorization-aware application shell, exact report-template execution prerequisites, requirement-to-contract-to-evidence traceability, governance barriers and the final release-candidate gate.
+The release candidate now has a single integrated contract layer covering executable synthetic controls, report rendering verification, role journeys, offline continuity, evidence traceability and the final pre-release gate. These contracts are implemented and covered by repository tests, but repository source presence is not treated as execution certification.
 
-The active branch is configured for push-triggered domain CI. The available GitHub Actions query still returns no observable workflow run for the new commits in this session, so execution remains **NOT CERTIFIED**. No CI PASS is inferred from source presence.
+The active branch remains configured for push-triggered domain CI. GitHub Actions execution has not produced an observable run in the available query path for these new commits, so CI/execution remains **NOT CERTIFIED**. No CI PASS is inferred.
 
 ## Integrated Application Model
 
@@ -47,10 +47,10 @@ RAP owns registration, administration and reporting; PERKES owns health records 
 - Sync conflicts require human review.
 - Report artifacts require deterministic inputs and reconciled source bindings.
 - Exact visual report reproduction remains gated by the approved source template and observable rendering evidence.
-- Certification evidence requires execution identity and output identity; `NOT_RUN` never becomes PASS.
+- Certification evidence requires execution identity, output identity and telemetry identity; `NOT_RUN` never becomes PASS.
 
 ## Next Gate
 
-**P13.4201–P13.4440 — executable integration harness, report rendering verification boundary, end-to-end role journey matrix, offline continuity drill, and release-candidate evidence manifest.**
+**P13.4441+ — observed execution evidence collection, report rendering verification against the approved source template, and controlled non-production integration certification.**
 
-No production or live-database step is implied.
+This next gate is intentionally evidence-driven. No production or live-database step is implied.
