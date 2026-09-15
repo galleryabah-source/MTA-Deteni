@@ -1,5 +1,12 @@
 # Changelog
 
+## P13.9121–9240 — Integrated Offline-First Continuity Journey
+
+- Added a deterministic contract-level composition from active operational session through local command admission, reconciliation, synchronized runtime continuity, backup continuity, unified continuity certification and clean session close.
+- Preserved end-to-end identity continuity for session, execution, device, installation, network, journey, command and reconciliation receipt identifiers.
+- Added regression coverage for successful integrated continuity and rejection of an empty/non-operative journey.
+- Kept all state synthetic/in-memory with no production persistence or AI activation.
+
 ## P13.9001–9120 — Session Reconciliation Completion
 
 - Added deterministic per-command reconciliation receipts bound to session, execution and command identities.
@@ -17,20 +24,4 @@
 - Added deterministic clean session-close evidence bound to synchronized queue state, READY runtime continuity, READY backup continuity and the unified continuity certification.
 - Added explicit `INTERRUPTED` state so an interrupted local/LAN session cannot be represented as a clean operational handoff.
 - Added regression coverage for active admission, scope drift, unauthenticated context, inactive/interrupted sessions, pending queues, reconciliation conflicts, clean close and fabricated close evidence.
-- No database driver, schema migration, production persistence, real detainee data or AI activation.
-
-## P13.8641–8760 — Backup Continuity Coordinator
-
-- Added a contract-only backup continuity coordinator for synthetic LOCAL/LAN backup manifests.
-- Validated predecessor backup references through the existing backup-chain contract.
-- Missing predecessor references are explicitly `BLOCKED` rather than treated as a valid chain.
-- Added regression coverage for first backup readiness, valid chained backup and predecessor tampering.
-- No database driver, schema migration, production persistence, real detainee data or AI activation.
-
-## P13.8521–8640 — Runtime Continuity Coordinator
-
-- Added a synthetic runtime continuity assessment combining authenticated runtime context, queue state, reconciliation decision and handoff identity.
-- Pending offline work cannot be considered ready without reconciliation evidence.
-- Reconnect conflict is represented as an explicit `BLOCKED` continuity state.
-- Added regression coverage for synchronized readiness, pending-queue reconciliation, reconnect conflict and runtime handoff identity drift.
 - No database driver, schema migration, production persistence, real detainee data or AI activation.
