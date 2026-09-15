@@ -1,7 +1,7 @@
 # MTA DETENI — Next Gate
 
-**Foundation:** v1.61+
-**Current:** P13.7121–7200 — critical mutation integration seam implemented; CI observation pending
+**Foundation:** v1.62+
+**Current:** P13.7201–7320 — non-production aggregate repository contracts and in-memory reference registry implemented; CI observation pending
 
 ## Completed
 
@@ -16,35 +16,33 @@
 9. reporting governance gate with synthetic-only provenance enforcement;
 10. report preview boundary with tamper detection;
 11. report download boundary with preview/snapshot/document binding and deterministic safe filename;
-12. integrated daily guard report journey from validated snapshot through preview to download;
+12. integrated daily guard report journey through validated preview and download;
 13. application surface regression for REPORTS, responsive behavior and role navigation;
-14. renderer abstraction with REFERENCE_TEXT as deterministic reference implementation and PDF/DOCX formats reserved;
+14. renderer abstraction with REFERENCE_TEXT plus reserved PDF/DOCX formats;
 15. daily guard renderer application boundary;
 16. canonical daily guard section-order and completeness contract;
-17. integrated daily guard journey regression across snapshot → render → preview → download;
-18. source-grounded daily guard presentation contract based on the supplied report;
-19. strict separation of business/domain snapshot fields from presentation metadata;
-20. evidenced source heading mappings only; unsupported layout facts are not invented;
-21. synthetic PDF/DOCX renderer adapter boundaries behind the renderer abstraction;
-22. renderer certification contract with template version `DGRT-1.0`;
-23. stable output identity and deterministic content fingerprint;
-24. fail-closed renderer certification against format, snapshot and content drift;
-25. database adapter contract with environment-aware access guard;
-26. explicit schema comparison matrix with migration freeze;
-27. critical mutation transaction boundary;
-28. critical mutation idempotency contract and replay/conflict detection;
-29. transactional outbox event contract and payload-drift detection;
-30. certified report output envelope with MIME and filename policy;
-31. end-to-end daily guard export certification;
-32. critical mutation application integration seam;
-33. replay/conflict fail-closed behavior at integration boundary;
-34. synthetic regression coverage for output export and mutation integration;
-35. no database connection or live PostgreSQL execution;
-36. no schema migration, AI activation or real detainee data.
+17. source-grounded daily guard presentation contract and domain/presentation separation;
+18. synthetic PDF/DOCX renderer adapter boundaries;
+19. renderer certification contract `DGRT-1.0`;
+20. certified report output envelope with MIME and filename policy;
+21. end-to-end daily guard export certification;
+22. database environment/access contract without database connection;
+23. schema comparison matrix with migration freeze;
+24. critical mutation transaction boundary;
+25. critical mutation idempotency replay/conflict contract;
+26. transactional outbox and payload-drift contract;
+27. critical mutation integration seam;
+28. non-production aggregate repository interface;
+29. in-memory reference repository implementation;
+30. explicit repository registry for detainee, placement, movement, temporary-exit, report and audit boundaries;
+31. monotonic repository version guard and deterministic removal;
+32. synthetic regression coverage for repository contracts;
+33. no concrete PostgreSQL driver, database connection, or production persistence;
+34. no schema migration, AI activation or real detainee data.
 
-## Next gate: P13.7201–7320
+## Next gate: P13.7321–7440
 
-Establish non-production repository interfaces for detainee, placement, movement, temporary-exit, report and audit aggregates. Add in-memory reference repositories and deterministic reconciliation contracts only. No concrete PostgreSQL driver, migration, production persistence or real detainee data.
+Build deterministic reconciliation contracts across repository state, offline queue state and reporting projections. Then add application service seams for detainee registration, placement/movement and temporary-exit workflows, using repository interfaces only. Preserve authorization, transaction, idempotency, audit and outbox boundaries. No concrete database driver or production persistence.
 
 ## Governance lock
 
