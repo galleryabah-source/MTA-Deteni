@@ -1,16 +1,18 @@
 # MTA DETENI — Project Status
 
-**Version:** Foundation v1.45
-**Current Phase:** P13.2041–P13.2200 operator recovery, local-first synchronization, audit correlation and synthetic resilience
-**Implementation Track:** P13.2200
+**Version:** Foundation v1.46
+**Current Phase:** P13.2201–P13.2440 local-device continuity, sync queue integrity, backup/restore evidence and synthetic multi-device acceptance
+**Implementation Track:** P13.2440
 **Branch:** `phase-p12.961-13.200`
 
 ## Latest Progress
 
-- P13.2041–P13.2080 — operator error/recovery UX boundary;
-- P13.2081–P13.2120 — local-first synchronization contract;
-- P13.2121–P13.2160 — correlation-safe audit chain;
-- P13.2161–P13.2200 — synthetic resilience acceptance.
+- P13.2201–P13.2240 — local-device runtime packaging contract;
+- P13.2241–P13.2280 — fail-closed synchronization queue integrity;
+- P13.2281–P13.2320 — backup/restore evidence contract;
+- P13.2321–P13.2360 — synthetic multi-device acceptance;
+- P13.2361–P13.2400 — continuity release gate;
+- P13.2401–P13.2440 — continuity documentation and synthetic regression coverage.
 
 ## Integrated Application Model
 
@@ -18,9 +20,9 @@ RAP owns registration, administration and reporting; PERKES owns health records 
 
 ## Operational Application Chain
 
-`UI/API Command → Authorization Policy → Canonical Operational Envelope → Domain Aggregate → Transaction Context → Idempotency → Domain Workflow → Immutable Timeline/Audit → Operational Evidence → Reconciliation → Outbox → Projection Checkpoint → Read Model → Dashboard/Workbench/Navigation → QR/Movement/Headcount/Temporary Exit → Reporting Workspace/Timeline → Reporting Snapshot → Report Preview → Report Artifact → Document Output → Template → Notification/Recommendation → Review → Human Approval Binding → Generated Output → Read-only Audit → Synthetic Release Evidence → Operator UI Contract → Responsive Layout → Report Rendering Adapter → Synthetic Release Manifest → Application Shell → Navigation State → Preview/Download → Synthetic Operator Journey → Cross-Module Acceptance → UI Release Evidence → Command UX → Connectivity Safety → Notification Center → Evidence Acknowledgement → Synthetic Release Trace → Error Recovery → Local-First Sync → Audit Correlation → Resilience Acceptance`
+`UI/API Command → Authorization Policy → Canonical Operational Envelope → Domain Aggregate → Transaction Context → Idempotency → Domain Workflow → Immutable Timeline/Audit → Operational Evidence → Reconciliation → Outbox → Projection Checkpoint → Read Model → Dashboard/Workbench/Navigation → QR/Movement/Headcount/Temporary Exit → Reporting Workspace/Timeline → Reporting Snapshot → Report Preview → Report Artifact → Document Output → Template → Notification/Recommendation → Review → Human Approval Binding → Generated Output → Read-only Audit → Synthetic Release Evidence → Operator UI Contract → Responsive Layout → Report Rendering Adapter → Synthetic Release Manifest → Application Shell → Navigation State → Preview/Download → Synthetic Operator Journey → Cross-Module Acceptance → UI Release Evidence → Command UX → Connectivity Safety → Notification Center → Evidence Acknowledgement → Synthetic Release Trace → Error Recovery → Local-First Sync → Audit Correlation → Resilience Acceptance → Local Device Runtime → Sync Queue Integrity → Backup/Restore Evidence → Multi-Device Acceptance → Continuity Gate`
 
-P13.2041–2200 establishes the safety foundation for intermittent connectivity and operational recovery. Network loss never silently authorizes mutation; conflict becomes blocked until controlled resolution; audit correlation remains aggregate-independent but correlation-scoped; resilience acceptance remains synthetic.
+P13.2201–2440 establishes the contract foundation for a local PC/server continuity model in which tablet and smartphone clients can operate through the same local network when internet access is interrupted. Local operation is continuity only; it does not create new authority or bypass authorization.
 
 ## Safety / Governance
 
@@ -42,15 +44,15 @@ QR is an operational verification point, not a free-form data-entry path. Verifi
 
 Leadership remains oversight-read/directive only and is denied direct operational mutation.
 
-Read models, dashboard views, workbench navigation, operational boards, reporting workspace, timelines, notifications, report previews, report artifacts, document outputs, templates, dashboard state, UI contracts, rendering adapters, application shell, navigation state, notification center, release traces and resilience state remain derived/control state. Committed operational evidence remains authoritative and rebuildable.
+Read models, dashboard views, workbench navigation, operational boards, reporting workspace, timelines, notifications, report previews, report artifacts, document outputs, templates, dashboard state, UI contracts, rendering adapters, application shell, navigation state, notification center, release traces, resilience state, local-device runtime state, sync queue state, backup evidence and multi-device acceptance remain derived/control state. Committed operational evidence remains authoritative and rebuildable.
 
-Local-first synchronization is a continuity mechanism, not an authorization mechanism. Conflicts are fail-closed. Audit correlation preserves evidence identity and does not create new authority.
+Local-first synchronization is a continuity mechanism, not an authorization mechanism. Conflicts are fail-closed. Queue items cannot commit unless explicitly completed. Backup restore is promotable only when verification is explicitly VERIFIED.
 
 ## Current Gate
 
-**P13.2200 — RECOVERY / LOCAL-FIRST SYNC / AUDIT CORRELATION / RESILIENCE CONTRACT-READY / EXECUTION-CERTIFICATION PENDING**
+**P13.2440 — LOCAL-DEVICE CONTINUITY / SYNC QUEUE / BACKUP-RESTORE / MULTI-DEVICE ACCEPTANCE CONTRACT-READY / EXECUTION-CERTIFICATION PENDING**
 
-Regression coverage has been added for recovery decisions, conflict blocking, audit correlation and synthetic resilience. Observable GitHub execution telemetry remains unavailable in this work session, so these controls are not certified as executed.
+Synthetic regression coverage has been added for local device classes, failed queue blocking, verified restore evidence and PC/tablet/smartphone acceptance. Observable GitHub execution telemetry remains unavailable in this work session, so these controls are not certified as executed.
 
 ## Execution Certification Rule
 
@@ -58,6 +60,6 @@ CI or local execution may be certified only from observable command/job telemetr
 
 ## Next Gate
 
-**P13.2201–P13.2440 — local-device runtime packaging contract, sync queue integrity, backup/restore evidence, and synthetic multi-device acceptance.**
+**P13.2441–P13.2680 — local server bootstrap contract, LAN client discovery, durable sync journal, and controlled backup rotation.**
 
 No production or live-database step is implied by this next gate.
