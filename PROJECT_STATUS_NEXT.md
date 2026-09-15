@@ -1,7 +1,7 @@
 # MTA DETENI — Next Gate
 
 **Foundation:** v1.61+
-**Current:** P13.6961–7120 — database, transaction, idempotency and outbox boundaries implemented; CI observation pending
+**Current:** P13.7121–7200 — critical mutation integration seam implemented; CI observation pending
 
 ## Completed
 
@@ -34,13 +34,17 @@
 27. critical mutation transaction boundary;
 28. critical mutation idempotency contract and replay/conflict detection;
 29. transactional outbox event contract and payload-drift detection;
-30. synthetic regression coverage for all P13.6961–7120 boundaries;
-31. no database connection or live PostgreSQL execution;
-32. no schema migration, AI activation or real detainee data.
+30. certified report output envelope with MIME and filename policy;
+31. end-to-end daily guard export certification;
+32. critical mutation application integration seam;
+33. replay/conflict fail-closed behavior at integration boundary;
+34. synthetic regression coverage for output export and mutation integration;
+35. no database connection or live PostgreSQL execution;
+36. no schema migration, AI activation or real detainee data.
 
-## Next gate: P13.7121–7200
+## Next gate: P13.7201–7320
 
-Build the application integration seam that composes authentication → authorization → validation → transaction → domain mutation → mandatory audit → outbox, while preserving fail-closed behavior. Then establish the first non-production repository interfaces without binding to a concrete database driver. Keep production persistence blocked.
+Establish non-production repository interfaces for detainee, placement, movement, temporary-exit, report and audit aggregates. Add in-memory reference repositories and deterministic reconciliation contracts only. No concrete PostgreSQL driver, migration, production persistence or real detainee data.
 
 ## Governance lock
 
