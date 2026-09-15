@@ -21,6 +21,7 @@ export type PersistentQueueAdapter<T = OfflineCommand> = Readonly<{
   append(item: T): Promise<void>;
   list(): Promise<readonly T[]>;
   replace(item: T): Promise<void>;
+  replaceByIdentity(item: T, identity: (candidate: T) => string): Promise<void>;
 }>;
 
 export class MemoryQueueAdapter<T = OfflineCommand> implements PersistentQueueAdapter<T> {
@@ -30,6 +31,13 @@ export class MemoryQueueAdapter<T = OfflineCommand> implements PersistentQueueAd
   async replace(item: T): Promise<void> {
     const index = this.items.findIndex((candidate) => candidate === item);
     if (index < 0) throw new Error("Queue replacement target is not present.");
+    this.items[index] = item;
+  }
+  async replaceByIdentity(item: T, identity: (candidate: T) => string): Promise<void> {
+    const target = identity(item);
+    if (!target.trim()) throw new Error("Queue replacement identity is required.");
+    const index = this.items.findIndex((candidate) => identity(candidate) === target);
+    if (index < 0) throw new Error("Queue replacement identity is not present.");
     this.items[index] = item;
   }
 }
