@@ -1,7 +1,7 @@
 # MTA DETENI — Next Gate
 
-**Foundation:** v1.64+
-**Current:** P13.7481–7560 — repository-backed aggregate orchestration seam implemented; CI observation pending
+**Foundation:** v1.66+
+**Current:** P13.7681–7800 — synthetic end-to-end lifecycle certification contract implemented; CI observation pending
 
 ## Completed
 
@@ -44,12 +44,23 @@
 37. synthetic regression coverage for reconciliation, replay and audit/outbox non-duplication;
 38. repository-backed aggregate orchestration seam with version-preserving repository result propagation;
 39. synthetic regression coverage for repository orchestration;
-40. no concrete PostgreSQL driver, database connection, or production persistence;
-41. no schema migration, AI activation or real detainee data.
+40. cross-domain lifecycle command/event envelope correlation contract;
+41. optimistic version propagation contract;
+42. read-model refresh boundary contract;
+43. actor/correlation binding fail-closed contract;
+44. synthetic lifecycle orchestration regression coverage;
+45. controlled synthetic end-to-end lifecycle certification contract;
+46. correlation consistency across lifecycle steps;
+47. optimistic version progression certification;
+48. reporting projection freshness certification;
+49. audit/outbox cardinality integrity guard;
+50. lifecycle drift and duplicate-effect fail-closed regression;
+51. no concrete PostgreSQL driver, database connection, or production persistence;
+52. no schema migration, AI activation or real detainee data.
 
-## Next gate: P13.7561–7680
+## Next gate: P13.7801–7920
 
-Build cross-domain lifecycle orchestration contracts linking detainee registration → placement → movement → temporary-exit → reporting as one controlled application journey. Introduce explicit command/event envelope correlation, optimistic-version propagation, read-model refresh boundaries and failure compensation semantics. Preserve RBAC/SoD, transaction, idempotency, audit, outbox, offline/LAN continuity and fail-closed reconciliation. No concrete database driver, migration, production persistence, AI, or real detainee data.
+Harden the certified lifecycle into a deterministic failure-injection and recovery matrix: authorization denial, stale version, idempotency conflict, repository conflict, outbox failure, reporting refresh failure, and offline reconnect conflict. Define compensation boundaries without pretending distributed rollback is atomic. Extend synthetic evidence so every failure has a terminal state, reason code and recoverability classification. Preserve RBAC/SoD, transaction, idempotency, audit, outbox, offline/LAN continuity and fail-closed governance.
 
 ## Governance lock
 
