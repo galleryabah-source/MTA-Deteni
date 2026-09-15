@@ -1,5 +1,16 @@
 # Changelog
 
+## P13.7921–8040 — Lifecycle Recovery & Continuity Integration
+
+- Separated lifecycle `requestHash` from `commandId`; command identity is no longer silently reused as request content identity.
+- Added synthetic recovery evidence binding failure class, reason code, terminal state, recoverability, command/event/correlation/aggregate identity and expected/resulting versions.
+- Added fail-closed version semantics: pre-commit failure evidence cannot advance the aggregate; committed recovery evidence must advance exactly one version.
+- Added idempotent retry decisions for committed outbox/projection recovery with explicit duplicate-skip and review-required outcomes.
+- Bound offline reconnect decisions to reconciliation outcomes so `REVIEW_CONFLICT` cannot be accepted without a reconciliation `CONFLICT` state.
+- Hardened lifecycle certification to exactly five canonical ordered steps and explicit replay/version semantics.
+- Added synthetic regression coverage for recovery evidence, retry deduplication, reconnect/reconciliation binding and explicit request-hash validation.
+- No concrete database driver, schema migration, AI activation, production persistence, or live PostgreSQL execution.
+
 ## P13.7801–7920 — Failure Injection & Recovery Matrix
 
 - Added a deterministic synthetic failure/recovery matrix covering authorization denial, stale version, idempotency conflict, repository conflict, outbox failure, reporting refresh failure, and offline reconnect conflict.
@@ -52,7 +63,6 @@
 - Inspected the supplied operational daily guard report and recorded only presentation facts evidenced by the source: report title, organization lines, Rudenim Pontianak location, Bravo morning duty label, 11 September 2026 date, 07.00–14.00 WIB duty interval, closing location/date, and signature labels.
 - Added an explicit presentation contract separate from the business/domain `ReportSnapshot` model.
 - Recorded only evidenced section headings; unsupported layout labels remain intentionally unmapped rather than invented.
-- Added deterministic mapping validation for snapshot sections without changing business data.
 - Added synthetic PDF and DOCX renderer adapter boundaries behind the existing renderer abstraction. These are format contracts only; they do not emit production documents or perform persistence.
 - Added regression coverage for source facts, domain/presentation separation, deterministic PDF/DOCX adapter output, and synthetic-only enforcement.
 - No schema migration, AI activation, production persistence, or live PostgreSQL execution.
