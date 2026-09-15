@@ -1,8 +1,8 @@
 # MTA DETENI — Project Status
 
-**Version:** Foundation v1.21
-**Current Phase:** P11.097–P11.160 evidence-integrity and workflow-ownership gate
-**Implementation Track:** P11.160
+**Version:** Foundation v1.22
+**Current Phase:** P11.161–P11.224 temporary-exit lifecycle consistency gate
+**Implementation Track:** P11.224
 **Branch:** `main`
 
 ## Latest Progress
@@ -25,19 +25,19 @@
 - P10.981–P10.988 PASS/exit-code consistency;
 - P10.989–P10.996 packet/observation identity integrity;
 - P10.997–P11.000 synthetic-only evidence enforcement;
-- P11.001–P11.008 supported application-surface identity;
-- P11.009–P11.016 mutation/server-boundary regression;
-- P11.017–P11.024 responsive read-model structural regression;
-- P11.025–P11.032 QR/report application-capability boundary regression;
+- P11.001–P11.032 application-boundary regression;
 - P11.033–P11.064 QR/report contract hardening;
 - P11.065–P11.096 integrated synthetic verification gate;
-- P11.097–P11.104 synthetic evidence identity completeness;
-- P11.105–P11.112 cross-boundary negative-path blocking;
-- P11.113–P11.128 synthetic-only evidence-integrity enforcement;
-- P11.129–P11.136 RAP temporary-exit request ownership;
-- P11.137–P11.144 KAMTIB validation ownership;
-- P11.145–P11.152 Leadership approval ownership;
-- P11.153–P11.160 SUBBAG TU document ownership and controlled handoff to KAMTIB.
+- P11.097–P11.128 evidence-integrity hardening;
+- P11.129–P11.160 workflow ownership and controlled domain handoff;
+- P11.161–P11.168 request-to-validation lifecycle continuity;
+- P11.169–P11.176 approval-to-document lifecycle continuity;
+- P11.177–P11.184 escort-to-departure continuity;
+- P11.185–P11.192 departure/return headcount consistency;
+- P11.193–P11.200 temporary-exit QR context enforcement;
+- P11.201–P11.208 completion/deportation QR separation;
+- P11.209–P11.216 full synthetic lifecycle consistency;
+- P11.217–P11.224 synthetic target and negative-path enforcement.
 
 ## Integrated Application Model
 
@@ -57,9 +57,9 @@ RAP owns registration, administration and reporting; PERKES owns health records 
 
 ## Current Gate
 
-**P11.160 — EVIDENCE-INTEGRITY + WORKFLOW-OWNERSHIP CONTRACT-READY / TRUSTWORTHY EXECUTION TELEMETRY STILL REQUIRED**
+**P11.224 — TEMPORARY-EXIT LIFECYCLE CONSISTENCY CONTRACT-READY / TRUSTWORTHY EXECUTION TELEMETRY STILL REQUIRED**
 
-The synthetic gate now verifies evidence identity/integrity and preserves the controlled temporary-exit ownership chain. These are contract-level controls only; they do not claim real execution, database integration, production readiness, or operational authorisation.
+The synthetic lifecycle contract now connects temporary-exit state progression, departure/return headcount deltas, and distinct QR contexts while preserving the domain state machine and governance boundaries. This remains contract-level evidence only.
 
 ## Execution Certification Rule
 
@@ -67,6 +67,6 @@ CI or local execution may be certified only from observable command/job telemetr
 
 ## Next Gate
 
-**P11.161–P11.224 — temporary-exit lifecycle composition, movement/headcount consistency, QR context enforcement, and synthetic cross-domain E2E expansion.**
+**P11.225–P11.288 — movement/headcount domain composition, detainee placement consistency, operational QR validity-window enforcement, and synthetic cross-domain regression expansion.**
 
 No production or live-database step is implied by this next gate.
