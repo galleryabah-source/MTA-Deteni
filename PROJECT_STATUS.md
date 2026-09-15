@@ -1,19 +1,17 @@
 # MTA DETENI — Project Status
 
 **Foundation:** v1.60+
-**Current Track:** P13.5809–5880 observable execution + evidence acceptance
+**Current Track:** P13.5823–5880 controlled synthetic domain journey
 **Branch:** `main`
-**Latest implementation commit:** `68c9f6c7425fd0d0de40a7d5e05f1331195e80eb`
+**Latest implementation commit:** `0125ee734880f5b2f17d5124ccf81ffce71147ca`
 
 ## Latest progress
 
-- P13.5809–5822 — deterministic architecture/governance contract gate;
-- P13.5809–5880 — observable execution and evidence acceptance contract;
-- P13.5801–5805 — deterministic non-production execution harness for Node/npm, production typecheck, regression and TypeScript domain tests;
-- P13.5806 — explicit TypeScript test compilation boundary;
-- P13.5807 — explicit `typecheck:test` package command;
-- P13.5808 — CI hardened with controlled execution evidence and artifact upload;
-- P13.5681–5720 — canonical `HEAD_RUDENIM` governance vocabulary;
+- P13.5823 — canonical `HEAD_RUDENIM` enforced in the shared domain type; historical `LEADERSHIP` is retained only as an explicit compatibility type;
+- P13.5824–5826 — deterministic temporary-exit synthetic journey tests: complete happy path, invalid skip/reversal rejection and terminal-state protection;
+- P13.5809–5822 — deterministic architecture/governance contract gate and observable execution/evidence acceptance contract;
+- P13.5801–5808 — deterministic non-production execution harness, test compilation boundary and controlled evidence upload;
+- P13.5681–5720 — canonical governance vocabulary;
 - P13.5721–5760 — DR evidence binding;
 - P13.5761–5800 — report rendering evidence gate.
 
@@ -37,16 +35,16 @@ The application chain remains:
 
 ## Current certification state
 
-**P13.5822 — STATIC CONTRACT GATE IMPLEMENTED / OBSERVATION PENDING**
+**P13.5826 — CONTROLLED SYNTHETIC DOMAIN JOURNEY IMPLEMENTED / OBSERVATION PENDING**
 
-A deterministic contract gate now validates the package/test boundaries, controlled CI environment, evidence publication, governance locks, canonical `HEAD_RUDENIM` vocabulary and non-false certification state. It writes `artifacts/mta-evidence/contract-gate.json` and is executed before dependency installation/runtime checks.
+The repository now has executable, dependency-light synthetic tests for the temporary-exit state machine. These tests prove the intended ordered lifecycle and reject skipped/reversed transitions, but they are not yet certified by CI because GitHub Actions continues to terminate with no usable step telemetry.
 
-The repository still cannot claim CI PASS because the latest GitHub Actions observation failed with a completed job that exposed no usable step telemetry. This remains an infrastructure/runner observation blocker, not an application PASS or FAIL.
+Latest observed CI behavior remains an infrastructure/runner observation blocker: completed failure with zero reported steps. A targeted rerun was accepted by GitHub, but execution telemetry must still be observed before claiming PASS.
 
 ## Next gate
 
-**P13.5823–5880 — obtain observable CI telemetry, validate execution/evidence identity, then begin controlled application-surface verification.**
+**P13.5827–5880 — observable CI/evidence identity validation and expansion of synthetic domain-surface checks for movement, placement, authorization and reporting boundaries.**
 
 **Following:** P13.5881–5960 — runtime/browser/RBAC synthetic journey and LAN/offline continuity harness design.
 
-No production deployment, live operational integration, or schema migration is implied.
+No production deployment, live operational integration, AI activation, or schema migration is implied.
