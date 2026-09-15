@@ -10,6 +10,8 @@ import { certifyRecoveryJourney } from "../src/application/recovery-certificatio
 
 const context = { executionId: "EXEC-S", runtimeMode: "LAN" as const, deviceClass: "TABLET" as const, networkScopeId: "NET-S", certificationJourneyId: "J-S", authenticated: true, syntheticOnly: true as const };
 const command = { commandId: "CMD-S", aggregateId: "DET-S", commandType: "MOVEMENT_RECORD", payloadHash: "FP-S", idempotencyKey: "ID-S", createdAt: "2026-09-16T00:00:00Z", state: "PENDING" as const };
+const reconciliationApply = { commandId: "CMD-S", action: "APPLY" as const };
+const reconciliationConflict = { commandId: "CMD-S", action: "REVIEW_CONFLICT" as const };
 
 function certifiedContinuity() {
   const steps = ["REGISTRATION", "PLACEMENT", "MOVEMENT", "TEMPORARY_EXIT", "REPORTING"].map((name, i) => ({ name: name as "REGISTRATION"|"PLACEMENT"|"MOVEMENT"|"TEMPORARY_EXIT"|"REPORTING", aggregateId: "DET-S", commandId: `CMD-S-${i}`, eventId: `EVT-S-${i}`, correlationId: "CORR-S", beforeVersion: i, afterVersion: i + 1, status: "COMMITTED" as const }));
@@ -34,7 +36,7 @@ test("session scope drift fails closed", () => {
   assert.throws(() => assertSessionScope(session, { ...context, authenticated: false }, "DEV-S", "INST-S"));
 });
 
-test("inactive or closed session rejects command admission", () => {
+test("inactive or interrupted session rejects command admission and clean handoff", () => {
   const session = openOperationalSession({ sessionId: "SES-I", context, deviceId: "DEV-S", installationId: "INST-S" });
   const interrupted = interruptOperationalSession(session);
   assert.throws(() => admitLocalCommand({ session: interrupted, context, deviceId: "DEV-S", installationId: "INST-S", command }));
@@ -55,13 +57,13 @@ test("clean close requires synchronized queue, ready backup and continuity certi
 test("pending queue or reconciliation conflict blocks clean close", () => {
   const session = openOperationalSession({ sessionId: "SES-B", context, deviceId: "DEV-S", installationId: "INST-S" });
   const { backup, continuity } = certifiedContinuity();
-  const pendingRuntime = assessRuntimeContinuity({ context, queue: [command], reconciliation: { action: "APPLY" } });
-  assert.throws(() => assessSessionClose({ session, context, deviceId: "DEV-S", installationId: "INST-S", queue: [command], runtime: pendingRuntime, backup, continuity }));
-  const conflictRuntime = assessRuntimeContinuity({ context, queue: [command], reconciliation: { action: "REVIEW_CONFLICT" } });
-  assert.throws(() => assessSessionClose({ session, context, deviceId: "DEV-S", installationId: "INST-S", queue: [command], reconciliation: { action: "REVIEW_CONFLICT" }, runtime: conflictRuntime, backup, continuity }));
+  const pendingRuntime = assessRuntimeContinuity({ context, queue: [command], reconciliation: reconciliationApply });
+  assert.throws(() => assessSessionClose({ session, context, deviceId: "DEV-S", installationId: "INST-S", queue: [command], reconciliation: reconciliationApply, runtime: pendingRuntime, backup, continuity }));
+  const conflictRuntime = assessRuntimeContinuity({ context, queue: [command], reconciliation: reconciliationConflict });
+  assert.throws(() => assessSessionClose({ session, context, deviceId: "DEV-S", installationId: "INST-S", queue: [command], reconciliation: reconciliationConflict, runtime: conflictRuntime, backup, continuity }));
 });
 
-test("interrupted session is never a clean handoff", () => {
+test("interrupted session is never a clean handoff even with fabricated evidence", () => {
   const session = openOperationalSession({ sessionId: "SES-X", context, deviceId: "DEV-S", installationId: "INST-S" });
   const interrupted = interruptOperationalSession(session);
   assert.equal(interrupted.state, "INTERRUPTED");
