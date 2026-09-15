@@ -1,8 +1,8 @@
 # MTA DETENI — Project Status
 
-**Version:** Foundation v1.50
-**Current Phase:** P13.3121–P13.3320 data-contract audit, cross-domain invariants, report-template fidelity and synthetic certification preparation
-**Implementation Track:** P13.3320
+**Version:** Foundation v1.51
+**Current Phase:** P13.3321–P13.3480 synthetic integration matrix, report reconciliation, QR/movement acceptance and pre-certification evidence
+**Implementation Track:** P13.3480
 **Branch:** `phase-p12.961-13.200`
 
 ## Latest Progress
@@ -17,7 +17,11 @@
 - P13.3161–P13.3200 — operational data-contract audit boundary;
 - P13.3201–P13.3240 — report-template fidelity contract;
 - P13.3241–P13.3280 — synthetic integration certification contract;
-- P13.3281–P13.3320 — production authorization barrier.
+- P13.3281–P13.3320 — production authorization barrier;
+- P13.3321–P13.3360 — synthetic contract integration matrix;
+- P13.3361–P13.3400 — report source-field reconciliation;
+- P13.3401–P13.3440 — QR/movement/temporary-exit cross-domain acceptance;
+- P13.3441–P13.3480 — observable pre-certification evidence bundle.
 
 ## Integrated Application Model
 
@@ -25,7 +29,7 @@ RAP owns registration, administration and reporting; PERKES owns health records 
 
 ## Operational Chain
 
-`UI/API Command → Authorization Policy → Canonical Operational Envelope → Domain Aggregate → Transaction Context → Idempotency → Domain Workflow → Immutable Timeline/Audit → Operational Evidence → Reconciliation → Outbox → Projection Checkpoint → Read Model → Dashboard/Workbench/Navigation → QR/Movement/Headcount/Temporary Exit → Reporting Workspace/Timeline → Reporting Snapshot → Report Preview → Report Artifact → Document Output → Template → Notification/Recommendation → Review → Human Approval Binding → Generated Output → Read-only Audit → Synthetic Release Evidence → Operator UI Contract → Responsive Layout → Report Rendering Adapter → Synthetic Release Manifest → Application Shell → Navigation State → Preview/Download → Synthetic Operator Journey → Cross-Module Acceptance → UI Release Evidence → Command UX → Connectivity Safety → Notification Center → Evidence Acknowledgement → Synthetic Release Trace → Error Recovery → Local-First Sync → Audit Correlation → Resilience Acceptance → Local Device Runtime → Sync Queue Integrity → Backup/Restore Evidence → Multi-Device Acceptance → Continuity Gate → Local Server Bootstrap → LAN Client Discovery → Durable Sync Journal → Controlled Backup Rotation → Continuity Runtime Gate → Offline Session → Client Pairing → Sync Replay → Integrity Checksum → Disaster Recovery Rehearsal → Continuity Session Lifecycle → Device Revocation → Sync Conflict Resolution → Evidence Chain Sealing → Synthetic Continuity E2E → Continuity Release Gate → Cross-Domain Invariants → Operational Data Contract → Report Template Fidelity → Synthetic Certification → Production Barrier`
+`UI/API Command → Authorization Policy → Canonical Operational Envelope → Domain Aggregate → Transaction Context → Idempotency → Domain Workflow → Immutable Timeline/Audit → Operational Evidence → Reconciliation → Outbox → Projection Checkpoint → Read Model → Dashboard/Workbench/Navigation → QR/Movement/Headcount/Temporary Exit → Reporting Workspace/Timeline → Reporting Snapshot → Report Preview → Report Artifact → Document Output → Template → Notification/Recommendation → Review → Human Approval Binding → Generated Output → Read-only Audit → Synthetic Release Evidence → Operator UI Contract → Responsive Layout → Report Rendering Adapter → Synthetic Release Manifest → Application Shell → Navigation State → Preview/Download → Synthetic Operator Journey → Cross-Module Acceptance → UI Release Evidence → Command UX → Connectivity Safety → Notification Center → Evidence Acknowledgement → Synthetic Release Trace → Error Recovery → Local-First Sync → Audit Correlation → Resilience Acceptance → Local Device Runtime → Sync Queue Integrity → Backup/Restore Evidence → Multi-Device Acceptance → Continuity Gate → Local Server Bootstrap → LAN Client Discovery → Durable Sync Journal → Controlled Backup Rotation → Continuity Runtime Gate → Offline Session → Client Pairing → Sync Replay → Integrity Checksum → Disaster Recovery Rehearsal → Continuity Session Lifecycle → Device Revocation → Sync Conflict Resolution → Evidence Chain Sealing → Synthetic Continuity E2E → Continuity Release Gate → Cross-Domain Invariants → Operational Data Contract → Report Template Fidelity → Synthetic Certification → Production Barrier → Synthetic Contract Matrix → Report Source Reconciliation → QR/Movement/Temporary-Exit Acceptance → Pre-Certification Evidence Bundle`
 
 ## Safety / Governance
 
@@ -49,13 +53,14 @@ RAP owns registration, administration and reporting; PERKES owns health records 
 - Sync conflicts are never silently resolved by last-write-wins; human review is required.
 - Evidence-chain sealing occurs only after integrity verification.
 - Report fidelity is represented as a contract with source-field mapping and deterministic element order; exact visual reproduction still requires the approved source template and execution evidence.
-- Certification contracts require observable execution evidence; source-code presence alone is not certification.
+- Cross-domain compatibility, report source reconciliation and QR context are now explicit synthetic contracts.
+- Pre-certification evidence requires observable evidence; source-code presence alone is not certification.
 
 ## Current Gate
 
-**P13.3320 — CROSS-DOMAIN INVARIANTS / DATA-CONTRACT AUDIT / REPORT-TEMPLATE FIDELITY / SYNTHETIC CERTIFICATION / PRODUCTION-BARRIER CONTRACT-READY / EXECUTION-CERTIFICATION PENDING**
+**P13.3480 — SYNTHETIC CONTRACT MATRIX / REPORT SOURCE RECONCILIATION / QR-MOVEMENT ACCEPTANCE / PRE-CERTIFICATION EVIDENCE CONTRACT-READY / EXECUTION-CERTIFICATION PENDING**
 
-Synthetic regression coverage has been added for the new invariant and certification boundaries. Observable GitHub execution telemetry is not being represented as PASS unless actually available.
+Synthetic regression coverage has been added for contract compatibility, report source-field equality, QR temporary-exit context separation and observable evidence requirements. No execution PASS is claimed without observable telemetry.
 
 ## Execution Certification Rule
 
@@ -63,6 +68,6 @@ CI or local execution may be certified only from observable command/job telemetr
 
 ## Next Gate
 
-**P13.3321–P13.3560 — synthetic contract integration matrix, report source-field reconciliation, QR/movement/temporary-exit cross-domain acceptance, and pre-certification evidence bundle.**
+**P13.3481–P13.3720 — full synthetic journey composition, report artifact determinism, role/permission regression matrix, offline-to-online reconciliation acceptance, and certification evidence packaging.**
 
 No production or live-database step is implied by this next gate.
