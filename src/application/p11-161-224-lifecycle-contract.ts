@@ -4,7 +4,7 @@ export type LifecycleEvent = Readonly<{
   checkpoint: string;
   state: TemporaryExitState;
   headcountDelta: number;
-  qrContext?: "TEMPORARY_EXIT" | "DEPORTATION";
+  qrContext?: "TEMPORARY_EXIT";
   outcome?: "ACCEPTED" | "REJECTED" | "EXPIRED" | "FUTURE" | "CONTEXT_MISMATCH" | "INACTIVE";
 }>;
 
@@ -14,10 +14,7 @@ export type LifecycleContract = Readonly<{
   events: readonly LifecycleEvent[];
 }>;
 
-const expected: readonly TemporaryExitState[] = [
-  "REQUESTED", "VALIDATED", "APPROVED", "DOCUMENTED", "ESCORT_ASSIGNED",
-  "DEPARTED", "RETURN_PENDING", "RETURNED", "COMPLETED",
-];
+const expected: readonly TemporaryExitState[] = ["REQUESTED", "VALIDATED", "APPROVED", "DOCUMENTED", "ESCORT_ASSIGNED", "DEPARTED", "RETURN_PENDING", "RETURNED", "COMPLETED"];
 
 export function defaultSyntheticLifecycle(): readonly LifecycleEvent[] {
   return expected.map((state, index) => ({
@@ -25,7 +22,6 @@ export function defaultSyntheticLifecycle(): readonly LifecycleEvent[] {
     state,
     headcountDelta: state === "DEPARTED" ? -1 : state === "RETURNED" ? 1 : 0,
     ...(state === "DEPARTED" ? { qrContext: "TEMPORARY_EXIT" as const, outcome: "ACCEPTED" as const } : {}),
-    ...(state === "COMPLETED" ? { qrContext: "DEPORTATION" as const, outcome: "ACCEPTED" as const } : {}),
   }));
 }
 
@@ -34,8 +30,8 @@ export function validateLifecycleContract(contract: LifecycleContract): "READY" 
   return contract.events.every((event, index) =>
     event.state === expected[index] &&
     event.checkpoint.trim().length > 0 &&
-    (event.state === "DEPARTED" ? event.headcountDelta === -1 && event.qrContext === "TEMPORARY_EXIT" && event.outcome === "ACCEPTED" : true) &&
+    (event.state === "DEPARTED" ? event.headcountDelta === -1 && event.qrContext === "TEMPORARY_EXIT" && event.outcome === "ACCEPTED" : event.headcountDelta === 0 || event.state === "RETURNED") &&
     (event.state === "RETURNED" ? event.headcountDelta === 1 : true) &&
-    (event.state === "COMPLETED" ? event.qrContext === "DEPORTATION" && event.outcome === "ACCEPTED" : true),
+    event.qrContext !== undefined ? event.qrContext === "TEMPORARY_EXIT" : true,
   ) ? "READY" : "BLOCKED";
 }
