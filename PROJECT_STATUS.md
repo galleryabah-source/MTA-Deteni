@@ -1,24 +1,21 @@
 # MTA DETENI — Project Status
 
 **Foundation:** v1.60+
-**Current Track:** P13.5967–6040 integrated synthetic continuity journey / observation pending
+**Current Track:** P13.6041–6080 runtime adapter identity hardening / observation pending
 **Branch:** `main`
-**Latest implementation checkpoint:** P13.5967–6040
+**Latest implementation checkpoint:** P13.6041
 
 ## Latest progress
 
-- P13.5967 — composed offline command enqueue → persistent queue adapter → browser mutation identity/idempotency boundary;
-- P13.5968 — composed LAN session binding and local-PC fail-closed boundary into the same runtime journey;
-- P13.5969 — composed versioned backup manifest chain and reconnect reconciliation;
-- P13.5970 — bound the reconciled synthetic command to an immutable reporting snapshot and canonical representation;
-- P13.5971 — bound the journey to controlled-nonprod continuity evidence with deterministic fingerprint verification;
-- P13.5972–6040 — added deterministic integrated synthetic journey tests, including expired-session fail-closed regression;
+- P13.6041 — strengthened queue replacement around stable command identity rather than object reference;
+- P13.6042 — added regression proving an equivalent command object can replace a queued command by `commandId`, while unknown identity fails closed;
+- P13.5967–6040 — composed offline command → persistent queue → LAN session → local-PC boundary → backup chain → reconnect reconciliation → reporting snapshot → continuity evidence;
 - P13.5963–5966 — persistent queue seam, LAN session binding, browser/local-PC boundary hardening and synthetic backup manifest chain;
 - P13.5841–5880 — contextual QR semantics, immutable reporting snapshot and integrated cross-domain synthetic journey.
 
-## Integrated continuity journey
+## Runtime continuity integrity
 
-The current application-level synthetic seam composes: offline command → persistent queue → authenticated LAN session → local-PC boundary → backup chain → reconnect/idempotency-aware reconciliation → reporting snapshot → continuity evidence. It is deliberately framework-neutral and performs no network, database, filesystem or production-data access.
+Queue identity is now explicit at the adapter seam: command replacement can be addressed by stable domain identity (`commandId`) without relying on object identity. This is still a framework-neutral synthetic adapter; it does not claim durable browser/SQLite/PostgreSQL persistence.
 
 The application chain remains: UI/API Command → Authorization → Domain Workflow → Immutable Evidence → Reconciliation → Projection → Reporting. Runtime adapters do not bypass authorization, idempotency or audit/evidence controls.
 
@@ -34,10 +31,10 @@ The application chain remains: UI/API Command → Authorization → Domain Workf
 
 ## Current certification state
 
-**P13.5967–6040 — IMPLEMENTED CONTRACTS / OBSERVATION PENDING**
+**P13.6041–6080 — IMPLEMENTED CONTRACTS / OBSERVATION PENDING**
 
-The integrated journey and deterministic regression tests are committed. GitHub Actions remains subject to the existing observation blocker when job-step telemetry/logs/artifacts are unavailable. No runtime PASS is inferred until the controlled CI observation is available.
+The stable queue identity contract and regression are committed. GitHub Actions remains subject to the existing observation blocker when job-step telemetry/logs/artifacts are unavailable. No runtime PASS is inferred until controlled CI observation is available.
 
 ## Next gate
 
-**P13.6041–6080 — runtime adapter identity hardening:** strengthen queue replacement semantics around stable command identity, add explicit reconnect state transition assertions, and extend evidence/reporting invariants without introducing production persistence or schema migration.
+**P13.6043–6120 — reconnect state/evidence hardening:** explicitly model queue state transitions during reconnect, bind APPLY/SKIP_DUPLICATE/REVIEW_CONFLICT outcomes to continuity evidence, and preserve immutable reporting semantics. No production persistence, schema migration, AI or live database execution.
