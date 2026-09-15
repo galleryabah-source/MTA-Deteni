@@ -9,6 +9,7 @@ export type LifecycleCommandEnvelope<T> = Readonly<{
   correlationId: string;
   aggregateId: string;
   expectedVersion: number;
+  requestHash: string;
   payload: T;
 }>;
 
@@ -30,12 +31,11 @@ export type LifecycleReadRefresh = Readonly<{
 }>;
 
 export function assertLifecycleEnvelope(input: LifecycleCommandEnvelope<unknown>): void {
-  for (const value of [input.commandId, input.correlationId, input.aggregateId]) if (!value.trim()) throw new Error("Lifecycle command identity is required.");
+  for (const value of [input.commandId, input.correlationId, input.aggregateId, input.requestHash]) if (!value.trim()) throw new Error("Lifecycle command identity/hash is required.");
   if (!Number.isInteger(input.expectedVersion) || input.expectedVersion < 0) throw new Error("Lifecycle expected version is invalid.");
 }
 
 export function createLifecycleEvent<T>(input: LifecycleEventEnvelope<T>): LifecycleEventEnvelope<T> {
-  assertLifecycleEnvelope({ commandId: input.commandId, correlationId: input.correlationId, aggregateId: input.aggregateId, expectedVersion: input.resultingVersion - 1, payload: input.payload });
   if (!input.eventId.trim() || !input.eventType.trim()) throw new Error("Lifecycle event identity is required.");
   if (!Number.isInteger(input.resultingVersion) || input.resultingVersion <= 0) throw new Error("Lifecycle resulting version is invalid.");
   return Object.freeze({ ...input });
@@ -59,10 +59,10 @@ export type LifecycleOrchestrator = Readonly<{
 
 export function createLifecycleOrchestrator(services: MtaApplicationServices): LifecycleOrchestrator {
   return Object.freeze({
-    register: (ctx) => services.registerDetainee({ ...ctx, detainee: ctx.command.payload, requestHash: ctx.command.commandId }),
-    place: (ctx) => services.placeDetainee({ ...ctx, placement: ctx.command.payload, requestHash: ctx.command.commandId }),
-    movement: (ctx) => services.recordMovement({ ...ctx, movement: ctx.command.payload, requestHash: ctx.command.commandId }),
-    temporaryExit: (ctx) => services.advanceTemporaryExit({ ...ctx, exitId: ctx.command.payload.exitId, from: ctx.command.payload.from, to: ctx.command.payload.to, requestHash: ctx.command.commandId, apply: ctx.apply }),
+    register: (ctx) => services.registerDetainee({ ...ctx, detainee: ctx.command.payload, requestHash: ctx.command.requestHash }),
+    place: (ctx) => services.placeDetainee({ ...ctx, placement: ctx.command.payload, requestHash: ctx.command.requestHash }),
+    movement: (ctx) => services.recordMovement({ ...ctx, movement: ctx.command.payload, requestHash: ctx.command.requestHash }),
+    temporaryExit: (ctx) => services.advanceTemporaryExit({ ...ctx, exitId: ctx.command.payload.exitId, from: ctx.command.payload.from, to: ctx.command.payload.to, requestHash: ctx.command.requestHash, apply: ctx.apply }),
   });
 }
 
