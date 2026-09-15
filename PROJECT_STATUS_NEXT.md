@@ -1,7 +1,7 @@
 # MTA DETENI — Next Gate
 
 **Foundation:** v1.60+
-**Current:** P13.6761–6800 — integrated daily guard journey regression implemented; CI observation pending
+**Current:** P13.6801–6880 — source-grounded daily guard presentation mapping and synthetic PDF/DOCX adapter boundaries implemented; CI observation pending
 
 ## Completed
 
@@ -18,16 +18,21 @@
 11. report download boundary with preview/snapshot/document binding and deterministic safe filename;
 12. integrated daily guard report journey from validated snapshot through preview to download;
 13. application surface regression for REPORTS, responsive behavior and role navigation;
-14. renderer abstraction with REFERENCE_TEXT as deterministic reference implementation and future PDF/DOCX formats reserved;
+14. renderer abstraction with REFERENCE_TEXT as deterministic reference implementation and PDF/DOCX formats reserved;
 15. daily guard renderer application boundary;
 16. canonical daily guard section-order and completeness contract;
 17. integrated daily guard journey regression across snapshot → render → preview → download;
-18. no adapter writes to live production systems;
-19. no schema migration, AI activation or real detainee data.
+18. source-grounded daily guard presentation contract based on the supplied report;
+19. strict separation of business/domain snapshot fields from presentation metadata;
+20. evidenced source heading mappings only; unsupported layout facts are not invented;
+21. synthetic PDF/DOCX renderer adapter boundaries behind the renderer abstraction;
+22. adapter regression for deterministic content, identity binding and synthetic-only enforcement;
+23. no adapter writes to live production systems;
+24. no schema migration, AI activation or real detainee data.
 
-## Next gate: P13.6801–6880
+## Next gate: P13.6881–6960
 
-Inspect the supplied operational daily guard report source and establish a source-grounded presentation mapping contract. Keep business/domain fields separate from layout. Do not invent fields. Then prepare PDF/DOCX renderer adapters behind the existing renderer abstraction, initially as non-production synthetic boundaries only.
+Harden renderer certification and report-template fidelity without introducing production persistence. Add explicit format-adapter invariants, deterministic output identity/content hashing, negative tests for cross-format and snapshot drift, and a template-version contract. Keep binary PDF/DOCX generation behind the adapter boundary until a safe non-production runtime and approved rendering dependency path are available.
 
 ## Governance lock
 
