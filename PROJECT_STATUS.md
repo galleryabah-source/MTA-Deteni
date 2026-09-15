@@ -1,27 +1,20 @@
 # MTA DETENI — Project Status
 
 **Version:** Foundation v1.15
-**Current Phase:** P10.777–P10.808 synthetic application-surface implementation
-**Implementation Track:** P10.808
+**Current Phase:** P10.809–P10.904 application-surface and release-readiness hardening
+**Implementation Track:** P10.904
 **Branch:** `main`
 
 ## Latest Progress
 
-- P10.577–P10.584 pilot-readiness evidence and fail-closed certification contract;
-- P10.585–P10.592 API/application transport contract;
-- P10.593–P10.600 responsive operator read-model contract;
-- P10.601–P10.608 regu jaga reporting/export contract;
-- P10.609–P10.632 controlled integration gate;
-- P10.633–P10.656 controlled synthetic verification suite;
-- P10.657–P10.680 QR, reporting and operator workflow hardening;
 - P10.681–P10.704 synthetic E2E orchestration;
 - P10.705–P10.728 UI/operator read-model contract;
 - P10.729–P10.752 deterministic report-renderer preparation;
 - P10.753–P10.776 regression/security hardening baseline;
-- P10.777–P10.784 UI shell/read-model implementation boundary;
-- P10.785–P10.792 QR scan-result adapter contract;
-- P10.793–P10.800 report artifact adapter contract;
-- P10.801–P10.808 composed synthetic application-surface regression tests.
+- P10.777–P10.808 application-surface implementation boundary;
+- P10.809–P10.840 application-surface composition and synthetic regression;
+- P10.841–P10.872 responsive operator workflow UI contract;
+- P10.873–P10.904 release-readiness boundary.
 
 ## Integrated Application Model
 
@@ -41,10 +34,10 @@ RAP owns registration, administration and reporting; PERKES owns health records 
 
 ## Current Gate
 
-**P10.808 — SYNTHETIC APPLICATION-SURFACE CONTRACT READY**
+**P10.904 — RELEASE-CANDIDATE CONTRACT READY / EXECUTION EVIDENCE REQUIRED**
 
-The repository now contains the application-surface contracts for UI/read-model access, QR verification outcomes, deterministic report artifact adaptation and composed regression coverage. These additions do not authorize live database execution or production deployment.
+The application surface now has explicit UI/read-model, QR, reporting and operator-workflow boundaries. Release readiness remains evidence-based; no CI PASS, live database PASS, or production readiness is claimed without observable evidence.
 
 ## Next Gate
 
-**P10.809+ — synthetic regression execution/evidence composition and continued application-surface hardening.** Live integration remains blocked until explicit governance clearance and an approved non-production target.
+**P10.905–936 — synthetic release-candidate test matrix, evidence packet composition, and final pre-authorisation audit of application boundaries.**
