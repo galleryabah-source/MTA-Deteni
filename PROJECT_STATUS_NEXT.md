@@ -1,7 +1,7 @@
 # MTA DETENI — Next Gate
 
-**Foundation:** v1.68
-**Current:** P13.7921–8040 — failure recovery integrated with lifecycle and continuity contracts; CI observation blocker confirmed
+**Foundation:** v1.69
+**Current:** P13.8161–8280 — deterministic recovery journey and certification boundary implemented; CI observation blocker confirmed
 
 ## Completed
 
@@ -66,11 +66,19 @@
 59. idempotent retry contract for committed outbox/projection recovery;
 60. offline reconnect decision bound to reconciliation status with fail-closed conflict handling;
 61. lifecycle certification hardened to canonical five-step order and replay/version semantics;
-62. synthetic recovery/continuity regression coverage for request-hash, recovery evidence, retry deduplication and reconnect conflict binding.
+62. synthetic recovery/continuity regression coverage for request-hash, recovery evidence, retry deduplication and reconnect conflict binding;
+63. deterministic recovery journey proving pre-commit zero-effect behavior;
+64. deterministic post-commit recovery retry with duplicate suppression;
+65. recovery evidence bound to lifecycle command/event/correlation/aggregate/version;
+66. offline reconnect conflict forced into reconciliation review;
+67. recovery certification boundary enforcing mutation/audit/outbox cardinality;
+68. canonical retry sequence `RETRY → SKIP_DUPLICATE` for committed infrastructure recovery;
+69. no cross-system atomic rollback assumption;
+70. synthetic-only recovery journey and certification regression coverage.
 
-## Next gate: P13.8041–8160
+## Next gate: P13.8281–8400
 
-Build the deterministic recovery journey across the lifecycle: bind recovery evidence to actual lifecycle steps, verify pre-commit failures produce zero mutation/audit/outbox effects, verify post-commit outbox/projection failures are retryable without duplication, and certify offline reconnect conflicts through reconciliation. Keep expected-version, idempotency, RBAC/SoD, audit, outbox, reporting, LAN/offline continuity and synthetic-only governance intact.
+Harden the recovery journey against cross-step drift: bind recovery evidence to the lifecycle certification record, require command/request/event identity consistency, certify retry keys against payload fingerprints, and add a unified synthetic failure matrix covering all seven failure classes through the recovery journey. Then prepare the contract boundary for later runtime adapters without introducing database drivers, migrations, production data, or AI.
 
 ## Governance lock
 
@@ -78,4 +86,4 @@ Migration Freeze TRUE. AI OFF. Repository SYNTHETIC ONLY. Production access NOT 
 
 ## Observation blocker
 
-Run #416 (head `ded6e6a96b8127a051b02a75baaf4770f9280849`) completed with failure, but its only job exposes zero steps and no logs. Run #415 likewise completed with failure without step telemetry. This is consistent with the existing GitHub Actions runner/observation failure and is not evidence of an application test failure. CI PASS is therefore not claimed.
+GitHub Actions remains an observation blocker. Run #416 failed with zero steps and no logs; its job log endpoint returned BlobNotFound. Repository implementation checkpoints are therefore tracked independently from runtime CI PASS claims.
