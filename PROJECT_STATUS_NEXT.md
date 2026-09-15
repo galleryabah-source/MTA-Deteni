@@ -1,7 +1,7 @@
 # MTA DETENI — Next Gate
 
-**Foundation:** v1.74
-**Current:** P13.8761–8880 — unified synthetic continuity certification implemented; CI observation blocker remains
+**Foundation:** v1.75
+**Current:** P13.8881–9000 — offline-first operational session contract implemented; CI observation blocker remains
 
 ## Completed (through current gate)
 
@@ -30,11 +30,14 @@
 - Unified synthetic continuity certification binding runtime execution, lifecycle certification, recovery certification, queue/reconciliation readiness and backup-chain readiness.
 - Continuity certification rejects unresolved runtime queue/reconciliation or backup states.
 - Continuity certification preserves lifecycle projection/version identity.
+- **Offline-first operational session contract:** device-scoped session identity, execution/network/runtime-scope binding, authenticated synthetic admission, LAN/LOCAL-only local command admission, pending-queue admission invariant, deterministic clean-close evidence, and explicit interruption state.
+- **Session close continuity binding:** clean close requires synchronized queue, ready backup, READY runtime continuity and matching continuity certification; close evidence is device/install/network/execution bound.
+- **Interrupted-session safety:** interrupted/closed sessions cannot admit local commands; interrupted sessions cannot be represented as clean handoff even with fabricated close evidence.
 - No database driver, migration, production persistence, real detainee data, or AI activation.
 
-## Next gate: P13.8881–9000
+## Next gate: P13.9001–9120
 
-Build the contract-level **offline-first operational session** above the certified continuity layer: define a device-scoped session lifecycle, deterministic local command admission, queue admission policy, reconnect/reconciliation completion proof and safe session close. Then bind the session close evidence to continuity certification so an interrupted local/LAN session cannot be mistaken for a clean operational handoff. No concrete persistence, migrations, production data or AI.
+Build the **offline-first session reconciliation completion contract** above the operational session: deterministic per-command reconciliation receipts, completion proof covering the full admitted queue, session state transition from reconciliation-required to active/closable, stale execution/session rejection, and certification binding so a partial reconnect can never be represented as complete. Then extend the synthetic end-to-end continuity regression across admission → offline queue → reconnect → reconciliation → backup → clean close.
 
 ## Governance lock
 
