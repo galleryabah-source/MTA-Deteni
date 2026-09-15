@@ -1,5 +1,16 @@
 # Changelog
 
+## P13.7801–7920 — Failure Injection & Recovery Matrix
+
+- Added a deterministic synthetic failure/recovery matrix covering authorization denial, stale version, idempotency conflict, repository conflict, outbox failure, reporting refresh failure, and offline reconnect conflict.
+- Added explicit terminal states, stable reason codes and recoverability classifications for each governed failure.
+- Pre-commit failures are fail-closed and are not treated as blindly retryable.
+- Post-commit infrastructure failures are explicitly retryable without representing them as distributed rollback.
+- Added an explicit compensation boundary contract so compensation is never inferred from a generic failure or presented as atomic cross-system rollback.
+- Added canonical recovery-case validation and deterministic fingerprinting for regression evidence.
+- Added synthetic regression coverage for all failure classes, retry safety, tamper detection and compensation-boundary semantics.
+- No concrete database driver, schema migration, AI activation, production persistence, or live PostgreSQL execution.
+
 ## P13.7401–7440 — Reconciliation & Application Service Seams
 
 - Added deterministic reconciliation across repository entity state, offline queue state and reporting projection source revision.
