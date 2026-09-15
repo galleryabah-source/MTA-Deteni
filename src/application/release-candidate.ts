@@ -26,17 +26,27 @@ export type BoundaryAudit = Readonly<{
   findings: readonly string[];
 }>;
 
+function isNonBlank(value: string): boolean {
+  return value.trim().length > 0;
+}
+
 export function evaluateReleaseCandidate(matrix: ReleaseCandidateMatrix): "READY" | "BLOCKED" {
-  if (matrix.checks.length === 0) return "BLOCKED";
+  if (!isNonBlank(matrix.matrixId) || matrix.checks.length === 0) return "BLOCKED";
   if (matrix.target === "NON_PRODUCTION" && matrix.checks.some((check) => check.target !== "NON_PRODUCTION")) return "BLOCKED";
-  return matrix.checks.every((check) => check.status === "PASS" && check.evidenceRef.length > 0) ? "READY" : "BLOCKED";
+  return matrix.checks.every((check) =>
+    isNonBlank(check.id) &&
+    isNonBlank(check.checkpoint) &&
+    isNonBlank(check.control) &&
+    check.status === "PASS" &&
+    isNonBlank(check.evidenceRef),
+  ) ? "READY" : "BLOCKED";
 }
 
 export function evaluateBoundaryAudit(audit: BoundaryAudit): "PASS" | "BLOCKED" {
   if (audit.migrationFreeze !== true) return "BLOCKED";
   if (audit.aiEnabled !== false || audit.productionAccess !== false) return "BLOCKED";
   if (audit.directOperationalMutation !== false || audit.realPiiPresent !== false) return "BLOCKED";
-  return audit.findings.length === 0 ? "PASS" : "BLOCKED";
+  return audit.findings.every((finding) => isNonBlank(finding)) && audit.findings.length === 0 ? "PASS" : "BLOCKED";
 }
 
 export function createSyntheticReleaseCheck(
