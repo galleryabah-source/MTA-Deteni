@@ -59,7 +59,7 @@ export function createUnifiedTemporaryExitService({ repository }) {
       if (!existing) throw new Error('TEMPORARY_EXIT_NOT_FOUND');
       if (existing.operationalState !== 'RETURN_RECORDED') throw new Error(`INVALID_OPERATIONAL_STATE:${existing.operationalState}->DUTY_COMPLETED`);
       const operational = transitionTemporaryExitOperationalState(existing.operationalState, 'DUTY_COMPLETED');
-      const timeline = appendTemporaryExitTimeline(existing.timeline, { step: 'RETURN', actorId: input.actorId, metadata: { action: 'DUTY_COMPLETED' } });
+      const timeline = appendTemporaryExitTimeline(existing.timeline, { step: 'DUTY_COMPLETED', actorId: input.actorId, metadata: { fromState: 'RETURN_RECORDED', toState: 'DUTY_COMPLETED' } });
       const record = { ...existing, timeline, operationalState: operational.state };
       repository.update(input.exitId, record);
       return buildTemporaryExitReadModel(record);
