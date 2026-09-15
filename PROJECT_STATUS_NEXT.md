@@ -1,10 +1,18 @@
-# MTA DETENI — Status Addendum
+# MTA DETENI — Next Gate
 
-Foundation v1.13 — P10.633–P10.656 controlled verification suite completed.
+**Foundation v1.15 — P10.777–P10.808 advanced**
 
-- P10.633–640: deterministic evidence packet and fail-closed evaluator.
-- P10.641–648: synthetic domain-boundary verification.
-- P10.649–656: synthetic transport-context verification.
+## Completed
+- P10.777–784 — UI/read-model application boundary;
+- P10.785–792 — QR scan-result adapter;
+- P10.793–800 — deterministic report artifact adapter;
+- P10.801–808 — composed synthetic regression tests.
 
-Current gate: CONTRACT READY / SYNTHETIC VERIFICATION READY; LIVE EXECUTION BLOCKED.
-Next: P10.657–680 synthetic E2E evidence orchestration, QR/reporting invariants, and operator workflow contract hardening.
+## Current gate
+**P10.808 — SYNTHETIC APPLICATION-SURFACE CONTRACT READY.**
+
+## Next
+**P10.809–840 — synthetic regression execution/evidence composition, application-surface hardening, and read-only operator flow verification.**
+
+## Governance lock
+Migration Freeze TRUE. AI OFF. Repository SYNTHETIC ONLY. Production access NOT AUTHORIZED. Live PostgreSQL execution remains blocked until explicit governance clearance and an approved non-production target.
