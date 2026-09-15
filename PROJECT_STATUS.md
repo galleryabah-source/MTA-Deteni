@@ -1,6 +1,6 @@
 # MTA DETENI — Project Status
 
-**Version:** P10.188 Governed Non-Production Execution Preflight Contract  
+**Version:** P10.196 Governed Execution Decision Artifact  
 **Branch:** `phase10.14-database-verification-package`  
 **Certification:** NOT CERTIFIED  
 **Migration Freeze:** TRUE  
@@ -9,22 +9,22 @@
 
 ## Completed checkpoints
 
-P9 kernel foundations; P10.1–P10.13 operational/domain/database-contract foundations; P10.14–P10.17 controlled database verification packages; P10.18–P10.21 document-output operationalization and runtime integration contracts; P10.22–P10.24 CI evidence, release-readiness and safety consolidation; P10.25–P10.34 runtime, authorization, document API, audit, transaction and security certification-readiness contracts; P10.35–P10.48 evidence and release hardening; P10.49–P10.54 temporary-exit vertical slice and operational execution boundaries; P10.55–P10.60 operational state, read model, repository/unified/transactional boundaries; P10.61–P10.68 command/runtime boundary contracts; P10.69–P10.76 persistence/release gates; P10.77–P10.84 synthetic persistent adapter and transaction verification; P10.85–P10.92 persistent-boundary hardening; P10.93–P10.100 authenticated command, artifact grant and evidence-integrity boundary; P10.101–P10.108 controlled HTTP/application integration; P10.109–P10.116 controlled PostgreSQL adapter specification; P10.117–P10.124 transaction/evidence hardening; P10.125–P10.132 synthetic concurrency/race verification; P10.133–P10.140 governed PostgreSQL verification readiness; P10.141–P10.148 governed verification evidence and orchestration boundary; P10.149–P10.156 release evidence hardening; P10.157–P10.164 pre-certification consistency gate; P10.165–P10.172 governed non-production verification plan; P10.173–P10.180 governed non-production verification evidence packet; P10.181–P10.188 governed non-production execution preflight.
+P9 kernel foundations; P10.1–P10.13 operational/domain/database-contract foundations; P10.14–P10.17 controlled database verification packages; P10.18–P10.21 document-output operationalization and runtime integration contracts; P10.22–P10.24 CI evidence, release-readiness and safety consolidation; P10.25–P10.34 runtime, authorization, document API, audit, transaction and security certification-readiness contracts; P10.35–P10.48 evidence and release hardening; P10.49–P10.54 temporary-exit vertical slice and operational execution boundaries; P10.55–P10.60 operational state, read model, repository/unified/transactional boundaries; P10.61–P10.68 command/runtime boundary contracts; P10.69–P10.76 persistence/release gates; P10.77–P10.84 synthetic persistent adapter and transaction verification; P10.85–P10.92 persistent-boundary hardening; P10.93–P10.100 authenticated command, artifact grant and evidence-integrity boundary; P10.101–P10.108 controlled HTTP/application integration; P10.109–P10.116 controlled PostgreSQL adapter specification; P10.117–P10.124 transaction/evidence hardening; P10.125–P10.132 synthetic concurrency/race verification; P10.133–P10.140 governed PostgreSQL verification readiness; P10.141–P10.148 governed verification evidence and orchestration boundary; P10.149–P10.156 release evidence hardening; P10.157–P10.164 pre-certification consistency gate; P10.165–P10.172 governed non-production verification plan; P10.173–P10.180 governed non-production verification evidence packet; P10.181–P10.188 governed non-production execution preflight; P10.189–P10.196 governed execution decision artifact.
 
-## P10.181–P10.188 technical actions
+## P10.189–P10.196 technical actions
 
-- P10.181: preflight schema is bounded and carries no execution authorization field.
-- P10.182: packet validation is a prerequisite.
-- P10.183: Migration Freeze blocks execution preflight.
-- P10.184: governance approval is explicit.
-- P10.185: target approval is independently required.
-- P10.186: rollback readiness is mandatory.
-- P10.187: independent review completion is mandatory.
-- P10.188: even a valid preflight is evidence-only and cannot authorize live execution.
+- P10.189: governed execution decision schema is explicit.
+- P10.190: default decision is BLOCKED/PENDING.
+- P10.191: unsupported decision values are rejected.
+- P10.192: APPROVED requires explicit approver and scope references.
+- P10.193: APPROVED requires an explicit reason.
+- P10.194: REJECTED is terminal evidence and cannot authorize execution.
+- P10.195: cryptographic decision tampering is detected.
+- P10.196: even APPROVED is evidence-only; execution authorization remains a separate runtime control.
 
 ## CI / evidence hardening
 
-The authoritative P10 regression gate now includes P10.141–P10.188. The evidence path remains synthetic/readiness-only and fail-closed. The pre-certification consistency gate cross-checks regression evidence, integrity evidence and release manifest before any certification interpretation.
+The authoritative P10 regression gate now includes P10.141–P10.196. The evidence path remains synthetic/readiness-only and fail-closed. The pre-certification consistency gate cross-checks regression evidence, integrity evidence and release manifest before any certification interpretation.
 
 ## External blockers
 
@@ -53,4 +53,4 @@ Synthetic PASS means the software contract, evidence integrity and consistency c
 
 ## Next gates
 
-P10.189+: strengthen the preflight-to-execution separation with an explicit governance decision artifact and a non-executing dry-run evidence composer. Any actual database execution remains a separate governance-controlled action after the freeze is explicitly lifted.
+P10.197+: add a non-executing dry-run evidence composer that consumes the governed decision/preflight/packet identities, verifies cross-artifact consistency, and produces an auditable readiness result without opening a database connection or lifting the freeze.
