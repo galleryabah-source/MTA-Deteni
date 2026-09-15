@@ -1,7 +1,7 @@
 # MTA DETENI — Next Gate
 
-**Foundation:** v1.73
-**Current:** P13.8641–8760 — backup continuity coordinator and fail-closed backup-chain boundary implemented; CI observation blocker remains
+**Foundation:** v1.74
+**Current:** P13.8761–8880 — unified synthetic continuity certification implemented; CI observation blocker remains
 
 ## Completed (through current gate)
 
@@ -27,11 +27,14 @@
 - Reconnect conflict produces explicit `BLOCKED` continuity state.
 - Backup continuity coordinator validates synthetic backup manifests and predecessor-chain references.
 - Missing or mismatched backup predecessor references fail closed.
+- Unified synthetic continuity certification binding runtime execution, lifecycle certification, recovery certification, queue/reconciliation readiness and backup-chain readiness.
+- Continuity certification rejects unresolved runtime queue/reconciliation or backup states.
+- Continuity certification preserves lifecycle projection/version identity.
 - No database driver, migration, production persistence, real detainee data, or AI activation.
 
-## Next gate: P13.8761–8880
+## Next gate: P13.8881–9000
 
-Unify local/LAN continuity into a single synthetic **continuity certification**: bind runtime execution, queue/reconciliation assessment, backup-chain assessment, lifecycle certification and recovery certification into one evidence object. Add explicit invariants that a runtime handoff cannot be certified when queue reconciliation or backup continuity is blocked, and verify reporting freshness against the certified lifecycle version. Keep all persistence, migrations, production data and AI disabled.
+Build the contract-level **offline-first operational session** above the certified continuity layer: define a device-scoped session lifecycle, deterministic local command admission, queue admission policy, reconnect/reconciliation completion proof and safe session close. Then bind the session close evidence to continuity certification so an interrupted local/LAN session cannot be mistaken for a clean operational handoff. No concrete persistence, migrations, production data or AI.
 
 ## Governance lock
 
