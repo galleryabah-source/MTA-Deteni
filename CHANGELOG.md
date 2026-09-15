@@ -1,5 +1,15 @@
 # Changelog
 
+## P13.5827–5840 — Domain-Surface Hardening
+
+- Aligned the synthetic temporary-exit approval actor with canonical `HEAD_RUDENIM` vocabulary.
+- Added deterministic movement tests for append-only event capture, headcount outside/unknown distinction, and domain authorization.
+- Added deterministic placement tests for one-active-placement and bed-exclusivity invariants plus version progression after closure/reassignment.
+- Added deterministic approval tests for canonical `HEAD_RUDENIM`, subject-scoped authorization and separation-of-duties second approval.
+- Advanced the roadmap to P13.5841–5880 for reporting snapshot, QR contextual semantics, audit/evidence binding and an integrated synthetic domain journey.
+- Preserved Migration Freeze, AI OFF, synthetic-only repository data, production authorization FALSE and live PostgreSQL block.
+- No schema migration introduced.
+
 ## P13.5800 — Execution-First Convergence
 
 - Consolidated the controlled non-production execution order and evidence rules.
