@@ -1,7 +1,7 @@
 # MTA DETENI — Next Gate
 
-**Foundation:** v1.76
-**Current:** P13.9001–9120 — session reconciliation completion contract implemented; CI observation blocker remains
+**Foundation:** v1.77
+**Current:** P13.9121–9240 — integrated offline-first continuity journey implemented; CI observation blocker remains
 
 ## Completed (through current gate)
 
@@ -33,13 +33,15 @@
 - Offline-first operational session contract: device-scoped session identity, execution/network/runtime-scope binding, authenticated synthetic admission, LAN/LOCAL-only local command admission, pending-queue admission invariant, deterministic clean-close evidence, and explicit interruption state.
 - Session close continuity binding: clean close requires synchronized queue, ready backup, READY runtime continuity and matching continuity certification; close evidence is device/install/network/execution bound.
 - Interrupted-session safety: interrupted/closed sessions cannot admit local commands; interrupted sessions cannot be represented as clean handoff even with fabricated close evidence.
-- **Session reconciliation completion:** per-command receipts bind session/execution/command identity; conflicts cannot yield completion receipts; proof requires one unique receipt for every admitted command; partial reconnects fail closed.
-- **Reconciliation state transition:** an open session can explicitly enter `RECONCILIATION_REQUIRED` and return to `ACTIVE` only after complete reconciliation proof; terminated sessions cannot be resumed through reconciliation.
+- Session reconciliation completion: per-command receipts bind session/execution/command identity; conflicts cannot yield completion receipts; proof requires one unique receipt for every admitted command; partial reconnects fail closed.
+- Reconciliation state transition: an open session can explicitly enter `RECONCILIATION_REQUIRED` and return to `ACTIVE` only after complete reconciliation proof; terminated sessions cannot be resumed through reconciliation.
+- **Integrated offline-first continuity journey:** active session → local command admission → reconciliation-required transition → per-command reconciliation → synchronized queue/runtime continuity → backup continuity → unified continuity certification → clean session close.
+- End-to-end synthetic identity continuity covers session, execution, device, installation, network, journey, command and reconciliation receipt identifiers.
 - No database driver, migration, production persistence, real detainee data, or AI activation.
 
-## Next gate: P13.9121–9240
+## Next gate: P13.9241–9360
 
-Build the **integrated offline-first continuity journey** as a contract-level deterministic composition: active session → local command admission → queued offline work → interrupted/reconnect transition → complete per-command reconciliation → synchronized runtime continuity → backup continuity → unified continuity certification → clean session close. Add end-to-end proof that every identity (session, execution, device, installation, network, journey, command and reconciliation receipt) remains stable across the whole chain. Keep all persistence synthetic/in-memory and fail closed on any partial or drifted state.
+Build the **offline interruption/recovery proof contract**: capture a deterministic interrupted-session record, preserve the last admitted/reconciled command boundary, require explicit reconnect authorization, reject stale execution/session identities, and prove that recovery from interruption resumes only from a known safe state. Extend the integrated journey with a deliberate interruption branch and a fail-closed recovery branch before allowing clean close. Keep all state synthetic/in-memory.
 
 ## Governance lock
 
