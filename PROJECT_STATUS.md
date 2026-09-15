@@ -1,8 +1,8 @@
 # MTA DETENI — Project Status
 
-**Version:** Foundation v1.16
-**Current Phase:** P10.905–P10.936 synthetic release-candidate and pre-authorisation audit
-**Implementation Track:** P10.936
+**Version:** Foundation v1.17
+**Current Phase:** P10.937–P10.968 synthetic execution-evidence gate
+**Implementation Track:** P10.968
 **Branch:** `main`
 
 ## Latest Progress
@@ -15,7 +15,11 @@
 - P10.809–P10.840 application-surface composition and synthetic regression;
 - P10.841–P10.872 responsive operator workflow UI contract;
 - P10.873–P10.904 release-readiness boundary;
-- P10.905–P10.936 synthetic release-candidate matrix and final pre-authorisation application-boundary audit.
+- P10.905–P10.936 synthetic release-candidate matrix and final pre-authorisation application-boundary audit;
+- P10.937–P10.944 release-candidate validation hardening;
+- P10.945–P10.952 synthetic execution-evidence contract;
+- P10.953–P10.960 fail-closed evidence regression matrix;
+- P10.961–P10.968 synthetic-only evidence boundary.
 
 ## Integrated Application Model
 
@@ -35,12 +39,16 @@ RAP owns registration, administration and reporting; PERKES owns health records 
 
 ## Current Gate
 
-**P10.936 — SYNTHETIC RELEASE-CANDIDATE CONTRACT + PRE-AUTHORISATION BOUNDARY AUDIT READY**
+**P10.968 — SYNTHETIC EXECUTION-EVIDENCE CONTRACT READY / OBSERVABLE EXECUTION REQUIRED**
 
-The repository now defines a deterministic synthetic release-candidate matrix and a fail-closed application-boundary audit. This is a contract/test milestone, not a claim of CI PASS, database PASS, production readiness, or operational authorisation.
+The repository now distinguishes contract-level release readiness from trustworthy execution evidence. Synthetic evidence fixtures are intentionally not treated as proof that commands actually ran.
+
+## Execution Certification Rule
+
+CI or local execution may be certified only from observable command/job telemetry. `NOT_RUN`, missing evidence, non-zero exit codes, or missing output identity remain blocked. No CI PASS, database PASS, production readiness, or operational authorisation is claimed by this contract milestone.
 
 ## Next Gate
 
-**P10.937+ — execute/observe the synthetic release-candidate matrix, collect immutable evidence, and resolve any failures before considering a controlled non-production integration request.**
+**P10.969–P11.000 — controlled synthetic verification harness, evidence packet composition, and application-boundary regression expansion.**
 
 No production or live-database step is implied by this next gate.
