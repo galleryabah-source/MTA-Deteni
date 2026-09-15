@@ -23,7 +23,7 @@ export type OperatorReadPort = Readonly<{
 
 export class OperatorCommandSurface<TPayload, TResult> {
   constructor(
-    private readonly mutation: TransactionalMutationService<TResult>,
+    private readonly mutation: TransactionalMutationService<TResult, TPayload>,
     private readonly reads: OperatorReadPort,
   ) {}
 
@@ -33,13 +33,9 @@ export class OperatorCommandSurface<TPayload, TResult> {
       actor: command.actor,
       permission: command.permission,
       fingerprint: command.fingerprint,
+      input: command.payload,
     });
-    return {
-      commandId: command.commandId,
-      correlationId: command.actor.correlationId,
-      aggregateId: result.audit.aggregateId,
-      result,
-    };
+    return { commandId: command.commandId, correlationId: command.actor.correlationId, aggregateId: result.audit.aggregateId, result };
   }
 
   async dashboard(actor: ActorContext): Promise<OperatorDashboardReadModel> {
