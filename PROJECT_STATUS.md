@@ -1,8 +1,8 @@
 # MTA DETENI — Project Status
 
-**Version:** Foundation v1.18
-**Current Phase:** P10.969–P11.000 controlled synthetic verification harness
-**Implementation Track:** P11.000
+**Version:** Foundation v1.19
+**Current Phase:** P11.001–P11.032 application-boundary regression gate
+**Implementation Track:** P11.032
 **Branch:** `main`
 
 ## Latest Progress
@@ -24,7 +24,11 @@
 - P10.973–P10.980 observation-to-packet composition;
 - P10.981–P10.988 PASS/exit-code consistency;
 - P10.989–P10.996 packet/observation identity integrity;
-- P10.997–P11.000 synthetic-only evidence enforcement.
+- P10.997–P11.000 synthetic-only evidence enforcement;
+- P11.001–P11.008 supported application-surface identity;
+- P11.009–P11.016 mutation/server-boundary regression;
+- P11.017–P11.024 responsive read-model structural regression;
+- P11.025–P11.032 QR/report application-capability boundary regression.
 
 ## Integrated Application Model
 
@@ -44,9 +48,9 @@ RAP owns registration, administration and reporting; PERKES owns health records 
 
 ## Current Gate
 
-**P11.000 — CONTROLLED SYNTHETIC VERIFICATION HARNESS CONTRACT-READY / TRUSTWORTHY TELEMETRY STILL REQUIRED**
+**P11.032 — APPLICATION BOUNDARY REGRESSION CONTRACT-READY / EXECUTION TELEMETRY STILL REQUIRED**
 
-The repository now has a deterministic harness contract that can represent command observations and compose them into a synthetic evidence packet. The harness deliberately does not claim that commands ran.
+The synthetic regression gate now covers all six supported UI surfaces, explicit server-bound mutation identifiers, read-model collection shape, and the QR/report capability boundary. This is a contract-level milestone and does not claim that tests actually executed.
 
 ## Execution Certification Rule
 
@@ -54,6 +58,6 @@ CI or local execution may be certified only from observable command/job telemetr
 
 ## Next Gate
 
-**P11.001+ — trustworthy observable execution capture, evidence reconciliation, and application-boundary regression expansion.**
+**P11.033–P11.064 — QR/report contract regression hardening and composition of application-boundary checks with synthetic execution evidence.**
 
 No production or live-database step is implied by this next gate.
