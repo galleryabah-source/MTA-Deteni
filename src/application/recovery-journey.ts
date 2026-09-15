@@ -23,6 +23,7 @@ function assertIdentity(...values: readonly string[]): void {
 export function executeSyntheticRecoveryJourney(input: {
   journeyId: string;
   commandId: string;
+  requestHash: string;
   eventId: string;
   correlationId: string;
   aggregateId: string;
@@ -31,7 +32,8 @@ export function executeSyntheticRecoveryJourney(input: {
   payloadHash: string;
   reconnectCommand?: OfflineCommand;
 }): RecoveryJourneyResult {
-  assertIdentity(input.journeyId, input.commandId, input.eventId, input.correlationId, input.aggregateId, input.payloadHash);
+  assertIdentity(input.journeyId, input.commandId, input.requestHash, input.eventId, input.correlationId, input.aggregateId, input.payloadHash);
+  if (input.requestHash === input.commandId) throw new Error("Recovery requestHash must remain distinct from commandId.");
   if (!Number.isInteger(input.expectedVersion) || input.expectedVersion < 0) throw new Error("Recovery journey expected version is invalid.");
 
   const failure = createFailureRecoveryCase(input.failureClass);
@@ -39,6 +41,7 @@ export function executeSyntheticRecoveryJourney(input: {
   const evidence = createRecoveryEvidence({
     evidenceId: `REC-${input.commandId}`,
     commandId: input.commandId,
+    requestHash: input.requestHash,
     eventId: input.eventId,
     correlationId: input.correlationId,
     aggregateId: input.aggregateId,
@@ -52,7 +55,7 @@ export function executeSyntheticRecoveryJourney(input: {
     retrySafe: failure.retrySafe,
     compensationAllowed: failure.compensationAllowed,
   });
-  assertRecoveryEventBinding(evidence, input.commandId, input.eventId, input.correlationId, input.aggregateId);
+  assertRecoveryEventBinding(evidence, input.commandId, input.eventId, input.correlationId, input.aggregateId, input.requestHash);
 
   const retries: RecoveryRetryRecord[] = [];
   let outcome: RecoveryJourneyOutcome;

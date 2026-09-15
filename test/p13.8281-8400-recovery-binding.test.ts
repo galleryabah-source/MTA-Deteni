@@ -21,9 +21,10 @@ function lifecycleCertification(): LifecycleCertification {
 
 test("recovery evidence binds directly to the lifecycle certification step", () => {
   const failure = createFailureRecoveryCase("OUTBOX_FAILURE");
-  const evidence = createRecoveryEvidence({ evidenceId: "REC-BIND", commandId: "CMD-BIND-3", eventId: "EVT-BIND-3", correlationId: "CORR-BIND", aggregateId: "DET-BIND", expectedVersion: 2, resultingVersion: 3, failureClass: failure.failureClass, reasonCode: failure.reasonCode, terminalState: failure.terminalState, recovery: failure.recovery, mutationCommitted: true, retrySafe: true, compensationAllowed: false });
-  assert.doesNotThrow(() => assertRecoveryEvidenceLifecycleBinding(lifecycleCertification(), [evidence]));
+  const evidence = createRecoveryEvidence({ evidenceId: "REC-BIND", commandId: "CMD-BIND-3", requestHash: "REQ-BIND-3", eventId: "EVT-BIND-3", correlationId: "CORR-BIND", aggregateId: "DET-BIND", expectedVersion: 2, resultingVersion: 3, failureClass: failure.failureClass, reasonCode: failure.reasonCode, terminalState: failure.terminalState, recovery: failure.recovery, mutationCommitted: true, retrySafe: true, compensationAllowed: false });
+  assert.doesNotThrow(() => assertRecoveryEvidenceLifecycleBinding(lifecycleCertification(), [evidence], { "CMD-BIND-3": "REQ-BIND-3" }));
   assert.throws(() => assertRecoveryEvidenceLifecycleBinding(lifecycleCertification(), [{ ...evidence, eventId: "EVT-TAMPER" }]));
+  assert.throws(() => assertRecoveryEvidenceLifecycleBinding(lifecycleCertification(), [evidence], { "CMD-BIND-3": "REQ-TAMPER" }));
 });
 
 test("retry key is deterministically bound to command identity and source fingerprint", () => {

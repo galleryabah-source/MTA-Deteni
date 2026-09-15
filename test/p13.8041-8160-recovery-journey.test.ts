@@ -7,11 +7,12 @@ import { createRecoveryEvidence } from "../src/application/recovery-evidence.js"
 const base = {
   journeyId: "J-001",
   commandId: "CMD-001",
+  requestHash: "REQUEST-HASH-001",
   eventId: "EVT-001",
   correlationId: "CORR-001",
   aggregateId: "DET-001",
   expectedVersion: 4,
-  payloadHash: "HASH-001",
+  payloadHash: "PAYLOAD-FP-001",
 };
 
 test("pre-commit recovery has zero mutation, audit and outbox effects", () => {
@@ -53,7 +54,7 @@ test("offline reconnect conflict is forced into review", () => {
   assert.equal(result.outcome, "RECONNECT_REVIEW");
 });
 
-test("recovery evidence preserves canonical failure semantics", () => {
+test("recovery evidence preserves canonical failure semantics and request-hash separation", () => {
   const failure = createFailureRecoveryCase("STALE_VERSION");
   const evidence = createRecoveryEvidence({
     ...base,
@@ -70,4 +71,5 @@ test("recovery evidence preserves canonical failure semantics", () => {
   });
   assert.equal(evidence.syntheticOnly, true);
   assert.throws(() => createRecoveryEvidence({ ...evidence, resultingVersion: 5 }));
+  assert.throws(() => createRecoveryEvidence({ ...evidence, requestHash: evidence.commandId }));
 });
