@@ -57,6 +57,11 @@ export function admitLocalCommand(input: { session: OperationalSession; context:
   return "ADMITTED";
 }
 
+export function markSessionReconciliationRequired(session: OperationalSession): OperationalSession {
+  if (session.state !== "ACTIVE") throw new Error("Only an active session can enter reconciliation-required state.");
+  return Object.freeze({ ...session, state: "RECONCILIATION_REQUIRED" });
+}
+
 export function assessSessionClose(input: { session: OperationalSession; context: RuntimeExecutionContext; deviceId: string; installationId: string; queue: readonly OfflineCommand[]; reconciliation?: ReconciliationDecision; runtime: RuntimeContinuityAssessment; backup: BackupContinuityAssessment; continuity: ContinuityCertification }): SessionCloseEvidence {
   assertSessionScope(input.session, input.context, input.deviceId, input.installationId);
   if (input.session.state !== "ACTIVE" && input.session.state !== "RECONCILIATION_REQUIRED") throw new Error("Operational session is not closable.");
