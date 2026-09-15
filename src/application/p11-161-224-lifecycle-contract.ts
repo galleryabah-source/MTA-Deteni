@@ -8,11 +8,7 @@ export type LifecycleEvent = Readonly<{
   outcome?: "ACCEPTED" | "REJECTED" | "EXPIRED" | "FUTURE" | "CONTEXT_MISMATCH" | "INACTIVE";
 }>;
 
-export type LifecycleContract = Readonly<{
-  contractId: string;
-  target: "SYNTHETIC";
-  events: readonly LifecycleEvent[];
-}>;
+export type LifecycleContract = Readonly<{ contractId: string; target: "SYNTHETIC"; events: readonly LifecycleEvent[] }>;
 
 const expected: readonly TemporaryExitState[] = ["REQUESTED", "VALIDATED", "APPROVED", "DOCUMENTED", "ESCORT_ASSIGNED", "DEPARTED", "RETURN_PENDING", "RETURNED", "COMPLETED"];
 
@@ -25,13 +21,14 @@ export function defaultSyntheticLifecycle(): readonly LifecycleEvent[] {
   }));
 }
 
+function validEvent(event: LifecycleEvent, index: number): boolean {
+  if (event.state !== expected[index] || !event.checkpoint.trim()) return false;
+  if (event.state === "DEPARTED") return event.headcountDelta === -1 && event.qrContext === "TEMPORARY_EXIT" && event.outcome === "ACCEPTED";
+  if (event.state === "RETURNED") return event.headcountDelta === 1 && event.qrContext === undefined;
+  return event.headcountDelta === 0 && event.qrContext === undefined && event.outcome === undefined;
+}
+
 export function validateLifecycleContract(contract: LifecycleContract): "READY" | "BLOCKED" {
   if (!contract.contractId.trim() || contract.target !== "SYNTHETIC" || contract.events.length !== expected.length) return "BLOCKED";
-  return contract.events.every((event, index) =>
-    event.state === expected[index] &&
-    event.checkpoint.trim().length > 0 &&
-    (event.state === "DEPARTED" ? event.headcountDelta === -1 && event.qrContext === "TEMPORARY_EXIT" && event.outcome === "ACCEPTED" : event.headcountDelta === 0 || event.state === "RETURNED") &&
-    (event.state === "RETURNED" ? event.headcountDelta === 1 : true) &&
-    event.qrContext !== undefined ? event.qrContext === "TEMPORARY_EXIT" : true,
-  ) ? "READY" : "BLOCKED";
+  return contract.events.every(validEvent) ? "READY" : "BLOCKED";
 }
