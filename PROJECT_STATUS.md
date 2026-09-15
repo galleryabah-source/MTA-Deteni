@@ -1,8 +1,8 @@
 # MTA DETENI — Project Status
 
-**Version:** Foundation v1.29
-**Current Phase:** P12.121–P12.240 integrity composition
-**Implementation Track:** P12.240
+**Version:** Foundation v1.30
+**Current Phase:** P12.121–P12.280 integrity composition and authorization enforcement
+**Implementation Track:** P12.280
 **Branch:** `main`
 
 ## Latest Progress
@@ -25,7 +25,8 @@
 - P11.1161–P12.120 command-to-read-model application composition;
 - P12.121–P12.160 shared transaction identity/context contract;
 - P12.161–P12.200 persistent idempotency contract;
-- P12.201–P12.240 explicit domain authorization policy matrix.
+- P12.201–P12.240 explicit domain authorization policy matrix;
+- P12.241–P12.280 policy-enforcing authorization boundary.
 
 ## Integrated Application Model
 
@@ -33,11 +34,9 @@ RAP owns registration, administration and reporting; PERKES owns health records 
 
 ## Operational Application Chain
 
-`UI/API Command → Authorization → Transaction → Idempotency → Domain Workflow → Immutable Timeline/Audit → Outbox → Read Model → QR/Movement/Temporary Exit → Reporting`
+`UI/API Command → Authorization Policy → Transaction Context → Idempotency → Domain Workflow → Immutable Timeline/Audit → Outbox → Read Model → QR/Movement/Temporary Exit → Reporting`
 
-The transaction integrity layer now defines one shared transaction identity for actor, correlation and aggregate; persistent idempotency binds the complete mutation identity; and operational permissions are explicitly declared by domain.
-
-Read-model projection remains downstream of committed mutation evidence and must be rebuildable from committed operational evidence/outbox records. It is not treated as a hidden extension of the mutation transaction.
+The application boundary now has explicit domain permission enforcement before mutation. A shared transaction context binds transaction, actor, correlation and aggregate identity. Persistent idempotency binds key, fingerprint, actor, correlation and aggregate identity. Read-model projection remains downstream of committed operational evidence and is not a hidden extension of the mutation transaction.
 
 ## Safety / Governance
 
@@ -55,15 +54,15 @@ Read-model projection remains downstream of committed mutation evidence and must
 
 Temporary-exit `COMPLETED` is not a deportation event. Deportation remains a separate operational workflow and QR context.
 
-Leadership is explicitly restricted to oversight-read and directive permissions in the authorization contract; it does not receive direct operational-edit permissions.
+Leadership is explicitly limited to oversight-read and directive permissions and is denied direct operational mutation permissions.
 
 Concrete persistence adapters must preserve the shared transaction identity across domain mutation, audit, outbox and idempotency completion.
 
 ## Current Gate
 
-**P12.240 — INTEGRITY COMPOSITION CONTRACT-READY / EXECUTION TELEMETRY STILL REQUIRED**
+**P12.280 — AUTHORIZATION ENFORCEMENT CONTRACT-READY / EXECUTION TELEMETRY STILL REQUIRED**
 
-Static regression coverage was added for shared transaction identity, persistent idempotency replay safety, domain authorization ownership and leadership operational-edit prevention. These controls are not execution-certified until observable CI or authorized local telemetry is available.
+Static regression coverage was added for transaction identity, persistent idempotency replay safety, domain authorization ownership, policy enforcement and leadership operational-edit prevention. These controls are not execution-certified until observable CI or authorized local telemetry is available.
 
 ## Execution Certification Rule
 
@@ -71,6 +70,6 @@ CI or local execution may be certified only from observable command/job telemetr
 
 ## Next Gate
 
-**P12.241 onward — enforce authorization policy at the transactional application boundary, design concrete non-production persistence adapters, bind audit/outbox atomically, implement outbox-driven read-model projection, then expose controlled operator API/UI surfaces.**
+**P12.281–P12.360 — concrete non-production persistence adapters, atomic audit/outbox/idempotency implementation contract, outbox-driven read-model projection, and controlled API boundary tests.**
 
 No production or live-database step is implied by this next gate.
