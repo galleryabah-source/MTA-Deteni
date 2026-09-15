@@ -1,7 +1,7 @@
 # MTA DETENI — Next Gate
 
-**Foundation:** v1.91
-**Current:** P13.10801–10920 — session continuity transition contract implemented; CI observation blocker remains
+**Foundation:** v1.94
+**Current:** P13.11161–11280 — local runtime regression certification implemented; CI observation blocker remains
 
 ## Completed (through current gate)
 
@@ -15,47 +15,20 @@
 - Deterministic seven-class failure/recovery matrix with explicit terminal/recovery semantics.
 - Synthetic recovery journey with zero-effect pre-commit behavior and post-commit retry deduplication.
 - Recovery evidence bound to command, request hash, event, correlation, aggregate and version identities.
-- Recovery evidence bound directly to lifecycle certification steps.
-- Retry keys deterministically bound to command identity plus source fingerprint; fingerprint drift rejected.
-- Unified seven-class recovery regression, including explicit offline reconnect review.
-- Dedicated lifecycle event-envelope validation with no `commandId`/`requestHash` substitution.
-- Runtime execution context bound to runtime mode, device class, network scope, authentication and certification journey.
-- Runtime certification binding to lifecycle and recovery certification records.
-- Synthetic LAN/offline runtime handoff contract requiring authorization and reconciliation continuity.
-- Runtime continuity coordinator combining authenticated runtime context, queue state, reconciliation decision and handoff identity.
-- Pending/offline queue cannot be treated as ready without reconciliation evidence.
-- Reconnect conflict produces explicit `BLOCKED` continuity state.
-- Backup continuity coordinator validates synthetic backup manifests and predecessor-chain references.
-- Missing or mismatched backup predecessor references fail closed.
-- Unified synthetic continuity certification binding runtime execution, lifecycle certification, recovery certification, queue/reconciliation readiness and backup-chain readiness.
-- Continuity certification rejects unresolved runtime queue/reconciliation or backup states.
-- Continuity certification preserves lifecycle projection/version identity.
-- Offline-first operational session contract: device-scoped session identity, execution/network/runtime-scope binding, authenticated synthetic admission, LAN/LOCAL-only local command admission, pending-queue admission invariant, deterministic clean-close evidence, and explicit interruption state.
-- Session close continuity binding: clean close requires synchronized queue, ready backup, READY runtime continuity and matching continuity certification; close evidence is device/install/network/execution bound.
-- Interrupted-session safety: interrupted/closed sessions cannot admit local commands; interrupted sessions cannot be represented as clean handoff even with fabricated close evidence.
-- Session reconciliation completion: per-command receipts bind session/execution/command identity; conflicts cannot yield completion receipts; proof requires one unique receipt for every admitted command; partial reconnects fail closed.
-- Reconciliation state transition: an open session can explicitly enter `RECONCILIATION_REQUIRED` and return to `ACTIVE` only after complete reconciliation proof; terminated sessions cannot be resumed through reconciliation.
-- Integrated offline-first continuity journey exercises deliberate interruption, explicit reconnect authorization, scope revalidation, queue rehydration and APPLY/SKIP_DUPLICATE transitions before clean close.
-- Continuity certification explicitly binds session, execution, device, installation and network identities and rejects backup source identity drift.
-- Synthetic multi-device continuity proof: authorized handoff within the same installation/network scope is admissible; unauthorized or network-drift handoff is fail-closed.
-- Runtime handoff safety matrix binds source/target runtime mode, source/target device, source/target network scope, authorization identity and reconciliation requirement.
-- Device/network drift and pending queues cannot bypass reconciliation during runtime handoff.
-- **P13.9601–9720:** unified continuity certification envelope binds clean session, continuity certification, reconciliation proof, runtime handoff authorization/certification and READY backup state under one immutable synthetic envelope.
-- **P13.9721–9840:** deterministic LOCAL/LAN recovery boundary validates authenticated synthetic context, execution/network continuity, trusted installation continuity and fail-closed target drift.
-- **P13.9841–9960:** multi-device LAN continuity is represented through the same installation/network trust boundary; cross-installation or network drift is blocked before recovery proof can become READY.
-- **P13.9961–10080:** runtime integration remains adapter-only and synthetic; local/LAN recovery proof is separated from external transport/persistence so production connectivity cannot be introduced accidentally.
-- **P13.10081–10200:** narrow LOCAL/LAN browser adapter contract validates request identity, authenticated device identity, local-service boundary and mutation idempotency.
-- **P13.10201–10320:** local runtime adapter rejects absolute/protocol-relative URLs and non-LOCAL service paths, preventing accidental external transport routing.
-- **P13.10321–10440:** synthetic local adapter execution boundary returns only contract-level acceptance; no network, database, persistence or production service is invoked.
-- **P13.10441–10560:** local runtime session handshake binds adapter requests to authenticated synthetic LAN/LOCAL sessions and exact device/install/network identity, with deterministic expiry validation.
-- **P13.10561–10680:** handshake validity is bounded by its explicit issued/expiry window; expired sessions fail closed.
-- **P13.10681–10800:** malformed handshake identity/time and continuity-sensitive mutation admission fail closed; continuity-sensitive mutations require certified handoff and ready recovery proof.
-- **P13.10801–10920:** session continuity transition binds handshake reuse to active session state and exact execution/device/install/network identity; closed/interrupted sessions are blocked and reconciliation-required state cannot be promoted by handshake reuse alone.
-- No database driver, migration, production persistence, real detainee data, or AI activation.
+- Runtime/offline/LAN continuity, session reconciliation, backup continuity, handoff safety and unified continuity certification.
+- P13.10081–10440: narrow LOCAL/LAN browser adapter, routing safety and synthetic execution boundary.
+- P13.10441–10560: local runtime session handshake bound to session/execution/device/install/network identity with deterministic expiry.
+- P13.10561–10680: handshake lifetime and expiry fail-closed regression.
+- P13.10681–10800: continuity-sensitive mutation admission requires certified handoff and ready recovery proof.
+- P13.10801–10920: session continuity transition binds handshake reuse to active session and exact execution/device/install/network identity; closed/interrupted and reconciliation-required states cannot be promoted by handshake reuse.
+- **P13.10921–11040:** local adapter audit envelope produces deterministic synthetic request/response evidence and binds actor/session/execution/device/install/network/request/idempotency identities; evidence drift fails closed.
+- **P13.11041–11160:** local adapter observability contract derives a deterministic `LOCAL_ADAPTER_EXECUTION` observation from audit evidence; observation/audit drift fails closed.
+- **P13.11161–11280:** integrated local runtime regression certification composes routing, handshake, session continuity, audit envelope and observability into one synthetic certification; reconciliation-required continuity cannot be certified READY.
+- No database driver, migration, production persistence, real detainee data, production telemetry, or AI activation.
 
-## Next gate: P13.10921–11040
+## Next gate: P13.11281–11400
 
-Build the **local adapter audit envelope**: produce deterministic synthetic request/response evidence for each local adapter execution, bind it to actor/device/session/request/idempotency identities, and fail closed on evidence identity drift. Keep all state synthetic/in-memory and do not introduce production telemetry.
+Build **local adapter failure evidence**: represent deterministic rejected executions as synthetic audit/observability evidence without leaking exception internals; bind the rejection to the same actor/session/execution/device/install/network/request identity chain and preserve fail-closed semantics.
 
 ## Governance lock
 
