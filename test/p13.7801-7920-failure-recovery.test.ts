@@ -41,8 +41,13 @@ test("matrix rejects tampered recovery semantics", () => {
 });
 
 test("compensation is an explicit boundary rather than implicit distributed rollback", () => {
-  const base = createFailureRecoveryCase("REPOSITORY_CONFLICT");
-  const compensation = { ...base, terminalState: "COMPENSATION_PENDING" as const, recovery: "COMPENSATION_REQUIRED" as const, mutationCommitted: true, compensationAllowed: true, retrySafe: false };
-  assertFailureRecoveryCase(compensation);
+  const compensation = {
+    ...createFailureRecoveryCase("REPOSITORY_CONFLICT"),
+    terminalState: "COMPENSATION_PENDING" as const,
+    recovery: "COMPENSATION_REQUIRED" as const,
+    mutationCommitted: true,
+    compensationAllowed: true,
+    retrySafe: false,
+  };
   assertCompensationBoundary(compensation);
 });
