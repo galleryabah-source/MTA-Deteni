@@ -1,8 +1,8 @@
 # MTA DETENI — Project Status
 
-**Version:** Foundation v1.17
-**Current Phase:** P10.937–P10.968 synthetic execution-evidence gate
-**Implementation Track:** P10.968
+**Version:** Foundation v1.18
+**Current Phase:** P10.969–P11.000 controlled synthetic verification harness
+**Implementation Track:** P11.000
 **Branch:** `main`
 
 ## Latest Progress
@@ -19,7 +19,12 @@
 - P10.937–P10.944 release-candidate validation hardening;
 - P10.945–P10.952 synthetic execution-evidence contract;
 - P10.953–P10.960 fail-closed evidence regression matrix;
-- P10.961–P10.968 synthetic-only evidence boundary.
+- P10.961–P10.968 synthetic-only evidence boundary;
+- P10.969–P10.972 controlled synthetic command sequence;
+- P10.973–P10.980 observation-to-packet composition;
+- P10.981–P10.988 PASS/exit-code consistency;
+- P10.989–P10.996 packet/observation identity integrity;
+- P10.997–P11.000 synthetic-only evidence enforcement.
 
 ## Integrated Application Model
 
@@ -39,16 +44,16 @@ RAP owns registration, administration and reporting; PERKES owns health records 
 
 ## Current Gate
 
-**P10.968 — SYNTHETIC EXECUTION-EVIDENCE CONTRACT READY / OBSERVABLE EXECUTION REQUIRED**
+**P11.000 — CONTROLLED SYNTHETIC VERIFICATION HARNESS CONTRACT-READY / TRUSTWORTHY TELEMETRY STILL REQUIRED**
 
-The repository now distinguishes contract-level release readiness from trustworthy execution evidence. Synthetic evidence fixtures are intentionally not treated as proof that commands actually ran.
+The repository now has a deterministic harness contract that can represent command observations and compose them into a synthetic evidence packet. The harness deliberately does not claim that commands ran.
 
 ## Execution Certification Rule
 
-CI or local execution may be certified only from observable command/job telemetry. `NOT_RUN`, missing evidence, non-zero exit codes, or missing output identity remain blocked. No CI PASS, database PASS, production readiness, or operational authorisation is claimed by this contract milestone.
+CI or local execution may be certified only from observable command/job telemetry. `NOT_RUN`, missing evidence, non-zero exit codes, target mismatch, identity drift, or missing output identity remain blocked. No CI PASS, database PASS, production readiness, or operational authorisation is claimed.
 
 ## Next Gate
 
-**P10.969–P11.000 — controlled synthetic verification harness, evidence packet composition, and application-boundary regression expansion.**
+**P11.001+ — trustworthy observable execution capture, evidence reconciliation, and application-boundary regression expansion.**
 
 No production or live-database step is implied by this next gate.
