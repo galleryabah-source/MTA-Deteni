@@ -1,91 +1,33 @@
 # MTA DETENI — Next Gate
 
-**Foundation:** v1.70
-**Current:** P13.8281–8400 — recovery/lifecycle cross-step binding, retry fingerprint certification and unified seven-class failure journey implemented; CI observation blocker remains
+**Foundation:** v1.71
+**Current:** P13.8401–8520 — runtime execution/certification boundary and synthetic LAN/offline handoff contract implemented; CI observation blocker remains
 
-## Completed
+## Completed (through current gate)
 
-1. deterministic reconnect transitions for APPLY, SKIP_DUPLICATE and REVIEW_CONFLICT;
-2. stable command identity and current-state guards;
-3. synthetic reconnect evidence bound to commandId, aggregateId, payload hash, idempotency key and transition;
-4. reconnect reporting projection with sourceRevision and evidence integrity binding;
-5. immutable reporting snapshots with canonical representation verification;
-6. reporting artifact integrity contract bound to snapshotId and sourceRevision;
-7. reporting export envelope bound to artifactId, snapshotId and sourceRevision;
-8. operational report rendering boundary with mandatory section completeness and deterministic ordering;
-9. reporting governance gate with synthetic-only provenance enforcement;
-10. report preview boundary with tamper detection;
-11. report download boundary with preview/snapshot/document binding and deterministic safe filename;
-12. integrated daily guard report journey through validated preview and download;
-13. application surface regression for REPORTS, responsive behavior and role navigation;
-14. renderer abstraction with REFERENCE_TEXT plus reserved PDF/DOCX formats;
-15. daily guard renderer application boundary;
-16. canonical daily guard section-order and completeness contract;
-17. source-grounded daily guard presentation contract and domain/presentation separation;
-18. synthetic PDF/DOCX renderer adapter boundaries;
-19. renderer certification contract `DGRT-1.0`;
-20. certified report output envelope with MIME and filename policy;
-21. end-to-end daily guard export certification;
-22. database environment/access contract without database connection;
-23. schema comparison matrix with migration freeze;
-24. critical mutation transaction boundary;
-25. critical mutation idempotency replay/conflict contract;
-26. transactional outbox and payload-drift contract;
-27. critical mutation integration seam;
-28. non-production aggregate repository interface;
-29. in-memory reference repository implementation;
-30. explicit repository registry for detainee, placement, movement, temporary-exit, report and audit boundaries;
-31. monotonic repository version guard and deterministic removal;
-32. synthetic regression coverage for repository contracts;
-33. deterministic repository/queue/reporting reconciliation contract;
-34. unified application mutation service seam for detainee registration, placement, movement and temporary-exit advancement;
-35. application service authorization gate before critical mutation;
-36. application service routing through transaction, idempotency, audit and outbox kernel;
-37. synthetic regression coverage for reconciliation, replay and audit/outbox non-duplication;
-38. repository-backed aggregate orchestration seam with version-preserving repository result propagation;
-39. synthetic regression coverage for repository orchestration;
-40. cross-domain lifecycle command/event envelope correlation contract;
-41. optimistic version propagation contract;
-42. read-model refresh boundary contract;
-43. actor/correlation binding fail-closed contract;
-44. synthetic lifecycle orchestration regression coverage;
-45. controlled synthetic end-to-end lifecycle certification contract;
-46. correlation consistency across lifecycle steps;
-47. optimistic version progression certification;
-48. reporting projection freshness certification;
-49. audit/outbox cardinality integrity guard;
-50. lifecycle drift and duplicate-effect fail-closed regression;
-51. deterministic failure matrix for authorization, stale version, idempotency, repository, outbox, projection and offline reconnect failures;
-52. terminal state, reason code and recoverability classification for each governed failure;
-53. explicit compensation boundary without distributed-rollback claims;
-54. synthetic regression coverage for pre-commit rejection, post-commit retry and compensation-boundary semantics;
-55. no concrete PostgreSQL driver, database connection, or production persistence;
-56. no schema migration, AI activation or real detainee data;
-57. explicit lifecycle request-hash field separated from command identity;
-58. failure classification evidence bound to command, event, correlation, aggregate and expected/resulting versions;
-59. idempotent retry contract for committed outbox/projection recovery;
-60. offline reconnect decision bound to reconciliation status with fail-closed conflict handling;
-61. lifecycle certification hardened to canonical five-step order and replay/version semantics;
-62. synthetic recovery/continuity regression coverage for request-hash, recovery evidence, retry deduplication and reconnect conflict binding;
-63. deterministic recovery journey proving pre-commit zero-effect behavior;
-64. deterministic post-commit recovery retry with duplicate suppression;
-65. recovery evidence bound to lifecycle command/event/correlation/aggregate/version;
-66. offline reconnect conflict forced into reconciliation review;
-67. recovery certification boundary enforcing mutation/audit/outbox cardinality;
-68. canonical retry sequence `RETRY → SKIP_DUPLICATE` for committed infrastructure recovery;
-69. no cross-system atomic rollback assumption;
-70. synthetic-only recovery journey and certification regression coverage;
-71. dedicated lifecycle-event envelope validator with no command/request-hash substitution;
-72. recovery evidence directly bound to the corresponding lifecycle certification step;
-73. deterministic retry-key construction from command identity plus source fingerprint;
-74. recovery certification rejects retry-key or source-fingerprint drift;
-75. unified synthetic recovery regression across all seven governed failure classes;
-76. offline reconnect conflict included as an explicit seven-class recovery journey case;
-77. cross-step recovery/lifecycle identity and version drift fail-closed tests.
+- Deterministic reconnect transitions and stable queue identity.
+- Immutable reporting snapshots, artifacts, export envelopes, renderer boundaries and daily guard report certification.
+- Database/access contract and migration freeze; no concrete PostgreSQL connection.
+- Critical mutation transaction, idempotency, audit and outbox integration seams.
+- Non-production aggregate repositories and deterministic reconciliation.
+- Unified application mutation services for detainee registration, placement, movement and temporary-exit advancement.
+- Canonical five-step lifecycle orchestration/certification with correlation and version propagation.
+- Deterministic seven-class failure/recovery matrix with explicit terminal/recovery semantics.
+- Synthetic recovery journey with zero-effect pre-commit behavior and post-commit retry deduplication.
+- Recovery evidence bound to command, request hash, event, correlation, aggregate and version identities.
+- Recovery evidence bound directly to lifecycle certification steps.
+- Retry keys deterministically bound to command identity plus source fingerprint; fingerprint drift rejected.
+- Unified seven-class recovery regression, including explicit offline reconnect review.
+- Dedicated lifecycle event-envelope validation with no `commandId`/`requestHash` substitution.
+- Runtime execution context bound to runtime mode, device class, network scope, authentication and certification journey.
+- Runtime certification binding to lifecycle and recovery certification records.
+- Synthetic LAN/offline runtime handoff contract requiring authorization and reconciliation continuity.
+- Runtime handoff fail-closed checks prevent bypass of certification/reconciliation controls.
+- No database driver, migration, production persistence, real detainee data, or AI activation.
 
-## Next gate: P13.8401–8520
+## Next gate: P13.8521–8640
 
-Prepare the runtime adapter boundary as a contract-only layer: bind lifecycle/recovery certification to runtime execution context, formalize synthetic LAN/offline adapter handoff, and verify that runtime mode transitions cannot bypass authorization, idempotency, reconciliation, reporting, or recovery controls. Keep database drivers, migrations, production persistence, real detainee data and AI disabled.
+Extend the runtime boundary into a contract-level **local/LAN continuity coordinator**: bind device identity, local service boundary, persistent queue, reconnect transition, backup manifest/chain and reporting refresh into one synthetic end-to-end continuity journey. Then add fail-closed tests for device/network-scope drift, expired LAN sessions, backup-chain drift, pending-queue handoff and certification mismatch. Do not introduce database drivers, migrations, production data, or AI.
 
 ## Governance lock
 
@@ -93,4 +35,4 @@ Migration Freeze TRUE. AI OFF. Repository SYNTHETIC ONLY. Production access NOT 
 
 ## Observation blocker
 
-GitHub Actions remains an observation blocker. Run #416 failed with zero steps and no logs; its job log endpoint returned BlobNotFound. Repository implementation checkpoints are therefore tracked independently from runtime CI PASS claims. No CI PASS claim is made without observable steps/logs/artifacts.
+GitHub Actions remains an observation blocker. The known Run #416 failed with zero steps and no logs; its job log endpoint returned BlobNotFound. New commits must not be described as CI-PASS until observable workflow steps/logs/artifacts exist.

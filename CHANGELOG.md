@@ -1,5 +1,14 @@
 # Changelog
 
+## P13.8401–8520 — Runtime Execution & Handoff Boundary
+
+- Added a synthetic runtime execution context binding execution identity, runtime mode, device class, network scope, authentication and certification journey.
+- Bound runtime execution to lifecycle and recovery certification records so runtime adapters cannot bypass certified application state.
+- Added a contract-only LAN/offline runtime handoff with explicit authorization and reconciliation requirements.
+- Added fail-closed runtime handoff checks for missing authorization, pending-queue reconciliation and non-cloud continuity.
+- Added synthetic regression coverage for runtime/capability mismatch, certification mismatch, unauthenticated execution and unsafe handoff.
+- No database driver, schema migration, production persistence, real detainee data or AI activation.
+
 ## P13.8281–8400 — Recovery/Lifecycle Cross-Step Certification
 
 - Added a dedicated lifecycle-event envelope validator so event validation never substitutes `commandId` for `requestHash`.
@@ -31,31 +40,3 @@
 - Hardened lifecycle certification to exactly five canonical ordered steps and explicit replay/version semantics.
 - Added synthetic regression coverage for recovery evidence, retry deduplication, reconnect/reconciliation binding and explicit request-hash validation.
 - No concrete database driver, schema migration, AI activation, production persistence, or live PostgreSQL execution.
-
-## P13.7801–7920 — Failure Injection & Recovery Matrix
-
-- Added a deterministic synthetic failure/recovery matrix covering authorization denial, stale version, idempotency conflict, repository conflict, outbox failure, reporting refresh failure, and offline reconnect conflict.
-- Added explicit terminal states, stable reason codes and recoverability classifications for each governed failure.
-- Pre-commit failures are fail-closed and are not treated as blindly retryable.
-- Post-commit infrastructure failures are explicitly retryable without representing them as distributed rollback.
-- Added an explicit compensation boundary contract so compensation is never inferred from a generic failure or presented as atomic cross-system rollback.
-- Added canonical recovery-case validation and deterministic fingerprinting for regression evidence.
-- Added synthetic regression coverage for all failure classes, retry safety, tamper detection and compensation-boundary semantics.
-- No concrete database driver, schema migration, AI activation, production persistence, or live PostgreSQL execution.
-
-## P13.7401–7440 — Reconciliation & Application Service Seams
-
-- Added deterministic reconciliation across repository entity state, offline queue state and reporting projection source revision.
-- Added explicit reconciliation outcomes: `CONSISTENT`, `REPLAY_REQUIRED`, `CONFLICT`, and `MISSING_PROJECTION`, with fail-closed safety for unresolved states.
-- Added a unified application mutation service seam for detainee registration, placement, movement and temporary-exit advancement.
-- Application service authorization is evaluated before entering the critical mutation kernel.
-- All mutation paths route through the existing transaction, idempotency, audit and outbox integration boundary; no direct persistence implementation was added.
-- Added synthetic regression coverage for deterministic reconciliation, replay behavior, source conflicts, and prevention of duplicate audit/outbox effects.
-- No concrete database driver, schema migration, AI activation, production persistence, or live PostgreSQL execution.
-
-## P13.7121–7200 — Critical Mutation Integration Seam
-
-- Added an application integration seam composing idempotency, transaction execution, domain mutation, mandatory audit and transactional outbox publication within the transaction runner boundary.
-- Added fail-closed replay behavior for completed idempotency keys and explicit conflict behavior for request-hash reuse.
-- Added synthetic regression coverage for commit, replay and conflict paths.
-- No concrete database driver or production persistence was introduced.
