@@ -18,9 +18,11 @@ MTA DETENI adalah model tata kelola administrasi deteni yang mengintegrasikan st
 
 ## Current Status
 
-**Foundation / D0 — Governance & Discovery**
+**Foundation v1.60 — P13.5240**
 
-The repository is the source of truth for the MTA DETENI blueprint, architecture, requirements, security baseline, roadmap, and implementation decisions.
+The implementation branch is currently at **EVIDENCE-DRIVEN PRE-PRODUCTION CONTRACT READY / OBSERVATION PENDING**. The repository has the controlled execution, browser/LAN continuity, report-fidelity, recovery, security and evidence-convergence contracts, but does not claim runtime execution evidence that has not actually been observed.
+
+Production is not authorized and schema migration remains frozen.
 
 ## Repository Structure
 
