@@ -1,26 +1,25 @@
 # MTA DETENI — Project Status
 
-**Version:** Foundation v1.55
-**Current Phase:** P13.4201–P13.4440 release-integration convergence
-**Implementation Track:** P13.4440
+**Version:** Foundation v1.56
+**Current Phase:** P13.4441–P13.4560 observed-execution certification boundary
+**Implementation Track:** P13.4560
 **Branch:** `phase-p12.961-13.200`
 
 ## Latest Progress
 
-- P13.4201–P13.4240 — integrated executable release harness;
-- P13.4241–P13.4280 — report rendering verification boundary;
-- P13.4281–P13.4320 — end-to-end role journey matrix;
-- P13.4321–P13.4360 — offline continuity drill;
-- P13.4361–P13.4400 — release-candidate evidence manifest;
-- P13.4401–P13.4440 — integrated pre-release gate.
+- P13.4441–P13.4480 — observed execution manifest contract;
+- P13.4481–P13.4520 — controlled non-production certification contract;
+- P13.4521–P13.4560 — deployment readiness barrier;
+- regression tests added for the evidence and deployment barriers;
+- certification documentation added.
 
 ## Current Gate
 
-**P13.4440 — PRE-RELEASE CONTRACT-READY / OBSERVED EXECUTION EVIDENCE PENDING**
+**P13.4560 — OBSERVED-EXECUTION CONTRACT-READY / ACTUAL EXECUTION EVIDENCE PENDING**
 
-The release candidate now has a single integrated contract layer covering executable synthetic controls, report rendering verification, role journeys, offline continuity, evidence traceability and the final pre-release gate. These contracts are implemented and covered by repository tests, but repository source presence is not treated as execution certification.
+The application now distinguishes contractual readiness from observed execution. Execution observations require execution identity, control identity, timestamps, successful exit code and output identity. Controlled non-production certification requires each control to be observed and passed. Deployment readiness additionally requires explicit source/test/security/backup-restore/migration-plan review and production authorization.
 
-The active branch remains configured for push-triggered domain CI. GitHub Actions execution has not produced an observable run in the available query path for these new commits, so CI/execution remains **NOT CERTIFIED**. No CI PASS is inferred.
+The active branch remains configured for push-triggered domain CI, but the available GitHub Actions query has not returned an observable workflow run for the new commits. Therefore CI/execution remains **NOT CERTIFIED**. No PASS is inferred from source presence.
 
 ## Integrated Application Model
 
@@ -48,9 +47,10 @@ RAP owns registration, administration and reporting; PERKES owns health records 
 - Report artifacts require deterministic inputs and reconciled source bindings.
 - Exact visual report reproduction remains gated by the approved source template and observable rendering evidence.
 - Certification evidence requires execution identity, output identity and telemetry identity; `NOT_RUN` never becomes PASS.
+- Production deployment is now explicitly impossible through the readiness contract without authorization.
 
 ## Next Gate
 
-**P13.4441+ — observed execution evidence collection, report rendering verification against the approved source template, and controlled non-production integration certification.**
+**P13.4561–P13.4680 — test/evidence aggregation, report-rendering evidence adapter, local-server/LAN acceptance evidence, and final release-candidate evidence index.**
 
-This next gate is intentionally evidence-driven. No production or live-database step is implied.
+This gate remains evidence-driven and non-production. No production or live-database step is implied.
