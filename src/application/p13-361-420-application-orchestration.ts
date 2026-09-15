@@ -26,12 +26,23 @@ export class ControlledApplicationOrchestrator {
     if (!request.actor.correlationId || request.actor.correlationId !== request.command.correlationId) {
       throw new Error("ORCHESTRATION_CORRELATION_MISMATCH");
     }
-    const existing = await this.idempotency.get(request.command.commandId);
-    if (existing) return { result: existing, correlationId: request.command.correlationId, idempotent: true };
 
-    await this.authorization.assertCanExecute(request.actor, request.command.permission);
-    const result = await this.transaction.run(async () => handler(request.command));
-    await this.idempotency.put(request.command.commandId, result, request.fingerprint);
+    const replay = await this.idempotency.replay(request.command.commandId);
+    if (replay) return { result: replay, correlationId: request.command.correlationId, idempotent: true };
+
+    const acquisition = await this.idempotency.begin(request.command.commandId, request.fingerprint);
+    if (acquisition === "CONFLICT") throw new Error("ORCHESTRATION_IDEMPOTENCY_CONFLICT");
+    if (acquisition === "REPLAY") {
+      const result = await this.idempotency.replay(request.command.commandId);
+      if (!result) throw new Error("ORCHESTRATION_REPLAY_RESULT_MISSING");
+      return { result, correlationId: request.command.correlationId, idempotent: true };
+    }
+
+    const allowed = await this.authorization.authorize(request.actor, request.command.permission, request.command.aggregateId);
+    if (!allowed) throw new Error("ORCHESTRATION_AUTHORIZATION_DENIED");
+
+    const result = await this.transaction.run(() => handler(request.command));
+    await this.idempotency.complete(request.command.commandId, result);
     return { result, correlationId: request.command.correlationId, idempotent: false };
   }
 }
