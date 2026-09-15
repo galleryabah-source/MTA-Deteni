@@ -1,8 +1,8 @@
 # MTA DETENI — Project Status
 
-**Version:** Foundation v1.26
-**Current Phase:** P11.545–P11.816 cross-domain reconciliation gate
-**Implementation Track:** P11.816
+**Version:** Foundation v1.27
+**Current Phase:** P11.817–P11.960 operational integrity gate
+**Implementation Track:** P11.960
 **Branch:** `main`
 
 ## Latest Progress
@@ -14,7 +14,11 @@
 - P11.449–P11.544 operational QR validity-window and explicit context compatibility contract;
 - P11.545–P11.608 cross-domain detainee/placement/headcount aggregate composition;
 - P11.609–P11.680 reporting snapshot consistency;
-- P11.681–P11.816 integrated synthetic failure-path matrix.
+- P11.681–P11.816 integrated synthetic failure-path matrix;
+- P11.817–P11.872 immutable operational timeline composition;
+- P11.873–P11.904 audit/outbox correlation binding;
+- P11.905–P11.936 idempotency-aware mutation identity;
+- P11.937–P11.960 synthetic authorization regression.
 
 ## Integrated Application Model
 
@@ -32,15 +36,17 @@ RAP owns registration, administration and reporting; PERKES owns health records 
 - No direct WhatsApp/OCR/transcript → approved operational record;
 - No schema migration before approved data model, security controls, reconciliation and governance gate.
 
-## Design Integrity Finding Addressed
+## Design Integrity
 
 Temporary-exit `COMPLETED` is not a deportation event. Deportation remains a separate operational workflow and QR context.
 
+Operational mutations now have a contract-level integrity chain: authorization → idempotency → domain mutation → immutable timeline/audit → outbox → read model/report.
+
 ## Current Gate
 
-**P11.816 — CROSS-DOMAIN RECONCILIATION / REPORT SNAPSHOT / FAILURE-MATRIX CONTRACT-READY / EXECUTION TELEMETRY STILL REQUIRED**
+**P11.960 — OPERATIONAL INTEGRITY CONTRACT-READY / EXECUTION TELEMETRY STILL REQUIRED**
 
-Cross-domain consistency is now represented at contract level from detainee identity through placement, movement, headcount and reporting snapshot binding. Negative paths are first-class synthetic scenarios.
+The application boundary now explicitly models ordered operational history, audit/outbox correlation, replay-safe mutation identity, and deny-by-default authorization regression. These remain contract-level controls until observable execution evidence exists.
 
 ## Execution Certification Rule
 
@@ -48,6 +54,6 @@ CI or local execution may be certified only from observable command/job telemetr
 
 ## Next Gate
 
-**P11.817–P11.960 — immutable operational timeline composition, audit/outbox correlation binding, idempotency-aware mutation contracts, and synthetic authorization regression expansion.**
+**P11.961–P12.120 — controlled application service composition, transactional mutation orchestration, audit/outbox atomicity contract, and operator-facing command/read-model integration.**
 
 No production or live-database step is implied by this next gate.
