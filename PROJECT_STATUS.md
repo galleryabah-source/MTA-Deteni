@@ -1,8 +1,8 @@
 # MTA DETENI — Project Status
 
-**Version:** Foundation v1.7
-**Current Phase:** D3/D4/D5/D6 implementation + domain verification foundation
-**Implementation Track:** P10.480
+**Version:** Foundation v1.8
+**Current Phase:** D3/D4/D5/D6 implementation + synthetic integration verification foundation
+**Implementation Track:** P10.512
 **Branch:** `main`
 
 ## Implementation / Verification Progress
@@ -50,7 +50,11 @@
 - P10.456–P10.463 idempotency, authorization, transaction, audit/outbox and failure-semantics ports established;
 - P10.464–P10.471 governed temporary-exit orchestration added with approval/document/escort prerequisites and stale-state protection;
 - P10.472–P10.479 document template effectiveness, required-field, numbering and approval-binding contracts added;
-- P10.480 repository CI harness added for Node 24 typecheck and regression/domain tests.
+- P10.480 CI harness added for Node 24 typecheck and regression/domain tests;
+- P10.481–P10.488 CI diagnosis remains open because GitHub Actions jobs are failing before exposing executable step telemetry in this repository environment;
+- P10.489–P10.496 versioned persistence contracts and optimistic-concurrency adapter semantics added;
+- P10.497–P10.504 append-only audit/event and outbox persistence contracts plus deterministic in-memory adapters added;
+- P10.505–P10.512 synthetic end-to-end temporary-exit execution harness added.
 
 ## Current Governance Model
 
@@ -78,14 +82,14 @@
 
 ## Current Gate
 
-**P10.480 — Domain Verification + CI Foundation: IN PROGRESS / VERIFICATION REQUIRED**
+**P10.512 — Synthetic Integration + Persistence Boundary Foundation: READY FOR ENVIRONMENTAL VERIFICATION**
 
-The repository now has service-contract tests, fail-closed idempotency boundaries, transaction/audit/outbox ports, governed temporary-exit orchestration, document template/numbering/approval binding contracts, and a GitHub Actions CI harness. Earlier CI attempts failed before meaningful code verification because the workflow enabled npm dependency caching without a committed lockfile; the cache prerequisite has now been removed. The latest CI run must be observed before claiming typecheck/test PASS.
+The domain/application layer now has explicit service contracts, fail-closed idempotency, optimistic-concurrency boundaries, append-only event/outbox contracts, governed temporary-exit orchestration, document binding controls, deterministic in-memory persistence adapters, and a synthetic end-to-end workflow harness. No database schema or migration was introduced. GitHub Actions exists as the intended verification path, but the observed runs fail before exposing actionable step telemetry; therefore no CI PASS is claimed.
 
 ## Next Checkpoints
 
-1. P10.481–P10.488 — resolve and verify CI/typecheck findings;
-2. P10.489–P10.496 — persistence adapter interfaces and optimistic-concurrency semantics;
-3. P10.497–P10.504 — append-only audit/event and outbox adapter contracts;
-4. P10.505–P10.512 — application composition/E2E synthetic execution harness;
-5. P10.513+ — non-production runtime adapter, still migration-frozen until governance gate.
+1. P10.513–P10.520 — isolate CI runner/workflow execution failure and obtain first trustworthy automated verification;
+2. P10.521–P10.528 — application composition across detainee/placement/movement/exit/document/escort/approval services;
+3. P10.529–P10.536 — synthetic persistence contract tests including conflict/replay/recovery semantics;
+4. P10.537–P10.544 — runtime adapter boundary and readiness/health contracts;
+5. P10.545+ — non-production PostgreSQL adapter only after governance gate; migration remains frozen.
