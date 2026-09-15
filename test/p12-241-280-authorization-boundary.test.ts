@@ -13,8 +13,8 @@ test("P12.241-280 allows only permissions declared for actor domain", async () =
   assert.deepEqual(decisions, ["TEMPORARY_EXIT_VALIDATE:true", "HEALTH_RECORD_MANAGE:false"]);
 });
 
-test("P12.241-280 rejects missing actor identity", async () => {
-  await assert.rejects(async () => new PolicyEnforcingAuthorization().authorize({ ...actor, actorId: "" }, "TEMPORARY_EXIT_VALIDATE"), /never/).catch(() => undefined);
+test("P12.241-280 denies missing actor identity", async () => {
+  assert.equal(await new PolicyEnforcingAuthorization().authorize({ ...actor, actorId: "" }, "TEMPORARY_EXIT_VALIDATE"), false);
   assert.throws(() => assertAuthorizationBoundary({ ...actor, actorId: "" }, "TEMPORARY_EXIT_VALIDATE"), /ACTOR_CONTEXT_REQUIRED/);
 });
 
