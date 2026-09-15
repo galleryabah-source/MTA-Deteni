@@ -1,5 +1,25 @@
 # Changelog
 
+## P13.11161–11280 — Local Runtime Regression Certification
+
+- Added integrated synthetic certification composing local routing, session handshake, session continuity, audit envelope and observability evidence.
+- Required READY session continuity before local runtime regression can be certified.
+- Reconciliation-required continuity cannot be certified as READY.
+
+## P13.11041–11160 — Local Adapter Observability Contract
+
+- Added deterministic `LOCAL_ADAPTER_EXECUTION` observation derived from audit evidence.
+- Bound observations to evidence, actor, session, execution, device, installation, network and request identities.
+- Observation/audit identity drift fails closed.
+- Preserved synthetic-only observability with no production telemetry.
+
+## P13.10921–11040 — Local Adapter Audit Envelope
+
+- Added deterministic synthetic request/response audit evidence for local adapter execution.
+- Bound audit evidence to actor, session, execution, device, installation, network, request and mutation idempotency identities.
+- Request/response identity drift and scope drift fail closed.
+- Preserved synthetic/in-memory execution only.
+
 ## P13.10801–10920 — Session Continuity Transition
 
 - Added a deterministic session continuity proof bound to the local runtime handshake.
@@ -67,29 +87,3 @@
 
 - Kept runtime integration adapter-only and isolated from database/production transport.
 - Established the separation needed for a future browser/tablet/smartphone LOCAL/LAN adapter without weakening current synthetic governance controls.
-
-## P13.9121–9240 — Integrated Offline-First Continuity Journey
-
-- Added a deterministic contract-level composition from active operational session through local command admission, reconciliation, synchronized runtime continuity, backup continuity, unified continuity certification and clean session close.
-- Preserved end-to-end identity continuity for session, execution, device, installation, network, journey, command and reconciliation receipt identifiers.
-- Added regression coverage for successful integrated continuity and rejection of an empty/non-operative journey.
-- Kept all state synthetic/in-memory with no production persistence or AI activation.
-
-## P13.9001–9120 — Session Reconciliation Completion
-
-- Added deterministic per-command reconciliation receipts bound to session, execution and command identities.
-- Conflict review cannot emit a completed reconciliation receipt.
-- Added complete reconciliation proof requiring one unique receipt for every admitted command; partial reconnects fail closed.
-- Added explicit `RECONCILIATION_REQUIRED` session state and a guarded transition back to `ACTIVE` only after complete reconciliation proof.
-- Added execution/session drift and terminated-session regression coverage.
-- Preserved synthetic-only operation and all governance locks.
-
-## P13.8881–9000 — Offline-First Operational Session
-
-- Added a contract-only operational session lifecycle bound to execution, device, installation, network scope and runtime mode.
-- Added authenticated synthetic session admission with LAN/LOCAL-only local command admission and complete command identity validation.
-- Added fail-closed session scope checks for execution, runtime mode, network, device and installation drift.
-- Added deterministic clean session-close evidence bound to synchronized queue state, READY runtime continuity, READY backup continuity and the unified continuity certification.
-- Added explicit `INTERRUPTED` state so an interrupted local/LAN session cannot be represented as a clean operational handoff.
-- Added regression coverage for active admission, scope drift, unauthenticated context, inactive/interrupted sessions, pending queues, reconciliation conflicts, clean close and fabricated close evidence.
-- No database driver, schema migration, production persistence, real detainee data or AI activation.
