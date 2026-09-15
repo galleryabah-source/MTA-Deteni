@@ -1,7 +1,7 @@
 # MTA DETENI — Next Gate
 
-**Foundation:** v1.77
-**Current:** P13.9121–9240 — integrated offline-first continuity journey implemented; CI observation blocker remains
+**Foundation:** v1.79
+**Current:** P13.9361–9480 — synthetic multi-device continuity boundary implemented; CI observation blocker remains
 
 ## Completed (through current gate)
 
@@ -35,13 +35,14 @@
 - Interrupted-session safety: interrupted/closed sessions cannot admit local commands; interrupted sessions cannot be represented as clean handoff even with fabricated close evidence.
 - Session reconciliation completion: per-command receipts bind session/execution/command identity; conflicts cannot yield completion receipts; proof requires one unique receipt for every admitted command; partial reconnects fail closed.
 - Reconciliation state transition: an open session can explicitly enter `RECONCILIATION_REQUIRED` and return to `ACTIVE` only after complete reconciliation proof; terminated sessions cannot be resumed through reconciliation.
-- **Integrated offline-first continuity journey:** active session → local command admission → reconciliation-required transition → per-command reconciliation → synchronized queue/runtime continuity → backup continuity → unified continuity certification → clean session close.
-- End-to-end synthetic identity continuity covers session, execution, device, installation, network, journey, command and reconciliation receipt identifiers.
+- Integrated offline-first continuity journey now exercises deliberate interruption, interruption evidence, explicit reconnect authorization, scope revalidation, queue rehydration and APPLY/SKIP_DUPLICATE transitions before clean close.
+- Continuity certification explicitly binds session, execution, device, installation and network identities and rejects backup source identity drift.
+- Synthetic multi-device continuity proof: authorized handoff within the same installation/network scope is admissible; unauthorized or network-drift handoff is fail-closed.
 - No database driver, migration, production persistence, real detainee data, or AI activation.
 
-## Next gate: P13.9241–9360
+## Next gate: P13.9481–9600
 
-Build the **offline interruption/recovery proof contract**: capture a deterministic interrupted-session record, preserve the last admitted/reconciled command boundary, require explicit reconnect authorization, reject stale execution/session identities, and prove that recovery from interruption resumes only from a known safe state. Extend the integrated journey with a deliberate interruption branch and a fail-closed recovery branch before allowing clean close. Keep all state synthetic/in-memory.
+Build the runtime handoff proof: explicit CLOUD/LAN/LOCAL transitions, authorization binding, queue/reconciliation requirements, and fail-closed mode/device/network drift. Then bind the handoff proof into the continuity certification chain.
 
 ## Governance lock
 
@@ -49,4 +50,4 @@ Migration Freeze TRUE. AI OFF. Repository SYNTHETIC ONLY. Production access NOT 
 
 ## Observation blocker
 
-GitHub Actions remains an observation blocker. The known Run #416 failed with zero steps and no logs; its job log endpoint returned BlobNotFound. New commits must not be described as CI-PASS until observable workflow steps/logs/artifacts exist.
+GitHub Actions remains an observation blocker. New commits must not be described as CI-PASS until observable workflow steps/logs/artifacts exist.
