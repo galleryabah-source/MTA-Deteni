@@ -1,7 +1,7 @@
 # MTA DETENI — Next Gate
 
-**Foundation:** v1.80
-**Current:** P13.9481–9600 — runtime handoff safety matrix implemented; CI observation blocker remains
+**Foundation:** v1.84
+**Current:** P13.9961–10080 — runtime adapter integration boundary implemented; CI observation blocker remains
 
 ## Completed (through current gate)
 
@@ -40,11 +40,15 @@
 - Synthetic multi-device continuity proof: authorized handoff within the same installation/network scope is admissible; unauthorized or network-drift handoff is fail-closed.
 - Runtime handoff safety matrix binds source/target runtime mode, source/target device, source/target network scope, authorization identity and reconciliation requirement.
 - Device/network drift and pending queues cannot bypass reconciliation during runtime handoff.
+- **P13.9601–9720:** unified continuity certification envelope binds clean session, continuity certification, reconciliation proof, runtime handoff authorization/certification and READY backup state under one immutable synthetic envelope.
+- **P13.9721–9840:** deterministic LOCAL/LAN recovery boundary validates authenticated synthetic context, execution/network continuity, trusted installation continuity and fail-closed target drift.
+- **P13.9841–9960:** multi-device LAN continuity is represented through the same installation/network trust boundary; cross-installation or network drift is blocked before recovery proof can become READY.
+- **P13.9961–10080:** runtime integration remains adapter-only and synthetic; local/LAN recovery proof is separated from external transport/persistence so production connectivity cannot be introduced accidentally.
 - No database driver, migration, production persistence, real detainee data, or AI activation.
 
-## Next gate: P13.9601–9720
+## Next gate: P13.10081–10200
 
-Bind runtime handoff proofs into unified continuity certification and add a deterministic certification envelope covering session, execution, device, installation, network, journey, command and reconciliation evidence. Require exact identity equality across all layers and fail closed on any drift.
+Build the **offline/local runtime adapter contract**: define a narrow transport interface for browser/tablet/smartphone clients to a LOCAL/LAN service, require authenticated device identity and idempotency for every mutation, reject internet-exposed local adapters, and add deterministic synthetic adapter regression. Do not connect a real database or external production service.
 
 ## Governance lock
 
