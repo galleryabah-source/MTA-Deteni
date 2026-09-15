@@ -1,8 +1,8 @@
 # MTA DETENI — Project Status
 
-**Version:** Foundation v1.28
-**Current Phase:** P11.961–P12.120 controlled application composition
-**Implementation Track:** P12.120
+**Version:** Foundation v1.29
+**Current Phase:** P12.121–P12.240 integrity composition
+**Implementation Track:** P12.240
 **Branch:** `main`
 
 ## Latest Progress
@@ -22,7 +22,10 @@
 - P11.961–P11.1024 transactional mutation orchestration;
 - P11.1025–P11.1088 operator command/read surface;
 - P11.1089–P11.1160 temporary-exit command adapter to canonical workflow;
-- P11.1161–P12.120 command-to-read-model application composition.
+- P11.1161–P12.120 command-to-read-model application composition;
+- P12.121–P12.160 shared transaction identity/context contract;
+- P12.161–P12.200 persistent idempotency contract;
+- P12.201–P12.240 explicit domain authorization policy matrix.
 
 ## Integrated Application Model
 
@@ -32,7 +35,9 @@ RAP owns registration, administration and reporting; PERKES owns health records 
 
 `UI/API Command → Authorization → Transaction → Idempotency → Domain Workflow → Immutable Timeline/Audit → Outbox → Read Model → QR/Movement/Temporary Exit → Reporting`
 
-Operator commands now carry command identity, actor context, permission, fingerprint and payload. Temporary-exit commands are routed through `MtaWorkflowService`; the application facade projects successful mutation envelopes into the operator read-model boundary.
+The transaction integrity layer now defines one shared transaction identity for actor, correlation and aggregate; persistent idempotency binds the complete mutation identity; and operational permissions are explicitly declared by domain.
+
+Read-model projection remains downstream of committed mutation evidence and must be rebuildable from committed operational evidence/outbox records. It is not treated as a hidden extension of the mutation transaction.
 
 ## Safety / Governance
 
@@ -50,13 +55,15 @@ Operator commands now carry command identity, actor context, permission, fingerp
 
 Temporary-exit `COMPLETED` is not a deportation event. Deportation remains a separate operational workflow and QR context.
 
-The application layer now has a contract-level composition from authorized operator command through transactional mutation and evidence to read-model projection. Concrete persistence adapters must preserve the same transaction context across domain mutation, audit, outbox and idempotency completion.
+Leadership is explicitly restricted to oversight-read and directive permissions in the authorization contract; it does not receive direct operational-edit permissions.
+
+Concrete persistence adapters must preserve the shared transaction identity across domain mutation, audit, outbox and idempotency completion.
 
 ## Current Gate
 
-**P12.120 — CONTROLLED APPLICATION COMPOSITION CONTRACT-READY / EXECUTION TELEMETRY STILL REQUIRED**
+**P12.240 — INTEGRITY COMPOSITION CONTRACT-READY / EXECUTION TELEMETRY STILL REQUIRED**
 
-Static tests were added for transactional ordering, replay/conflict behavior, temporary-exit command routing, and mutation-to-read-model projection. These controls are not execution-certified until observable CI or authorized local telemetry is available.
+Static regression coverage was added for shared transaction identity, persistent idempotency replay safety, domain authorization ownership and leadership operational-edit prevention. These controls are not execution-certified until observable CI or authorized local telemetry is available.
 
 ## Execution Certification Rule
 
@@ -64,6 +71,6 @@ CI or local execution may be certified only from observable command/job telemetr
 
 ## Next Gate
 
-**P12.121 onward — concrete non-production adapters: shared transaction context, persistent idempotency, atomic audit/outbox persistence, explicit authorization policy matrix, then operator UI/API integration.**
+**P12.241 onward — enforce authorization policy at the transactional application boundary, design concrete non-production persistence adapters, bind audit/outbox atomically, implement outbox-driven read-model projection, then expose controlled operator API/UI surfaces.**
 
 No production or live-database step is implied by this next gate.
