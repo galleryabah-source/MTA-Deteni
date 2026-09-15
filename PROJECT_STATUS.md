@@ -1,8 +1,8 @@
 # MTA DETENI — Project Status
 
-**Version:** Foundation v1.40
-**Current Phase:** P13.1041–P13.1240 document/output, approval, audit and cross-domain acceptance
-**Implementation Track:** P13.1240
+**Version:** Foundation v1.41
+**Current Phase:** P13.1241–P13.1400 presentation-ready reporting, dashboard state and synthetic release evidence
+**Implementation Track:** P13.1400
 **Branch:** `phase-p12.961-13.200`
 
 ## Latest Progress
@@ -21,7 +21,10 @@
 - P13.1041–P13.1100 controlled document output workspace;
 - P13.1101–P13.1160 exact approval-to-artifact/evidence binding;
 - P13.1161–P13.1200 role-scoped read-only operational audit view;
-- P13.1201–P13.1240 cross-domain synthetic acceptance boundary.
+- P13.1201–P13.1240 cross-domain synthetic acceptance boundary;
+- P13.1241–P13.1300 presentation-ready report template contract;
+- P13.1301–P13.1360 operational dashboard state model;
+- P13.1361–P13.1400 stronger synthetic release evidence contract.
 
 ## Integrated Application Model
 
@@ -29,9 +32,9 @@ RAP owns registration, administration and reporting; PERKES owns health records 
 
 ## Operational Application Chain
 
-`UI/API Command → Authorization Policy → Canonical Operational Envelope → Domain Aggregate → Transaction Context → Idempotency → Domain Workflow → Immutable Timeline/Audit → Operational Evidence → Reconciliation → Outbox → Projection Checkpoint → Read Model → Dashboard/Workbench/Navigation → QR/Movement/Headcount/Temporary Exit → Reporting Workspace/Timeline → Reporting Snapshot → Report Preview → Report Artifact → Document Output → Notification/Recommendation → Review → Human Approval Binding → Generated Output → Read-only Audit`
+`UI/API Command → Authorization Policy → Canonical Operational Envelope → Domain Aggregate → Transaction Context → Idempotency → Domain Workflow → Immutable Timeline/Audit → Operational Evidence → Reconciliation → Outbox → Projection Checkpoint → Read Model → Dashboard/Workbench/Navigation → QR/Movement/Headcount/Temporary Exit → Reporting Workspace/Timeline → Reporting Snapshot → Report Preview → Report Artifact → Document Output → Template → Notification/Recommendation → Review → Human Approval Binding → Generated Output → Read-only Audit → Synthetic Release Evidence`
 
-P13.1041–1240 hardens output provenance and approval integrity, keeps audit views read-only and role scoped, and introduces a cross-domain synthetic acceptance boundary. These are derived/control surfaces and do not replace authoritative evidence or authorization.
+P13.1241–1400 adds presentation-template validation, deterministic operational dashboard states and explicit synthetic release evidence. These remain contract-level controls; they do not certify runtime execution or production readiness.
 
 ## Safety / Governance
 
@@ -53,15 +56,15 @@ QR is an operational verification point, not a free-form data-entry path. Verifi
 
 Leadership remains oversight-read/directive only and is denied direct operational mutation.
 
-Read models, dashboard views, workbench navigation, operational boards, reporting workspace, timelines, notifications, report previews, report artifacts and document outputs remain derived state. Committed operational evidence remains authoritative and rebuildable.
+Read models, dashboard views, workbench navigation, operational boards, reporting workspace, timelines, notifications, report previews, report artifacts, document outputs, templates and dashboard state remain derived/control state. Committed operational evidence remains authoritative and rebuildable.
 
-Approval is human-bound to the exact artifact/report/evidence fingerprint. Cross-domain acceptance is synthetic and governance-gated; it does not authorize production execution.
+Approval is human-bound to the exact artifact/report/evidence fingerprint. Cross-domain acceptance and release evidence are synthetic and governance-gated; neither authorizes production execution.
 
 ## Current Gate
 
-**P13.1240 — DOCUMENT / APPROVAL / AUDIT / CROSS-DOMAIN ACCEPTANCE CONTRACT-READY / EXECUTION-CERTIFICATION PENDING**
+**P13.1400 — PRESENTATION / DASHBOARD / SYNTHETIC RELEASE-EVIDENCE CONTRACT-READY / EXECUTION-CERTIFICATION PENDING**
 
-Executable regression coverage has been added for document content drift, exact approval binding, role-scoped read-only audit access and governance-safe cross-domain acceptance. Observable GitHub execution telemetry remains unavailable in this work session, so these controls are not certified as executed.
+Executable regression coverage has been added for report template requirements, dashboard state precedence and synthetic release evidence invariants. Observable GitHub execution telemetry remains unavailable in this work session, so these controls are not certified as executed.
 
 ## Execution Certification Rule
 
@@ -69,6 +72,6 @@ CI or local execution may be certified only from observable command/job telemetr
 
 ## Next Gate
 
-**P13.1241–P13.1440 — presentation-ready reporting pipeline, document template contract, operational dashboard state model, and stronger synthetic release evidence.**
+**P13.1401–P13.1600 — operator-facing UI contract, responsive layout model, report rendering adapter boundary, and synthetic release manifest.**
 
 No production or live-database step is implied by this next gate.
