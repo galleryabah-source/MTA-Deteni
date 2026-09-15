@@ -1,7 +1,7 @@
 # MTA DETENI — Next Gate
 
-**Foundation:** v1.63+
-**Current:** P13.7401–7440 — deterministic reconciliation contract and unified application mutation service seams implemented; CI observation pending
+**Foundation:** v1.64+
+**Current:** P13.7481–7560 — repository-backed aggregate orchestration seam implemented; CI observation pending
 
 ## Completed
 
@@ -42,12 +42,14 @@
 35. application service authorization gate before critical mutation;
 36. application service routing through transaction, idempotency, audit and outbox kernel;
 37. synthetic regression coverage for reconciliation, replay and audit/outbox non-duplication;
-38. no concrete PostgreSQL driver, database connection, or production persistence;
-39. no schema migration, AI activation or real detainee data.
+38. repository-backed aggregate orchestration seam with version-preserving repository result propagation;
+39. synthetic regression coverage for repository orchestration;
+40. no concrete PostgreSQL driver, database connection, or production persistence;
+41. no schema migration, AI activation or real detainee data.
 
-## Next gate: P13.7441–7560
+## Next gate: P13.7561–7680
 
-Build repository-backed application orchestration contracts without concrete persistence: aggregate lifecycle coordination, optimistic version propagation, command-to-event envelope consistency, and cross-domain read-model refresh boundaries. Extend synthetic end-to-end coverage for registration → placement → movement → temporary-exit → reporting while preserving RBAC/SoD, transaction, idempotency, audit, outbox, offline/LAN continuity and fail-closed reconciliation. Do not introduce a database driver, migration, production persistence, AI, or real detainee data.
+Build cross-domain lifecycle orchestration contracts linking detainee registration → placement → movement → temporary-exit → reporting as one controlled application journey. Introduce explicit command/event envelope correlation, optimistic-version propagation, read-model refresh boundaries and failure compensation semantics. Preserve RBAC/SoD, transaction, idempotency, audit, outbox, offline/LAN continuity and fail-closed reconciliation. No concrete database driver, migration, production persistence, AI, or real detainee data.
 
 ## Governance lock
 
