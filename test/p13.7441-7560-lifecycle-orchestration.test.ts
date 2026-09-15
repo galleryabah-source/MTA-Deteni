@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import { assertLifecycleActorCorrelation, assertReadRefresh, assertVersionPropagation, createLifecycleEvent, assertLifecycleEnvelope } from "../src/application/lifecycle-orchestration.js";
 
 test("lifecycle envelope and version propagation are deterministic", () => {
-  const command = { commandId: "CMD-001", correlationId: "CORR-001", aggregateId: "DET-001", expectedVersion: 4, payload: { state: "ACTIVE" } };
+  const command = { commandId: "CMD-001", correlationId: "CORR-001", aggregateId: "DET-001", expectedVersion: 4, requestHash: "REQ-HASH-001", payload: { state: "ACTIVE" } };
   assertLifecycleEnvelope(command);
   assertVersionPropagation(command.expectedVersion, 5);
   const event = createLifecycleEvent({ eventId: "EVT-001", commandId: command.commandId, correlationId: command.correlationId, aggregateId: command.aggregateId, resultingVersion: 5, eventType: "DETAINEE_REGISTERED", payload: command.payload });
