@@ -1,11 +1,12 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { assertPreCertificationConsistency, classifyPreCertificationConsistency } from '../src/runtime/pre-certification-consistency-gate.mjs';
+import { buildReleaseEvidenceManifest } from '../src/runtime/release-evidence-manifest.mjs';
 
 function pkg(overrides = {}) {
   const regressionEvidence = { checkpoint: 'P10.164', commitSha: 'commit-164', classification: 'PASS', syntheticOnly: true, safety: { APP_ENV: 'test', AI_ENABLED: 'false', MIGRATION_FREEZE: 'true' }, requiredTestCount: 80, missingTests: [] };
   const integrityEvidence = { checkpoint: 'P10.164', commitSha: 'commit-164', classification: 'PASS', syntheticOnly: true, safety: { APP_ENV: 'test', AI_ENABLED: 'false', MIGRATION_FREEZE: 'true' }, requiredTestCount: 80 };
-  const releaseManifest = { schemaVersion: 'MTA-EVIDENCE-V1', checkpoint: 'P10.164', commitSha: 'commit-164', safety: { migrationFreeze: true, aiEnabled: false }, tests: [{ name: 'gate-a', status: 'PASS' }], manifestSha256: 'synthetic-hash' };
+  const releaseManifest = buildReleaseEvidenceManifest({ commitSha: 'commit-164', checkpoint: 'P10.164', safety: { migrationFreeze: true, aiEnabled: false }, tests: [{ name: 'gate-a', status: 'PASS' }], files: [{ path: 'evidence/a.json', sha256: 'a'.repeat(64) }] });
   return { regressionEvidence, integrityEvidence, releaseManifest, expectedCheckpoint: 'P10.164', expectedCommitSha: 'commit-164', ...overrides };
 }
 
@@ -45,5 +46,6 @@ test('P10.163: release manifest safety and schema are independently enforced', (
 test('P10.164: classifier converts any consistency failure to BLOCKED without fabricating PASS', () => {
   const result = classifyPreCertificationConsistency(pkg({ releaseManifest: { ...pkg().releaseManifest, checkpoint: 'P10.163' } }));
   assert.equal(result.classification, 'BLOCKED');
-  assert.match(result.reason, /RELEASE_CHECKPOINT_MISMATCH/);
+  assert.equal(result.executionAuthorized, undefined);
+  assert.equal(result.reason, 'EVIDENCE_MANIFEST_TAMPERED');
 });
