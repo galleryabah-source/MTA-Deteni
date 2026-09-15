@@ -26,6 +26,8 @@ jobs:
         run: |
           set -u
           mkdir -p artifacts/p10-runtime
+          tracked_lockfile=false
+          if git ls-files --error-unmatch package-lock.json >/dev/null 2>&1; then tracked_lockfile=true; fi
           {
             echo "generatedAt=$(date -u +%Y-%m-%dT%H:%M:%SZ)"
             echo "commitSha=${GITHUB_SHA}"
@@ -35,7 +37,7 @@ jobs:
             echo "runnerArch=${RUNNER_ARCH}"
             echo "nodeVersion=$(node --version)"
             echo "npmVersion=$(npm --version)"
-            echo "lockfilePresent=$([ -f package-lock.json ] && echo true || echo false)"
+            echo "lockfileTracked=${tracked_lockfile}"
             echo "envFilePresent=$([ -f .env ] && echo true || echo false)"
             echo "envLocalFilePresent=$([ -f .env.local ] && echo true || echo false)"
             echo "APP_ENV=${APP_ENV}"
@@ -44,13 +46,16 @@ jobs:
             echo "gitStatusStart=$(git status --short | tr '\n' ' ' || true)"
           } > artifacts/p10-runtime/ci-transport-diagnostic.txt
       - name: Install approved dependencies
-        run: npm install --ignore-scripts --no-audit --no-fund
+        run: npm install --package-lock=false --ignore-scripts --no-audit --no-fund
       - name: Record dependency install mode
         if: always()
         run: |
           set -u
+          tracked_lockfile=false
+          if git ls-files --error-unmatch package-lock.json >/dev/null 2>&1; then tracked_lockfile=true; fi
           {
-            echo "dependencyInstallMode=$([ -f package-lock.json ] && echo npm-ci-required || echo temporary-npm-install)"
+            echo "lockfileTracked=${tracked_lockfile}"
+            echo "dependencyInstallMode=$([ "$tracked_lockfile" = true ] && echo npm-ci-required || echo temporary-npm-install)"
             echo "dependencyInstallStepStatus=${{ job.status }}"
           } >> artifacts/p10-runtime/ci-transport-diagnostic.txt
       - name: Verify immutable synthetic safety gate
@@ -64,12 +69,13 @@ jobs:
       - name: Verify dependency reproducibility boundary
         run: |
           set -euxo pipefail
-          if test -f package-lock.json; then
+          if git ls-files --error-unmatch package-lock.json >/dev/null 2>&1; then
+            test -f package-lock.json
             npm ci --ignore-scripts --no-audit --no-fund
             echo "lockfileInstall=npm-ci" >> artifacts/p10-runtime/ci-transport-diagnostic.txt
           else
-            echo "NO_LOCKFILE: npm install path is temporary; production certification remains blocked until package-lock.json is reviewed and committed."
-            echo "lockfileInstall=blocked-no-lockfile" >> artifacts/p10-runtime/ci-transport-diagnostic.txt
+            echo "NO_REVIEWED_LOCKFILE: temporary dependency bootstrap only; production certification remains blocked until package-lock.json is reviewed and committed."
+            echo "lockfileInstall=blocked-no-reviewed-lockfile" >> artifacts/p10-runtime/ci-transport-diagnostic.txt
           fi
       - name: Verify consolidated regression suite
         run: |
@@ -89,15 +95,15 @@ jobs:
             test/p10.36-operational-scenario-matrix.test.mjs test/p10.38-traceability-matrix.test.mjs test/p10.39-final-pre-governance-gate.test.mjs \
             test/p10.41-governance-decision-packet.test.mjs test/p10.42-controlled-postgresql-rls-runbook.test.mjs test/p10.43-post-freeze-evidence-contract.test.mjs \
             test/p10.44-cutover-rollback-gate.test.mjs test/p10.45-ci-evidence-transport.test.mjs test/p10.46-dependency-lockfile-gate.test.mjs \
-            test/p10.47-ci-transport-diagnostic.test.mjs; do test -f "$f"; done
+            test/p10.47-ci-transport-diagnostic.test.mjs test/p10.48-lockfile-transport-integrity.test.mjs; do test -f "$f"; done
       - name: Run deterministic P10 regression gate
         run: node scripts/p10-runtime-regression-gate.mjs
       - name: Verify P10.23 evidence integrity
         if: always()
         run: node scripts/p10-evidence-integrity-gate.mjs
-      - name: Verify P10.35-47 pre-governance contract
+      - name: Verify P10.35-48 pre-governance contract
         if: always()
-        run: node --test test/p10.35-release-candidate-hardening.test.mjs test/p10.36-operational-scenario-matrix.test.mjs test/p10.38-traceability-matrix.test.mjs test/p10.39-final-pre-governance-gate.test.mjs test/p10.41-governance-decision-packet.test.mjs test/p10.42-controlled-postgresql-rls-runbook.test.mjs test/p10.43-post-freeze-evidence-contract.test.mjs test/p10.44-cutover-rollback-gate.test.mjs test/p10.45-ci-evidence-transport.test.mjs test/p10.46-dependency-lockfile-gate.test.mjs test/p10.47-ci-transport-diagnostic.test.mjs
+        run: node --test test/p10.35-release-candidate-hardening.test.mjs test/p10.36-operational-scenario-matrix.test.mjs test/p10.38-traceability-matrix.test.mjs test/p10.39-final-pre-governance-gate.test.mjs test/p10.41-governance-decision-packet.test.mjs test/p10.42-controlled-postgresql-rls-runbook.test.mjs test/p10.43-post-freeze-evidence-contract.test.mjs test/p10.44-cutover-rollback-gate.test.mjs test/p10.45-ci-evidence-transport.test.mjs test/p10.46-dependency-lockfile-gate.test.mjs test/p10.47-ci-transport-diagnostic.test.mjs test/p10.48-lockfile-transport-integrity.test.mjs
       - name: Upload P10 evidence
         if: always()
         uses: actions/upload-artifact@v4
