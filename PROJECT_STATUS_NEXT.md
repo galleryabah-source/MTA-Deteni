@@ -1,7 +1,7 @@
 # MTA DETENI — Next Gate
 
-**Foundation:** v1.87
-**Current:** P13.10321–10440 — local runtime adapter safety contract implemented; CI observation blocker remains
+**Foundation:** v1.90
+**Current:** P13.10681–10800 — local runtime session handshake and continuity admission hardened; CI observation blocker remains
 
 ## Completed (through current gate)
 
@@ -47,11 +47,14 @@
 - **P13.10081–10200:** narrow LOCAL/LAN browser adapter contract validates request identity, authenticated device identity, local-service boundary and mutation idempotency.
 - **P13.10201–10320:** local runtime adapter rejects absolute/protocol-relative URLs and non-LOCAL service paths, preventing accidental external transport routing.
 - **P13.10321–10440:** synthetic local adapter execution boundary returns only contract-level acceptance; no network, database, persistence or production service is invoked.
+- **P13.10441–10560:** local runtime session handshake binds adapter requests to authenticated synthetic LAN/LOCAL sessions and exact device/install/network identity, with deterministic expiry validation.
+- **P13.10561–10680:** handshake validity is bounded by its explicit issued/expiry window; expired sessions fail closed.
+- **P13.10681–10800:** malformed handshake identity/time and continuity-sensitive mutation admission fail closed; continuity-sensitive mutations require certified handoff and ready recovery proof.
 - No database driver, migration, production persistence, real detainee data, or AI activation.
 
-## Next gate: P13.10441–10560
+## Next gate: P13.10801–10920
 
-Build the **local runtime session handshake**: bind a browser/tablet/smartphone adapter request to a valid LAN session and exact device/install/network identity, enforce session expiry, and require a clean runtime handoff/recovery proof before accepting a continuity-sensitive mutation. Keep all state synthetic/in-memory.
+Build the **session continuity transition contract**: explicitly bind handshake state to session state transitions, prevent closed/interrupted sessions from reusing a valid-looking handshake, and require execution/device/install/network identity continuity at every transition. Keep all state synthetic/in-memory.
 
 ## Governance lock
 
