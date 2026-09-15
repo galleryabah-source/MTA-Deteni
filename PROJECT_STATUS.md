@@ -1,12 +1,14 @@
 # MTA DETENI — Project Status
 
 **Foundation:** v1.60+
-**Current Track:** P13.5801–5808 controlled execution harness hardening
+**Current Track:** P13.5809–5880 observable execution + evidence acceptance
 **Branch:** `main`
-**Latest implementation commit:** `91717d842de1a05f2584b41d75663a045f629149`
+**Latest implementation commit:** `68c9f6c7425fd0d0de40a7d5e05f1331195e80eb`
 
 ## Latest progress
 
+- P13.5809–5822 — deterministic architecture/governance contract gate;
+- P13.5809–5880 — observable execution and evidence acceptance contract;
 - P13.5801–5805 — deterministic non-production execution harness for Node/npm, production typecheck, regression and TypeScript domain tests;
 - P13.5806 — explicit TypeScript test compilation boundary;
 - P13.5807 — explicit `typecheck:test` package command;
@@ -35,14 +37,16 @@ The application chain remains:
 
 ## Current certification state
 
-**P13.5808 — EXECUTION HARNESS READY / OBSERVATION PENDING**
+**P13.5822 — STATIC CONTRACT GATE IMPLEMENTED / OBSERVATION PENDING**
 
-The repository now has a reproducible CI execution path that captures commit SHA, run identity, environment, timestamps, control IDs, exit codes and command output into an evidence artifact. This does not itself certify PASS; certification requires successful observable execution.
+A deterministic contract gate now validates the package/test boundaries, controlled CI environment, evidence publication, governance locks, canonical `HEAD_RUDENIM` vocabulary and non-false certification state. It writes `artifacts/mta-evidence/contract-gate.json` and is executed before dependency installation/runtime checks.
 
-The previous CI run failed with zero reported job steps. A controlled rerun was attempted and also did not yield usable step telemetry. This is treated as infrastructure/runner observation failure, not as application PASS or FAIL.
+The repository still cannot claim CI PASS because the latest GitHub Actions observation failed with a completed job that exposed no usable step telemetry. This remains an infrastructure/runner observation blocker, not an application PASS or FAIL.
 
 ## Next gate
 
-**P13.5809–5880 — first observable CI execution, evidence validation and controlled application-surface verification.**
+**P13.5823–5880 — obtain observable CI telemetry, validate execution/evidence identity, then begin controlled application-surface verification.**
+
+**Following:** P13.5881–5960 — runtime/browser/RBAC synthetic journey and LAN/offline continuity harness design.
 
 No production deployment, live operational integration, or schema migration is implied.
