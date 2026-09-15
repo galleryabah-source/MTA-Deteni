@@ -1,5 +1,15 @@
 # Changelog
 
+## P13.7401–7440 — Reconciliation & Application Service Seams
+
+- Added deterministic reconciliation across repository entity state, offline queue state and reporting projection source revision.
+- Added explicit reconciliation outcomes: `CONSISTENT`, `REPLAY_REQUIRED`, `CONFLICT`, and `MISSING_PROJECTION`, with fail-closed safety for unresolved states.
+- Added a unified application mutation service seam for detainee registration, placement, movement and temporary-exit advancement.
+- Application service authorization is evaluated before entering the critical mutation kernel.
+- All mutation paths route through the existing transaction, idempotency, audit and outbox integration boundary; no direct persistence implementation was added.
+- Added synthetic regression coverage for deterministic reconciliation, replay behavior, source conflicts, and prevention of duplicate audit/outbox effects.
+- No concrete database driver, schema migration, AI activation, production persistence, or live PostgreSQL execution.
+
 ## P13.7121–7200 — Critical Mutation Integration Seam
 
 - Added an application integration seam composing idempotency, transaction execution, domain mutation, mandatory audit and transactional outbox publication within the transaction runner boundary.
