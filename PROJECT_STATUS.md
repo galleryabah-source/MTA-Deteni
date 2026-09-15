@@ -1,8 +1,8 @@
 # MTA DETENI — Project Status
 
-**Version:** Foundation v1.5
-**Current Phase:** D3/D4 implementation foundation
-**Implementation Track:** P10.388
+**Version:** Foundation v1.6
+**Current Phase:** D3/D4/D5/D6 implementation foundation
+**Implementation Track:** P10.447
 **Branch:** `main`
 
 ## Implementation / Verification Progress
@@ -35,7 +35,17 @@
 - P10.357–P10.364 approval/leadership implementation scaffold established;
 - P10.365–P10.372 integrated synthetic test matrix established;
 - P10.373–P10.380 shared domain types/error taxonomy/command-result contracts established;
-- P10.381–P10.388 synthetic fixture factory and deterministic state-machine tests established.
+- P10.381–P10.388 synthetic fixture factory and deterministic state-machine tests established;
+- P10.389–P10.396 core administration service foundation implemented;
+- P10.397–P10.404 placement service foundation implemented;
+- P10.405–P10.412 movement/headcount service foundation implemented;
+- P10.413–P10.420 temporary-exit service foundation implemented;
+- P10.421–P10.428 escort service foundation implemented and hardened;
+- P10.429–P10.436 document-engine artifact service foundation implemented;
+- P10.437–P10.444 approval/leadership service foundation implemented with separation-of-duties guard;
+- P10.445 application workflow composition boundary established;
+- P10.446 minimal TypeScript project manifest established;
+- P10.447 strict TypeScript compiler contract established.
 
 ## Current Governance Model
 
@@ -63,17 +73,14 @@
 
 ## Current Gate
 
-**P10.388 — Deterministic Domain Test Foundation: READY**
+**P10.447 — Domain Service + Application Composition Foundation: READY FOR LOCAL/CI TYPECHECK AND INTEGRATION TESTING**
 
-Shared contracts, domain error taxonomy, the canonical temporary-exit state machine, and synthetic fixture safety tests are now present in the repository. These are implementation foundations, not production authorization.
+The repository now has the first service layer across core administration, placement, movement/headcount, temporary exit, escort, document artifacts, and approval/leadership, plus an application composition boundary and strict TypeScript project contract. Services are port-driven and do not require a database migration. This is an implementation foundation, not production authorization. Runtime/typecheck status is **NOT_RUN in this environment**.
 
 ## Next Checkpoints
 
-1. P10.389–P10.396 — Core Administration service;
-2. P10.397–P10.404 — Placement service;
-3. P10.405–P10.412 — Movement/Headcount service;
-4. P10.413–P10.420 — Temporary Exit service;
-5. P10.421–P10.428 — Escort service;
-6. P10.429–P10.436 — Document Engine;
-7. P10.437–P10.444 — Approval/Leadership;
-8. P10.445+ — integrated execution/evidence.
+1. P10.448–P10.455 — repository-wide service contract tests using synthetic fixtures;
+2. P10.456–P10.463 — idempotency, optimistic-concurrency, audit/outbox ports and failure semantics;
+3. P10.464–P10.471 — integrated temporary-exit orchestration invariants;
+4. P10.472–P10.479 — document numbering/template/approval binding contracts;
+5. P10.480+ — persistence adapter boundary and non-production runtime harness, still migration-frozen until governance gate.
