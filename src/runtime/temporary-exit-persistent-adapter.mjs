@@ -14,7 +14,12 @@ export function createSyntheticTemporaryExitPersistentAdapter({ scopeResolver = 
   const adapter = {
     transaction(work) {
       if (typeof work !== 'function') throw new Error('TRANSACTION_CALLBACK_REQUIRED');
-      return work(adapter);
+      const snapshot = new Map([...records].map(([k, v]) => [k, structuredClone(v)]));
+      try { return work(adapter); } catch (error) {
+        records.clear();
+        for (const [k, v] of snapshot) records.set(k, v);
+        throw error;
+      }
     },
     checkIdempotency({ idempotencyKey, request }) {
       if (!idempotencyKey?.trim()) throw new Error('IDEMPOTENCY_KEY_REQUIRED');
@@ -38,18 +43,21 @@ export function createSyntheticTemporaryExitPersistentAdapter({ scopeResolver = 
     appendTimeline: (event) => Object.freeze({ ...event }),
     saveDocument: save,
     saveArtifactGrant: save,
-    executeCriticalCommand({ idempotencyKey, request, resourceId, mutation, auditEvent, outboxEvent }) {
-      adapter.assertScope(request.actorId, request.scope);
-      return store.command({
-        idempotencyKey,
-        request: { ...request, resourceId },
-        domainMutation: ({ set }) => {
-          const next = structuredClone(mutation(records.get(resourceId) ?? null));
-          set(resourceId, next);
-          records.set(resourceId, next);
-        },
-        auditEvent,
-        outboxEvent,
+    executeCriticalCommand(input) {
+      return adapter.transaction(() => {
+        const { idempotencyKey, request, resourceId, mutation, auditEvent, outboxEvent } = input ?? {};
+        adapter.assertScope(request?.actorId, request?.scope);
+        return store.command({
+          idempotencyKey,
+          request: { ...request, resourceId },
+          domainMutation: ({ set }) => {
+            const next = structuredClone(mutation(records.get(resourceId) ?? null));
+            set(resourceId, next);
+            records.set(resourceId, next);
+          },
+          auditEvent: adapter.appendAudit(auditEvent),
+          outboxEvent: adapter.appendOutbox(outboxEvent),
+        });
       });
     },
     snapshot() {
