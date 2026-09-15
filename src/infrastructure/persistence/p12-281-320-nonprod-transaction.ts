@@ -26,35 +26,36 @@ export class InMemoryGovernedTransaction implements GovernedTransactionRunner {
       persistOutbox: async (message) => { stagedOutbox.push(message); },
       completeIdempotency: async (key, fingerprint, result) => {
         const existing = this.committedIdempotency.get(key) ?? stagedIdempotency.get(key);
-        if (!existing) throw new Error("IDEMPOTENCY_RECORD_REQUIRED");
-        stagedIdempotency.set(key, { ...existing, fingerprint, state: "COMPLETED", result });
+        if (!existing || existing.fingerprint !== fingerprint) throw new Error("IDEMPOTENCY_RECORD_REQUIRED");
+        stagedIdempotency.set(key, { ...existing, state: "COMPLETED", result });
       },
     };
-
-    const result = await work(context);
-    for (const event of stagedAudits) this.committedAudits.push(event);
-    for (const message of stagedOutbox) this.committedOutbox.push(message);
-    for (const [key, record] of stagedIdempotency) this.committedIdempotency.set(key, record);
-    return result;
+    try {
+      const result = await work(context);
+      for (const event of stagedAudits) this.committedAudits.push(event);
+      for (const message of stagedOutbox) this.committedOutbox.push(message);
+      for (const [key, record] of stagedIdempotency) this.committedIdempotency.set(key, record);
+      return result;
+    } catch (error) {
+      throw error;
+    }
   }
 
   journal(transactionId: string): TransactionJournal {
-    return {
-      transactionId,
-      audits: [...this.committedAudits],
-      outbox: [...this.committedOutbox],
-      idempotency: [...this.committedIdempotency.values()],
-    };
+    return { transactionId, audits: [...this.committedAudits], outbox: [...this.committedOutbox], idempotency: [...this.committedIdempotency.values()] };
   }
 }
 
 export class InMemoryPersistentIdempotency implements PersistentIdempotencyPort {
   private readonly records = new Map<string, IdempotencyRecord>();
 
-  async acquire(record: IdempotencyRecord): Promise<"ACQUIRED" | "REPLAY" | "CONFLICT"> {
-    const existing = this.records.get(record.key);
-    if (!existing) { this.records.set(record.key, record); return "ACQUIRED"; }
-    if (existing.fingerprint !== record.fingerprint || existing.actorId !== record.actorId || existing.correlationId !== record.correlationId || existing.aggregateId !== record.aggregateId) return "CONFLICT";
+  async acquire(key: string, fingerprint: string, actorId: string, correlationId: string, aggregateId: string): Promise<"ACQUIRED" | "REPLAY" | "CONFLICT"> {
+    const existing = this.records.get(key);
+    if (!existing) {
+      this.records.set(key, { key, fingerprint, actorId, correlationId, aggregateId, state: "IN_PROGRESS" });
+      return "ACQUIRED";
+    }
+    if (existing.fingerprint !== fingerprint || existing.actorId !== actorId || existing.correlationId !== correlationId || existing.aggregateId !== aggregateId) return "CONFLICT";
     return existing.state === "COMPLETED" ? "REPLAY" : "CONFLICT";
   }
 
