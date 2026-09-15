@@ -1,33 +1,42 @@
 # MTA DETENI — Project Status
 
-**Version:** Foundation v1.60
-**Current Phase:** P13.5041–5240 evidence-driven pre-production convergence
-**Implementation Track:** P13.5240
+**Version:** Foundation v1.61
+**Current Phase:** P13.5241–5360 audit hardening → execution-backed convergence
+**Implementation Track:** P13.5361–5440
 **Branch:** `phase-p12.961-13.200`
 
 ## Latest Progress
 
-- P13.4921–P4960 — controlled non-production execution plan;
-- P13.4961–P5000 — evidence coverage validation and unexpected-control rejection;
-- P13.5001–P5040 — explicit final evidence status semantics;
-- P13.5041–P5080 — execution observation ledger;
-- P13.5081–P5120 — isolated controlled non-production execution boundary;
-- P13.5121–P5160 — browser/LAN acceptance matrix for PC, tablet and smartphone continuity;
-- P13.5161–P5200 — report source/template fidelity contract with exact binding checks and visual-review evidence;
-- P13.5201–P5240 — evidence-driven pre-production gate;
-- regression tests and implementation documentation added for this block.
+- P13.5241–5280 — observed-evidence integrity hardened with SHA-256 over canonical evidence payload;
+- P13.5281–5320 — disaster-recovery rehearsal evidence hardened with backup/restore identities, hashes, replay/rebuild verification and human sign-off;
+- P13.5321–5360 — canonical domain vocabulary hardened to `RAP`, `PERKES`, `KAMTIB`, `SUBBAG_TU`, `HEAD_RUDENIM`; `LEADERSHIP` remains compatibility input only;
+- regression tests and audit-hardening documentation added;
+- PROJECT_STATUS synchronized with the actual post-audit state.
 
 ## Current Gate
 
-**P13.5240 — EVIDENCE-DRIVEN PRE-PRODUCTION CONTRACT READY / OBSERVATION PENDING**
+**P13.5360 — AUDIT HARDENING COMPLETE / EXECUTION EVIDENCE REQUIRED**
 
-The repository now has a structured path for recording actual controlled non-production observations and converging them into a pre-production decision. The new controls do not claim that the runtime, browser, LAN, report, recovery or security executions have occurred. `OBSERVATION_PENDING` remains the truthful default until evidence is captured.
+The highest-value contract-level audit findings have been corrected. The next work is intentionally execution-first rather than adding speculative architecture: run the existing controlled non-production matrix, capture real observations, fix observed defects, retest, and certify only from observed evidence.
 
-## Next Gate
+## Execution Blocker Observed
 
-**P13.5241+ — execution-backed convergence:** execute the existing matrix in a controlled non-production environment, capture observations, verify browser/LAN continuity, render and visually review the approved daily guard report, rehearse recovery, perform security review, and aggregate only observed evidence.
+GitHub Actions was triggered for the latest hardening commits, but the `domain-ci` job failed before producing usable step-level execution evidence. Run #262 for commit `1a45fd23ace1d88e65efb0fafcab6b0b75f0fc3b` completed in approximately two seconds with `failure`, and the job exposed no executable step log through the available GitHub integration. This is treated as an **execution infrastructure blocker**, not as a test PASS and not as proof of an application defect.
 
-`READY_FOR_HUMAN_APPROVAL` is not production authorization. Production remains blocked until explicit governance approval.
+The workflow definition itself remains the intended contract: checkout → Node 24 → dependency installation → typecheck → JavaScript tests → TypeScript domain tests.
+
+## Next Checkpoints — P13.5361–5440
+
+1. Restore/obtain a functioning controlled execution runner and obtain step-level CI evidence.
+2. Run `npm run typecheck`.
+3. Run `npm test`.
+4. Run `npm run test:unit`.
+5. Execute the controlled non-production application harness.
+6. Execute role journeys for RAP, PERKES, KAMTIB, SUBBAG_TU and HEAD_RUDENIM.
+7. Execute PC/LAN/tablet/smartphone continuity and offline/online reconciliation.
+8. Render and visually review the approved Daily Guard Report against the approved source template.
+9. Execute backup/restore rehearsal with real evidence identities and hashes.
+10. Execute security regression and aggregate only observed evidence.
 
 ## Integrated Application Model
 
