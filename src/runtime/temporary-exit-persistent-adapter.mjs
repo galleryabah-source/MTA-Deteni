@@ -43,7 +43,11 @@ export function createSyntheticTemporaryExitPersistentAdapter({ scopeResolver = 
       return store.command({
         idempotencyKey,
         request: { ...request, resourceId },
-        domainMutation: ({ set }) => set(resourceId, structuredClone(mutation(records.get(resourceId) ?? null))),
+        domainMutation: ({ set }) => {
+          const next = structuredClone(mutation(records.get(resourceId) ?? null));
+          set(resourceId, next);
+          records.set(resourceId, next);
+        },
         auditEvent,
         outboxEvent,
       });
