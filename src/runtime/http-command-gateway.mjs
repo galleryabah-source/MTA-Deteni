@@ -1,5 +1,6 @@
 import { randomUUID } from 'node:crypto';
 import { authorize } from '../kernel/p9-kernel.mjs';
+import { composeAuthenticatedCommand } from '../application/authenticated-command-composer.mjs';
 
 const MUTATING_METHODS = new Set(['POST', 'PUT', 'PATCH', 'DELETE']);
 
@@ -42,12 +43,38 @@ export function createHttpCommandGateway({ resolveSession, commandHandlers = Obj
       });
       if (!decision.allowed) return { status: 403, body: { code: decision.reasonCode, policyVersion: decision.policyVersion, requestId } };
 
+      let command;
+      try {
+        command = composeAuthenticatedCommand({
+          principal: {
+            actorId: session.userId,
+            scopeId: session.scope,
+            dutyId: session.dutyId ?? null,
+            classification: session.classification ?? 'INTERNAL',
+          },
+          input: {
+            operation: handler.operation ?? route,
+            resourceId: body?.resourceId ?? body?.exitId ?? null,
+            idempotencyKey: header(headers, 'idempotency-key') ?? body?.idempotencyKey,
+            actorId: body?.actorId,
+            scopeId: body?.scopeId,
+            payload: body?.payload ?? body,
+            requestId,
+            correlationId,
+          },
+          requiredScope: handler.requiredScope ?? null,
+        });
+      } catch (error) {
+        return { status: 400, body: { code: error?.message ?? 'COMMAND_COMPOSITION_DENIED', requestId } };
+      }
+
       const result = await handler.execute({
-        actorId: session.userId,
-        scope: session.scope,
-        body,
-        requestId,
-        correlationId,
+        command,
+        actorId: command.actorId,
+        scope: command.scopeId,
+        body: command.payload,
+        requestId: command.requestId,
+        correlationId: command.correlationId,
         occurredAt: now(),
       });
       return { status: 200, body: result };
