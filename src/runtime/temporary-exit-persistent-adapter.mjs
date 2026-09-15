@@ -2,15 +2,15 @@ import { TransactionalKernelStore } from '../kernel/transactional-command.mjs';
 import { fingerprint } from '../kernel/idempotency.mjs';
 import { assertTemporaryExitPersistenceAdapter } from '../application/temporary-exit-persistence-readiness.mjs';
 
-/**
- * Adapter-neutral persistence implementation used only by synthetic tests.
- * It deliberately has no PostgreSQL dependency and must never be treated as a
- * production persistence adapter.
- */
+/** Synthetic-only adapter: no PostgreSQL, providers, AI, or production data. */
 export function createSyntheticTemporaryExitPersistentAdapter({ scopeResolver = () => true } = {}) {
   const store = new TransactionalKernelStore();
   const records = new Map();
-
+  const save = (id, value) => {
+    if (!id) throw new Error('RESOURCE_ID_REQUIRED');
+    records.set(id, structuredClone(value));
+    return records.get(id);
+  };
   const adapter = {
     transaction(work) {
       if (typeof work !== 'function') throw new Error('TRANSACTION_CALLBACK_REQUIRED');
@@ -32,34 +32,25 @@ export function createSyntheticTemporaryExitPersistentAdapter({ scopeResolver = 
       if (!actorId || !scopeId || !scopeResolver(actorId, scopeId)) throw new Error('SCOPE_DENIED');
       return true;
     },
-    getById(id) {
-      return records.get(id) ?? null;
-    },
-    save(id, value) {
-      if (!id) throw new Error('RESOURCE_ID_REQUIRED');
-      records.set(id, structuredClone(value));
-      return records.get(id);
-    },
+    getById: (id) => records.get(id) ?? null,
+    create: save,
+    update: save,
+    appendTimeline: (event) => Object.freeze({ ...event }),
+    saveDocument: save,
+    saveArtifactGrant: save,
     executeCriticalCommand({ idempotencyKey, request, resourceId, mutation, auditEvent, outboxEvent }) {
       adapter.assertScope(request.actorId, request.scope);
-      const result = store.command({
+      return store.command({
         idempotencyKey,
         request: { ...request, resourceId },
-        domainMutation: ({ set }) => {
-          const current = records.get(resourceId) ?? null;
-          const next = mutation(current);
-          set(resourceId, structuredClone(next));
-          records.set(resourceId, structuredClone(next));
-        },
+        domainMutation: ({ set }) => set(resourceId, structuredClone(mutation(records.get(resourceId) ?? null))),
         auditEvent,
         outboxEvent,
       });
-      return result;
     },
     snapshot() {
       return { records: structuredClone(Object.fromEntries(records)), kernel: store.snapshot() };
     },
   };
-
-  return assertTemporaryExitPersistenceAdapter({ ...adapter });
+  return assertTemporaryExitPersistenceAdapter(adapter);
 }
