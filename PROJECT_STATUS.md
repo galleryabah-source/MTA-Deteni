@@ -1,15 +1,15 @@
 # MTA DETENI — Project Status
 
-**Version:** Foundation v1.32
-**Current Phase:** P12.361–P12.520 persistence boundary and rebuildable read-model integrity
-**Implementation Track:** P12.520
+**Version:** Foundation v1.33
+**Current Phase:** P12.521–P12.680 persistence and projection integrity
+**Implementation Track:** P12.680
 **Branch:** `main`
 
 ## Latest Progress
 
-- P12.361–P12.420 PostgreSQL transaction boundary contract;
-- P12.421–P12.480 durable outbox consumer contract;
-- P12.481–P12.520 rebuildable read-model replay contract and regression coverage.
+- P12.521–P12.560 persistence repository boundary contract;
+- P12.561–P12.600 idempotency observability contract;
+- P12.601–P12.680 projection checkpoint, retry and rebuild integrity contract.
 
 ## Integrated Application Model
 
@@ -17,9 +17,9 @@ RAP owns registration, administration and reporting; PERKES owns health records 
 
 ## Operational Application Chain
 
-`UI/API Command → Authorization Policy → Transaction Context → Idempotency → Domain Workflow → Immutable Timeline/Audit → Outbox → Read Model → QR/Movement/Temporary Exit → Reporting`
+`UI/API Command → Authorization Policy → Transaction Context → Idempotency → Domain Workflow → Immutable Timeline/Audit → Outbox → Projection Checkpoint → Read Model → QR/Movement/Temporary Exit → Reporting`
 
-Persistence is explicitly separated into a future PostgreSQL transaction contract, controlled durable-outbox consumption semantics, and a rebuildable read-model projection path. Read models remain derived state; committed operational evidence remains authoritative.
+Persistence operations now carry explicit transaction/actor/correlation identity. Idempotency outcomes have an observability contract. Projection progress is checkpointed only after successful processing and remains rebuildable from committed outbox evidence.
 
 ## Safety / Governance
 
@@ -39,13 +39,15 @@ Temporary-exit `COMPLETED` is not a deportation event. Deportation remains a sep
 
 Leadership is explicitly limited to oversight-read and directive permissions and is denied direct operational mutation permissions.
 
-The PostgreSQL transaction boundary is a contract only; it does not authorize database connectivity, migrations, or production execution. Durable outbox and projection replay contracts are also non-production boundaries until execution is explicitly cleared and evidenced.
+Persistence and projection contracts are non-production boundaries. They do not authorize database connectivity, migrations, production execution, or operational use.
+
+Projection checkpoints are derived progress markers; committed audit/outbox evidence remains authoritative and is the source for rebuild.
 
 ## Current Gate
 
-**P12.520 — PERSISTENCE/REPLAY CONTRACT-READY / EXECUTION-CERTIFICATION PENDING**
+**P12.680 — PERSISTENCE/PROJECTION CONTRACT-READY / EXECUTION-CERTIFICATION PENDING**
 
-Regression coverage includes rollback behavior, outbox consumer-context validation, and deterministic replay from committed outbox evidence. GitHub execution telemetry remains unavailable, so these controls are not certified as executed.
+Regression coverage was added for persistence context validation, idempotency observation identity, and deterministic projection checkpoint generation. GitHub execution telemetry remains unavailable, so these controls are not certified as executed.
 
 ## Execution Certification Rule
 
@@ -53,6 +55,6 @@ CI or local execution may be certified only from observable command/job telemetr
 
 ## Next Gate
 
-**P12.521–P12.600 — persistence repository adapters, durable idempotency storage semantics, projection checkpoint/retry policy, and controlled API observability contracts.**
+**P12.681–P12.760 — operational evidence ledger contract, projection failure/recovery matrix, API audit envelope, and cross-domain consistency gate.**
 
 No production or live-database step is implied by this next gate.
