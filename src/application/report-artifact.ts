@@ -1,3 +1,5 @@
+import { assertReportGovernance } from "./reporting-governance.js";
+
 export type ReportSnapshot = Readonly<{
   snapshotId: string;
   sourceVersion: string;
@@ -29,6 +31,7 @@ export type OperationalReportRender = Readonly<{
 const requiredSections = ["IDENTITAS_LAPORAN", "PERSONEL_REGU", "KONDISI_DETENI", "KEGIATAN_JAGA", "KEJADIAN_PENTING", "SERAH_TERIMA", "PENGESAHAN"] as const;
 
 export function validateReportSnapshot(snapshot: ReportSnapshot): void {
+  assertReportGovernance(snapshot);
   if (!snapshot.snapshotId || !snapshot.sourceVersion || !snapshot.documentNumber || !snapshot.approvalBinding) throw new Error("Report snapshot identity/approval binding is incomplete.");
   for (const section of requiredSections) if (!(snapshot.sections[section] ?? "").trim()) throw new Error(`Missing mandatory report section: ${section}`);
 }
