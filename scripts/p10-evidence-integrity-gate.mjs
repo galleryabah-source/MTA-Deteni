@@ -7,10 +7,8 @@ const evidence = JSON.parse(readFileSync(evidencePath, 'utf8'));
 const output = readFileSync(outputPath, 'utf8');
 const failures = [];
 
-// P10.140 is the current evidence checkpoint. The schema identifier remains
-// stable for backwards-compatible evidence consumers; checkpoint is authoritative.
 if (evidence.schemaVersion !== 'p10.22.v1') failures.push('UNSUPPORTED_EVIDENCE_SCHEMA');
-if (evidence.checkpoint !== 'P10.140') failures.push('WRONG_CHECKPOINT');
+if (evidence.checkpoint !== 'P10.148') failures.push('WRONG_CHECKPOINT');
 if (evidence.syntheticOnly !== true) failures.push('NON_SYNTHETIC_EVIDENCE');
 if (evidence.safety?.APP_ENV !== 'test') failures.push('UNSAFE_APP_ENV');
 if (evidence.safety?.AI_ENABLED !== 'false') failures.push('AI_NOT_DISABLED');
@@ -21,13 +19,12 @@ if (!['PASS', 'FAIL', 'BLOCKED'].includes(evidence.classification)) failures.pus
 
 const expectedSha = process.env.GITHUB_SHA ?? null;
 if (expectedSha && evidence.commitSha !== expectedSha) failures.push('COMMIT_MISMATCH');
-
 const outputSha = createHash('sha256').update(output).digest('hex');
 if (evidence.testOutputSha256 !== outputSha) failures.push('OUTPUT_HASH_MISMATCH');
 
 const result = {
-  schemaVersion: 'p10.23.v2',
-  checkpoint: 'P10.140',
+  schemaVersion: 'p10.23.v3',
+  checkpoint: 'P10.148',
   classification: failures.length ? 'FAIL' : 'PASS',
   evidenceClassification: evidence.classification,
   evidenceCommitSha: evidence.commitSha ?? null,
@@ -37,7 +34,6 @@ const result = {
   failures,
   verifiedAt: new Date().toISOString(),
 };
-
 writeFileSync('artifacts/p10-runtime/integrity.json', `${JSON.stringify(result, null, 2)}\n`, 'utf8');
 console.log(JSON.stringify(result, null, 2));
 process.exit(failures.length ? 1 : 0);
