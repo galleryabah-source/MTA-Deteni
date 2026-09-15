@@ -1,5 +1,5 @@
-import type { ActorContext } from "../shared/contracts";
-import { DomainError } from "../shared/errors";
+import type { ActorContext } from "../shared/contracts.js";
+import { DomainError } from "../shared/errors.js";
 
 export type EscortAssignment = Readonly<{
   id: string;
