@@ -20,7 +20,11 @@ export const TEMPORARY_EXIT_STATES = [
 export type DetaineeStatus = (typeof DETAINEE_STATUSES)[number];
 export type TemporaryExitState = (typeof TEMPORARY_EXIT_STATES)[number];
 
-export type DomainName = "RAP" | "PERKES" | "KAMTIB" | "SUBBAG_TU" | "LEADERSHIP";
+/** Canonical governance domain vocabulary. */
+export type DomainName = "RAP" | "PERKES" | "KAMTIB" | "SUBBAG_TU" | "HEAD_RUDENIM";
+
+/** Historical compatibility vocabulary; never use as an independent domain. */
+export type LegacyDomainName = "LEADERSHIP";
 
 export type ActorContext = Readonly<{
   actorId: string;
