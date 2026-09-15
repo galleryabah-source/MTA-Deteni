@@ -1,8 +1,8 @@
 # MTA DETENI — Project Status
 
-**Version:** Foundation v1.8
+**Version:** Foundation v1.9
 **Current Phase:** D3/D4/D5/D6 implementation + synthetic integration verification foundation
-**Implementation Track:** P10.512
+**Implementation Track:** P10.544
 **Branch:** `main`
 
 ## Implementation / Verification Progress
@@ -54,7 +54,11 @@
 - P10.481–P10.488 CI diagnosis remains open because GitHub Actions jobs are failing before exposing executable step telemetry in this repository environment;
 - P10.489–P10.496 versioned persistence contracts and optimistic-concurrency adapter semantics added;
 - P10.497–P10.504 append-only audit/event and outbox persistence contracts plus deterministic in-memory adapters added;
-- P10.505–P10.512 synthetic end-to-end temporary-exit execution harness added.
+- P10.505–P10.512 synthetic end-to-end temporary-exit execution harness added;
+- P10.513–P10.520 CI verification boundary documented; no CI PASS claimed;
+- P10.521–P10.528 application composition boundary reaffirmed for canonical temporary-exit orchestration;
+- P10.529–P10.536 synthetic persistence contract tests added for stale writes, append-only events, outbox replay/duplicate handling, claim and acknowledgement;
+- P10.537–P10.544 runtime readiness and safe configuration contracts/tests added.
 
 ## Current Governance Model
 
@@ -82,14 +86,14 @@
 
 ## Current Gate
 
-**P10.512 — Synthetic Integration + Persistence Boundary Foundation: READY FOR ENVIRONMENTAL VERIFICATION**
+**P10.544 — Runtime Readiness + Synthetic Persistence Boundary Foundation: CONTRACT READY; EXECUTION VERIFICATION PENDING**
 
-The domain/application layer now has explicit service contracts, fail-closed idempotency, optimistic-concurrency boundaries, append-only event/outbox contracts, governed temporary-exit orchestration, document binding controls, deterministic in-memory persistence adapters, and a synthetic end-to-end workflow harness. No database schema or migration was introduced. GitHub Actions exists as the intended verification path, but the observed runs fail before exposing actionable step telemetry; therefore no CI PASS is claimed.
+The application composition boundary, deterministic persistence contracts/tests, and runtime readiness/safety contracts are now represented in the repository. This does not constitute a CI PASS because the connector currently exposes no workflow status for the new commits and prior CI diagnosis showed missing actionable step telemetry. No PostgreSQL adapter or migration was introduced.
 
 ## Next Checkpoints
 
-1. P10.513–P10.520 — isolate CI runner/workflow execution failure and obtain first trustworthy automated verification;
-2. P10.521–P10.528 — application composition across detainee/placement/movement/exit/document/escort/approval services;
-3. P10.529–P10.536 — synthetic persistence contract tests including conflict/replay/recovery semantics;
-4. P10.537–P10.544 — runtime adapter boundary and readiness/health contracts;
-5. P10.545+ — non-production PostgreSQL adapter only after governance gate; migration remains frozen.
+1. P10.545–P10.552 — non-production PostgreSQL adapter contract, only after governance clearance and approved target;
+2. P10.553–P10.560 — read-only schema/RLS reconciliation against the approved target;
+3. P10.561–P10.568 — PostgreSQL transaction, idempotency, audit and outbox integration tests;
+4. P10.569–P10.576 — runtime adapter integration and health verification;
+5. P10.577+ — controlled pilot-readiness certification; migration remains frozen until explicitly approved.
