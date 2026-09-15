@@ -18,9 +18,9 @@ MTA DETENI adalah model tata kelola administrasi deteni yang mengintegrasikan st
 
 ## Current Status
 
-**Foundation v1.60 — P13.5240**
+**Foundation v1.61 — P13.5361–5440**
 
-The implementation branch is currently at **EVIDENCE-DRIVEN PRE-PRODUCTION CONTRACT READY / OBSERVATION PENDING**. The repository has the controlled execution, browser/LAN continuity, report-fidelity, recovery, security and evidence-convergence contracts, but does not claim runtime execution evidence that has not actually been observed.
+The implementation branch is in **EXECUTION-BACKED CONVERGENCE**. Contract-level audit hardening is complete. The next gate is based on observable controlled non-production execution, not source presence. GitHub Actions has not yet produced usable step-level evidence for the latest hardening run, so the execution gate remains blocked rather than being inferred as PASS.
 
 Production is not authorized and schema migration remains frozen.
 
