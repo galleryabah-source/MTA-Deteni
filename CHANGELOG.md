@@ -1,5 +1,21 @@
 # Changelog
 
+## P13.7121–7200 — Critical Mutation Integration Seam
+
+- Added an application integration seam composing idempotency, transaction execution, domain mutation, mandatory audit and transactional outbox publication within the transaction runner boundary.
+- Added fail-closed replay behavior for completed idempotency keys and explicit conflict behavior for request-hash reuse.
+- Added synthetic regression coverage for commit, replay and conflict paths.
+- No concrete database driver or production persistence was introduced.
+
+## P13.6961–7040 — Report Output Envelope & Export Certification
+
+- Added a certified report output envelope with format, MIME type, filename, snapshot identity, document identity and content fingerprint binding.
+- Added deterministic PDF/DOCX filename and MIME policy behind the existing renderer certification boundary.
+- Added end-to-end daily guard export certification from snapshot → renderer → certification → output envelope.
+- Added fail-closed output tampering regression coverage and incomplete-report rejection.
+- Binary PDF/DOCX generation remains behind an explicit runtime/dependency approval gate.
+- No schema migration, AI activation, production persistence, or live PostgreSQL execution.
+
 ## P13.6881–6960 — Renderer Certification & Template Versioning
 
 - Added a deterministic renderer certification contract with explicit `DGRT-1.0` template version.
