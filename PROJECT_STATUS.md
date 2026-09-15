@@ -1,24 +1,27 @@
 # MTA DETENI — Project Status
 
-**Version:** Foundation v1.14
-**Current Phase:** P10.641–P10.648 CI + controlled verification hardening
-**Implementation Track:** P10.648
+**Version:** Foundation v1.15
+**Current Phase:** P10.777–P10.808 synthetic application-surface implementation
+**Implementation Track:** P10.808
 **Branch:** `main`
 
 ## Latest Progress
 
 - P10.577–P10.584 pilot-readiness evidence and fail-closed certification contract;
-- P10.585–P10.592 API/application transport contract with authorization, correlation, idempotency and audit requirements;
-- P10.593–P10.600 responsive operator read-model contract with deny-by-default role access;
-- P10.601–P10.608 regu jaga reporting/export contract with provenance, required sections, document numbering and approval binding;
-- P10.609–P10.616 controlled target + schema/RLS reconciliation gate contract;
-- P10.617–P10.624 guarded persistence execution contract;
-- P10.625–P10.632 API/runtime verification contract and synthetic E2E gate;
-- P10.633–P10.640 formal controlled verification evidence gate and fail-closed regression tests;
-- P10.609–P10.615 NodeNext import/declaration consistency hardened;
-- P10.616–P10.620 runtime/read-model, reporting-export and transport guards added;
-- P10.633–P10.640 controlled evidence gate formalized;
-- P10.641 CI action versions/install behavior hardened for Node 24 verification.
+- P10.585–P10.592 API/application transport contract;
+- P10.593–P10.600 responsive operator read-model contract;
+- P10.601–P10.608 regu jaga reporting/export contract;
+- P10.609–P10.632 controlled integration gate;
+- P10.633–P10.656 controlled synthetic verification suite;
+- P10.657–P10.680 QR, reporting and operator workflow hardening;
+- P10.681–P10.704 synthetic E2E orchestration;
+- P10.705–P10.728 UI/operator read-model contract;
+- P10.729–P10.752 deterministic report-renderer preparation;
+- P10.753–P10.776 regression/security hardening baseline;
+- P10.777–P10.784 UI shell/read-model implementation boundary;
+- P10.785–P10.792 QR scan-result adapter contract;
+- P10.793–P10.800 report artifact adapter contract;
+- P10.801–P10.808 composed synthetic application-surface regression tests.
 
 ## Integrated Application Model
 
@@ -38,10 +41,10 @@ RAP owns registration, administration and reporting; PERKES owns health records 
 
 ## Current Gate
 
-**P10.648 — CI HARDENING COMPLETE; AUTOMATED VERIFICATION STILL NOT CLAIMED**
+**P10.808 — SYNTHETIC APPLICATION-SURFACE CONTRACT READY**
 
-The CI workflow now uses stable action major versions and deterministic dependency-install flags. Automated runs observed in this environment still terminate as failures without executable step telemetry, so no PASS is claimed. The codebase remains migration-frozen and production-isolated.
+The repository now contains the application-surface contracts for UI/read-model access, QR verification outcomes, deterministic report artifact adaptation and composed regression coverage. These additions do not authorize live database execution or production deployment.
 
 ## Next Gate
 
-**P10.649+ — CI execution observability/evidence transport hardening, then controlled non-production verification harness.** Any real target requires explicit governance clearance and an approved non-production target; otherwise work remains synthetic.
+**P10.809+ — synthetic regression execution/evidence composition and continued application-surface hardening.** Live integration remains blocked until explicit governance clearance and an approved non-production target.
