@@ -1,5 +1,12 @@
 # Changelog
 
+## P13.10801–10920 — Session Continuity Transition
+
+- Added a deterministic session continuity proof bound to the local runtime handshake.
+- Closed and interrupted sessions are explicitly blocked from handshake reuse.
+- Reconciliation-required sessions cannot become READY merely by presenting a valid handshake.
+- Preserved exact execution/device/install/network identity continuity.
+
 ## P13.10441–10560 — Local Runtime Session Handshake
 
 - Added a synthetic local runtime session handshake bound to operational session, execution, device, installation and network identities.
