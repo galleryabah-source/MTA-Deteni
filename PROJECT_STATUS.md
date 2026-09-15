@@ -1,14 +1,15 @@
 # MTA DETENI — Project Status
 
 **Foundation:** v1.60+
-**Current Track:** P13.5823–5880 controlled synthetic domain journey
+**Current Track:** P13.5827–5880 domain-surface hardening / observation pending
 **Branch:** `main`
-**Latest implementation commit:** `0125ee734880f5b2f17d5124ccf81ffce71147ca`
+**Latest implementation commit:** `5ffe64274cf0ba6932053c4eefafa2551a076579`
 
 ## Latest progress
 
-- P13.5823 — canonical `HEAD_RUDENIM` enforced in the shared domain type; historical `LEADERSHIP` is retained only as an explicit compatibility type;
-- P13.5824–5826 — deterministic temporary-exit synthetic journey tests: complete happy path, invalid skip/reversal rejection and terminal-state protection;
+- P13.5827 — canonical synthetic temporary-exit approval actor aligned to `HEAD_RUDENIM`;
+- P13.5827–5840 — added deterministic movement, placement and authorization/SoD synthetic contract tests;
+- P13.5824–5826 — deterministic temporary-exit synthetic journey: complete happy path, invalid skip/reversal rejection and terminal-state protection;
 - P13.5809–5822 — deterministic architecture/governance contract gate and observable execution/evidence acceptance contract;
 - P13.5801–5808 — deterministic non-production execution harness, test compilation boundary and controlled evidence upload;
 - P13.5681–5720 — canonical governance vocabulary;
@@ -35,15 +36,15 @@ The application chain remains:
 
 ## Current certification state
 
-**P13.5826 — CONTROLLED SYNTHETIC DOMAIN JOURNEY IMPLEMENTED / OBSERVATION PENDING**
+**P13.5827–5840 — IMPLEMENTED / OBSERVATION PENDING**
 
-The repository now has executable, dependency-light synthetic tests for the temporary-exit state machine. These tests prove the intended ordered lifecycle and reject skipped/reversed transitions, but they are not yet certified by CI because GitHub Actions continues to terminate with no usable step telemetry.
+The repository now contains dependency-light synthetic checks for movement append-only behavior and headcount unknown-state handling, placement exclusivity/versioning, and canonical `HEAD_RUDENIM` approval with separation of duties. These remain uncertified until CI exposes usable execution telemetry.
 
-Latest observed CI behavior remains an infrastructure/runner observation blocker: completed failure with zero reported steps. A targeted rerun was accepted by GitHub, but execution telemetry must still be observed before claiming PASS.
+Latest known CI behavior remains an infrastructure/runner observation blocker: completed failure with zero reported steps. No application PASS or application test FAIL is inferred from that condition.
 
 ## Next gate
 
-**P13.5827–5880 — observable CI/evidence identity validation and expansion of synthetic domain-surface checks for movement, placement, authorization and reporting boundaries.**
+**P13.5841–5880 — reporting snapshot, QR contextual semantics, audit/evidence binding and integrated synthetic domain journey.**
 
 **Following:** P13.5881–5960 — runtime/browser/RBAC synthetic journey and LAN/offline continuity harness design.
 
