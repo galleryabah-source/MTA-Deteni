@@ -1,8 +1,8 @@
 # MTA DETENI — Project Status
 
-**Version:** Foundation v1.22
-**Current Phase:** P11.161–P11.224 temporary-exit lifecycle consistency gate
-**Implementation Track:** P11.224
+**Version:** Foundation v1.24
+**Current Phase:** P11.225–P11.352 operational consistency and synthetic cross-domain E2E gate
+**Implementation Track:** P11.352
 **Branch:** `main`
 
 ## Latest Progress
@@ -16,28 +16,20 @@
 - P10.841–P10.872 responsive operator workflow UI contract;
 - P10.873–P10.904 release-readiness boundary;
 - P10.905–P10.936 synthetic release-candidate matrix and final pre-authorisation application-boundary audit;
-- P10.937–P10.944 release-candidate validation hardening;
-- P10.945–P10.952 synthetic execution-evidence contract;
-- P10.953–P10.960 fail-closed evidence regression matrix;
-- P10.961–P10.968 synthetic-only evidence boundary;
-- P10.969–P10.972 controlled synthetic command sequence;
-- P10.973–P10.980 observation-to-packet composition;
-- P10.981–P10.988 PASS/exit-code consistency;
-- P10.989–P10.996 packet/observation identity integrity;
-- P10.997–P11.000 synthetic-only evidence enforcement;
+- P10.937–P10.968 execution-evidence contract and fail-closed synthetic enforcement;
+- P10.969–P11.000 controlled synthetic verification harness;
 - P11.001–P11.032 application-boundary regression;
 - P11.033–P11.064 QR/report contract hardening;
 - P11.065–P11.096 integrated synthetic verification gate;
 - P11.097–P11.128 evidence-integrity hardening;
 - P11.129–P11.160 workflow ownership and controlled domain handoff;
-- P11.161–P11.168 request-to-validation lifecycle continuity;
-- P11.169–P11.176 approval-to-document lifecycle continuity;
-- P11.177–P11.184 escort-to-departure continuity;
-- P11.185–P11.192 departure/return headcount consistency;
-- P11.193–P11.200 temporary-exit QR context enforcement;
-- P11.201–P11.208 completion/deportation QR separation;
-- P11.209–P11.216 full synthetic lifecycle consistency;
-- P11.217–P11.224 synthetic target and negative-path enforcement.
+- P11.161–P11.224 temporary-exit lifecycle consistency;
+- P11.225–P11.240 placement and movement identity;
+- P11.241–P11.264 exited-state/headcount/temporary-exit QR consistency;
+- P11.265–P11.280 return-state/Rudenim-stay QR consistency;
+- P11.281–P11.288 operational target and negative-path enforcement;
+- P11.289–P11.320 synthetic cross-domain E2E composition;
+- P11.321–P11.352 E2E failure-path and synthetic target enforcement.
 
 ## Integrated Application Model
 
@@ -57,9 +49,9 @@ RAP owns registration, administration and reporting; PERKES owns health records 
 
 ## Current Gate
 
-**P11.224 — TEMPORARY-EXIT LIFECYCLE CONSISTENCY CONTRACT-READY / TRUSTWORTHY EXECUTION TELEMETRY STILL REQUIRED**
+**P11.352 — OPERATIONAL CONSISTENCY + SYNTHETIC CROSS-DOMAIN E2E CONTRACT-READY / TRUSTWORTHY EXECUTION TELEMETRY STILL REQUIRED**
 
-The synthetic lifecycle contract now connects temporary-exit state progression, departure/return headcount deltas, and distinct QR contexts while preserving the domain state machine and governance boundaries. This remains contract-level evidence only.
+The synthetic layer now connects placement/movement identity, headcount representation, detainee stay context, temporary-exit QR acceptance and a cross-domain E2E run contract. These controls remain contract-level evidence only.
 
 ## Execution Certification Rule
 
@@ -67,6 +59,6 @@ CI or local execution may be certified only from observable command/job telemetr
 
 ## Next Gate
 
-**P11.225–P11.288 — movement/headcount domain composition, detainee placement consistency, operational QR validity-window enforcement, and synthetic cross-domain regression expansion.**
+**P11.353–P11.448 — detainee/placement aggregate consistency, movement event ledger contract, headcount reconciliation, QR validity-window model, and synthetic end-to-end reconciliation.**
 
 No production or live-database step is implied by this next gate.
