@@ -1,7 +1,7 @@
 # MTA DETENI — Next Gate
 
-**Foundation:** v1.62+
-**Current:** P13.7201–7320 — non-production aggregate repository contracts and in-memory reference registry implemented; CI observation pending
+**Foundation:** v1.63+
+**Current:** P13.7401–7440 — deterministic reconciliation contract and unified application mutation service seams implemented; CI observation pending
 
 ## Completed
 
@@ -37,12 +37,17 @@
 30. explicit repository registry for detainee, placement, movement, temporary-exit, report and audit boundaries;
 31. monotonic repository version guard and deterministic removal;
 32. synthetic regression coverage for repository contracts;
-33. no concrete PostgreSQL driver, database connection, or production persistence;
-34. no schema migration, AI activation or real detainee data.
+33. deterministic repository/queue/reporting reconciliation contract;
+34. unified application mutation service seam for detainee registration, placement, movement and temporary-exit advancement;
+35. application service authorization gate before critical mutation;
+36. application service routing through transaction, idempotency, audit and outbox kernel;
+37. synthetic regression coverage for reconciliation, replay and audit/outbox non-duplication;
+38. no concrete PostgreSQL driver, database connection, or production persistence;
+39. no schema migration, AI activation or real detainee data.
 
-## Next gate: P13.7321–7440
+## Next gate: P13.7441–7560
 
-Build deterministic reconciliation contracts across repository state, offline queue state and reporting projections. Then add application service seams for detainee registration, placement/movement and temporary-exit workflows, using repository interfaces only. Preserve authorization, transaction, idempotency, audit and outbox boundaries. No concrete database driver or production persistence.
+Build repository-backed application orchestration contracts without concrete persistence: aggregate lifecycle coordination, optimistic version propagation, command-to-event envelope consistency, and cross-domain read-model refresh boundaries. Extend synthetic end-to-end coverage for registration → placement → movement → temporary-exit → reporting while preserving RBAC/SoD, transaction, idempotency, audit, outbox, offline/LAN continuity and fail-closed reconciliation. Do not introduce a database driver, migration, production persistence, AI, or real detainee data.
 
 ## Governance lock
 
