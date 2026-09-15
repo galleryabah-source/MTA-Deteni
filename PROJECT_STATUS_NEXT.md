@@ -1,7 +1,7 @@
 # MTA DETENI — Next Gate
 
-**Foundation:** v1.90
-**Current:** P13.10681–10800 — local runtime session handshake and continuity admission hardened; CI observation blocker remains
+**Foundation:** v1.91
+**Current:** P13.10801–10920 — session continuity transition contract implemented; CI observation blocker remains
 
 ## Completed (through current gate)
 
@@ -50,11 +50,12 @@
 - **P13.10441–10560:** local runtime session handshake binds adapter requests to authenticated synthetic LAN/LOCAL sessions and exact device/install/network identity, with deterministic expiry validation.
 - **P13.10561–10680:** handshake validity is bounded by its explicit issued/expiry window; expired sessions fail closed.
 - **P13.10681–10800:** malformed handshake identity/time and continuity-sensitive mutation admission fail closed; continuity-sensitive mutations require certified handoff and ready recovery proof.
+- **P13.10801–10920:** session continuity transition binds handshake reuse to active session state and exact execution/device/install/network identity; closed/interrupted sessions are blocked and reconciliation-required state cannot be promoted by handshake reuse alone.
 - No database driver, migration, production persistence, real detainee data, or AI activation.
 
-## Next gate: P13.10801–10920
+## Next gate: P13.10921–11040
 
-Build the **session continuity transition contract**: explicitly bind handshake state to session state transitions, prevent closed/interrupted sessions from reusing a valid-looking handshake, and require execution/device/install/network identity continuity at every transition. Keep all state synthetic/in-memory.
+Build the **local adapter audit envelope**: produce deterministic synthetic request/response evidence for each local adapter execution, bind it to actor/device/session/request/idempotency identities, and fail closed on evidence identity drift. Keep all state synthetic/in-memory and do not introduce production telemetry.
 
 ## Governance lock
 
