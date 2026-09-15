@@ -1,8 +1,8 @@
 # MTA DETENI — Project Status
 
-**Version:** Foundation v1.4
-**Current Phase:** D3/D4 implementation scaffold + integrated synthetic test planning
-**Implementation Track:** P10.372
+**Version:** Foundation v1.5
+**Current Phase:** D3/D4 implementation foundation
+**Implementation Track:** P10.388
 **Branch:** `main`
 
 ## Implementation / Verification Progress
@@ -33,7 +33,9 @@
 - P10.341–P10.348 escort implementation scaffold established;
 - P10.349–P10.356 document-engine implementation scaffold established;
 - P10.357–P10.364 approval/leadership implementation scaffold established;
-- P10.365–P10.372 integrated synthetic test matrix established.
+- P10.365–P10.372 integrated synthetic test matrix established;
+- P10.373–P10.380 shared domain types/error taxonomy/command-result contracts established;
+- P10.381–P10.388 synthetic fixture factory and deterministic state-machine tests established.
 
 ## Current Governance Model
 
@@ -61,19 +63,17 @@
 
 ## Current Gate
 
-**P10.372 — Integrated Synthetic Test Matrix: TEST_PLAN_READY**
+**P10.388 — Deterministic Domain Test Foundation: READY**
 
-The implementation path is now contractually scaffolded across the operational MVP. The next work can proceed into repository code only while preserving the existing kernel boundaries. Automated tests remain synthetic and deterministic until an explicitly governed non-production execution target is approved.
+Shared contracts, domain error taxonomy, the canonical temporary-exit state machine, and synthetic fixture safety tests are now present in the repository. These are implementation foundations, not production authorization.
 
 ## Next Checkpoints
 
-1. P10.373–P10.380 — shared domain types, error taxonomy, and command/result contracts;
-2. P10.381–P10.388 — synthetic fixture factory and deterministic test harness;
-3. P10.389–P10.396 — Core Administration service implementation;
-4. P10.397–P10.404 — Placement service implementation;
-5. P10.405–P10.412 — Movement/Headcount service implementation;
-6. P10.413–P10.420 — Temporary Exit service implementation;
-7. P10.421–P10.428 — Escort service implementation;
-8. P10.429–P10.436 — Document Engine implementation;
-9. P10.437–P10.444 — Approval/Leadership implementation;
-10. P10.445+ — integrated test execution/evidence.
+1. P10.389–P10.396 — Core Administration service;
+2. P10.397–P10.404 — Placement service;
+3. P10.405–P10.412 — Movement/Headcount service;
+4. P10.413–P10.420 — Temporary Exit service;
+5. P10.421–P10.428 — Escort service;
+6. P10.429–P10.436 — Document Engine;
+7. P10.437–P10.444 — Approval/Leadership;
+8. P10.445+ — integrated execution/evidence.
