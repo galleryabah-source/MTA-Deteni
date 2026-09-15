@@ -1,5 +1,26 @@
 # Changelog
 
+## P13.11521–11640 — Local Runtime Failure Certification
+
+- Composed failure evidence, failure observation and request-boundary validation into one synthetic certification chain.
+- Preserved stable evidence, observation, failure, request, session and execution identities.
+- Certification rejects inconsistent evidence and remains synthetic-only.
+
+## P13.11401–11520 — Local Runtime Failure Observability
+
+- Added deterministic `LOCAL_ADAPTER_FAILURE` observations derived from failure evidence.
+- Bound failure observations to evidence, failure class, actor, session, execution, device, installation and network identities.
+- Observation/evidence drift fails closed.
+- Preserved synthetic-only observability with no production telemetry.
+
+## P13.11281–11400 — Local Adapter Failure Evidence
+
+- Added deterministic failure evidence for rejected local adapter executions.
+- Added stable failure classes for request, handshake, session-scope and execution rejection boundaries.
+- Preserved actor/session/execution/device/install/network/request/idempotency identity binding.
+- Request/response, execution and device-scope drift fail closed.
+- Preserved synthetic/in-memory operation only.
+
 ## P13.11161–11280 — Local Runtime Regression Certification
 
 - Added integrated synthetic certification composing local routing, session handshake, session continuity, audit envelope and observability evidence.
