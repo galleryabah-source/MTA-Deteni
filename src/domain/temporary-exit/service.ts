@@ -1,5 +1,5 @@
-import type { ActorContext, TemporaryExitState } from "../shared/contracts";
-import { DomainError } from "../shared/errors";
+import type { ActorContext, TemporaryExitState } from "../shared/contracts.js";
+import { DomainError } from "../shared/errors.js";
 import { transition } from "./state-machine.mjs";
 
 export type TemporaryExit = Readonly<{
