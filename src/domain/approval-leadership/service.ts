@@ -1,5 +1,5 @@
-import type { ActorContext } from "../shared/contracts";
-import { DomainError } from "../shared/errors";
+import type { ActorContext } from "../shared/contracts.js";
+import { DomainError } from "../shared/errors.js";
 
 export type ApprovalDecision = "APPROVED" | "REJECTED" | "REVOKED";
 export type Approval = Readonly<{
@@ -30,28 +30,11 @@ export type ApprovalDeps = Readonly<{
 export class ApprovalLeadershipService {
   constructor(private readonly deps: ApprovalDeps) {}
 
-  async decide(input: {
-    id: string;
-    subjectType: string;
-    subjectId: string;
-    decision: ApprovalDecision;
-    reason: string;
-    actor: ActorContext;
-  }): Promise<Approval> {
+  async decide(input: { id: string; subjectType: string; subjectId: string; decision: ApprovalDecision; reason: string; actor: ActorContext }): Promise<Approval> {
     if (!this.deps.canApprove(input.actor, input.subjectType)) throw new DomainError("FORBIDDEN_SCOPE", "Actor is not authorized to approve this subject.");
     if (!input.reason.trim()) throw new DomainError("VALIDATION_FAILED", "Approval reason is required.");
     if (await this.deps.repository.get(input.id)) throw new DomainError("CONFLICT", "Approval decision already exists.");
-    const approval: Approval = {
-      id: input.id,
-      subjectType: input.subjectType,
-      subjectId: input.subjectId,
-      decision: input.decision,
-      reason: input.reason,
-      actorId: input.actor.actorId,
-      correlationId: input.actor.correlationId,
-      decidedAt: this.deps.now(),
-      secondApprovalRequired: this.deps.requiresSecondApproval(input.subjectType),
-    };
+    const approval: Approval = { id: input.id, subjectType: input.subjectType, subjectId: input.subjectId, decision: input.decision, reason: input.reason, actorId: input.actor.actorId, correlationId: input.actor.correlationId, decidedAt: this.deps.now(), secondApprovalRequired: this.deps.requiresSecondApproval(input.subjectType) };
     await this.deps.repository.save(approval);
     return approval;
   }
