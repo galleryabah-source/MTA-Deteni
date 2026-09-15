@@ -1,8 +1,8 @@
 # MTA DETENI — Project Status
 
-**Version:** Foundation v1.9
-**Current Phase:** D3/D4/D5/D6 implementation + synthetic integration verification foundation
-**Implementation Track:** P10.544
+**Version:** Foundation v1.10
+**Current Phase:** D3/D4/D5/D6 implementation + guarded persistence/runtime integration foundation
+**Implementation Track:** P10.576
 **Branch:** `main`
 
 ## Implementation / Verification Progress
@@ -58,7 +58,11 @@
 - P10.513–P10.520 CI verification boundary documented; no CI PASS claimed;
 - P10.521–P10.528 application composition boundary reaffirmed for canonical temporary-exit orchestration;
 - P10.529–P10.536 synthetic persistence contract tests added for stale writes, append-only events, outbox replay/duplicate handling, claim and acknowledgement;
-- P10.537–P10.544 runtime readiness and safe configuration contracts/tests added.
+- P10.537–P10.544 runtime readiness and safe configuration contracts/tests added;
+- P10.545–P10.552 guarded non-production PostgreSQL boundary contract added;
+- P10.553–P10.560 schema/RLS reconciliation remains gated on an approved non-production target;
+- P10.561–P10.568 persistence integration requirements documented around existing transaction/idempotency/audit/outbox boundaries;
+- P10.569–P10.576 runtime integration requirements documented with fail-closed health/readiness boundary.
 
 ## Current Governance Model
 
@@ -86,14 +90,14 @@
 
 ## Current Gate
 
-**P10.544 — Runtime Readiness + Synthetic Persistence Boundary Foundation: CONTRACT READY; EXECUTION VERIFICATION PENDING**
+**P10.576 — Guarded PostgreSQL + Runtime Integration Foundation: CONTRACT READY; LIVE EXECUTION BLOCKED BY GOVERNANCE GATE**
 
-The application composition boundary, deterministic persistence contracts/tests, and runtime readiness/safety contracts are now represented in the repository. This does not constitute a CI PASS because the connector currently exposes no workflow status for the new commits and prior CI diagnosis showed missing actionable step telemetry. No PostgreSQL adapter or migration was introduced.
+The repository now contains a guarded PostgreSQL boundary that cannot execute production and requires migration freeze plus an explicit non-production target. Persistence and runtime integration requirements are documented and synthetic tests cover the boundary semantics. No PostgreSQL driver, live database connection, or schema migration was introduced. CI PASS is still not claimed because trustworthy workflow execution telemetry has not been obtained.
 
 ## Next Checkpoints
 
-1. P10.545–P10.552 — non-production PostgreSQL adapter contract, only after governance clearance and approved target;
-2. P10.553–P10.560 — read-only schema/RLS reconciliation against the approved target;
-3. P10.561–P10.568 — PostgreSQL transaction, idempotency, audit and outbox integration tests;
-4. P10.569–P10.576 — runtime adapter integration and health verification;
-5. P10.577+ — controlled pilot-readiness certification; migration remains frozen until explicitly approved.
+1. P10.577–P10.584 — controlled pilot-readiness evidence model and certification checklist;
+2. P10.585–P10.592 — API/application transport boundary with authorization, idempotency, audit and error contracts;
+3. P10.593–P10.600 — responsive operator UI/read-model boundary, preserving domain ownership and role separation;
+4. P10.601–P10.608 — reporting/export contract including regu jaga operational reporting and document numbering/binding;
+5. P10.609+ — controlled non-production integration only after explicit governance clearance and approved target; migration remains frozen.
