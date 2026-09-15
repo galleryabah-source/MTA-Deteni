@@ -1,5 +1,16 @@
 # Changelog
 
+## P13.8161–8280 — Recovery Journey Certification
+
+- Added a deterministic synthetic recovery journey spanning pre-commit rejection, post-commit infrastructure recovery, and offline reconnect conflict review.
+- Added recovery evidence binding to lifecycle command, event, correlation, aggregate and version identities.
+- Proved pre-commit failure paths produce zero mutation, audit and outbox effects at the contract level.
+- Proved committed outbox/projection recovery performs one logical mutation with `RETRY → SKIP_DUPLICATE` retry evidence.
+- Added a recovery certification boundary enforcing mutation/audit/outbox cardinality and canonical retry sequencing.
+- Added synthetic regression coverage for zero-effect rejection, post-commit deduplication, reconnect conflict review and duplicate-effect rejection.
+- No cross-system atomic rollback assumption was introduced.
+- No concrete database driver, schema migration, AI activation, production persistence, or live PostgreSQL execution.
+
 ## P13.7921–8040 — Lifecycle Recovery & Continuity Integration
 
 - Separated lifecycle `requestHash` from `commandId`; command identity is no longer silently reused as request content identity.
@@ -38,39 +49,3 @@
 - Added fail-closed replay behavior for completed idempotency keys and explicit conflict behavior for request-hash reuse.
 - Added synthetic regression coverage for commit, replay and conflict paths.
 - No concrete database driver or production persistence was introduced.
-
-## P13.6961–7040 — Report Output Envelope & Export Certification
-
-- Added a certified report output envelope with format, MIME type, filename, snapshot identity, document identity and content fingerprint binding.
-- Added deterministic PDF/DOCX filename and MIME policy behind the existing renderer certification boundary.
-- Added end-to-end daily guard export certification from snapshot → renderer → certification → output envelope.
-- Added fail-closed output tampering regression coverage and incomplete-report rejection.
-- Binary PDF/DOCX generation remains behind an explicit runtime/dependency approval gate.
-- No schema migration, AI activation, production persistence, or live PostgreSQL execution.
-
-## P13.6881–6960 — Renderer Certification & Template Versioning
-
-- Added a deterministic renderer certification contract with explicit `DGRT-1.0` template version.
-- Added stable output identity binding to template version, format, snapshot identity and document number.
-- Added deterministic content fingerprinting for regression evidence; this is not presented as a cryptographic security primitive.
-- Added fail-closed certification checks for format mismatch, snapshot/document drift, content tampering and non-synthetic output.
-- Added negative regression coverage across cross-format binding, snapshot drift and content tampering.
-- No binary document generation dependency was introduced; PDF/DOCX remain adapter-boundary formats only.
-- No schema migration, AI activation, production persistence, or live PostgreSQL execution.
-
-## P13.6801–6880 — Daily Guard Source Presentation Mapping
-
-- Inspected the supplied operational daily guard report and recorded only presentation facts evidenced by the source: report title, organization lines, Rudenim Pontianak location, Bravo morning duty label, 11 September 2026 date, 07.00–14.00 WIB duty interval, closing location/date, and signature labels.
-- Added an explicit presentation contract separate from the business/domain `ReportSnapshot` model.
-- Recorded only evidenced section headings; unsupported layout labels remain intentionally unmapped rather than invented.
-- Added synthetic PDF and DOCX renderer adapter boundaries behind the existing renderer abstraction. These are format contracts only; they do not emit production documents or perform persistence.
-- Added regression coverage for source facts, domain/presentation separation, deterministic PDF/DOCX adapter output, and synthetic-only enforcement.
-- No schema migration, AI activation, production persistence, or live PostgreSQL execution.
-
-## P13.6481–6520 — Integrated Daily Guard Report Journey
-
-- Added an application-level journey composing operational report preview and validated download as one deterministic flow.
-- Bound the journey to the report snapshot and preserved preview/download identity.
-- Added synthetic regression for successful daily guard report completion and incomplete-report fail-closed behavior.
-- Preserved reporting governance, snapshot integrity and rendering boundaries; no bypass path introduced.
-- No schema migration introduced.
