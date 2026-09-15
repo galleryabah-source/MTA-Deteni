@@ -1,15 +1,15 @@
 # MTA DETENI — Project Status
 
 **Foundation:** v1.60+
-**Current Track:** P13.5841–5880 reporting/QR/integrated synthetic hardening / observation pending
+**Current Track:** P13.5881–5960 runtime/LAN/offline continuity design / observation pending
 **Branch:** `main`
-**Latest implementation commit:** `f63aa044455838e8bc84d6c73db31fc7e4f1aa20`
+**Latest implementation checkpoint:** P13.5901–5920
 
 ## Latest progress
 
-- P13.5841 — added contextual QR domain contract separating detainee/block display from temporary-exit and deportation scan operations;
-- P13.5841 — added immutable, deterministic reporting snapshot contract;
-- P13.5841–5880 — added synthetic QR/reporting tests and integrated cross-domain journey covering placement, movement, temporary exit, HEAD_RUDENIM approval, SUBBAG TU documentation, escort, return and reporting snapshot;
+- P13.5901–5920 — added deterministic runtime capability contract for CLOUD, LAN and LOCAL modes across desktop/tablet/smartphone, including offline-write and local-backup safety invariants;
+- P13.5881–5900 — added deterministic offline command queue, idempotency-aware reconnect reconciliation and conflict-review contract;
+- P13.5841–5880 — contextual QR semantics, immutable reporting snapshot and integrated cross-domain synthetic journey;
 - P13.5827–5840 — canonical actor cleanup plus deterministic movement, placement, authorization and SoD synthetic contract tests;
 - P13.5824–5826 — deterministic temporary-exit synthetic journey: complete happy path, invalid skip/reversal rejection and terminal-state protection;
 - P13.5809–5822 — deterministic architecture/governance contract gate and observable execution/evidence acceptance contract;
@@ -26,6 +26,12 @@ The application chain remains:
 
 `UI/API Command → Authorization Policy → Canonical Operational Envelope → Domain Aggregate → Transaction Context → Idempotency → Domain Workflow → Immutable Timeline/Audit → Operational Evidence → Reconciliation → Outbox → Projection Checkpoint → Read Model → QR/Movement/Temporary Exit → Reporting Snapshot → Review/Approval → Generated Artifact`
 
+## Runtime continuity model
+
+`CLOUD` is online-only; `LAN` supports multi-device local network continuity plus local backup; `LOCAL` supports device-local/offline writes and local backup. Offline commands carry command identity, aggregate identity, payload hash and idempotency key. Reconnect must skip duplicates, apply only when aggregate revision matches, and route revision conflicts to review rather than silently overwrite. Runtime capability claims fail closed when contradictory.
+
+The contract is intentionally implementation-neutral: it does not yet claim a running local PC server, browser UI, IndexedDB queue, synchronization service or backup engine. Those require later runtime implementation and observation.
+
 ## Governance locks
 
 - Migration Freeze: **TRUE**;
@@ -38,14 +44,12 @@ The application chain remains:
 
 ## Current certification state
 
-**P13.5841–5880 — IMPLEMENTED / OBSERVATION PENDING**
+**P13.5881–5960 — IMPLEMENTED CONTRACTS / OBSERVATION PENDING**
 
-The repository now has dependency-light synthetic coverage for movement, placement, authorization/SoD, contextual QR semantics, deterministic reporting snapshots and an integrated temporary-exit journey across the intended domain ownership boundaries. Certification is still blocked only by the unresolved CI observation condition; no application PASS or application test FAIL is inferred from the runner telemetry gap.
-
-Latest observed GitHub Actions runs continue to complete as `failure` with `steps: null`, so the result is classified as an infrastructure/runner observation blocker rather than an application failure.
+Synthetic contracts now cover offline queue/reconnect conflict semantics and runtime mode capability safety. They are not certified by execution because GitHub Actions continues to terminate with `failure` while exposing no usable job-step telemetry (`steps: null`). No application PASS or application test FAIL is inferred from that infrastructure condition.
 
 ## Next gate
 
-**P13.5881–5960 — runtime/browser/RBAC synthetic journey + LAN/offline continuity harness design.**
+**P13.5921–5960 — browser/RBAC/LAN runtime contract expansion:** responsive application-surface invariants, role-aware navigation, multi-device LAN identity, local-PC service boundary, local backup/restore identity and evidence binding. Keep all work synthetic and non-production.
 
-Targets: responsive application-surface verification, role-aware navigation, synthetic multi-device LAN access, offline write queue semantics, reconnect reconciliation, local backup/restore, conflict-safe synchronization, and evidence binding. No production deployment, live PostgreSQL, AI activation or schema migration is implied.
+**Following:** controlled runtime observation once GitHub runner telemetry is available.
