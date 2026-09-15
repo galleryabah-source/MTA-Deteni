@@ -2,7 +2,7 @@ name: MTA DETENI Domain CI
 
 on:
   push:
-    branches: [main]
+    branches: [main, "phase-p12.961-13.200"]
   pull_request:
     branches: [main]
 
