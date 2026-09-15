@@ -1,7 +1,7 @@
 # MTA DETENI — Next Gate
 
-**Foundation:** v1.84
-**Current:** P13.9961–10080 — runtime adapter integration boundary implemented; CI observation blocker remains
+**Foundation:** v1.87
+**Current:** P13.10321–10440 — local runtime adapter safety contract implemented; CI observation blocker remains
 
 ## Completed (through current gate)
 
@@ -44,11 +44,14 @@
 - **P13.9721–9840:** deterministic LOCAL/LAN recovery boundary validates authenticated synthetic context, execution/network continuity, trusted installation continuity and fail-closed target drift.
 - **P13.9841–9960:** multi-device LAN continuity is represented through the same installation/network trust boundary; cross-installation or network drift is blocked before recovery proof can become READY.
 - **P13.9961–10080:** runtime integration remains adapter-only and synthetic; local/LAN recovery proof is separated from external transport/persistence so production connectivity cannot be introduced accidentally.
+- **P13.10081–10200:** narrow LOCAL/LAN browser adapter contract validates request identity, authenticated device identity, local-service boundary and mutation idempotency.
+- **P13.10201–10320:** local runtime adapter rejects absolute/protocol-relative URLs and non-LOCAL service paths, preventing accidental external transport routing.
+- **P13.10321–10440:** synthetic local adapter execution boundary returns only contract-level acceptance; no network, database, persistence or production service is invoked.
 - No database driver, migration, production persistence, real detainee data, or AI activation.
 
-## Next gate: P13.10081–10200
+## Next gate: P13.10441–10560
 
-Build the **offline/local runtime adapter contract**: define a narrow transport interface for browser/tablet/smartphone clients to a LOCAL/LAN service, require authenticated device identity and idempotency for every mutation, reject internet-exposed local adapters, and add deterministic synthetic adapter regression. Do not connect a real database or external production service.
+Build the **local runtime session handshake**: bind a browser/tablet/smartphone adapter request to a valid LAN session and exact device/install/network identity, enforce session expiry, and require a clean runtime handoff/recovery proof before accepting a continuity-sensitive mutation. Keep all state synthetic/in-memory.
 
 ## Governance lock
 
