@@ -9,9 +9,9 @@ test('P10.47: CI workflow has a non-secret transport diagnostic and always uploa
   assert.match(workflow, /GITHUB_SHA/);
   assert.match(workflow, /node --version/);
   assert.match(workflow, /npm --version/);
-  assert.match(workflow, /package-lock\\.json/);
-  assert.match(workflow, /if: always\\(\\)/);
-  assert.match(workflow, /ci-transport-diagnostic\\.txt/);
-  assert.doesNotMatch(workflow, /printenv\\b/);
-  assert.doesNotMatch(workflow, /echo .*secrets\\./);
+  assert.match(workflow, /package-lock\.json/);
+  assert.match(workflow, /if: always\(\)/);
+  assert.match(workflow, /ci-transport-diagnostic\.txt/);
+  assert.doesNotMatch(workflow, /printenv\b/);
+  assert.doesNotMatch(workflow, /echo .*secrets\./);
 });
