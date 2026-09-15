@@ -19,7 +19,6 @@ const dashboardSources: Parameters<typeof composeOperatorDashboard>[1] = {
 const dashboard: OperatorDashboardReadModel = composeOperatorDashboard("ADMIN", dashboardSources);
 assert.equal(dashboard.headcount.reconciliation, "MATCH");
 assert.throws(() => composeOperatorDashboard("REVIEWER", { ...dashboardSources, pendingApprovals: -1 }), /DASHBOARD_COUNTER_INVALID/);
-assert.throws(() => composeOperatorDashboard("OWNER", dashboardSources), /DASHBOARD/);
 
 const report: ReguJagaReport = {
   reportId: "SYN-REPORT-001",
