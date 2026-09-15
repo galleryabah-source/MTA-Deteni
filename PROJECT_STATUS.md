@@ -1,8 +1,8 @@
 # MTA DETENI — Project Status
 
-**Version:** Foundation v1.13
-**Current Phase:** P10.609–P10.640 controlled integration + verification evidence foundation
-**Implementation Track:** P10.640
+**Version:** Foundation v1.14
+**Current Phase:** P10.641–P10.648 CI + controlled verification hardening
+**Implementation Track:** P10.648
 **Branch:** `main`
 
 ## Latest Progress
@@ -15,10 +15,10 @@
 - P10.617–P10.624 guarded persistence execution contract;
 - P10.625–P10.632 API/runtime verification contract and synthetic E2E gate;
 - P10.633–P10.640 formal controlled verification evidence gate and fail-closed regression tests;
-- P10.609–P10.615 NodeNext import/declaration consistency hardened across the application/domain TypeScript boundary;
-- P10.616 runtime/read-model integration guard added;
-- P10.617–P10.618 governed reporting export and transport authorization/idempotency guards added;
-- P10.619–P10.620 integration/report export regression tests added.
+- P10.609–P10.615 NodeNext import/declaration consistency hardened;
+- P10.616–P10.620 runtime/read-model, reporting-export and transport guards added;
+- P10.633–P10.640 controlled evidence gate formalized;
+- P10.641 CI action versions/install behavior hardened for Node 24 verification.
 
 ## Integrated Application Model
 
@@ -38,10 +38,10 @@ RAP owns registration, administration and reporting; PERKES owns health records 
 
 ## Current Gate
 
-**P10.640 — CONTROLLED VERIFICATION EVIDENCE GATE READY; LIVE EXECUTION BLOCKED**
+**P10.648 — CI HARDENING COMPLETE; AUTOMATED VERIFICATION STILL NOT CLAIMED**
 
-The application now has a fail-closed evidence model covering target authorization, read-only schema/RLS reconciliation, persistence concurrency, audit/outbox, API authorization, runtime readiness and synthetic E2E. A complete synthetic packet can be evaluated as READY, while missing, failed, or target-inconsistent evidence remains BLOCKED. No live database or production integration has been executed.
+The CI workflow now uses stable action major versions and deterministic dependency-install flags. Automated runs observed in this environment still terminate as failures without executable step telemetry, so no PASS is claimed. The codebase remains migration-frozen and production-isolated.
 
 ## Next Gate
 
-**P10.641+ — controlled non-production execution harness implementation.** The next execution sequence remains read-only target authorization/reconciliation first, followed by guarded persistence and API/runtime verification. Migration stays frozen.
+**P10.649+ — CI execution observability/evidence transport hardening, then controlled non-production verification harness.** Any real target requires explicit governance clearance and an approved non-production target; otherwise work remains synthetic.
