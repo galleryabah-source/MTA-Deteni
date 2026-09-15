@@ -5,6 +5,13 @@ on:
     branches: [main, phase9-kernel-implementation]
   pull_request:
     branches: [main]
+    paths:
+      - 'src/kernel/**'
+      - 'tests/p9-kernel.test.mjs'
+      - 'test/p9-*.test.mjs'
+      - 'package.json'
+      - 'package-lock.json'
+      - '.github/workflows/p9-kernel.yml'
 
 permissions:
   contents: read
@@ -39,6 +46,14 @@ jobs:
           test -f test/p9.11-concurrency-failure-security.test.mjs
           test -f test/p9.12-ci-quality-gate.test.mjs
           test -f test/p9.13-certification-evidence.test.mjs
+      - name: Verify immutable synthetic safety gate
+        run: |
+          set -euxo pipefail
+          test "$APP_ENV" = test
+          test "$AI_ENABLED" = false
+          test "$MIGRATION_FREEZE" = true
+          test ! -f .env
+          test ! -f .env.local
       - name: Run dependency-free kernel tests
         run: |
           set -euxo pipefail
