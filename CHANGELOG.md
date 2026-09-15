@@ -1,5 +1,15 @@
 # Changelog
 
+## P13.8881–9000 — Offline-First Operational Session
+
+- Added a contract-only operational session lifecycle bound to execution, device, installation, network scope and runtime mode.
+- Added authenticated synthetic session admission with LAN/LOCAL-only local command admission and complete command identity validation.
+- Added fail-closed session scope checks for execution, runtime mode, network, device and installation drift.
+- Added deterministic clean session-close evidence bound to synchronized queue state, READY runtime continuity, READY backup continuity and the unified continuity certification.
+- Added explicit `INTERRUPTED` state so an interrupted local/LAN session cannot be represented as a clean operational handoff.
+- Added regression coverage for active admission, scope drift, unauthenticated context, inactive/interrupted sessions, pending queues, reconciliation conflicts, clean close and fabricated close evidence.
+- No database driver, schema migration, production persistence, real detainee data or AI activation.
+
 ## P13.8641–8760 — Backup Continuity Coordinator
 
 - Added a contract-only backup continuity coordinator for synthetic LOCAL/LAN backup manifests.
