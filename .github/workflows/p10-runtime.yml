@@ -2,7 +2,7 @@ name: P10 Runtime Domain
 
 on:
   push:
-    branches: [phase9-kernel-implementation, phase10.10-persistent-grant-boundary, phase10.13-approved-db-integration-gate, phase10.14-database-verification-package, phase10.18-document-output-operationalization]
+    branches: [phase9-kernel-implementation, phase10.10-persistent-grant-boundary, phase10.13-approved-db-integration-gate, phase10.18-document-output-operationalization]
   pull_request:
     branches: [main]
   workflow_dispatch:
@@ -20,11 +20,9 @@ jobs:
       MIGRATION_FREEZE: 'true'
     steps:
       - uses: actions/checkout@v4
-
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-
       - name: Prepare CI transport diagnostic
         if: always()
         run: |
@@ -49,7 +47,6 @@ jobs:
             echo "MIGRATION_FREEZE=${MIGRATION_FREEZE}"
             echo "gitStatusStart=$(git status --short | tr '\n' ' ' || true)"
           } > artifacts/p10-runtime/ci-transport-diagnostic.txt
-
       - name: Verify immutable synthetic safety gate
         run: |
           set -euxo pipefail
@@ -58,10 +55,8 @@ jobs:
           test "$MIGRATION_FREEZE" = true
           test ! -f .env
           test ! -f .env.local
-
       - name: Install approved dependencies
         run: npm install --package-lock=false --ignore-scripts --no-audit --no-fund
-
       - name: Record dependency install mode
         if: always()
         run: |
@@ -73,7 +68,6 @@ jobs:
             echo "dependencyInstallMode=$([ "$tracked_lockfile" = true ] && echo npm-ci-required || echo temporary-npm-install)"
             echo "dependencyInstallStepStatus=${{ job.status }}"
           } >> artifacts/p10-runtime/ci-transport-diagnostic.txt
-
       - name: Verify dependency reproducibility boundary
         run: |
           set -euxo pipefail
@@ -85,7 +79,6 @@ jobs:
             echo "NO_REVIEWED_LOCKFILE: temporary dependency bootstrap only; production certification remains blocked until package-lock.json is reviewed and committed."
             echo "lockfileInstall=blocked-no-reviewed-lockfile" >> artifacts/p10-runtime/ci-transport-diagnostic.txt
           fi
-
       - name: Verify regression manifest
         run: |
           set -euxo pipefail
@@ -93,14 +86,11 @@ jobs:
           test -f scripts/p10-evidence-integrity-gate.mjs
           node --check scripts/p10-runtime-regression-gate.mjs
           node --check scripts/p10-evidence-integrity-gate.mjs
-
       - name: Run deterministic P10 regression gate
         run: node scripts/p10-runtime-regression-gate.mjs
-
       - name: Verify P10 evidence integrity
         if: always()
         run: node scripts/p10-evidence-integrity-gate.mjs
-
       - name: Upload P10 evidence
         if: always()
         uses: actions/upload-artifact@v4
