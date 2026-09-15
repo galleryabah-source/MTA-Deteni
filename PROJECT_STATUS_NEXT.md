@@ -1,7 +1,7 @@
 # MTA DETENI — Next Gate
 
-**Foundation:** v1.71
-**Current:** P13.8401–8520 — runtime execution/certification boundary and synthetic LAN/offline handoff contract implemented; CI observation blocker remains
+**Foundation:** v1.73
+**Current:** P13.8641–8760 — backup continuity coordinator and fail-closed backup-chain boundary implemented; CI observation blocker remains
 
 ## Completed (through current gate)
 
@@ -22,12 +22,16 @@
 - Runtime execution context bound to runtime mode, device class, network scope, authentication and certification journey.
 - Runtime certification binding to lifecycle and recovery certification records.
 - Synthetic LAN/offline runtime handoff contract requiring authorization and reconciliation continuity.
-- Runtime handoff fail-closed checks prevent bypass of certification/reconciliation controls.
+- Runtime continuity coordinator combining authenticated runtime context, queue state, reconciliation decision and handoff identity.
+- Pending/offline queue cannot be treated as ready without reconciliation evidence.
+- Reconnect conflict produces explicit `BLOCKED` continuity state.
+- Backup continuity coordinator validates synthetic backup manifests and predecessor-chain references.
+- Missing or mismatched backup predecessor references fail closed.
 - No database driver, migration, production persistence, real detainee data, or AI activation.
 
-## Next gate: P13.8521–8640
+## Next gate: P13.8761–8880
 
-Extend the runtime boundary into a contract-level **local/LAN continuity coordinator**: bind device identity, local service boundary, persistent queue, reconnect transition, backup manifest/chain and reporting refresh into one synthetic end-to-end continuity journey. Then add fail-closed tests for device/network-scope drift, expired LAN sessions, backup-chain drift, pending-queue handoff and certification mismatch. Do not introduce database drivers, migrations, production data, or AI.
+Unify local/LAN continuity into a single synthetic **continuity certification**: bind runtime execution, queue/reconciliation assessment, backup-chain assessment, lifecycle certification and recovery certification into one evidence object. Add explicit invariants that a runtime handoff cannot be certified when queue reconciliation or backup continuity is blocked, and verify reporting freshness against the certified lifecycle version. Keep all persistence, migrations, production data and AI disabled.
 
 ## Governance lock
 
