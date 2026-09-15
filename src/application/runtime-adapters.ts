@@ -1,4 +1,4 @@
-import type { OfflineCommand } from "./offline-continuity.js";
+import type { OfflineCommand, QueueState, ReconciliationDecision } from "./offline-continuity.js";
 import type { LanDeviceIdentity, LocalServiceBoundary } from "./runtime-surface.js";
 
 export type BrowserTransportRequest = Readonly<{
@@ -40,6 +40,30 @@ export class MemoryQueueAdapter<T = OfflineCommand> implements PersistentQueueAd
     if (index < 0) throw new Error("Queue replacement identity is not present.");
     this.items[index] = item;
   }
+}
+
+export type ReconnectTransition = Readonly<{
+  commandId: string;
+  from: QueueState;
+  to: QueueState;
+  decision: ReconciliationDecision["action"];
+}>;
+
+const EXPECTED_RECONNECT_TRANSITIONS: Readonly<Record<ReconciliationDecision["action"], QueueState>> = {
+  APPLY: "SYNCED",
+  SKIP_DUPLICATE: "SYNCED",
+  REVIEW_CONFLICT: "CONFLICT",
+};
+
+export function createReconnectTransition(command: OfflineCommand, decision: ReconciliationDecision): ReconnectTransition {
+  if (decision.commandId !== command.commandId) throw new Error("Reconnect decision command identity mismatch.");
+  if (command.state !== "PENDING" && command.state !== "SYNCING") throw new Error("Reconnect requires a pending or syncing queue command.");
+  return Object.freeze({ commandId: command.commandId, from: command.state, to: EXPECTED_RECONNECT_TRANSITIONS[decision.action], decision: decision.action });
+}
+
+export function applyReconnectTransition(command: OfflineCommand, transition: ReconnectTransition): OfflineCommand {
+  if (transition.commandId !== command.commandId || transition.from !== command.state) throw new Error("Reconnect transition identity/state mismatch.");
+  return Object.freeze({ ...command, state: transition.to });
 }
 
 export type LanSession = Readonly<{
