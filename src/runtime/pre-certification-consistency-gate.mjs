@@ -1,3 +1,5 @@
+import { assertReleaseEvidence } from './release-evidence-manifest.mjs';
+
 const REQUIRED_SCHEMA = 'MTA-EVIDENCE-V1';
 
 function requiredString(value, name) {
@@ -29,6 +31,7 @@ export function assertPreCertificationConsistency({ regressionEvidence, integrit
   assertSafeEvidence(integrityEvidence, 'INTEGRITY_EVIDENCE');
   if (releaseManifest.schemaVersion !== REQUIRED_SCHEMA) throw new Error('RELEASE_SCHEMA_UNSUPPORTED');
   if (releaseManifest.safety?.migrationFreeze !== true || releaseManifest.safety?.aiEnabled !== false) throw new Error('RELEASE_SAFETY_INVALID');
+  try { assertReleaseEvidence(releaseManifest); } catch (error) { throw new Error(error instanceof Error ? error.message : 'RELEASE_EVIDENCE_INVALID'); }
 
   assertSame(regressionEvidence.checkpoint, expectedCheckpoint, 'REGRESSION_CHECKPOINT_MISMATCH');
   assertSame(integrityEvidence.checkpoint, expectedCheckpoint, 'INTEGRITY_CHECKPOINT_MISMATCH');
@@ -49,20 +52,10 @@ export function assertPreCertificationConsistency({ regressionEvidence, integrit
   const manifestTestNames = releaseManifest.tests.map((test) => test?.name).filter(Boolean);
   if (new Set(manifestTestNames).size !== manifestTestNames.length) throw new Error('RELEASE_DUPLICATE_TEST');
 
-  return Object.freeze({
-    classification: 'PASS',
-    checkpoint: expectedCheckpoint,
-    commitSha: expectedCommitSha,
-    syntheticOnly: true,
-    safety: Object.freeze({ appEnv: 'test', aiEnabled: false, migrationFreeze: true }),
-    requiredTestCount: regressionEvidence.requiredTestCount,
-  });
+  return Object.freeze({ classification: 'PASS', checkpoint: expectedCheckpoint, commitSha: expectedCommitSha, syntheticOnly: true, safety: Object.freeze({ appEnv: 'test', aiEnabled: false, migrationFreeze: true }), requiredTestCount: regressionEvidence.requiredTestCount });
 }
 
 export function classifyPreCertificationConsistency(input) {
-  try {
-    return assertPreCertificationConsistency(input);
-  } catch (error) {
-    return Object.freeze({ classification: 'BLOCKED', reason: error instanceof Error ? error.message : 'CONSISTENCY_CHECK_FAILED' });
-  }
+  try { return assertPreCertificationConsistency(input); }
+  catch (error) { return Object.freeze({ classification: 'BLOCKED', reason: error instanceof Error ? error.message : 'CONSISTENCY_CHECK_FAILED' }); }
 }
