@@ -1,5 +1,24 @@
 # Changelog
 
+## P13.10441–10560 — Local Runtime Session Handshake
+
+- Added a synthetic local runtime session handshake bound to operational session, execution, device, installation and network identities.
+- Restricted handshake creation to authenticated LAN/LOCAL runtime contexts.
+- Added deterministic issued/expiry validation and fail-closed invalid windows.
+- Required exact device/install/network binding for adapter requests.
+
+## P13.10561–10680 — Session Handshake Lifetime
+
+- Added regression proving a handshake is usable only inside its declared validity window.
+- Prevented expired handshakes from being accepted at the exact expiry boundary.
+- Preserved synthetic/in-memory operation.
+
+## P13.10681–10800 — Continuity-Sensitive Mutation Admission
+
+- Added fail-closed validation for malformed handshake identity/time.
+- Bound continuity-sensitive mutations to the active operational session and exact execution/device/install/network scope.
+- Required certified runtime handoff and ready recovery proof before continuity-sensitive mutation admission.
+
 ## P13.10081–10200 — Local Runtime Adapter Contract
 
 - Added a narrow synthetic LOCAL/LAN adapter contract for browser, tablet and smartphone clients.
