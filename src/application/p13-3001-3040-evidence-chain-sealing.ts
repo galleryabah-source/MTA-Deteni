@@ -36,7 +36,8 @@ export function assertEvidenceChainIntact(chain: EvidenceChain): void {
   let sequence = 0;
   for (const item of chain.items) {
     sequence += 1;
-    if (item.sequence !== sequence || item.previousFingerprint !== previous || item.fingerprint !== fingerprint({ ...item, fingerprint: undefined as never })) throw new Error("EVIDENCE_CHAIN_INTEGRITY_FAILED");
+    const unsigned = { sequence: item.sequence, evidenceId: item.evidenceId, payloadFingerprint: item.payloadFingerprint, previousFingerprint: item.previousFingerprint };
+    if (item.sequence !== sequence || item.previousFingerprint !== previous || item.fingerprint !== fingerprint(unsigned)) throw new Error("EVIDENCE_CHAIN_INTEGRITY_FAILED");
     previous = item.fingerprint;
   }
 }
