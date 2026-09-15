@@ -7,10 +7,9 @@ import { assertTemporaryExitRepository, TEMPORARY_EXIT_REPOSITORY_CONTRACT } fro
 
 test('P10.64 operational workflow remains distinct from detainee lifecycle', () => {
   const operational = createTemporaryExitOperationalState();
-  assert.equal(operational, 'READY');
-  assert.equal(transitionTemporaryExitOperationalState(operational, 'REQUEST'), 'EXIT_REQUESTED');
-  assert.throws(() => transitionTemporaryExitOperationalState('READY', 'EXECUTE_EXIT'), /Invalid operational transition/);
-  assert.equal(typeof operational, 'string');
+  assert.equal(operational.state, 'READY');
+  assert.equal(transitionTemporaryExitOperationalState(operational.state, 'EXIT_REQUESTED').state, 'EXIT_REQUESTED');
+  assert.throws(() => transitionTemporaryExitOperationalState('READY', 'EXECUTE_EXIT'), /INVALID_OPERATIONAL_TRANSITION/);
 });
 
 test('P10.65 timeline is append-only and terminal close blocks mutation', () => {
