@@ -35,9 +35,13 @@ export function assertLifecycleEnvelope(input: LifecycleCommandEnvelope<unknown>
   if (!Number.isInteger(input.expectedVersion) || input.expectedVersion < 0) throw new Error("Lifecycle expected version is invalid.");
 }
 
-export function createLifecycleEvent<T>(input: LifecycleEventEnvelope<T>): LifecycleEventEnvelope<T> {
+export function assertLifecycleEventEnvelope<T>(input: LifecycleEventEnvelope<T>): void {
   for (const value of [input.eventId, input.commandId, input.correlationId, input.aggregateId, input.eventType]) if (!value.trim()) throw new Error("Lifecycle event identity is required.");
   if (!Number.isInteger(input.resultingVersion) || input.resultingVersion <= 0) throw new Error("Lifecycle resulting version is invalid.");
+}
+
+export function createLifecycleEvent<T>(input: LifecycleEventEnvelope<T>): LifecycleEventEnvelope<T> {
+  assertLifecycleEventEnvelope(input);
   return Object.freeze({ ...input });
 }
 

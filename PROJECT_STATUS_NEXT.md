@@ -1,7 +1,7 @@
 # MTA DETENI — Next Gate
 
-**Foundation:** v1.69
-**Current:** P13.8161–8280 — deterministic recovery journey and certification boundary implemented; CI observation blocker confirmed
+**Foundation:** v1.70
+**Current:** P13.8281–8400 — recovery/lifecycle cross-step binding, retry fingerprint certification and unified seven-class failure journey implemented; CI observation blocker remains
 
 ## Completed
 
@@ -74,11 +74,18 @@
 67. recovery certification boundary enforcing mutation/audit/outbox cardinality;
 68. canonical retry sequence `RETRY → SKIP_DUPLICATE` for committed infrastructure recovery;
 69. no cross-system atomic rollback assumption;
-70. synthetic-only recovery journey and certification regression coverage.
+70. synthetic-only recovery journey and certification regression coverage;
+71. dedicated lifecycle-event envelope validator with no command/request-hash substitution;
+72. recovery evidence directly bound to the corresponding lifecycle certification step;
+73. deterministic retry-key construction from command identity plus source fingerprint;
+74. recovery certification rejects retry-key or source-fingerprint drift;
+75. unified synthetic recovery regression across all seven governed failure classes;
+76. offline reconnect conflict included as an explicit seven-class recovery journey case;
+77. cross-step recovery/lifecycle identity and version drift fail-closed tests.
 
-## Next gate: P13.8281–8400
+## Next gate: P13.8401–8520
 
-Harden the recovery journey against cross-step drift: bind recovery evidence to the lifecycle certification record, require command/request/event identity consistency, certify retry keys against payload fingerprints, and add a unified synthetic failure matrix covering all seven failure classes through the recovery journey. Then prepare the contract boundary for later runtime adapters without introducing database drivers, migrations, production data, or AI.
+Prepare the runtime adapter boundary as a contract-only layer: bind lifecycle/recovery certification to runtime execution context, formalize synthetic LAN/offline adapter handoff, and verify that runtime mode transitions cannot bypass authorization, idempotency, reconciliation, reporting, or recovery controls. Keep database drivers, migrations, production persistence, real detainee data and AI disabled.
 
 ## Governance lock
 
@@ -86,4 +93,4 @@ Migration Freeze TRUE. AI OFF. Repository SYNTHETIC ONLY. Production access NOT 
 
 ## Observation blocker
 
-GitHub Actions remains an observation blocker. Run #416 failed with zero steps and no logs; its job log endpoint returned BlobNotFound. Repository implementation checkpoints are therefore tracked independently from runtime CI PASS claims.
+GitHub Actions remains an observation blocker. Run #416 failed with zero steps and no logs; its job log endpoint returned BlobNotFound. Repository implementation checkpoints are therefore tracked independently from runtime CI PASS claims. No CI PASS claim is made without observable steps/logs/artifacts.

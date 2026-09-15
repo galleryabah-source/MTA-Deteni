@@ -1,6 +1,6 @@
 import { createFailureRecoveryCase, type FailureClass } from "./failure-recovery-contract.js";
 import { createRecoveryEvidence, assertRecoveryEventBinding, type RecoveryEvidence } from "./recovery-evidence.js";
-import { decideIdempotentRetry, type RecoveryRetryRecord } from "./recovery-retry.js";
+import { createRecoveryRetryKey, decideIdempotentRetry, type RecoveryRetryRecord } from "./recovery-retry.js";
 import { reconcileOfflineCommand, type OfflineCommand } from "./offline-continuity.js";
 
 export type RecoveryJourneyOutcome = "REJECTED" | "REVIEW_REQUIRED" | "RECOVERED" | "RECONNECT_REVIEW";
@@ -59,9 +59,10 @@ export function executeSyntheticRecoveryJourney(input: {
   if (!failure.mutationCommitted) {
     outcome = failure.recovery === "NON_RETRYABLE" ? "REJECTED" : "REVIEW_REQUIRED";
   } else {
-    const first = decideIdempotentRetry({ retryKey: `RETRY-${input.commandId}`, targetId: input.eventId, sourceFingerprint: input.payloadHash, prior: retries });
+    const retryKey = createRecoveryRetryKey(input.commandId, input.payloadHash);
+    const first = decideIdempotentRetry({ retryKey, targetId: input.eventId, sourceFingerprint: input.payloadHash, prior: retries });
     retries.push(first);
-    const second = decideIdempotentRetry({ retryKey: first.retryKey, targetId: first.targetId, sourceFingerprint: first.sourceFingerprint, prior: retries });
+    const second = decideIdempotentRetry({ retryKey, targetId: first.targetId, sourceFingerprint: first.sourceFingerprint, prior: retries });
     retries.push(second);
     if (second.decision !== "SKIP_DUPLICATE") throw new Error("Committed recovery retry did not deduplicate.");
     outcome = "RECOVERED";

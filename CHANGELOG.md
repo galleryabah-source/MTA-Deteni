@@ -1,5 +1,15 @@
 # Changelog
 
+## P13.8281–8400 — Recovery/Lifecycle Cross-Step Certification
+
+- Added a dedicated lifecycle-event envelope validator so event validation never substitutes `commandId` for `requestHash`.
+- Bound recovery evidence directly to the matching lifecycle certification step across command, event, correlation, aggregate and version identities.
+- Added deterministic recovery retry-key construction from command identity plus source fingerprint.
+- Hardened recovery certification against retry-key and source-fingerprint drift.
+- Added one synthetic regression matrix covering all seven governed failure classes through the recovery journey, including explicit offline reconnect review.
+- Added cross-step identity/version tamper regression coverage.
+- Preserved synthetic-only execution and all governance locks; no database driver, migration, production persistence, real detainee data or AI was introduced.
+
 ## P13.8161–8280 — Recovery Journey Certification
 
 - Added a deterministic synthetic recovery journey spanning pre-commit rejection, post-commit infrastructure recovery, and offline reconnect conflict review.
