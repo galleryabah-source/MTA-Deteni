@@ -1,5 +1,16 @@
 # Changelog
 
+## P13.176881–190880 — Integrated Integrity-Audit Terminal Closure Certification Continuation (100 Checkpoints)
+
+- Extended the governed chain across exactly 100 sequential checkpoints from P13.176881 through P13.190880.
+- Added a certification-continuation contract binding artifact, parent-closure, audit decision-fingerprint and continuity-certificate identity.
+- Enforced fail-closed identity validation, including rejection of certificate/artifact aliasing and continuity mismatches.
+- Preserved deterministic in-memory `ADMIT` / `REPLAY` / `CONFLICT` semantics with an identity-bound replay key.
+- Certification remains immutable, synthetic-only, review-only and explicitly non-executable.
+- No authorization, dispatch approval, external transport request, dispatch execution or durable publication capability is introduced.
+- Added regression coverage for checkpoint cardinality, immutability, governance locks, deterministic replay, fingerprint drift and continuity failures.
+- CI remains observation-only unless observable workflow evidence is available.
+
 ## P13.162881–176880 — Integrated Integrity-Audit Terminal Closure Continuation (100 Checkpoints)
 
 - Extended the governed chain across exactly 100 sequential checkpoints from P13.162881 through P13.176880.
