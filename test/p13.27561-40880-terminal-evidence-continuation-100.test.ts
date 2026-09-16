@@ -1,10 +1,10 @@
 import { strict as assert } from "node:assert";
 import { test } from "node:test";
 import { createTerminalEvidenceContinuationANode, replayTerminalEvidenceContinuationANode, certifyTerminalEvidenceContinuationANode, resetTerminalEvidenceContinuationAReplayRegistry, terminalEvidenceContinuationACheckpoints } from "../src/application/p13-27561-30080-terminal-evidence-continuation-a.js";
-import { terminalEvidenceContinuationBCheckpoints } from "../src/application/p13-30241-32760-terminal-evidence-continuation-b.js";
-import { terminalEvidenceContinuationCCheckpoints } from "../src/application/p13-32881-35400-terminal-evidence-continuation-c.js";
-import { terminalEvidenceContinuationDCheckpoints } from "../src/application/p13-35561-38080-terminal-evidence-continuation-d.js";
-import { terminalEvidenceContinuationECheckpoints } from "../src/application/p13-38241-40760-terminal-evidence-continuation-e.js";
+import { terminalEvidenceContinuationBCheckpoints } from "../src/application/p13-30241-32880-terminal-evidence-continuation-b.js";
+import { terminalEvidenceContinuationCCheckpoints } from "../src/application/p13-32881-35560-terminal-evidence-continuation-c.js";
+import { terminalEvidenceContinuationDCheckpoints } from "../src/application/p13-35561-38240-terminal-evidence-continuation-d.js";
+import { terminalEvidenceContinuationECheckpoints } from "../src/application/p13-38241-40880-terminal-evidence-continuation-e.js";
 
 test("P13.27561-40880 registers exactly 100 sequential continuation checkpoints",()=>{
  const all=[...terminalEvidenceContinuationACheckpoints(),...terminalEvidenceContinuationBCheckpoints(),...terminalEvidenceContinuationCCheckpoints(),...terminalEvidenceContinuationDCheckpoints(),...terminalEvidenceContinuationECheckpoints()];
