@@ -1,26 +1,19 @@
 # MTA DETENI — Project Status
 
-**Foundation:** v1.128+
-**Current Track:** P13.204881–218880 integrated integrity-audit terminal closure certification seal receipt / CI observation pending
+**Foundation:** v1.129+
+**Current Track:** P13.218881–232880 integrated integrity-audit terminal closure certification seal receipt attestation / CI observation pending
 **Branch:** `main`
-**Latest implementation checkpoint:** P13.218880
+**Latest implementation checkpoint:** P13.232880
 
 ## Latest progress
 
-- P13.121281–134880 — integrated integrity-audit terminal-closure boundary chain.
-- P13.134881–148880 — integrated integrity-audit terminal-closure boundary extension across 100 checkpoints in modules A–E.
-- P13.148881–162880 — governed terminal-closure boundary continuation across 100 checkpoints.
-- P13.162881–176880 — integrated terminal-closure continuation across 100 sequential checkpoints, preserving artifact identity, parent/closure continuity, audit decision-fingerprint continuity, deterministic replay and non-executable governance invariants.
-- P13.176881–190880 — integrated terminal-closure certification boundary across 100 sequential checkpoints, adding certification identity continuity.
-- P13.190881–204880 — terminal-closure certification-seal layer across 100 sequential checkpoints, binding seal identity to the preceding certification boundary.
-- P13.204881–218880 — terminal-closure certification-seal receipt layer across 100 sequential checkpoints, binding receipt identity to the preceding seal boundary while preserving the full artifact, closure, audit, certification and seal chain.
+- P13.204881–218880 — terminal-closure certification-seal receipt layer across 100 sequential checkpoints.
+- P13.218881–232880 — terminal-closure certification-seal receipt attestation layer across 100 sequential checkpoints, binding attestation identity to the preceding receipt boundary while preserving the complete artifact, closure, audit, certification and seal chain.
 - Regression coverage added for exactly 100 unique sequential checkpoints, immutability, governance locks, deterministic replay, fingerprint-drift conflict and continuity failures.
 
 ## Runtime continuity integrity
 
-The governed terminal-evidence and integrity-audit chain now extends through P13.218880. The latest certification-seal receipt layer remains synthetic-only, immutable, review-only and explicitly non-executable. Replay is deterministic and side-effect free. The layer does not itself grant authorization, approve dispatch, request external transport, execute dispatch or create durable publication.
-
-All continuation, audit, integrated certification, continuity, closure, certification-boundary, seal and receipt artifacts remain review artifacts only. Runtime adapters remain subordinate to authorization, idempotency and evidence controls.
+The governed terminal-evidence and integrity-audit chain now extends through P13.232880. The latest attestation layer remains synthetic-only, immutable, review-only and explicitly non-executable. Replay is deterministic and side-effect free. The layer does not grant authorization, approve dispatch, request external transport, execute dispatch or create durable publication.
 
 ## Governance locks
 
@@ -34,10 +27,10 @@ All continuation, audit, integrated certification, continuity, closure, certific
 
 ## Current certification state
 
-**P13.204881–218880 — IMPLEMENTED CONTRACTS / OBSERVATION PENDING**
+**P13.218881–232880 — IMPLEMENTED CONTRACTS / OBSERVATION PENDING**
 
-The 100-checkpoint terminal-closure certification-seal receipt layer and regression coverage are implemented. GitHub Actions is not treated as PASS until observable workflow steps/logs/artifacts are available.
+The 100-checkpoint attestation layer and regression coverage are implemented. GitHub Actions is not treated as PASS until observable workflow steps/logs/artifacts are available.
 
 ## Next gate
 
-**P13.218881 onward — next governed integrity layer:** inspect observable CI evidence for the completed batch, then continue with the next coherent boundary/replay/certification layer. No production activation or migration is implied by this implementation.
+**P13.232881 onward — next governed integrity layer:** continue the coherent boundary/replay/certification chain without production activation or migration.
