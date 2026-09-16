@@ -3,7 +3,7 @@
 **Foundation:** v1.134+
 **Current Track:** P1 runtime integrity remediation / P9 kernel implementation / P13 closure evidence recovery
 **Branch:** `main`
-**Latest implementation checkpoint:** P1 critical-mutation integration aligned to the canonical runtime outbox contract; P13 governed boundary remains P13.274880
+**Latest implementation checkpoint:** P1 canonical execution-context continuity contract + critical-mutation canonical outbox integration; P13 governed boundary remains P13.274880
 
 ## P9 kernel implementation
 
@@ -22,12 +22,14 @@
 
 ## P1 runtime integrity remediation
 
-- Critical mutation orchestration now binds its outbox boundary to the canonical runtime outbox contract rather than the legacy compatibility contract.
+- Critical mutation orchestration binds its outbox boundary to the canonical runtime outbox contract rather than the legacy compatibility contract.
 - The critical path remains: authorization → idempotency → transaction → domain mutation → audit → canonical outbox admission.
 - Canonical outbox admission is asynchronous and fail-closed on event identity conflict or unexpected replay during a new mutation.
-- Synthetic regression coverage was aligned with the canonical outbox status/disposition model and verifies rollback on domain/audit/outbox conflict paths.
+- A canonical execution-context contract now defines request, correlation, transaction and idempotency identities as one immutable boundary.
+- Downstream identity continuity can be checked fail-closed; mismatched request/correlation/transaction/idempotency identities are rejected.
+- Synthetic regression coverage certifies context normalization, immutability, matching downstream identities, identity drift rejection and missing-identity rejection.
 - Optimistic concurrency execution contract provides deterministic ACCEPT/STALE_VERSION semantics.
-- Further executable integration verification remains required before P1 can be certified complete.
+- Further executable end-to-end integration verification remains required before P1 can be certified complete.
 
 ## CI evidence recovery and hardening
 
