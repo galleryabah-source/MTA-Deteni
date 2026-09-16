@@ -1,5 +1,26 @@
 # Changelog
 
+## P13.14881–15000 — Final Runtime Recovery Closure Certification
+
+- Added final synthetic certification over the complete runtime recovery closure evidence chain.
+- Preserved exact evidence, continuity certification, receipt, closure, execution, dispatch, acknowledgement and decision fingerprint identity.
+- Certification fails closed on identity drift, incomplete/OPEN closure evidence or non-synthetic state.
+- Added regression coverage for final certification and tampered fingerprint identity.
+
+## P13.14761–14880 — Runtime Recovery Closure Evidence Replay Guard
+
+- Added deterministic ADMIT/REPLAY/CONFLICT semantics for the final closure evidence envelope.
+- Same evidence/closure identity and fingerprint replays without a second admission effect.
+- Same evidence/closure identity with a different valid fingerprint becomes CONFLICT.
+- Added deterministic registry reset for isolated synthetic tests.
+
+## P13.14641–14760 — Final Runtime Recovery Closure Evidence Envelope
+
+- Added final closure evidence envelope binding continuity certification, runtime continuity receipt and CLOSED runtime closure.
+- Preserved exact receipt, closure, execution, dispatch, acknowledgement and decision fingerprint identity.
+- Added fail-closed evidence assertion requiring complete, CLOSED and synthetic-only state.
+- Added regression coverage for the final evidence boundary.
+
 ## P13.14521–14640 — Integrated Runtime Recovery Closure Replay Guard
 
 - Added deterministic ADMIT/REPLAY/CONFLICT semantics for integrated recovery closure certification.
