@@ -1,9 +1,9 @@
 # MTA DETENI — Project Status
 
 **Foundation:** v1.124+
-**Current Track:** P13.24881–27560 terminal evidence continuation / CI observation pending
+**Current Track:** P13.27561–40880 terminal evidence continuation / CI observation pending
 **Branch:** `main`
-**Latest implementation checkpoint:** P13.27560
+**Latest implementation checkpoint:** P13.40880
 
 ## Latest progress
 
@@ -14,16 +14,17 @@
 - P13.24241–24360 — terminal evidence closure integrity replay guard provides deterministic replay semantics with identity continuity enforcement.
 - P13.24361–24480 — integrated terminal evidence closure integrity certification composes integrity validation and replay protection while preserving synthetic-only, review-only and non-executable invariants.
 - P13.24481–24640 — terminal evidence integrity evidence boundary verifies the next evidence-integrity artifact as `VERIFIED_TERMINAL_EVIDENCE_CLOSURE_INTEGRITY_EVIDENCE_REVIEW_ARTIFACT` while preserving evidence/closure/integrity/decision continuity.
-- P13.24641–24760 — terminal evidence integrity evidence replay guard enforces deterministic ADMIT/REPLAY semantics and rejects identity drift/conflict.
+- P13.24641–24760 — terminal evidence integrity evidence replay guard enforces deterministic ADMIT/REPLAY/CONFLICT semantics and rejects identity drift/conflict.
 - P13.24761–24880 — integrated terminal evidence integrity evidence certification composes evidence-integrity validation and replay protection while preserving review-only, synthetic-only and non-executable invariants.
-- P13.24881–27560 — added a governed continuation contract covering twenty sequential checkpoints, preserving immutable artifact identity, parent-artifact continuity, decision-fingerprint continuity, deterministic replay semantics and non-executable governance invariants.
-- Regression coverage added for the twenty-checkpoint continuation, including checkpoint registration, immutability, deterministic replay, fingerprint drift conflict and certification invariants.
+- P13.24881–27560 — governed continuation contract covering twenty sequential checkpoints.
+- P13.27561–40880 — extended the governed continuation chain by exactly 100 sequential checkpoints, organized into five auditable modules (A–E), with immutable artifact identity, parent-artifact continuity, decision-fingerprint continuity, deterministic replay semantics and non-executable governance invariants.
+- Regression coverage added asserting exactly 100 unique checkpoint labels and core replay/governance invariants.
 
 ## Runtime continuity integrity
 
-The certified chain now extends through terminal evidence closure, closure integrity, evidence-integrity verification and a twenty-checkpoint continuation through P13.27560. Every continuation node is bound to an explicit parent artifact and decision fingerprint. Replay is deterministic and side-effect free.
+The terminal-evidence continuation chain now extends through P13.40880. Each continuation node is immutable, synthetic-only and explicitly non-executable. Replay is deterministic and side-effect free. The five-module organization prevents the 100-checkpoint extension from becoming a single unbounded registry.
 
-All terminal evidence continuation artifacts remain review artifacts only. They cannot grant authorization, approve dispatch, execute dispatch, request external transport or create durable publication. Runtime adapters remain subordinate to authorization, idempotency and evidence controls.
+All continuation artifacts remain review artifacts only. They cannot grant authorization, approve dispatch, execute dispatch, request external transport or create durable publication. Runtime adapters remain subordinate to authorization, idempotency and evidence controls.
 
 ## Governance locks
 
@@ -37,10 +38,10 @@ All terminal evidence continuation artifacts remain review artifacts only. They 
 
 ## Current certification state
 
-**P13.24881–27560 — IMPLEMENTED CONTRACTS / OBSERVATION PENDING**
+**P13.27561–40880 — IMPLEMENTED CONTRACTS / OBSERVATION PENDING**
 
-The twenty-checkpoint continuation contract and regression coverage are implemented. GitHub Actions is not treated as PASS until observable workflow steps/logs/artifacts are available.
+The 100-checkpoint continuation and regression coverage are implemented. GitHub Actions is not treated as PASS until observable workflow steps/logs/artifacts are available.
 
 ## Next gate
 
-**P13.27561–27680 — terminal evidence continuation certification:** extend the certified chain while preserving exact parent identity, decision fingerprint continuity and all non-executable governance invariants.
+**P13.40881 onward — continuation integrity audit:** verify the 100-checkpoint extension against the preceding certified chain, then continue only after CI evidence is observable. No production activation or migration is implied by this implementation.
