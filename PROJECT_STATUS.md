@@ -3,7 +3,7 @@
 **Foundation:** v1.134+
 **Current Track:** P1 runtime integrity remediation / P9 kernel implementation / P13 closure evidence recovery
 **Branch:** `main`
-**Latest implementation checkpoint:** P1 canonical execution-context continuity contract + critical-mutation canonical outbox integration; P13 governed boundary remains P13.274880
+**Latest implementation checkpoint:** P1 canonical execution-context continuity bound into transaction, critical mutation and observability boundaries; P13 governed boundary remains P13.274880
 
 ## P9 kernel implementation
 
@@ -25,9 +25,11 @@
 - Critical mutation orchestration binds its outbox boundary to the canonical runtime outbox contract rather than the legacy compatibility contract.
 - The critical path remains: authorization → idempotency → transaction → domain mutation → audit → canonical outbox admission.
 - Canonical outbox admission is asynchronous and fail-closed on event identity conflict or unexpected replay during a new mutation.
-- A canonical execution-context contract now defines request, correlation, transaction and idempotency identities as one immutable boundary.
-- Downstream identity continuity can be checked fail-closed; mismatched request/correlation/transaction/idempotency identities are rejected.
-- Synthetic regression coverage certifies context normalization, immutability, matching downstream identities, identity drift rejection and missing-identity rejection.
+- The canonical execution-context contract now defines request, correlation, transaction and idempotency identities as one immutable boundary.
+- TransactionContext is now a direct alias of the canonical execution context, eliminating an independent transaction identity schema.
+- Critical mutation normalizes and freezes one canonical execution context before idempotency and transaction execution.
+- Observability now exposes an explicit continuity assertion against the same canonical context; request/correlation/transaction drift fails closed.
+- Synthetic regression coverage certifies canonical context normalization at the critical transaction boundary and observability drift rejection.
 - Optimistic concurrency execution contract provides deterministic ACCEPT/STALE_VERSION semantics.
 - Further executable end-to-end integration verification remains required before P1 can be certified complete.
 
@@ -66,7 +68,7 @@
 ## Current certification state
 
 **P9.9 Private Storage — CONTRACT IMPLEMENTED**
-**P9.10 Observability — CONTRACT IMPLEMENTED**
+**P9.10 Observability — CONTRACT IMPLEMENTED / CONTEXT CONTINUITY HARDENED**
 **P9.11 Test Harness — CONTRACT IMPLEMENTED**
 **P9.12 CI Certification — HARDENED / OBSERVATION REQUIRED**
 **P9.13 Kernel Certification — HARDENED CONTRACT / CI EVIDENCE REQUIRED**
