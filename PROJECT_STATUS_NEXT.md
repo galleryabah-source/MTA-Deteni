@@ -1,7 +1,7 @@
 # MTA DETENI — Next Gate
 
-**Foundation:** v1.102
-**Current:** P13.12481–12600 — integrated local runtime recovery certification implemented; CI observation blocker remains
+**Foundation:** v1.105
+**Current:** P13.12961–13080 — integrated local runtime recovery decision certification implemented; CI observation blocker remains
 
 ## Completed (through current gate)
 
@@ -35,11 +35,15 @@
 - P13.12241–12360: deterministic recovery action gate maps each certified scenario to a bounded action; blocked actions cannot be admitted automatically.
 - P13.12361–12480: recovery continuity gate converts safety policy into explicit READY/blocked continuity states while preserving the safety envelope boundary.
 - P13.12481–12600: integrated recovery certification composes the safety envelope and continuity gate into one synthetic recovery admission contract; operator-review and reconciliation-required states remain blocked.
+- P13.12601–12720: recovery decision integrity binds decision identity to envelope, journey, certification, evidence, disposition, scenario, continuity state and action; decision drift and non-synthetic state fail closed.
+- P13.12721–12840: deterministic in-memory recovery decision replay guard provides ADMIT/REPLAY/CONFLICT semantics; same identity with a different fingerprint becomes a review-required conflict.
+- P13.12841–12960: recovery decision audit evidence preserves exact decision identity and fails closed on field or synthetic-only drift.
+- P13.12961–13080: integrated recovery decision certification composes decision integrity, recovery certification and audit evidence; cross-chain substitution and blocked admission fail closed.
 - No database driver, migration, production persistence, real detainee data, production telemetry, or AI activation.
 
-## Next gate: P13.12601–12720
+## Next gate: P13.13081–13200
 
-Build **local runtime recovery decision integrity**: bind recovery admission to exact scenario, disposition, envelope and continuity identities; reject decision tampering, stale certification, cross-scenario substitution and non-synthetic recovery state.
+Build **local runtime recovery decision execution boundary**: make certified recovery decisions consumable by the runtime only when decision, replay, audit and safety identities remain exact; block uncertified, conflicted, stale or non-synthetic execution.
 
 ## Governance lock
 
