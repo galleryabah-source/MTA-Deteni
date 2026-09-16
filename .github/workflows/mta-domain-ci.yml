@@ -38,6 +38,7 @@ jobs:
           test -f package.json
           test -f .github/scripts/mta-contract-gate.mjs
           test -f .github/scripts/mta-execution-harness.mjs
+          test -f .github/scripts/mta-evidence-validator.mjs
 
       - name: Install dependencies
         run: npm install
@@ -61,9 +62,10 @@ jobs:
         run: node .github/scripts/mta-execution-harness.mjs
 
       - name: Verify execution evidence
+        if: always()
         run: |
           test -s artifacts/mta-evidence/execution.json
-          node -e "const fs=require('fs'); const x=JSON.parse(fs.readFileSync('artifacts/mta-evidence/execution.json','utf8')); if(x.result!=='OBSERVED_PASS') { console.error(JSON.stringify(x,null,2)); process.exit(1); } console.log('OBSERVED_PASS')"
+          node .github/scripts/mta-evidence-validator.mjs artifacts/mta-evidence/execution.json
 
       - name: Upload controlled execution evidence
         if: always()
