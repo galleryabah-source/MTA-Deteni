@@ -3,7 +3,7 @@
 **Foundation:** v1.134+
 **Current Track:** P1 runtime integrity remediation / P9 kernel implementation / P13 closure evidence recovery
 **Branch:** `main`
-**Latest implementation checkpoint:** P9.12 canonical CI evidence validation + fail-closed certification input hardening; P13 governed boundary remains P13.274880
+**Latest implementation checkpoint:** P1 critical-mutation integration aligned to the canonical runtime outbox contract; P13 governed boundary remains P13.274880
 
 ## P9 kernel implementation
 
@@ -15,25 +15,27 @@
 - P9.9 private storage contract is implemented with PRIVATE/RESTRICTED classification, object identity, content fingerprint and replay/content-drift protection.
 - P9.10 observability contract is implemented with structured event identity, correlation/request/transaction context and explicit outcome levels.
 - P9.11 controlled execution harness contract is implemented with fail-closed evidence validation and PASS/exit-code consistency.
-- P9.12 CI certification now requires canonical harness evidence; certification cannot be established from summary booleans such as `artifactAvailable` alone.
-- The CI evidence validator now requires the exact five canonical harness controls: BUILD-5801, BUILD-5802, BUILD-5803, REG-5804 and REG-5805.
+- P9.12 CI certification requires canonical harness evidence; certification cannot be established from summary booleans such as `artifactAvailable` alone.
+- The CI evidence validator requires the exact five canonical harness controls: BUILD-5801, BUILD-5802, BUILD-5803, REG-5804 and REG-5805.
 - P9.13 kernel certification requires the complete canonical P9.9–P9.12 control set, rejects duplicate control identities and remains non-authorizing: it cannot grant production access, execute migrations or enable AI.
 - P9.6–P9.13 remain runtime-unbound. No live PostgreSQL connection, SQL execution, migration, production access or durable external publication is introduced by these contracts.
+
+## P1 runtime integrity remediation
+
+- Critical mutation orchestration now binds its outbox boundary to the canonical runtime outbox contract rather than the legacy compatibility contract.
+- The critical path remains: authorization → idempotency → transaction → domain mutation → audit → canonical outbox admission.
+- Canonical outbox admission is asynchronous and fail-closed on event identity conflict or unexpected replay during a new mutation.
+- Synthetic regression coverage was aligned with the canonical outbox status/disposition model and verifies rollback on domain/audit/outbox conflict paths.
+- Optimistic concurrency execution contract provides deterministic ACCEPT/STALE_VERSION semantics.
+- Further executable integration verification remains required before P1 can be certified complete.
 
 ## CI evidence recovery and hardening
 
 - CI is explicitly configured for `controlled-nonprod`, with deterministic typecheck/test stages and mandatory execution evidence validation plus artifact upload.
 - Evidence verification runs with `always()` so incomplete harness execution cannot silently skip validation; the evidence artifact remains uploaded with `always()`.
 - The execution harness records a deterministic nonzero exit code when a child process terminates without a numeric exit status.
-- P9.12 certification now has regression coverage for complete observed evidence, incomplete evidence, wrong environment and forged summary-only input.
-- Previous GitHub Actions failures exposed no usable steps/logs. A rerun was initiated; certification remains pending until a completed run exposes observable steps and a valid evidence artifact.
-
-## P1 runtime integrity remediation
-
-- Critical mutation path exists as an application orchestration path: authorization → idempotency → transaction → domain mutation → audit → outbox.
-- Failure-path regression models transactional rollback for domain, audit and outbox failures in the synthetic harness.
-- Optimistic concurrency execution contract provides deterministic ACCEPT/STALE_VERSION semantics.
-- Further executable integration verification remains required before P1 can be certified complete.
+- P9.12 certification has regression coverage for complete observed evidence, incomplete evidence, wrong environment and forged summary-only input.
+- Previous GitHub Actions failures exposed no usable steps/logs. Certification remains pending until a completed run exposes observable steps and a valid evidence artifact.
 
 ## P13 closure audit
 
