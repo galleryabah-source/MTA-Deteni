@@ -1,7 +1,7 @@
 # MTA DETENI — Next Gate
 
-**Foundation:** v1.95
-**Current:** P13.11521–11640 — local runtime failure certification implemented; CI observation blocker remains
+**Foundation:** v1.99
+**Current:** P13.12001–12120 — local runtime safety certification envelope implemented; CI observation blocker remains
 
 ## Completed (through current gate)
 
@@ -24,14 +24,18 @@
 - P13.10921–11040: local adapter audit envelope produces deterministic synthetic request/response evidence and binds actor/session/execution/device/install/network/request/idempotency identities; evidence drift fails closed.
 - P13.11041–11160: local adapter observability contract derives deterministic `LOCAL_ADAPTER_EXECUTION` observations from audit evidence; observation/audit drift fails closed.
 - P13.11161–11280: integrated local runtime regression certification composes routing, handshake, session continuity, audit envelope and observability into one synthetic certification; reconciliation-required continuity cannot be certified READY.
-- **P13.11281–11400:** deterministic rejected local adapter executions are represented as synthetic failure evidence with stable failure classes and the same identity chain; request/response, session/execution and device-scope drift fail closed.
-- **P13.11401–11520:** local adapter failure observability derives `LOCAL_ADAPTER_FAILURE` observations from certified failure evidence; observation/evidence drift fails closed.
-- **P13.11521–11640:** failure evidence, failure observation and request boundary are composed into one synthetic certification chain; certification identity and evidence consistency are enforced.
+- P13.11281–11400: deterministic rejected local adapter executions are represented as synthetic failure evidence with stable failure classes and the same identity chain; request/response, execution and device-scope drift fail closed.
+- P13.11401–11520: local adapter failure observability derives `LOCAL_ADAPTER_FAILURE` observations from certified failure evidence; observation/evidence drift fails closed.
+- P13.11521–11640: failure evidence, failure observation and request boundary are composed into one synthetic certification chain; certification identity and evidence consistency are enforced.
+- P13.11641–11760: deterministic five-scenario local adapter failure-injection/recovery matrix covers malformed request, expired handshake, session scope drift, idempotency conflict and reconciliation-required state with bounded dispositions.
+- P13.11761–11880: recovery disposition contract binds each certified failure to deterministic retry/review semantics; idempotency conflict and reconciliation-required states cannot be automatically retried.
+- P13.11881–12000: integrated failure-recovery journey composes evidence, observation, certification and disposition while rejecting scenario/evidence drift.
+- P13.12001–12120: local runtime safety certification envelope binds journey, failure certification and recovery disposition and prevents automatic retry when operator review is required.
 - No database driver, migration, production persistence, real detainee data, production telemetry, or AI activation.
 
-## Next gate: P13.11641–11760
+## Next gate: P13.12121–12240
 
-Build **local adapter failure-injection and recovery matrix**: deterministic synthetic scenarios for malformed request, expired handshake, session scope drift, duplicate/idempotency conflict and reconciliation-required state; each scenario must produce bounded failure evidence and a deterministic recovery disposition without introducing production transport or persistence.
+Build **local runtime safety regression matrix**: execute the five failure/recovery scenarios through the full evidence → observation → certification → disposition → safety-envelope chain and assert fail-closed behavior for identity drift, retry-policy drift, operator-review conflicts and non-synthetic inputs.
 
 ## Governance lock
 
