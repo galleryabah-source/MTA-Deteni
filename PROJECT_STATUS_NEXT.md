@@ -1,7 +1,7 @@
 # MTA DETENI — Next Gate
 
 **Foundation:** v1.121+
-**Current:** P13.15601–15720 — final closure audit evidence certification implemented; CI observation blocker remains
+**Current:** P13.15961–16080 — operational audit projection certification implemented; CI observation blocker remains
 
 ## Completed (through current gate)
 
@@ -61,11 +61,14 @@
 - P13.15361–15480: deterministic final closure audit evidence envelope binds audit certification, audit record, closure certification, closure evidence, continuity, receipt, closure, execution, dispatch, acknowledgement and fingerprint identity.
 - P13.15481–15600: deterministic final closure audit evidence replay guard with ADMIT/REPLAY/CONFLICT semantics and no duplicate admission effect.
 - P13.15601–15720: final closure audit evidence certification composes the evidence envelope and replay boundary and fails closed on identity drift, conflict or non-synthetic state.
+- P13.15721–15840: deterministic operational audit projection boundary over certified final closure audit evidence; exact chain identity is preserved and invalid source states fail closed.
+- P13.15841–15960: deterministic operational audit projection replay guard with ADMIT/REPLAY/CONFLICT semantics and no duplicate admission effect.
+- P13.15961–16080: integrated operational audit projection certification composes the projection and replay boundary and preserves exact identity/fingerprint continuity.
 - Historical P13.5809–5880 observable-execution contract remains part of the repository governance chain.
 
-## Next gate: P13.15721–15840
+## Next gate: P13.16081–16200
 
-Extend the certified final closure audit evidence into a deterministic operational audit projection boundary. Preserve exact evidence-certification, audit-certification, audit-record, closure/evidence/receipt/closure/execution/fingerprint identity, reject projection of incomplete/conflicted/non-synthetic evidence, and keep the projection synthetic/in-memory only.
+Extend the certified operational audit projection into a deterministic operational audit publication envelope. Preserve the complete projection/certification identity chain, define an explicit publication-readiness boundary without performing external publication, and fail closed on incomplete, conflicted, drifted or non-synthetic state.
 
 ## Governance lock
 
