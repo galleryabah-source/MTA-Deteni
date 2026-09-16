@@ -1,9 +1,9 @@
 # MTA DETENI — Project Status
 
 **Foundation:** v1.122+
-**Current Track:** P13.17041–17160 publication dispatch candidate certification / CI observation pending
+**Current Track:** P13.17401–17520 integrated dispatch authorization certification / CI observation pending
 **Branch:** `main`
-**Latest implementation checkpoint:** P13.17160
+**Latest implementation checkpoint:** P13.17520
 
 ## Latest progress
 
@@ -22,12 +22,15 @@
 - P13.16801–16920 — review-only publication dispatch candidate boundary preserves request/publication identity and explicitly prevents dispatch execution or external transport.
 - P13.16921–17040 — dispatch candidate replay guard provides deterministic ADMIT/REPLAY/CONFLICT semantics without external side effects.
 - P13.17041–17160 — integrated dispatch candidate certification composes validation and replay protection while preserving synthetic-only and transport-free invariants.
+- P13.17161–17280 — deterministic dispatch authorization review envelope preserves the certified candidate identity chain and keeps authorization ungranted, execution-free and transport-free.
+- P13.17281–17400 — deterministic dispatch authorization replay guard provides ADMIT/REPLAY/CONFLICT semantics without external side effects.
+- P13.17401–17520 — integrated dispatch authorization certification composes authorization validation and replay protection while preserving synthetic-only, review-only and transport-free invariants.
 
 ## Runtime continuity integrity
 
-The certified chain now extends from recovery execution through acknowledgement, completion proof, continuity receipt, closure, final closure audit evidence, operational audit projection, publication readiness, publication certification, publication request admission, publication request replay protection, integrated request certification, dispatch-candidate review and dispatch-candidate certification. No publication or dispatch is executed externally.
+The certified chain now extends from recovery execution through acknowledgement, completion proof, continuity receipt, closure, final closure audit evidence, operational audit projection, publication readiness, publication certification, publication request admission, request replay protection, integrated request certification, dispatch-candidate review, dispatch-candidate replay/certification, dispatch authorization review, authorization replay and integrated authorization certification.
 
-The dispatch stage is deliberately a review-only boundary. It cannot request external transport, persist a publication, or execute a real dispatch. Runtime adapters remain subordinate to authorization, idempotency and evidence controls.
+The dispatch authorization stage is deliberately a review-only boundary. Authorization is not granted, dispatch is not executed, external transport is not requested, and no durable publication is created. Runtime adapters remain subordinate to authorization, idempotency and evidence controls.
 
 ## Governance locks
 
@@ -41,10 +44,10 @@ The dispatch stage is deliberately a review-only boundary. It cannot request ext
 
 ## Current certification state
 
-**P13.17041–17160 — IMPLEMENTED CONTRACTS / OBSERVATION PENDING**
+**P13.17401–17520 — IMPLEMENTED CONTRACTS / OBSERVATION PENDING**
 
-The integrated publication dispatch-candidate certification and regression coverage are committed. GitHub Actions remains subject to the existing observation blocker when job-step telemetry/logs/artifacts are unavailable. No runtime PASS is inferred until controlled CI observation is available.
+The integrated dispatch authorization certification and regression coverage are committed. GitHub Actions remains subject to the existing observation blocker when job-step telemetry/logs/artifacts are unavailable. No runtime PASS is inferred until controlled CI observation is available.
 
 ## Next gate
 
-**P13.17161–17280 — dispatch authorization review boundary:** create a deterministic, review-only authorization envelope over the certified dispatch candidate, preserving the full identity/fingerprint chain and preventing execution, external transport and durable publication.
+**P13.17521–17640 — dispatch authorization decision envelope:** add a deterministic, non-granting decision envelope over the certified authorization, preserving the complete identity/fingerprint chain and explicitly preventing authorization grant, dispatch execution, external transport and durable publication.
