@@ -22,7 +22,7 @@ function check(id, ok, detail) {
 const pkg = JSON.parse(read("package.json") || "{}");
 const workflow = read(".github/workflows/mta-domain-ci.yml");
 const status = read("PROJECT_STATUS.md");
-const next = read("PROJECT_STATUS_NEXT.md");
+const exitCriteria = read("P13_EXIT_CRITERIA.md");
 
 check("ARCH-5809", pkg.scripts?.typecheck === "tsc --noEmit", "production typecheck script is explicit");
 check("ARCH-5810", pkg.scripts?.["typecheck:test"] === "tsc -p tsconfig.test.json --noEmit", "test typecheck boundary is explicit");
@@ -35,15 +35,15 @@ check("GOV-5816", status.includes("AI: **OFF**"), "AI remains disabled");
 check("GOV-5817", status.includes("SYNTHETIC ONLY"), "repository remains synthetic-only");
 check("GOV-5818", status.includes("Production access: **NOT AUTHORIZED**"), "production access remains unauthorized");
 check("GOV-5819", !workflow.includes("DATABASE_URL") && !workflow.includes("SUPABASE_URL"), "CI workflow does not require live database credentials");
-check("VOC-5820", status.includes("HEAD RUDENIM"), "canonical HEAD RUDENIM vocabulary is recorded");
+check("STATE-5820", status.includes("P13.246881–260880"), "status reflects the latest implemented P13 gate");
 check("STATE-5821", status.includes("OBSERVATION PENDING"), "certification does not falsely claim execution PASS");
-check("STATE-5822", next.includes("P13.5809") || next.includes("P13.5880"), "next gate is synchronized");
+check("GOV-5822", exitCriteria.includes("P13-EXIT-01") && exitCriteria.includes("P13-EXIT-08"), "P13 exit criteria are explicitly versioned");
 
 const evidenceDir = path.join(root, "artifacts", "mta-evidence");
 fs.mkdirSync(evidenceDir, { recursive: true });
 const evidence = {
-  schemaVersion: "mta-contract-evidence/v1",
-  controlFamily: "P13.5809-5880",
+  schemaVersion: "mta-contract-evidence/v2",
+  controlFamily: "P13-EXIT-GATE",
   executionId: process.env.GITHUB_RUN_ID ? `github-${process.env.GITHUB_RUN_ID}` : `local-${Date.now()}`,
   commit: process.env.GITHUB_SHA || "unknown",
   environment: process.env.MTA_EXECUTION_ENV || "local-controlled-nonprod",

@@ -1,5 +1,13 @@
 # Changelog
 
+## P13 Closure Audit — Exit Criteria and CI Gate Repair
+
+- Added `P13_EXIT_CRITERIA.md` with eight evidence-based closure criteria covering scope, identity continuity, replay determinism, non-executable boundaries, regression coverage, observable CI execution, documentation synchronization and governance locks.
+- Explicitly prevented checkpoint inflation: no new numbered P13 ranges are added solely to increase counts.
+- Repaired `.github/scripts/mta-contract-gate.mjs` so the CI gate evaluates the current P13 closure candidate rather than stale historical `PROJECT_STATUS_NEXT.md` checkpoint values and obsolete vocabulary checks.
+- Updated `PROJECT_STATUS.md` to record the current closure audit and keep P13 at **IMPLEMENTED CONTRACTS / OBSERVATION PENDING** until observable controlled-nonprod workflow evidence exists.
+- No schema migration, live PostgreSQL execution, production access, AI activation, external transport, durable publication, real detainee data or production PII was introduced.
+
 ## P13.246881–260880 — Attestation Closure Certification (100 Checkpoints)
 
 - Extended the governed P13 chain across exactly 100 sequential checkpoints from P13.246881 through P13.260880.
