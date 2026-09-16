@@ -47,5 +47,5 @@ test("P9.12 rejects forged summary-only certification input", () => {
     environment: "controlled-nonprod",
     status: "OBSERVED_PASS",
     artifactAvailable: true,
-  } as never), /HARNESS/);
+  } as never), /P9_CI_HARNESS_EVIDENCE_REQUIRED/);
 });
