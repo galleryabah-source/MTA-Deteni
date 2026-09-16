@@ -1,24 +1,25 @@
 # MTA DETENI — Project Status
 
-**Foundation:** v1.132+
-**Current Track:** P13.246881–260880 attestation-closure certification / closure audit
+**Foundation:** v1.133+
+**Current Track:** P1 runtime integrity remediation / P13 closure evidence recovery
 **Branch:** `main`
 **Latest implementation checkpoint:** P13.260880
 
 ## P13 closure audit
 
-- P13 exit criteria are now explicitly defined in `P13_EXIT_CRITERIA.md`.
+- P13 exit criteria remain explicitly defined in `P13_EXIT_CRITERIA.md`.
 - P13-EXIT-01, 02, 03, 04, 05 and 08 have repository evidence.
 - P13-EXIT-06 (observable GitHub Actions execution evidence for the closure candidate) remains pending.
-- P13-EXIT-07 (synchronized documentation) is being satisfied by this closure-audit update plus the changelog entry in the same commit.
+- P13-EXIT-07 (synchronized documentation) remains maintained by this status and changelog.
 - No additional numbered checkpoints are being manufactured solely to increase counts.
 
-## Latest progress
+## P1 runtime integrity remediation
 
-- P13.232881–246880 — attestation-closure boundary, 100 checkpoints.
-- P13.246881–260880 — attestation-closure certification boundary, 100 checkpoints, extending the identity chain with distinct attestation-closure and certification identities/fingerprints.
-- Regression coverage added for cardinality, sequential labels, immutability, governance locks, replay determinism, fingerprint drift, fail-closed certification and identity alias rejection.
-- CI contract gate was repaired to evaluate the current P13 closure criteria instead of stale historical checkpoint values.
+- Critical mutation path exists as an application orchestration path: authorization → idempotency → transaction → domain mutation → audit → outbox.
+- Database governance remains migration-frozen and production execution blocked.
+- Optimistic concurrency execution contract added with deterministic ACCEPT/STALE_VERSION semantics.
+- Regression coverage added for exact-version acceptance, stale-version rejection, immutable version increment and invalid-version fail-closed behavior.
+- Further executable integration verification remains required before P1 can be certified complete.
 
 ## Governance locks
 
@@ -33,6 +34,7 @@
 ## Current certification state
 
 **P13.246881–260880 — IMPLEMENTED CONTRACTS / OBSERVATION PENDING**
+**P1 Runtime Integrity — REMEDIATION IN PROGRESS**
 
 ## Closure rule
 
