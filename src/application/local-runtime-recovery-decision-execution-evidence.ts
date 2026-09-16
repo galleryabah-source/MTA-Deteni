@@ -19,8 +19,9 @@ export type LocalRuntimeRecoveryDecisionExecutionEvidence = Readonly<{
 export function createLocalRuntimeRecoveryDecisionExecutionEvidence(input: { evidenceId: string; execution: LocalRuntimeRecoveryDecisionExecution; decision: LocalRuntimeRecoveryDecision; auditEvidence: LocalRuntimeRecoveryDecisionAuditEvidence }): LocalRuntimeRecoveryDecisionExecutionEvidence {
   if (!input.evidenceId.trim()) throw new Error("Recovery decision execution evidence identity is required.");
   assertLocalRuntimeRecoveryDecisionExecution(input.execution);
-  if (input.execution.decisionId !== input.decision.decisionId || input.execution.requestId !== input.auditEvidence.decisionId.replace(/^DEC-/, "REQ-")) throw new Error("Recovery decision execution evidence identity drift.");
+  if (input.execution.decisionId !== input.decision.decisionId) throw new Error("Recovery decision execution evidence decision identity drift.");
   if (input.execution.auditEvidenceId !== input.auditEvidence.auditEvidenceId || input.execution.envelopeId !== input.auditEvidence.envelopeId) throw new Error("Recovery decision execution evidence binding drift.");
+  if (input.decision.decisionFingerprint !== input.auditEvidence.decisionFingerprint) throw new Error("Recovery decision execution evidence fingerprint drift.");
   return Object.freeze({ evidenceId: input.evidenceId, executionId: input.execution.executionId, decisionId: input.execution.decisionId, requestId: input.execution.requestId, certificationId: input.execution.certificationId, auditEvidenceId: input.execution.auditEvidenceId, envelopeId: input.execution.envelopeId, decisionFingerprint: input.decision.decisionFingerprint, admitted: true, syntheticOnly: true });
 }
 
