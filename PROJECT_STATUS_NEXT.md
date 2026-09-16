@@ -1,7 +1,7 @@
 # MTA DETENI — Next Gate
 
-**Foundation:** v1.119+
-**Current:** P13.14881–15000 — final runtime recovery closure certification implemented; CI observation blocker remains
+**Foundation:** v1.120+
+**Current:** P13.15241–15360 — integrated final runtime recovery closure audit certification implemented; CI observation blocker remains
 
 ## Completed (through current gate)
 
@@ -55,11 +55,14 @@
 - P13.14641–14760: final runtime recovery closure evidence envelope binds continuity certification, receipt, CLOSED closure, execution, dispatch, acknowledgement and fingerprint identity.
 - P13.14761–14880: deterministic closure evidence replay guard with ADMIT/REPLAY/CONFLICT semantics.
 - P13.14881–15000: final runtime recovery closure certification binds the complete evidence chain and fails closed on identity drift or non-synthetic state.
+- P13.15001–15120: final deterministic closure audit record binds final closure certification to evidence, continuity, receipt, closure, execution, dispatch, acknowledgement and fingerprint identity.
+- P13.15121–15240: final closure audit replay guard provides deterministic ADMIT/REPLAY/CONFLICT semantics with no second admission effect.
+- P13.15241–15360: integrated final closure audit certification composes the complete audit record and final closure certification, rejecting conflicts and identity drift.
 - Historical P13.5809–5880 observable-execution contract remains part of the repository governance chain.
 
-## Next gate: P13.15001–15120
+## Next gate: P13.15361–15480
 
-Create a final deterministic closure audit record and integrated audit-evidence certification over the completed runtime recovery closure chain. Preserve exact certification/evidence/receipt/closure/execution/fingerprint identity and ensure audit records cannot be admitted when the closure chain is incomplete, conflicted or non-synthetic. No production transport, persistence, schema migration, AI or live database execution.
+Extend the final closure audit boundary into a deterministic audit evidence envelope suitable for later operational audit projection. Preserve exact audit certification, audit record, closure/evidence/receipt/closure/execution/fingerprint identity and fail closed on incomplete, conflicted or non-synthetic state. No production transport, persistence, schema migration, AI or live database execution.
 
 ## Governance lock
 
