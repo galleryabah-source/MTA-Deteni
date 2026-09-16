@@ -1,5 +1,30 @@
 # Changelog
 
+## P13.12961–13080 — Integrated Local Runtime Recovery Decision Certification
+
+- Added integrated certification composing decision integrity, recovery certification and decision audit evidence.
+- Preserved exact decision/envelope/audit identity continuity.
+- Rejected cross-chain substitution and blocked recovery admission tampering.
+- Preserved synthetic-only execution.
+
+## P13.12841–12960 — Local Runtime Recovery Decision Audit Evidence
+
+- Added deterministic audit evidence bound to the exact recovery decision identity and fingerprint.
+- Preserved scenario, action and admission semantics in audit evidence.
+- Audit evidence field drift and non-synthetic state fail closed.
+
+## P13.12721–12840 — Local Runtime Recovery Decision Replay Guard
+
+- Added deterministic in-memory ADMIT/REPLAY/CONFLICT semantics for recovery decisions.
+- Replayed identical decision identity/fingerprint without creating a second admission effect.
+- Same decision identity with a different fingerprint becomes a conflict requiring review.
+
+## P13.12601–12720 — Local Runtime Recovery Decision Integrity
+
+- Added deterministic recovery decision binding across envelope, journey, certification, evidence, disposition, scenario, continuity state and action.
+- Added decision fingerprint continuity for tamper detection.
+- Rejected stale/cross-scenario/non-synthetic decision state and blocked continuity admission tampering.
+
 ## P13.12481–12600 — Integrated Local Runtime Recovery Certification
 
 - Added integrated recovery certification composing the safety envelope with the recovery continuity gate.
@@ -43,30 +68,3 @@
 - Added deterministic recovery dispositions bound to certified failure evidence.
 - Distinguished corrective retry, reauthentication, valid-session reopening, operator review and reconciliation-before-retry.
 - Prevented automatic retry for idempotency conflicts and reconciliation-required states.
-
-## P13.11641–11760 — Local Adapter Failure-Injection & Recovery Matrix
-
-- Added a deterministic five-scenario synthetic matrix covering malformed request, expired handshake, session scope drift, idempotency conflict and reconciliation-required state.
-- Bound each scenario to a stable failure class, rejected response, retry policy and operator-review requirement.
-- Preserved fail-closed scenario/class consistency and synthetic-only operation.
-
-## P13.11521–11640 — Local Runtime Failure Certification
-
-- Composed failure evidence, failure observation and request-boundary validation into one synthetic certification chain.
-- Preserved stable evidence, observation, failure, request, session and execution identities.
-- Certification rejects inconsistent evidence and remains synthetic-only.
-
-## P13.11401–11520 — Local Runtime Failure Observability
-
-- Added deterministic `LOCAL_ADAPTER_FAILURE` observations derived from failure evidence.
-- Bound failure observations to evidence, failure class, actor, session, execution, device, installation and network identities.
-- Observation/evidence drift fails closed.
-- Preserved synthetic-only observability with no production telemetry.
-
-## P13.11281–11400 — Local Adapter Failure Evidence
-
-- Added deterministic failure evidence for rejected local adapter executions.
-- Added stable failure classes for request, handshake, session-scope and execution rejection boundaries.
-- Preserved actor/session/execution/device/install/network/request/idempotency identity binding.
-- Request/response, execution and device-scope drift fail closed.
-- Preserved synthetic/in-memory operation only.
