@@ -1,5 +1,23 @@
 # Changelog
 
+## P13.18961–19120 — Terminal Integrity Receipt Closure Boundary
+
+- Added deterministic closure of the terminal integrity receipt as `CLOSED_FOR_REVIEW`.
+- Preserved receipt certification, integrity, decision and fingerprint continuity.
+- Closure remains synthetic-only and explicitly blocks authorization, dispatch, external transport and durable publication.
+
+## P13.19121–19240 — Terminal Integrity Receipt Closure Replay Guard
+
+- Added deterministic `ADMIT` / `REPLAY` / `CONFLICT` semantics for terminal receipt closure.
+- Replay identity binds closure and receipt certification identities; fingerprint drift cannot be admitted.
+- Replay remains in-memory and side-effect free.
+
+## P13.19241–19360 — Integrated Terminal Integrity Receipt Closure Certification
+
+- Added integrated closure certification composing closure validation and replay protection.
+- Certification fails closed on replay conflict and preserves all non-executable invariants.
+- Added regression coverage for review-only state, replay, fingerprint/identity drift and execution attempts.
+
 ## P13.18801–18960 — Terminal Evidence Integrity Receipt Boundary
 
 - Added deterministic receipt binding the verified terminal evidence-closure integrity certification.
@@ -32,27 +50,3 @@
 - Replay remains in-memory and has no external side effect.
 
 ## P13.18521–18640 — Integrated Authorization Decision Evidence Closure Certification
-
-- Added integrated closure certification composing closure validation and replay protection.
-- Certification remains synthetic-only, review-only, immutable and non-executable.
-- No external transport, durable publication, migration, live database execution or AI activation.
-
-## P13.17881–18000 — Authorization Decision Evidence Envelope
-
-- Added deterministic evidence envelope binding the non-granting authorization decision certification.
-- Preserved decision, authorization, candidate, request, publication and decision fingerprint identity.
-- Evidence remains `READY_FOR_REVIEW` with authorization grant, dispatch approval, dispatch execution and external transport explicitly false.
-- Synthetic-only invariant remains enforced.
-
-## P13.18001–18120 — Authorization Decision Evidence Replay Guard
-
-- Added deterministic ADMIT/REPLAY/CONFLICT semantics for authorization decision evidence.
-- Same evidence/decision identity and fingerprint replays without duplicate admission; changed fingerprint becomes CONFLICT.
-- Replay remains in-memory with no external side effect.
-
-## P13.18121–18240 — Integrated Authorization Decision Evidence Certification
-
-- Added integrated certification composing evidence validation and replay protection.
-- Preserved complete decision, authorization, candidate, request, publication and fingerprint continuity.
-- Certification fails closed on conflict, identity drift or attempted authorization/dispatch execution.
-- No external transport, durable publication, migration, live database execution or AI activation.
