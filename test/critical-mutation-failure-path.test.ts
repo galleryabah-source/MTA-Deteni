@@ -2,7 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { executeCriticalMutation, type MutationIntegrationStores } from "../src/application/mutation-integration.js";
 import type { IdempotencyRecord } from "../src/application/idempotency-contract.js";
-import type { OutboxEvent } from "../src/application/outbox-contract.js";
+import type { OutboxEventContract } from "../src/application/outbox-runtime-contract.js";
 import type { TransactionContext, TransactionRunner } from "../src/application/transaction-contract.js";
 
 function context(): TransactionContext {
@@ -11,7 +11,7 @@ function context(): TransactionContext {
 
 type StoreHarness = MutationIntegrationStores & {
   audits: unknown[];
-  outbox: OutboxEvent[];
+  outbox: OutboxEventContract[];
   idempotency: Map<string, IdempotencyRecord>;
 };
 
@@ -19,7 +19,7 @@ function stores(seed?: IdempotencyRecord): StoreHarness {
   const idempotency = new Map<string, IdempotencyRecord>();
   if (seed) idempotency.set(seed.idempotencyKey, seed);
   const audits: unknown[] = [];
-  const outbox: OutboxEvent[] = [];
+  const outbox: OutboxEventContract[] = [];
   return {
     idempotency,
     audits,
@@ -27,7 +27,11 @@ function stores(seed?: IdempotencyRecord): StoreHarness {
     findIdempotency: key => idempotency.get(key),
     saveIdempotency: record => idempotency.set(record.idempotencyKey, record),
     appendAudit: record => audits.push(record),
-    appendOutbox: event => outbox.push(event),
+    appendOutbox: async event => {
+      if (outbox.some(existing => existing.eventId === event.eventId)) return "CONFLICT";
+      outbox.push(event);
+      return "ADMIT";
+    },
   };
 }
 
@@ -63,7 +67,7 @@ function input(overrides: Partial<{
     auditId: "audit-001",
     eventId: "event-001",
     occurredAt: "2026-09-16T00:00:00.000Z",
-    payload: "synthetic",
+    payload: { source: "synthetic", action: "register" },
     payloadFingerprint: "payload-fp-1",
     responseFingerprint: "response-fp-1",
     runDomainMutation: async () => ({ ok: true }),
@@ -107,13 +111,23 @@ test("audit failure rolls back completed mutation state and prevents outbox", as
   assert.equal(harness.outbox.length, 0);
 });
 
-test("outbox failure rolls back idempotency and audit state", async () => {
+test("outbox conflict rolls back idempotency and audit state", async () => {
   const harness = stores();
-  harness.appendOutbox = () => { throw new Error("OUTBOX_FAILURE"); };
-  await assert.rejects(() => execute(harness), /OUTBOX_FAILURE/);
+  harness.outbox.push({
+    eventId: "event-001",
+    aggregateType: "DETAINEE_REGISTER",
+    aggregateId: "d-001",
+    eventType: "DETAINEE_REGISTER_COMMITTED",
+    payload: { source: "synthetic", action: "existing" },
+    payloadFingerprint: "existing-fp",
+    occurredAt: "2026-09-16T00:00:00.000Z",
+    status: "PENDING",
+    attemptCount: 0,
+  });
+  await assert.rejects(() => execute(harness), /OUTBOX_EVENT_ID_CONFLICT/);
   assert.equal(harness.idempotency.size, 0);
   assert.equal(harness.audits.length, 0);
-  assert.equal(harness.outbox.length, 0);
+  assert.equal(harness.outbox.length, 1);
 });
 
 function storesWithCompleted(): StoreHarness {
