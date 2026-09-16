@@ -1,5 +1,14 @@
 # Changelog
 
+## Governance Fix — Cloudflare Deployment Boundary + Documentation Synchronization
+
+- Changed `.github/workflows/cloudflare-deploy.yml` from real deployment to validation-only using `wrangler deploy --dry-run`.
+- Removed Cloudflare API credential usage from the workflow so CI cannot implicitly perform a Cloudflare deployment.
+- Added an explicit governance comment and validation job boundary: no real deployment while Production Access is NOT AUTHORIZED and no controlled non-production target has been approved.
+- Synchronized `PROJECT_STATUS.md` and `P13_EXIT_CRITERIA.md` with the current P13 observation state and Cloudflare boundary.
+- Clarified that `src/application/outbox-runtime-contract.ts` is the canonical P9.8 runtime contract and the older `src/application/outbox-contract.ts` is retained only as a compatibility artifact.
+- No schema migration, live PostgreSQL execution, production access, AI activation, external transport, durable publication, real detainee data or production PII was introduced.
+
 ## P9.8 — Governed Outbox Contract
 
 - Added `src/application/outbox-runtime-contract.ts` defining the validated pending-outbox boundary with event identity, aggregate identity, event type, payload fingerprint, timestamp, status and attempt count.
