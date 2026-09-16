@@ -5,41 +5,71 @@ on:
     branches: [main]
   pull_request:
     branches: [main]
+  workflow_dispatch:
 
 permissions:
   contents: read
 
+concurrency:
+  group: mta-domain-ci-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  MTA_EXECUTION_ENV: controlled-nonprod
+  CI: true
+
 jobs:
   domain-ci:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 20
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: "24"
+          node-version: '24'
+          cache: npm
+
+      - name: Verify repository state
+        run: |
+          git status --short
+          test -f package.json
+          test -f .github/scripts/mta-contract-gate.mjs
+          test -f .github/scripts/mta-execution-harness.mjs
+
+      - name: Install dependencies
+        run: npm install
+
       - name: Static architecture contract gate
         run: node .github/scripts/mta-contract-gate.mjs
-      - name: Install dependencies
-        run: npm install --include=dev --ignore-scripts --no-audit --no-fund
-      - name: Typecheck production source
+
+      - name: Production typecheck
         run: npm run typecheck
-      - name: Typecheck test source
+
+      - name: Test typecheck
         run: npm run typecheck:test
+
       - name: JavaScript regression tests
         run: npm test
+
       - name: TypeScript domain tests
         run: npm run test:unit
-      - name: Controlled execution evidence
+
+      - name: Controlled execution evidence harness
         run: node .github/scripts/mta-execution-harness.mjs
-        env:
-          MTA_EXECUTION_ENV: controlled-nonprod
-      - name: Upload execution evidence
+
+      - name: Verify execution evidence
+        run: |
+          test -s artifacts/mta-evidence/execution.json
+          node -e "const fs=require('fs'); const x=JSON.parse(fs.readFileSync('artifacts/mta-evidence/execution.json','utf8')); if(x.result!=='OBSERVED_PASS') { console.error(JSON.stringify(x,null,2)); process.exit(1); } console.log('OBSERVED_PASS')"
+
+      - name: Upload controlled execution evidence
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: mta-execution-evidence-${{ github.run_id }}
+          name: mta-controlled-execution-evidence-${{ github.sha }}
           path: artifacts/mta-evidence/
-          if-no-files-found: warn
+          if-no-files-found: error
+          retention-days: 14
