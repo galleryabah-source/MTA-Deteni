@@ -1,7 +1,7 @@
 # MTA DETENI — Next Gate
 
-**Foundation:** v1.105
-**Current:** P13.12961–13080 — integrated local runtime recovery decision certification implemented; CI observation blocker remains
+**Foundation:** v1.107
+**Current:** P13.13201–13320 — recovery decision execution evidence implemented; CI observation blocker remains
 
 ## Completed (through current gate)
 
@@ -39,11 +39,13 @@
 - P13.12721–12840: deterministic in-memory recovery decision replay guard provides ADMIT/REPLAY/CONFLICT semantics; same identity with a different fingerprint becomes a review-required conflict.
 - P13.12841–12960: recovery decision audit evidence preserves exact decision identity and fails closed on field or synthetic-only drift.
 - P13.12961–13080: integrated recovery decision certification composes decision integrity, recovery certification and audit evidence; cross-chain substitution and blocked admission fail closed.
+- P13.13081–13200: certified recovery decision execution boundary requires exact decision, replay, audit and certification identities and blocks conflicted or non-admitted execution.
+- P13.13201–13320: execution evidence binds runtime execution to decision, request, certification, audit and envelope identities; execution evidence drift fails closed.
 - No database driver, migration, production persistence, real detainee data, production telemetry, or AI activation.
 
-## Next gate: P13.13081–13200
+## Next gate: P13.13321–13440
 
-Build **local runtime recovery decision execution boundary**: make certified recovery decisions consumable by the runtime only when decision, replay, audit and safety identities remain exact; block uncertified, conflicted, stale or non-synthetic execution.
+Build **local runtime recovery execution certification**: compose execution admission and execution evidence into one final runtime-facing certification, reject identity/fingerprint drift and preserve synthetic-only boundaries.
 
 ## Governance lock
 
