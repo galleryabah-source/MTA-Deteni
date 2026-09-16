@@ -9,7 +9,13 @@ function context(): TransactionContext {
   return { transactionId: "tx-001", requestId: "req-001", correlationId: "corr-001", idempotencyKey: "idem-001" };
 }
 
-function stores(seed?: IdempotencyRecord): MutationIntegrationStores & { audits: unknown[]; outbox: OutboxEvent[]; idempotency: Map<string, IdempotencyRecord> } {
+type StoreHarness = MutationIntegrationStores & {
+  audits: unknown[];
+  outbox: OutboxEvent[];
+  idempotency: Map<string, IdempotencyRecord>;
+};
+
+function stores(seed?: IdempotencyRecord): StoreHarness {
   const idempotency = new Map<string, IdempotencyRecord>();
   if (seed) idempotency.set(seed.idempotencyKey, seed);
   const audits: unknown[] = [];
@@ -25,11 +31,30 @@ function stores(seed?: IdempotencyRecord): MutationIntegrationStores & { audits:
   };
 }
 
-function runner(): TransactionRunner {
-  return async (_ctx, work) => work();
+function transactionalRunner(harness: StoreHarness): TransactionRunner {
+  return async (_ctx, work) => {
+    const idempotencySnapshot = new Map(harness.idempotency);
+    const auditsSnapshot = [...harness.audits];
+    const outboxSnapshot = [...harness.outbox];
+    try {
+      return await work();
+    } catch (error) {
+      harness.idempotency.clear();
+      for (const [key, value] of idempotencySnapshot) harness.idempotency.set(key, value);
+      harness.audits.splice(0, harness.audits.length, ...auditsSnapshot);
+      harness.outbox.splice(0, harness.outbox.length, ...outboxSnapshot);
+      throw error;
+    }
+  };
 }
 
-function input(overrides: Partial<Parameters<typeof executeCriticalMutation>[0]> = {}) {
+function input(overrides: Partial<{
+  requestHash: string;
+  eventId: string;
+  payloadFingerprint: string;
+  responseFingerprint: string;
+  runDomainMutation: () => Promise<unknown>;
+}> = {}) {
   return {
     context: context(),
     commandType: "DETAINEE_REGISTER",
@@ -46,42 +71,59 @@ function input(overrides: Partial<Parameters<typeof executeCriticalMutation>[0]>
   };
 }
 
+async function execute(harness: StoreHarness, overrides: Parameters<typeof input>[0] = {}) {
+  return executeCriticalMutation(input(overrides), harness, transactionalRunner(harness));
+}
+
 test("duplicate completed request replays without side effects", async () => {
-  const stores = storesWithCompleted();
-  const result = await executeCriticalMutation(input(), stores, runner());
+  const harness = storesWithCompleted();
+  const result = await execute(harness);
   assert.equal(result.outcome, "REPLAYED");
-  assert.equal(stores.audits.length, 0);
-  assert.equal(stores.outbox.length, 0);
+  assert.equal(harness.audits.length, 0);
+  assert.equal(harness.outbox.length, 0);
 });
 
 test("same idempotency key with different request fails closed", async () => {
-  const stores = storesWithCompleted();
-  await assert.rejects(() => executeCriticalMutation(input({ requestHash: "different" }), stores, runner()), /IDEMPOTENCY_KEY_REUSED_WITH_DIFFERENT_REQUEST/);
+  const harness = storesWithCompleted();
+  await assert.rejects(() => execute(harness, { requestHash: "different" }), /IDEMPOTENCY_KEY_REUSED_WITH_DIFFERENT_REQUEST/);
+  assert.equal(harness.audits.length, 0);
+  assert.equal(harness.outbox.length, 0);
 });
 
-test("domain failure prevents audit and outbox completion", async () => {
-  const stores = stores();
-  await assert.rejects(() => executeCriticalMutation(input({ runDomainMutation: async () => { throw new Error("DOMAIN_FAILURE"); } }), stores, runner()), /DOMAIN_FAILURE/);
-  assert.equal(stores.audits.length, 0);
-  assert.equal(stores.outbox.length, 0);
-  assert.equal(stores.idempotency.get("idem-001")?.status, "IN_PROGRESS");
+test("domain failure rolls back idempotency and downstream evidence", async () => {
+  const harness = stores();
+  await assert.rejects(() => execute(harness, { runDomainMutation: async () => { throw new Error("DOMAIN_FAILURE"); } }), /DOMAIN_FAILURE/);
+  assert.equal(harness.idempotency.size, 0);
+  assert.equal(harness.audits.length, 0);
+  assert.equal(harness.outbox.length, 0);
 });
 
-test("audit failure prevents outbox append", async () => {
-  const stores = stores();
-  stores.appendAudit = () => { throw new Error("AUDIT_FAILURE"); };
-  await assert.rejects(() => executeCriticalMutation(input(), stores, runner()), /AUDIT_FAILURE/);
-  assert.equal(stores.outbox.length, 0);
+test("audit failure rolls back completed mutation state and prevents outbox", async () => {
+  const harness = stores();
+  harness.appendAudit = () => { throw new Error("AUDIT_FAILURE"); };
+  await assert.rejects(() => execute(harness), /AUDIT_FAILURE/);
+  assert.equal(harness.idempotency.size, 0);
+  assert.equal(harness.audits.length, 0);
+  assert.equal(harness.outbox.length, 0);
 });
 
-test("outbox failure is observable after audit and completion", async () => {
-  const stores = stores();
-  stores.appendOutbox = () => { throw new Error("OUTBOX_FAILURE"); };
-  await assert.rejects(() => executeCriticalMutation(input(), stores, runner()), /OUTBOX_FAILURE/);
-  assert.equal(stores.audits.length, 1);
-  assert.equal(stores.idempotency.get("idem-001")?.status, "COMPLETED");
+test("outbox failure rolls back idempotency and audit state", async () => {
+  const harness = stores();
+  harness.appendOutbox = () => { throw new Error("OUTBOX_FAILURE"); };
+  await assert.rejects(() => execute(harness), /OUTBOX_FAILURE/);
+  assert.equal(harness.idempotency.size, 0);
+  assert.equal(harness.audits.length, 0);
+  assert.equal(harness.outbox.length, 0);
 });
 
-function storesWithCompleted() {
-  return stores({ idempotencyKey: "idem-001", commandType: "DETAINEE_REGISTER", requestHash: "request-hash-1", status: "COMPLETED", responseFingerprint: "response-fp-1", createdAt: "2026-09-16T00:00:00.000Z", completedAt: "2026-09-16T00:00:00.000Z" });
+function storesWithCompleted(): StoreHarness {
+  return stores({
+    idempotencyKey: "idem-001",
+    commandType: "DETAINEE_REGISTER",
+    requestHash: "request-hash-1",
+    status: "COMPLETED",
+    responseFingerprint: "response-fp-1",
+    createdAt: "2026-09-16T00:00:00.000Z",
+    completedAt: "2026-09-16T00:00:00.000Z",
+  });
 }
