@@ -1,5 +1,5 @@
 import { assertIdempotencyKey, createIdempotencyRecord, resolveIdempotency, type IdempotencyRecord } from "./idempotency-contract.js";
-import { createOutboxEvent, type OutboxEvent } from "./outbox-contract.js";
+import { appendMandatoryOutboxEvent, createOutboxEvent, type OutboxEventContract } from "./outbox-runtime-contract.js";
 import { assertCriticalTransactionBoundary, runCriticalTransaction, type TransactionContext, type TransactionRunner } from "./transaction-contract.js";
 
 export type MutationAuditRecord = Readonly<{
@@ -15,7 +15,7 @@ export type MutationIntegrationStores = Readonly<{
   findIdempotency: (key: string) => IdempotencyRecord | undefined;
   saveIdempotency: (record: IdempotencyRecord) => void;
   appendAudit: (record: MutationAuditRecord) => void;
-  appendOutbox: (event: OutboxEvent) => void;
+  appendOutbox: (event: OutboxEventContract) => Promise<"ADMIT" | "REPLAY" | "CONFLICT">;
 }>;
 
 export type CriticalMutationInput<T> = Readonly<{
@@ -26,7 +26,7 @@ export type CriticalMutationInput<T> = Readonly<{
   auditId: string;
   eventId: string;
   occurredAt: string;
-  payload: string;
+  payload: Readonly<Record<string, unknown>>;
   payloadFingerprint: string;
   runDomainMutation: () => Promise<T>;
   responseFingerprint: string;
@@ -62,7 +62,8 @@ export async function executeCriticalMutation<T>(
     const completed = createIdempotencyRecord({ ...inProgress, status: "COMPLETED", responseFingerprint: input.responseFingerprint, completedAt: input.occurredAt });
     stores.saveIdempotency(completed);
     stores.appendAudit({ auditId: input.auditId, commandType: input.commandType, aggregateId: input.aggregateId, requestHash: input.requestHash, outcome: "COMMITTED", recordedAt: input.occurredAt });
-    stores.appendOutbox(createOutboxEvent({
+
+    const event = createOutboxEvent({
       eventId: input.eventId,
       aggregateType: input.commandType,
       aggregateId: input.aggregateId,
@@ -70,9 +71,11 @@ export async function executeCriticalMutation<T>(
       payload: input.payload,
       payloadFingerprint: input.payloadFingerprint,
       occurredAt: input.occurredAt,
-      status: "PENDING",
-      attemptCount: 0,
-    }));
+    });
+    const outboxDisposition = await appendMandatoryOutboxEvent(stores, event);
+    if (outboxDisposition === "CONFLICT") throw new Error("OUTBOX_EVENT_ID_CONFLICT");
+    if (outboxDisposition === "REPLAY") throw new Error("OUTBOX_EVENT_REPLAY_DURING_NEW_MUTATION");
+
     return Object.freeze({ outcome: "COMMITTED", value });
   });
 }
