@@ -1,5 +1,24 @@
 # Changelog
 
+## P13.18801–18960 — Terminal Evidence Integrity Receipt Boundary
+
+- Added deterministic receipt binding the verified terminal evidence-closure integrity certification.
+- Receipt state is `RECEIVED_FOR_REVIEW` and preserves integrity, closure, decision and fingerprint identity.
+- Explicitly prevents authorization grant, dispatch approval, dispatch execution, external transport and durable publication.
+- Added replay and fail-closed regression coverage.
+
+## P13.18641–18720 — Authorization Decision Evidence Closure Integrity Boundary
+
+- Added deterministic integrity boundary verifying closed evidence as a stable terminal review artifact.
+- Preserved the complete decision, authorization, candidate, request, publication and fingerprint chain.
+- Integrity state is `VERIFIED_TERMINAL_REVIEW_ARTIFACT` and remains synthetic-only and non-executable.
+
+## P13.18721–18800 — Authorization Decision Evidence Closure Integrity Replay/Certification
+
+- Added deterministic integrity replay and integrated certification.
+- Same integrity identity/fingerprint replays safely; fingerprint drift and execution attempts fail closed.
+- No external transport, durable publication, migration, live database execution or AI activation.
+
 ## P13.18241–18400 — Authorization Decision Evidence Closure Boundary
 
 - Added deterministic closure boundary for authorization decision evidence.
@@ -37,11 +56,3 @@
 - Preserved complete decision, authorization, candidate, request, publication and fingerprint continuity.
 - Certification fails closed on conflict, identity drift or attempted authorization/dispatch execution.
 - No external transport, durable publication, migration, live database execution or AI activation.
-
-## P13.17521–17640 — Dispatch Authorization Decision Envelope
-
-- Added deterministic non-granting authorization decision envelope over certified dispatch authorization.
-- Preserved authorization, candidate, request, publication and decision fingerprint identity.
-- Decision remains `REVIEW_REQUIRED` with `authorizationGranted=false` and `dispatchApproved=false`.
-- External transport and dispatch execution remain explicitly false.
-- Added regression coverage for non-granting, replay and drift invariants.
