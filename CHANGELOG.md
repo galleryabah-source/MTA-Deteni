@@ -32,7 +32,24 @@
 
 - Added integrated integrity certification composing integrity validation and replay protection.
 - Certification remains synthetic-only, review-only and unable to grant authorization, approve dispatch, execute dispatch, request external transport or create durable publication.
-- Added regression coverage for P13.23681–24480 including state, identity continuity, replay, drift rejection and non-executable certification.
+
+## P13.24481–24640 — Terminal Evidence Integrity Evidence Boundary
+
+- Added deterministic verification of the next terminal evidence-integrity artifact as `VERIFIED_TERMINAL_EVIDENCE_CLOSURE_INTEGRITY_EVIDENCE_REVIEW_ARTIFACT`.
+- Preserved evidence, closure, integrity, receipt, decision and fingerprint continuity.
+- Evidence-integrity artifacts remain synthetic-only and explicitly non-executable.
+
+## P13.24641–24760 — Terminal Evidence Integrity Evidence Replay Guard
+
+- Added deterministic replay semantics for the terminal evidence-integrity artifact.
+- Replay binds integrity, evidence and certification identities and rejects identity drift/conflict.
+- Replay remains side-effect free.
+
+## P13.24761–24880 — Integrated Terminal Evidence Integrity Evidence Certification
+
+- Added integrated certification composing evidence-integrity validation and replay protection.
+- Certification remains review-only, synthetic-only and unable to grant authorization, approve dispatch, execute dispatch, request external transport or create durable publication.
+- Regression coverage now spans P13.23681–24880.
 
 ## P13.22481–22640 — Terminal Evidence Closure Integrity Evidence Boundary
 
