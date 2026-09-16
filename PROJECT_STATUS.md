@@ -1,9 +1,9 @@
 # MTA DETENI — Project Status
 
 **Foundation:** v1.124+
-**Current Track:** P13.40881–54280 terminal evidence continuation / CI observation pending
+**Current Track:** P13.54281–67560 terminal evidence integrity audit / CI observation pending
 **Branch:** `main`
-**Latest implementation checkpoint:** P13.54280
+**Latest implementation checkpoint:** P13.67560
 
 ## Latest progress
 
@@ -18,14 +18,15 @@
 - P13.24761–24880 — integrated terminal evidence integrity evidence certification composes evidence-integrity validation and replay protection while preserving review-only, synthetic-only and non-executable invariants.
 - P13.24881–27560 — governed continuation contract covering twenty sequential checkpoints.
 - P13.27561–40880 — governed continuation extension covering 100 sequential checkpoints in five auditable modules (A–E).
-- P13.40881–54280 — added the next 100 sequential checkpoints in five auditable modules (F–J), preserving immutable artifact identity, parent-artifact continuity, decision-fingerprint continuity, deterministic replay semantics and non-executable governance invariants.
+- P13.40881–54280 — governed continuation extension covering 100 sequential checkpoints in five auditable modules (F–J).
+- P13.54281–67560 — added the next 100 sequential checkpoints as a terminal-evidence integrity-audit chain in five auditable modules (A–E), preserving immutable artifact identity, parent-artifact continuity, decision-fingerprint continuity, deterministic replay semantics and non-executable governance invariants.
 - Regression coverage added asserting exactly 100 unique checkpoint labels plus immutability, replay determinism and governance invariants.
 
 ## Runtime continuity integrity
 
-The terminal-evidence continuation chain now extends through P13.54280. The new 100-checkpoint extension is organized into modules F–J and remains synthetic-only, immutable, review-only and explicitly non-executable. Replay is deterministic and side-effect free.
+The terminal-evidence chain now extends through P13.67560. The latest 100-checkpoint integrity-audit extension remains synthetic-only, immutable, review-only and explicitly non-executable. Replay is deterministic and side-effect free.
 
-All continuation artifacts remain review artifacts only. They cannot grant authorization, approve dispatch, execute dispatch, request external transport or create durable publication. Runtime adapters remain subordinate to authorization, idempotency and evidence controls.
+All continuation and audit artifacts remain review artifacts only. They cannot grant authorization, approve dispatch, execute dispatch, request external transport or create durable publication. Runtime adapters remain subordinate to authorization, idempotency and evidence controls.
 
 ## Governance locks
 
@@ -39,10 +40,10 @@ All continuation artifacts remain review artifacts only. They cannot grant autho
 
 ## Current certification state
 
-**P13.40881–54280 — IMPLEMENTED CONTRACTS / OBSERVATION PENDING**
+**P13.54281–67560 — IMPLEMENTED CONTRACTS / OBSERVATION PENDING**
 
-The 100-checkpoint continuation and regression coverage are implemented. GitHub Actions is not treated as PASS until observable workflow steps/logs/artifacts are available.
+The 100-checkpoint integrity-audit extension and regression coverage are implemented. GitHub Actions is not treated as PASS until observable workflow steps/logs/artifacts are available.
 
 ## Next gate
 
-**P13.54281 onward — continuation integrity audit:** verify the new 100-checkpoint extension against P13.40880 and the preceding certified chain, then continue only after CI evidence is observable. No production activation or migration is implied by this implementation.
+**P13.67561 onward — integrated integrity-audit certification:** connect the audit result to the preceding certified chain with explicit continuity checks, then continue only after CI evidence is observable. No production activation or migration is implied by this implementation.
