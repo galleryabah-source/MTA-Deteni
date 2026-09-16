@@ -1,5 +1,32 @@
 # Changelog
 
+## P13.16681–16800 — Integrated Publication Request Certification
+
+- Added deterministic integrated certification composing publication request admission and replay protection.
+- Preserved request, publication certification, publication, evidence, audit, closure, continuity, receipt, execution, dispatch, acknowledgement and decision fingerprint identity.
+- Certification fails closed on replay conflict, identity drift, incomplete or non-synthetic state.
+- External transport remains explicitly disabled.
+
+## P13.16801–16920 — Publication Dispatch Candidate Boundary
+
+- Added a review-only dispatch candidate over a certified publication request.
+- Candidate preserves request certification and publication identity/fingerprint continuity.
+- Candidate is `READY_FOR_DISPATCH_REVIEW` only; `dispatchExecuted` and `externalTransportRequested` remain false.
+- Added regression coverage for transport-free operation and identity drift.
+
+## P13.16921–17040 — Publication Dispatch Candidate Replay Guard
+
+- Added deterministic ADMIT/REPLAY/CONFLICT semantics for dispatch candidates.
+- Same candidate/request identity and fingerprint replays without duplicate admission; a different valid fingerprint becomes CONFLICT.
+- Replay remains in-memory and has no external side effect.
+
+## P13.17041–17160 — Publication Dispatch Candidate Certification
+
+- Added integrated certification composing dispatch-candidate validation and replay protection.
+- Preserved candidate, request certification, publication and decision fingerprint identity.
+- Certification fails closed on conflict, drift or attempted dispatch execution.
+- External transport remains explicitly disabled and synthetic-only constraints remain enforced.
+
 ## P13.16081–16440 — Operational Audit Publication Readiness
 
 - Added deterministic operational audit publication-readiness envelope over the certified operational audit projection.
