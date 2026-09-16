@@ -57,5 +57,5 @@ test("P13.15961-16080: operational audit projection certification composes repla
   assert.equal(certification.certified, true);
   assert.equal(certification.replayDisposition, "ADMIT");
   assert.throws(() => assertLocalRuntimeRecoveryOperationalAuditProjectionCertification({ ...certification, decisionFingerprint: "FP-DRIFT" }, projection), /drift/i);
-  assert.throws(() => certifyLocalRuntimeRecoveryOperationalAuditProjection({ certificationId: "", projection, evidenceCertification: c.e.evidenceCertification }), /identity/i);
+  assert.throws(() => certifyLocalRuntimeRecoveryOperationalAuditProjection({ certificationId: "", projection, evidenceCertification: c.evidenceCertification }), /identity/i);
 });
