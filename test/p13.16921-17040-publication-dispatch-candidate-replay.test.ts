@@ -11,7 +11,7 @@ import { certifyLocalRuntimeRecoveryOperationalAuditPublicationRequest } from ".
 import { createLocalRuntimeRecoveryOperationalAuditPublicationDispatchCandidate } from "../src/application/local-runtime-recovery-operational-audit-publication-dispatch-candidate.js";
 import { replayLocalRuntimeRecoveryOperationalAuditPublicationDispatchCandidate, resetLocalRuntimeRecoveryOperationalAuditPublicationDispatchCandidateReplayRegistry } from "../src/application/local-runtime-recovery-operational-audit-publication-dispatch-candidate-replay.js";
 
-function candidate(fingerprint = "FP-DCR") {
+function prepared(fingerprint: string) {
   const evidence = { evidenceId: "AE-DCR", auditCertificationId: "AUDCERT-DCR", auditRecordId: "AUD-DCR", closureCertificationId: "CERT-DCR", closureEvidenceId: "CE-DCR", continuityCertificationId: "CONT-DCR", receiptId: "RCP-DCR", closureId: "CLS-DCR", executionId: "EXEC-DCR", dispatchId: "DISP-DCR", acknowledgementId: "ACK-DCR", decisionFingerprint: fingerprint, complete: true, syntheticOnly: true } as const;
   const evidenceCertification = { certificationId: "AECERT-DCR", evidenceId: "AE-DCR", auditCertificationId: "AUDCERT-DCR", auditRecordId: "AUD-DCR", closureCertificationId: "CERT-DCR", closureEvidenceId: "CE-DCR", decisionFingerprint: fingerprint, replayDisposition: "ADMIT", certified: true, syntheticOnly: true } as LocalRuntimeRecoveryFinalClosureAuditEvidenceCertification;
   const projection = createLocalRuntimeRecoveryOperationalAuditProjection({ projectionId: "PROJ-DCR", evidenceCertification, evidence });
@@ -21,14 +21,15 @@ function candidate(fingerprint = "FP-DCR") {
   const request = createLocalRuntimeRecoveryOperationalAuditPublicationRequest({ requestId: "PUBREQ-DCR", certification: publicationCertification, envelope });
   resetLocalRuntimeRecoveryOperationalAuditPublicationRequestReplayRegistry();
   const requestCertification = certifyLocalRuntimeRecoveryOperationalAuditPublicationRequest({ certificationId: "REQCERT-DCR", request, certification: publicationCertification, envelope });
-  return createLocalRuntimeRecoveryOperationalAuditPublicationDispatchCandidate({ candidateId: "CAND-DCR", requestCertification });
+  return { candidate: createLocalRuntimeRecoveryOperationalAuditPublicationDispatchCandidate({ candidateId: "CAND-DCR", requestCertification }), requestCertification };
 }
 
 test("P13.16921-17040: dispatch candidate replay is ADMIT/REPLAY/CONFLICT", () => {
   resetLocalRuntimeRecoveryOperationalAuditDispatchCandidateReplayRegistry();
-  const first = candidate();
-  const requestCertification = { certificationId: first.requestCertificationId, requestId: first.requestId, publicationCertificationId: first.publicationCertificationId, publicationId: first.publicationId, evidenceCertificationId: "AECERT-DCR", evidenceId: "AE-DCR", auditCertificationId: "AUDCERT-DCR", auditRecordId: "AUD-DCR", closureCertificationId: "CERT-DCR", closureEvidenceId: "CE-DCR", continuityCertificationId: "CONT-DCR", receiptId: "RCP-DCR", closureId: "CLS-DCR", executionId: "EXEC-DCR", dispatchId: "DISP-DCR", acknowledgementId: "ACK-DCR", decisionFingerprint: "FP-DCR", replayDisposition: "ADMIT", certified: true, syntheticOnly: true, externalTransportRequested: false } as const;
-  assert.equal(replayLocalRuntimeRecoveryOperationalAuditPublicationDispatchCandidate({ candidate: first, requestCertification }), "ADMIT");
-  assert.equal(replayLocalRuntimeRecoveryOperationalAuditPublicationDispatchCandidate({ candidate: first, requestCertification }), "REPLAY");
-  assert.equal(replayLocalRuntimeRecoveryOperationalAuditPublicationDispatchCandidate({ candidate: { ...first, decisionFingerprint: "FP-CONFLICT" }, requestCertification }), "CONFLICT");
+  const first = prepared("FP-DCR");
+  const second = prepared("FP-CONFLICT");
+  const args = { candidate: first.candidate, requestCertification: first.requestCertification };
+  assert.equal(replayLocalRuntimeRecoveryOperationalAuditPublicationDispatchCandidate(args), "ADMIT");
+  assert.equal(replayLocalRuntimeRecoveryOperationalAuditPublicationDispatchCandidate(args), "REPLAY");
+  assert.equal(replayLocalRuntimeRecoveryOperationalAuditPublicationDispatchCandidate({ candidate: second.candidate, requestCertification: second.requestCertification }), "CONFLICT");
 });
