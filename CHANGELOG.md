@@ -1,5 +1,16 @@
 # Changelog
 
+## P13.204881–218880 — Integrated Integrity-Audit Terminal Closure Certification Seal Receipt (100 Checkpoints)
+
+- Extended the governed chain across exactly 100 sequential checkpoints from P13.204881 through P13.218880.
+- Added a certification-seal receipt contract binding the preceding artifact, closure, audit, certification and seal identities to a distinct receipt identity and receipt decision fingerprint.
+- Enforced fail-closed continuity validation, including rejection of artifact aliasing, fingerprint aliasing and receipt/seal identity collisions.
+- Preserved deterministic in-memory `ADMIT` / `REPLAY` / `CONFLICT` semantics with an identity-bound replay key.
+- Certification remains immutable, synthetic-only, review-only and explicitly non-executable.
+- No authorization, dispatch approval, external transport request, dispatch execution or durable publication capability is introduced.
+- Added regression coverage for checkpoint cardinality, immutability, governance locks, deterministic replay, fingerprint drift and continuity failures.
+- CI remains observation-only unless observable workflow evidence is available.
+
 ## P13.190881–204880 — Integrated Integrity-Audit Terminal Closure Certification Seal (100 Checkpoints)
 
 - Extended the governed chain across exactly 100 sequential checkpoints from P13.190881 through P13.204880.
