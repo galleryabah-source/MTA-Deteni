@@ -1,21 +1,22 @@
 # MTA DETENI — Project Status
 
 **Foundation:** v1.122+
-**Current Track:** P13.21321–21720 terminal evidence closure integrity evidence integrity / CI observation pending
+**Current Track:** P13.21721–22080 terminal evidence closure integrity evidence closure / CI observation pending
 **Branch:** `main`
-**Latest implementation checkpoint:** P13.21720
+**Latest implementation checkpoint:** P13.22080
 
 ## Latest progress
 
-- P13.21321–21480 — deterministic evidence-integrity boundary verifies the terminal evidence envelope as `VERIFIED_TERMINAL_EVIDENCE_CLOSURE_INTEGRITY_EVIDENCE_REVIEW_ARTIFACT` while preserving the complete identity chain.
-- P13.21481–21600 — evidence-integrity replay guard provides deterministic ADMIT/REPLAY/CONFLICT semantics without external side effects.
-- P13.21601–21720 — integrated evidence-integrity certification composes integrity validation and replay protection while preserving synthetic-only, review-only and non-executable invariants.
+- P13.21721–21880 — deterministic closure binds the certified terminal evidence-integrity evidence artifact as `CLOSED_FOR_REVIEW` while preserving identity continuity and non-executable governance invariants.
+- P13.21881–22000 — evidence-integrity evidence closure replay guard provides deterministic ADMIT/REPLAY/CONFLICT semantics without external side effects.
+- P13.22001–22080 — integrated evidence-integrity evidence closure certification composes closure validation and replay protection while preserving synthetic-only, review-only and non-executable invariants.
+- Regression coverage added for closure state, deterministic replay, fingerprint drift and non-granting certification.
 
 ## Runtime continuity integrity
 
-The certified chain now extends from recovery execution through acknowledgement, completion proof, continuity receipt, closure, final closure audit evidence, operational audit projection, publication readiness, publication certification, publication request admission/replay/certification, dispatch-candidate review/replay/certification, dispatch authorization review/replay/certification, authorization decision review/replay/certification, authorization decision evidence/replay/certification, authorization decision evidence closure/replay/certification, closure integrity/replay/certification, terminal integrity receipt/replay/certification, terminal integrity receipt closure/replay/certification, terminal integrity receipt closure integrity/replay/certification, terminal receipt closure integrity evidence/replay/certification, terminal receipt closure integrity evidence closure/replay/certification, terminal receipt closure integrity evidence closure integrity/replay/certification, terminal receipt closure integrity evidence closure integrity evidence/replay/certification, terminal receipt closure integrity evidence closure integrity evidence closure/replay/certification, terminal evidence closure integrity evidence integrity/replay/certification.
+The certified chain now extends from recovery execution through acknowledgement, completion proof, continuity receipt, closure, final closure audit evidence, operational audit projection, publication readiness, publication certification, publication request admission/replay/certification, dispatch-candidate review/replay/certification, dispatch authorization review/replay/certification, authorization decision review/replay/certification, authorization decision evidence/replay/certification, authorization decision evidence closure/replay/certification, closure integrity/replay/certification, terminal integrity receipt/replay/certification, terminal integrity receipt closure/replay/certification, terminal integrity receipt closure integrity/replay/certification, terminal receipt closure integrity evidence/replay/certification, terminal receipt closure integrity evidence closure/replay/certification, terminal receipt closure integrity evidence closure integrity/replay/certification, terminal receipt closure integrity evidence closure integrity evidence/replay/certification, terminal receipt closure integrity evidence closure integrity evidence closure/replay/certification, terminal evidence closure integrity evidence integrity/replay/certification, terminal evidence closure integrity evidence integrity evidence/replay/certification, terminal evidence closure integrity evidence integrity evidence closure/replay/certification.
 
-The terminal evidence integrity certification remains a review artifact only. It cannot grant authorization, approve dispatch, execute dispatch, request external transport or create durable publication. Runtime adapters remain subordinate to authorization, idempotency and evidence controls.
+The terminal evidence-integrity evidence closure certification remains a review artifact only. It cannot grant authorization, approve dispatch, execute dispatch, request external transport or create durable publication. Runtime adapters remain subordinate to authorization, idempotency and evidence controls.
 
 ## Governance locks
 
@@ -29,10 +30,10 @@ The terminal evidence integrity certification remains a review artifact only. It
 
 ## Current certification state
 
-**P13.21321–21720 — IMPLEMENTED CONTRACTS / OBSERVATION PENDING**
+**P13.21721–22080 — IMPLEMENTED CONTRACTS / OBSERVATION PENDING**
 
-The terminal evidence integrity boundary, replay guard, integrated certification and regression coverage are committed. GitHub Actions is not treated as PASS until job-step telemetry and controlled execution evidence are observable.
+The terminal evidence-integrity evidence closure boundary, replay guard, integrated certification and regression coverage are committed. GitHub Actions is not treated as PASS until job-step telemetry and controlled execution evidence are observable.
 
 ## Next gate
 
-**P13.21721–21880 — terminal evidence closure integrity evidence integrity closure boundary:** deterministically close the certified evidence-integrity artifact as `CLOSED_FOR_REVIEW` while preserving the complete identity chain and non-executable governance invariants.
+**P13.22081–22240 — terminal evidence closure integrity evidence closure integrity boundary:** bind the certified evidence-integrity evidence closure artifact into a deterministic integrity verification envelope while preserving the complete identity chain and non-executable governance invariants.
