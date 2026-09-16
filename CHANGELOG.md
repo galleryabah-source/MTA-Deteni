@@ -1,5 +1,19 @@
 # Changelog
 
+## P13.14281–14400 — Runtime Continuity Closure Gate
+
+- Added deterministic runtime continuity closure after a certified continuity receipt.
+- Closure requires a complete, certified, synthetic-only receipt chain.
+- Unresolved acknowledgement conflict blocks closure.
+- Receipt/closure identity drift fails closed.
+
+## P13.14161–14280 — Runtime Continuity Receipt
+
+- Added runtime continuity receipt binding the broader continuity certification to completion proof and acknowledgement certification.
+- Preserved execution, dispatch, acknowledgement and decision fingerprint continuity.
+- Strengthened the receipt boundary to validate the complete integrated execution chain.
+- Added regression coverage for receipt admission, closure, identity drift and non-synthetic state.
+
 ## P13.13921–14040 — Local Runtime Recovery Execution Acknowledgement Certification
 
 - Added acknowledgement continuity certification binding acknowledgement, replay result and integrated execution certification.
@@ -35,9 +49,3 @@
 - Added execution evidence binding runtime execution to decision, request, certification, audit and envelope identities.
 - Added fail-closed fingerprint and identity checks.
 - Preserved admitted and synthetic-only execution boundaries.
-
-## P13.13081–13200 — Local Runtime Recovery Decision Execution Boundary
-
-- Added a runtime admission boundary requiring certified recovery decision, replay, audit and safety identities.
-- Blocked conflicted, replayed, non-admitted and non-synthetic recovery execution.
-- Hardened the request boundary with the canonical local runtime request assertion.
