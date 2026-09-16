@@ -1,5 +1,6 @@
 import { assertIdempotencyKey, createIdempotencyRecord, resolveIdempotency, type IdempotencyRecord } from "./idempotency-contract.js";
 import { appendMandatoryOutboxEvent, createOutboxEvent, type OutboxEventContract } from "./outbox-runtime-contract.js";
+import { createExecutionContext, type ExecutionContext } from "./execution-context-contract.js";
 import { assertCriticalTransactionBoundary, runCriticalTransaction, type TransactionContext, type TransactionRunner } from "./transaction-contract.js";
 
 export type MutationAuditRecord = Readonly<{
@@ -19,7 +20,7 @@ export type MutationIntegrationStores = Readonly<{
 }>;
 
 export type CriticalMutationInput<T> = Readonly<{
-  context: TransactionContext;
+  context: ExecutionContext;
   commandType: string;
   aggregateId: string;
   requestHash: string;
@@ -37,20 +38,21 @@ export async function executeCriticalMutation<T>(
   stores: MutationIntegrationStores,
   transactionRunner: TransactionRunner,
 ): Promise<{ outcome: "COMMITTED" | "REPLAYED"; value: T | undefined }> {
-  assertIdempotencyKey(input.context.idempotencyKey ?? "");
+  const context = createExecutionContext(input.context);
+  assertIdempotencyKey(context.idempotencyKey);
   assertCriticalTransactionBoundary({ mutation: true, transactional: true, audited: true, idempotent: true });
   if (!input.commandType.trim() || !input.aggregateId.trim() || !input.requestHash.trim() || !input.auditId.trim() || !input.eventId.trim()) {
     throw new Error("Critical mutation identity is incomplete.");
   }
 
-  const existing = stores.findIdempotency(input.context.idempotencyKey!);
+  const existing = stores.findIdempotency(context.idempotencyKey);
   const decision = resolveIdempotency(existing, input.requestHash);
   if (decision === "CONFLICT") throw new Error("IDEMPOTENCY_KEY_REUSED_WITH_DIFFERENT_REQUEST");
   if (decision === "REPLAY") return Object.freeze({ outcome: "REPLAYED", value: undefined });
 
-  return runCriticalTransaction(transactionRunner, input.context, async () => {
+  return runCriticalTransaction(transactionRunner, context as TransactionContext, async () => {
     const inProgress = createIdempotencyRecord({
-      idempotencyKey: input.context.idempotencyKey!,
+      idempotencyKey: context.idempotencyKey,
       commandType: input.commandType,
       requestHash: input.requestHash,
       status: "IN_PROGRESS",
