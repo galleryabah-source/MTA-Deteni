@@ -1,5 +1,14 @@
 # Changelog
 
+## P1 — Canonical Execution Context Continuity
+
+- Bound `TransactionContext` directly to the canonical execution-context contract so request, correlation, transaction and idempotency identities cannot diverge by type definition.
+- Critical mutation orchestration now normalizes and freezes one canonical execution context before idempotency and transaction execution.
+- Added an executable regression proving normalized context identity reaches the transaction boundary unchanged.
+- Added explicit observability context-continuity validation against the canonical execution context.
+- Added regression coverage for observability request/transaction identity drift.
+- No schema migration, live PostgreSQL execution, production access, AI activation, external transport, durable publication, real detainee data or production PII was introduced.
+
 ## P9.12–P9.13 — Canonical Evidence Hardening
 
 - P9.12 CI certification now has regression coverage for complete observed `controlled-nonprod` harness evidence.
@@ -38,11 +47,3 @@
 ## P9.7 — Transaction + Idempotency Boundary Contract
 
 - Added transaction + idempotency boundary with deterministic `EXECUTE` / `REPLAY` / `CONFLICT` semantics and commit-after-success / rollback-on-failure behavior.
-
-## P9.6 — Governed Database Adapter Contract
-
-- Added typed database adapter, transaction and lifecycle contracts with fail-closed configuration validation and migration-role blocking.
-
-## P13.260881–274880 — Integrity Certification Evidence Continuation (100 Checkpoints)
-
-- Extended the governed P13 chain across exactly 100 sequential checkpoints from P13.260881 through P13.274880.
