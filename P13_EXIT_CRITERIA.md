@@ -21,7 +21,7 @@ P13 may be marked **CLOSED** only when P13-EXIT-01 through P13-EXIT-08 are all e
 
 ## Current assessment
 
-As of the current `main` baseline, P13-EXIT-01, P13-EXIT-02, P13-EXIT-03, P13-EXIT-04, P13-EXIT-05 and P13-EXIT-08 have repository evidence. P13-EXIT-06 remains pending observable workflow execution for the current closure candidate. P13-EXIT-07 requires synchronized status/changelog verification as part of the closure commit.
+As of the current `main` baseline, P13-EXIT-01, P13-EXIT-02, P13-EXIT-03, P13-EXIT-04, P13-EXIT-05 and P13-EXIT-08 have repository evidence. P13-EXIT-06 remains pending observable workflow execution for the current closure candidate. P13-EXIT-07 is synchronized by the current `PROJECT_STATUS.md` and `CHANGELOG.md`. The Cloudflare workflow is validation-only and does not itself satisfy P13-EXIT-06 because it is not a controlled execution/deployment of the P13 closure candidate.
 
 ## Non-goals
 
