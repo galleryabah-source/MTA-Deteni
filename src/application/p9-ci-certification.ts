@@ -11,6 +11,9 @@ export type CiEvidence = Readonly<{
 }>;
 
 export function certifyP9Ci(evidence: CiEvidence): "CERTIFIED" | "NOT_CERTIFIED" {
+  if (!evidence || typeof evidence !== "object" || !evidence.harnessEvidence) {
+    throw new Error("P9_CI_HARNESS_EVIDENCE_REQUIRED");
+  }
   assertHarnessObservedPass(evidence.harnessEvidence);
   return "CERTIFIED";
 }
