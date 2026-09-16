@@ -1,7 +1,7 @@
 # MTA DETENI — Next Gate
 
-**Foundation:** v1.110
-**Current:** P13.13561–13680 — integrated local runtime recovery execution certification implemented; CI observation blocker remains
+**Foundation:** v1.111+
+**Current:** P13.13681–13800 — post-dispatch recovery execution acknowledgement implemented; CI observation blocker remains
 
 ## Completed (through current gate)
 
@@ -20,36 +20,35 @@
 - P13.10441–10560: local runtime session handshake bound to session/execution/device/install/network identity with deterministic expiry.
 - P13.10561–10680: handshake lifetime and expiry fail-closed regression.
 - P13.10681–10800: continuity-sensitive mutation admission requires certified handoff and ready recovery proof.
-- P13.10801–10920: session continuity transition binds handshake reuse to active session and exact execution/device/install/network identity; closed/interrupted and reconciliation-required states cannot be promoted by handshake reuse.
-- P13.10921–11040: local adapter audit envelope produces deterministic synthetic request/response evidence and binds actor/session/execution/device/install/network/request/idempotency identities; evidence drift fails closed.
-- P13.11041–11160: local adapter observability contract derives deterministic `LOCAL_ADAPTER_EXECUTION` observations from audit evidence; observation/audit drift fails closed.
-- P13.11161–11280: integrated local runtime regression certification composes routing, handshake, session continuity, audit envelope and observability into one synthetic certification; reconciliation-required continuity cannot be certified READY.
-- P13.11281–11400: deterministic rejected local adapter executions are represented as synthetic failure evidence with stable failure classes and the same identity chain; request/response, execution and device-scope drift fail closed.
-- P13.11401–11520: local adapter failure observability derives `LOCAL_ADAPTER_FAILURE` observations from certified failure evidence; observation/evidence drift fails closed.
-- P13.11521–11640: failure evidence, failure observation and request boundary are composed into one synthetic certification chain; certification identity and evidence consistency are enforced.
-- P13.11641–11760: deterministic five-scenario local adapter failure-injection/recovery matrix covers malformed request, expired handshake, session scope drift, idempotency conflict and reconciliation-required state with bounded dispositions.
-- P13.11761–11880: recovery disposition contract binds each certified failure to deterministic retry/review semantics; idempotency conflict and reconciliation-required states cannot be automatically retried.
-- P13.11881–12000: integrated failure-recovery journey composes evidence, observation, certification and disposition while rejecting scenario/evidence drift.
-- P13.12001–12120: local runtime safety certification envelope binds journey, failure certification and recovery disposition and prevents automatic retry when operator review is required.
-- P13.12121–12240: five-scenario regression traverses the complete safety chain and covers retry-policy, operator-review and synthetic-only drift.
-- P13.12241–12360: deterministic recovery action gate maps each certified scenario to a bounded action; blocked actions cannot be admitted automatically.
-- P13.12361–12480: recovery continuity gate converts safety policy into explicit READY/blocked continuity states while preserving the safety envelope boundary.
-- P13.12481–12600: integrated recovery certification composes the safety envelope and continuity gate into one synthetic recovery admission contract; operator-review and reconciliation-required states remain blocked.
-- P13.12601–12720: recovery decision integrity binds decision identity to envelope, journey, certification, evidence, disposition, scenario, continuity state and action; decision drift and non-synthetic state fail closed.
-- P13.12721–12840: deterministic in-memory recovery decision replay guard provides ADMIT/REPLAY/CONFLICT semantics; same identity with a different fingerprint becomes a review-required conflict.
-- P13.12841–12960: recovery decision audit evidence preserves exact decision identity and fails closed on field or synthetic-only drift.
-- P13.12961–13080: integrated recovery decision certification composes decision integrity, recovery certification and audit evidence; cross-chain substitution and blocked admission fail closed.
-- P13.13081–13200: certified recovery decision execution boundary requires exact decision, replay, audit and certification identities and blocks conflicted or non-admitted execution.
-- P13.13201–13320: execution evidence binds runtime execution to decision, request, certification, audit and envelope identities; execution evidence drift fails closed.
-- P13.13321–13440: local runtime recovery execution certification composes admitted execution and execution evidence into a final certified runtime execution identity; request, decision, audit, envelope and fingerprint drift fail closed.
-- P13.13441–13560: local runtime recovery execution dispatch gate permits dispatch only for certified, admitted, synthetic execution and preserves exact execution/evidence/decision/fingerprint identity continuity.
-- P13.13561–13680: integrated local runtime recovery execution certification composes execution certification and dispatch into one final synthetic admission/certification envelope; identity and fingerprint drift fail closed.
-- Regression coverage added for the complete P13.13321–13680 chain, including blocked dispatch and integrated identity/fingerprint drift cases.
-- No database driver, migration, production persistence, real detainee data, production telemetry, or AI activation.
+- P13.10801–10920: session continuity transition binds handshake reuse to active session and exact execution/device/install/network identity.
+- P13.10921–11040: local adapter audit envelope produces deterministic synthetic request/response evidence and binds actor/session/execution/device/install/network/request/idempotency identities.
+- P13.11041–11160: local adapter observability derives deterministic observations from audit evidence.
+- P13.11161–11280: integrated local runtime regression certification composes routing, handshake, session continuity, audit envelope and observability.
+- P13.11281–11400: deterministic rejected local adapter executions are represented as synthetic failure evidence.
+- P13.11401–11520: local adapter failure observability derives failure observations from certified evidence.
+- P13.11521–11640: failure evidence, observation and request boundary compose into one certification chain.
+- P13.11641–11760: five-scenario local adapter failure-injection/recovery matrix.
+- P13.11761–11880: recovery disposition contract with bounded retry/review semantics.
+- P13.11881–12000: integrated failure-recovery journey.
+- P13.12001–12120: local runtime safety certification envelope.
+- P13.12121–12240: five-scenario safety regression.
+- P13.12241–12360: deterministic recovery action gate.
+- P13.12361–12480: recovery continuity gate.
+- P13.12481–12600: integrated recovery certification.
+- P13.12601–12720: recovery decision integrity.
+- P13.12721–12840: recovery decision replay guard.
+- P13.12841–12960: recovery decision audit evidence.
+- P13.12961–13080: integrated recovery decision certification.
+- P13.13081–13200: certified recovery decision execution boundary.
+- P13.13201–13320: recovery decision execution evidence.
+- P13.13321–13440: local runtime recovery execution certification.
+- P13.13441–13560: local runtime recovery execution dispatch gate.
+- P13.13561–13680: integrated local runtime recovery execution certification.
+- P13.13681–13800: deterministic post-dispatch acknowledgement bound to exact integrated execution, dispatch, evidence, decision, request and fingerprint identities; drift and non-synthetic acknowledgement fail closed.
 
-## Next gate: P13.13681–13800
+## Next gate: P13.13801–13920
 
-Build the next local runtime recovery execution boundary around the certified dispatch result: deterministic post-dispatch acknowledgement/evidence binding, without introducing production transport or persistence.
+Bind the post-dispatch acknowledgement into the continuity evidence chain and define deterministic duplicate acknowledgement semantics. Same acknowledgement identity and fingerprint may replay without a second effect; the same identity with a different fingerprint must become a conflict requiring review. No production transport, persistence, schema migration, AI or live database execution.
 
 ## Governance lock
 
