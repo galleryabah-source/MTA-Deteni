@@ -1,9 +1,9 @@
 # MTA DETENI — Project Status
 
 **Foundation:** v1.122+
-**Current Track:** P13.16321–16440 integrated operational audit publication certification / CI observation pending
+**Current Track:** P13.16441–16560 publication request admission boundary / CI observation pending
 **Branch:** `main`
-**Latest implementation checkpoint:** P13.16440
+**Latest implementation checkpoint:** P13.16560
 
 ## Latest progress
 
@@ -16,12 +16,13 @@
 - P13.16081–16200 — operational audit publication-readiness envelope preserves the complete certified projection chain and explicitly prevents external publication.
 - P13.16201–16320 — publication replay guard provides deterministic ADMIT/REPLAY/CONFLICT semantics without external side effects.
 - P13.16321–16440 — integrated publication certification composes readiness and replay boundaries and preserves exact identity/fingerprint continuity.
+- P13.16441–16560 — deterministic publication request admission preserves the complete publication certification identity chain, admits only certified READY_FOR_PUBLICATION synthetic state, and explicitly prevents external transport requests.
 
 ## Runtime continuity integrity
 
-The certified chain now extends from recovery execution through acknowledgement, completion proof, continuity receipt, closure, final audit evidence, operational audit projection and publication-readiness certification. The publication boundary is a candidate/readiness boundary only: it does not imply external delivery, transport or durable persistence.
+The certified chain now extends from recovery execution through acknowledgement, completion proof, continuity receipt, closure, final audit evidence, operational audit projection, publication-readiness certification and publication-request admission. Publication remains a candidate/readiness workflow only: request admission does not perform external delivery, transport or durable persistence.
 
-Runtime adapters continue to remain subordinate to authorization, idempotency and evidence controls.
+Runtime adapters remain subordinate to authorization, idempotency and evidence controls.
 
 ## Governance locks
 
@@ -35,10 +36,10 @@ Runtime adapters continue to remain subordinate to authorization, idempotency an
 
 ## Current certification state
 
-**P13.16321–16440 — IMPLEMENTED CONTRACTS / OBSERVATION PENDING**
+**P13.16441–16560 — IMPLEMENTED CONTRACTS / OBSERVATION PENDING**
 
-The publication envelope, replay boundary and integrated certification are committed. GitHub Actions remains subject to the existing observation blocker when job-step telemetry/logs/artifacts are unavailable. No runtime PASS is inferred until controlled CI observation is available.
+The publication request admission boundary and regression coverage are committed. GitHub Actions remains subject to the existing observation blocker when job-step telemetry/logs/artifacts are unavailable. No runtime PASS is inferred until controlled CI observation is available.
 
 ## Next gate
 
-**P13.16441–16560 — publication request admission boundary:** define a deterministic, synthetic-only publication request admission contract over certified publication readiness, preserving identity/fingerprint continuity and failing closed before any external transport.
+**P13.16561–16680 — publication request replay guard:** add deterministic ADMIT/REPLAY/CONFLICT semantics to the admitted publication request, preserving request/certification/envelope identity and keeping external transport side-effect-free.
