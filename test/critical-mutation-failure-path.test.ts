@@ -35,8 +35,9 @@ function stores(seed?: IdempotencyRecord): StoreHarness {
   };
 }
 
-function transactionalRunner(harness: StoreHarness): TransactionRunner {
-  return async (_ctx, work) => {
+function transactionalRunner(harness: StoreHarness, observedContexts: TransactionContext[] = []): TransactionRunner {
+  return async (ctx, work) => {
+    observedContexts.push(ctx);
     const idempotencySnapshot = new Map(harness.idempotency);
     const auditsSnapshot = [...harness.audits];
     const outboxSnapshot = [...harness.outbox];
@@ -58,6 +59,7 @@ function input(overrides: Partial<{
   payloadFingerprint: string;
   responseFingerprint: string;
   runDomainMutation: () => Promise<unknown>;
+  context: TransactionContext;
 }> = {}) {
   return {
     context: context(),
@@ -75,9 +77,20 @@ function input(overrides: Partial<{
   };
 }
 
-async function execute(harness: StoreHarness, overrides: Parameters<typeof input>[0] = {}) {
-  return executeCriticalMutation(input(overrides), harness, transactionalRunner(harness));
+async function execute(harness: StoreHarness, overrides: Parameters<typeof input>[0] = {}, observedContexts: TransactionContext[] = []) {
+  return executeCriticalMutation(input(overrides), harness, transactionalRunner(harness, observedContexts));
 }
+
+test("critical mutation passes one canonical normalized context into the transaction boundary", async () => {
+  const harness = stores();
+  const observedContexts: TransactionContext[] = [];
+  await execute(harness, {
+    context: { transactionId: " tx-001 ", requestId: " req-001 ", correlationId: " corr-001 ", idempotencyKey: " idem-001 " },
+  }, observedContexts);
+  assert.equal(observedContexts.length, 1);
+  assert.deepEqual(observedContexts[0], context());
+  assert.equal(Object.isFrozen(observedContexts[0]), true);
+});
 
 test("duplicate completed request replays without side effects", async () => {
   const harness = storesWithCompleted();
