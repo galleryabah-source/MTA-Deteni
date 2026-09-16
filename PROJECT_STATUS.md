@@ -3,7 +3,7 @@
 **Foundation:** v1.134+
 **Current Track:** P1 runtime integrity remediation / P9 kernel implementation / P13 closure evidence recovery
 **Branch:** `main`
-**Latest implementation checkpoint:** P9.8 governed outbox contract; P13 governed boundary remains P13.274880
+**Latest implementation checkpoint:** P9.13 kernel certification contract; P13 governed boundary remains P13.274880
 
 ## P9 kernel implementation
 
@@ -11,35 +11,39 @@
 - P9.2–P9.5 security-kernel contracts remain established for configuration, authentication, authorization and audit.
 - P9.6 database-adapter contract is implemented with typed query/result and transaction boundaries, lifecycle state, configuration validation and explicit migration-role blocking.
 - P9.7 transaction + idempotency boundary contract is implemented with deterministic EXECUTE / REPLAY / CONFLICT decisions and commit-after-success / rollback-on-failure semantics.
-- **P9.8 is implemented as the governed outbox contract**, requiring validated pending events with explicit event/aggregate identity, payload fingerprint, timestamp and attempt counter; append remains behind a dedicated store boundary.
-- The runtime outbox contract is the canonical P9.8 boundary. The older `src/application/outbox-contract.ts` remains a compatibility artifact and is not the runtime publication boundary; it must not be used to bypass P9.8 governance.
-- P9.6–P9.8 remain deliberately runtime-unbound. They do not connect to PostgreSQL, execute SQL, run migrations or alter schema.
-- Actual PostgreSQL binding requires a separately authorized controlled non-production target and governance clearance.
+- P9.8 is implemented as the governed outbox contract; the runtime outbox contract is canonical and the older outbox contract remains compatibility-only.
+- P9.9 private storage contract is implemented with PRIVATE/RESTRICTED classification, object identity, content fingerprint and replay/content-drift protection.
+- P9.10 observability contract is implemented with structured event identity, correlation/request/transaction context and explicit outcome levels.
+- P9.11 controlled execution harness contract is implemented with fail-closed evidence validation and PASS/exit-code consistency.
+- P9.12 CI certification contract is implemented but cannot be certified until observable controlled-nonprod GitHub Actions evidence exists.
+- P9.13 kernel certification contract is implemented as an aggregate gate over required control results and remains non-authorizing: it cannot grant production access, execute migrations or enable AI.
+- P9.6–P9.13 remain runtime-unbound. No live PostgreSQL connection, SQL execution, migration, production access or durable external publication is introduced by these contracts.
+
+## CI evidence recovery
+
+- CI is explicitly configured for `controlled-nonprod`, with deterministic typecheck/test stages and mandatory `execution.json` validation plus artifact upload.
+- Recent GitHub Actions runs have failed before exposing usable step/log evidence (`steps: []`, log retrieval `BlobNotFound`). Therefore P13-EXIT-06 remains pending and no CI PASS is claimed.
 
 ## P1 runtime integrity remediation
 
 - Critical mutation path exists as an application orchestration path: authorization → idempotency → transaction → domain mutation → audit → outbox.
 - Failure-path regression models transactional rollback for domain, audit and outbox failures in the synthetic harness.
 - Optimistic concurrency execution contract provides deterministic ACCEPT/STALE_VERSION semantics.
-- P9.7 provides an explicit idempotency-aware transaction boundary.
-- P9.8 provides a validated pending outbox boundary so downstream publication cannot bypass the transactional evidence path.
 - Further executable integration verification remains required before P1 can be certified complete.
 
 ## P13 closure audit
 
-- P13 exit criteria remain explicitly defined in `P13_EXIT_CRITERIA.md`.
-- P13.260881–274880 adds 100 integrity-certification-evidence continuation checkpoints as a governed review-only contract layer.
+- P13.260881–274880 remains the terminal governed checkpoint range.
 - P13-EXIT-01, 02, 03, 04, 05 and 08 retain repository evidence.
-- P13-EXIT-06 (observable GitHub Actions execution evidence for the closure candidate) remains pending.
-- P13-EXIT-07 (synchronized documentation) is now maintained by this status, the changelog and the exit-criteria document.
+- P13-EXIT-06 remains pending observable successful controlled-nonprod workflow execution and evidence artifact.
+- P13-EXIT-07 is synchronized by the current status, changelog and exit-criteria document.
 - No additional numbered checkpoints are manufactured solely to increase counts.
 
 ## Cloudflare deployment boundary
 
-- The Cloudflare GitHub Actions workflow is now **validation-only**: it performs `wrangler deploy --dry-run` and does not perform a real deployment.
-- Cloudflare API credentials are no longer required by this workflow.
-- No production target is configured or implied by CI.
-- A real Cloudflare deployment requires a separately approved controlled non-production target and explicit governance clearance; until then, deployment remains blocked by the production-access lock.
+- The Cloudflare GitHub Actions workflow is validation-only and does not perform a real deployment.
+- Cloudflare API credentials are not required by this workflow.
+- A real Cloudflare deployment requires a separately approved controlled non-production target and explicit governance clearance.
 
 ## Governance locks
 
@@ -53,11 +57,13 @@
 
 ## Current certification state
 
+**P9.9 Private Storage — CONTRACT IMPLEMENTED**
+**P9.10 Observability — CONTRACT IMPLEMENTED**
+**P9.11 Test Harness — CONTRACT IMPLEMENTED**
+**P9.12 CI Certification — CONTRACT IMPLEMENTED / OBSERVATION REQUIRED**
+**P9.13 Kernel Certification — CONTRACT IMPLEMENTED / CI EVIDENCE REQUIRED**
 **P13.260881–274880 — IMPLEMENTED CONTRACTS / OBSERVATION PENDING**
 **P1 Runtime Integrity — REMEDIATION IN PROGRESS**
-**P9.6 Database Adapter — CONTRACT IMPLEMENTED / RUNTIME BINDING BLOCKED**
-**P9.7 Transaction + Idempotency — CONTRACT IMPLEMENTED / RUNTIME BINDING BLOCKED**
-**P9.8 Outbox — CONTRACT IMPLEMENTED / RUNTIME BINDING BLOCKED**
 **Cloudflare CI — CONFIGURATION VALIDATION ONLY / DEPLOYMENT BLOCKED**
 
 ## Closure rule
