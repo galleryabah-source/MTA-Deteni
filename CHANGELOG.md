@@ -1,5 +1,14 @@
 # Changelog
 
+## P13.232881–246880 — Attestation Closure (100 Checkpoints)
+
+- Extended the governed P13 chain across exactly 100 sequential checkpoints from P13.232881 through P13.246880.
+- Added an attestation-closure boundary binding artifact, parent artifact, decision fingerprint and distinct attestation identity/fingerprint.
+- Enforced fail-closed identity alias rejection and deterministic identity-bound ADMIT / REPLAY / CONFLICT semantics.
+- Preserved immutable, synthetic-only, review-only and explicitly non-executable behavior.
+- Added regression coverage for cardinality, sequence, immutability, governance locks, replay, fingerprint drift and identity aliasing.
+- CI remains observation-only unless observable workflow evidence is available.
+
 ## P13.218881–232880 — Integrated Integrity-Audit Terminal Closure Certification Seal Receipt Attestation (100 Checkpoints)
 
 - Extended the governed chain across exactly 100 sequential checkpoints from P13.218881 through P13.232880.
