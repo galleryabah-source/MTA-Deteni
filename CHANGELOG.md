@@ -1,5 +1,14 @@
 # Changelog
 
+## P9.12–P9.13 — Canonical Evidence Hardening
+
+- P9.12 CI certification now has regression coverage for complete observed `controlled-nonprod` harness evidence.
+- CI evidence validation now requires the exact canonical harness control set: `BUILD-5801`, `BUILD-5802`, `BUILD-5803`, `REG-5804`, `REG-5805`.
+- Evidence with missing canonical controls, duplicate controls, failed checks or nonzero PASS exit codes is rejected.
+- P9.13 continues to require the complete canonical P9.9–P9.12 kernel control set and remains non-authorizing.
+- Project status synchronized with the strengthened evidence boundary.
+- No schema migration, live PostgreSQL execution, production access, AI activation, external transport, durable publication, real detainee data or production PII was introduced.
+
 ## P9.9–P9.13 — Runtime Governance Contract Continuation
 
 - P9.9: added private/restricted storage contract with object identity, content fingerprint, replay safety and content-drift detection.
@@ -10,7 +19,6 @@
 - Added regression coverage for P9.11 and P9.13 fail-closed behavior.
 - Hardened GitHub Actions CI with deterministic typecheck/test stages, execution-evidence validation, artifact verification and concurrency control.
 - Recent GitHub Actions infrastructure did not expose usable steps/logs for the latest runs, so observable CI certification remains pending; no false PASS is recorded.
-- No schema migration, live PostgreSQL execution, production access, AI activation, external transport, durable publication, real detainee data or production PII was introduced.
 
 ## Governance Fix — Cloudflare Deployment Boundary + Documentation Synchronization
 
@@ -38,5 +46,3 @@
 ## P13.260881–274880 — Integrity Certification Evidence Continuation (100 Checkpoints)
 
 - Extended the governed P13 chain across exactly 100 sequential checkpoints from P13.260881 through P13.274880.
-- Preserved fail-closed identity continuity, deterministic replay semantics, synthetic-only and review-only behavior.
-- P13 remains observation-pending until controlled workflow evidence is observable.
