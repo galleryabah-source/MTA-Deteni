@@ -1,5 +1,14 @@
 # Changelog
 
+## P13.15001–15360 — Final Runtime Recovery Closure Audit Certification
+
+- Added deterministic final closure audit record binding final closure certification to evidence, continuity, receipt, CLOSED closure, execution, dispatch, acknowledgement and decision fingerprint identity.
+- Added deterministic final closure audit replay guard with ADMIT/REPLAY/CONFLICT semantics and no second admission effect.
+- Added integrated final closure audit certification composing the complete audit record and closure certification.
+- Audit certification fails closed on identity drift, replay conflict or non-synthetic/incomplete closure state.
+- Added regression coverage for complete-chain audit creation, replay/conflict handling and certification drift.
+- No production transport, persistence, schema migration, live database execution or AI activation.
+
 ## P13.14881–15000 — Final Runtime Recovery Closure Certification
 
 - Added final synthetic certification over the complete runtime recovery closure evidence chain.
