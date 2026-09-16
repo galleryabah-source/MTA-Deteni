@@ -1,7 +1,7 @@
 # MTA DETENI — Next Gate
 
-**Foundation:** v1.111+
-**Current:** P13.13681–13800 — post-dispatch recovery execution acknowledgement implemented; CI observation blocker remains
+**Foundation:** v1.113+
+**Current:** P13.13921–14040 — acknowledgement continuity certification implemented; CI observation blocker remains
 
 ## Completed (through current gate)
 
@@ -44,12 +44,14 @@
 - P13.13321–13440: local runtime recovery execution certification.
 - P13.13441–13560: local runtime recovery execution dispatch gate.
 - P13.13561–13680: integrated local runtime recovery execution certification.
-- P13.13681–13800: deterministic post-dispatch acknowledgement bound to exact integrated execution, dispatch, evidence, decision, request and fingerprint identities; drift and non-synthetic acknowledgement fail closed.
+- P13.13681–13800: deterministic post-dispatch acknowledgement bound to exact integrated execution, dispatch, evidence, decision, request and fingerprint identities.
+- P13.13801–13920: deterministic acknowledgement replay guard with ADMIT/REPLAY/CONFLICT semantics; same identity/fingerprint replays without a second effect, changed fingerprint becomes conflict.
+- P13.13921–14040: acknowledgement continuity certification binds acknowledgement, replay result and integrated execution certification; conflicts cannot be certified and identity/fingerprint drift fails closed.
 - Historical P13.5809–5880 observable-execution contract remains part of the repository governance chain.
 
-## Next gate: P13.13801–13920
+## Next gate: P13.14041–14160
 
-Bind the post-dispatch acknowledgement into the continuity evidence chain and define deterministic duplicate acknowledgement semantics. Same acknowledgement identity and fingerprint may replay without a second effect; the same identity with a different fingerprint must become a conflict requiring review. No production transport, persistence, schema migration, AI or live database execution.
+Bind certified acknowledgement into the broader runtime continuity evidence envelope and create a deterministic post-dispatch completion proof. The proof must preserve execution/dispatch/acknowledgement identity and fingerprint continuity and remain synthetic-only. No production transport, persistence, schema migration, AI or live database execution.
 
 ## Governance lock
 
