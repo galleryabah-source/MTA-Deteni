@@ -1,5 +1,26 @@
 # Changelog
 
+## P13.17161–17280 — Dispatch Authorization Review Boundary
+
+- Added deterministic review-only dispatch authorization envelope over the certified dispatch candidate.
+- Preserved candidate, request certification, request, publication certification, publication and decision fingerprint identity.
+- Authorization remains `READY_FOR_AUTHORIZATION_REVIEW` with `authorizationGranted=false`.
+- External transport and dispatch execution remain explicitly false.
+- Added regression coverage for review-only and synthetic-only invariants.
+
+## P13.17281–17400 — Dispatch Authorization Replay Guard
+
+- Added deterministic ADMIT/REPLAY/CONFLICT semantics for dispatch authorization review.
+- Same authorization/candidate identity and fingerprint replays without duplicate admission; changed fingerprint becomes CONFLICT.
+- Replay remains in-memory with no external side effect.
+
+## P13.17401–17520 — Integrated Dispatch Authorization Certification
+
+- Added integrated certification composing dispatch authorization validation and replay protection.
+- Preserved candidate, request, publication and decision fingerprint continuity.
+- Certification fails closed on conflict, drift, attempted authorization grant, attempted execution or external transport.
+- Synthetic-only and review-only invariants remain enforced.
+
 ## P13.16681–16800 — Integrated Publication Request Certification
 
 - Added deterministic integrated certification composing publication request admission and replay protection.
