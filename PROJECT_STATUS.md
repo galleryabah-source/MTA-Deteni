@@ -11,7 +11,8 @@
 - P9.2–P9.5 security-kernel contracts remain established for configuration, authentication, authorization and audit.
 - P9.6 database-adapter contract is implemented with typed query/result and transaction boundaries, lifecycle state, configuration validation and explicit migration-role blocking.
 - P9.7 transaction + idempotency boundary contract is implemented with deterministic EXECUTE / REPLAY / CONFLICT decisions and commit-after-success / rollback-on-failure semantics.
-- **P9.8 is now implemented as a governed outbox contract**, requiring validated pending events with explicit event/aggregate identity, payload fingerprint, timestamp and attempt counter; append remains behind a dedicated store boundary.
+- **P9.8 is implemented as the governed outbox contract**, requiring validated pending events with explicit event/aggregate identity, payload fingerprint, timestamp and attempt counter; append remains behind a dedicated store boundary.
+- The runtime outbox contract is the canonical P9.8 boundary. The older `src/application/outbox-contract.ts` remains a compatibility artifact and is not the runtime publication boundary; it must not be used to bypass P9.8 governance.
 - P9.6–P9.8 remain deliberately runtime-unbound. They do not connect to PostgreSQL, execute SQL, run migrations or alter schema.
 - Actual PostgreSQL binding requires a separately authorized controlled non-production target and governance clearance.
 
@@ -30,8 +31,15 @@
 - P13.260881–274880 adds 100 integrity-certification-evidence continuation checkpoints as a governed review-only contract layer.
 - P13-EXIT-01, 02, 03, 04, 05 and 08 retain repository evidence.
 - P13-EXIT-06 (observable GitHub Actions execution evidence for the closure candidate) remains pending.
-- P13-EXIT-07 (synchronized documentation) is maintained by this status and changelog.
+- P13-EXIT-07 (synchronized documentation) is now maintained by this status, the changelog and the exit-criteria document.
 - No additional numbered checkpoints are manufactured solely to increase counts.
+
+## Cloudflare deployment boundary
+
+- The Cloudflare GitHub Actions workflow is now **validation-only**: it performs `wrangler deploy --dry-run` and does not perform a real deployment.
+- Cloudflare API credentials are no longer required by this workflow.
+- No production target is configured or implied by CI.
+- A real Cloudflare deployment requires a separately approved controlled non-production target and explicit governance clearance; until then, deployment remains blocked by the production-access lock.
 
 ## Governance locks
 
@@ -50,6 +58,7 @@
 **P9.6 Database Adapter — CONTRACT IMPLEMENTED / RUNTIME BINDING BLOCKED**
 **P9.7 Transaction + Idempotency — CONTRACT IMPLEMENTED / RUNTIME BINDING BLOCKED**
 **P9.8 Outbox — CONTRACT IMPLEMENTED / RUNTIME BINDING BLOCKED**
+**Cloudflare CI — CONFIGURATION VALIDATION ONLY / DEPLOYMENT BLOCKED**
 
 ## Closure rule
 
