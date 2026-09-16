@@ -1,5 +1,13 @@
 # Changelog
 
+## P13.13681–13800 — Post-Dispatch Recovery Execution Acknowledgement
+
+- Added deterministic post-dispatch acknowledgement for certified local runtime recovery execution.
+- Bound acknowledgement to integrated execution certification, dispatch, execution evidence, decision, request and decision fingerprint identities.
+- Added fail-closed checks for acknowledgement identity drift, dispatch/certification substitution, fingerprint drift and non-synthetic state.
+- Added regression coverage for successful acknowledgement and tampering cases.
+- No external delivery confirmation, production transport, persistence, database migration or AI activation.
+
 ## P13.13321–13680 — Local Runtime Recovery Execution Certification, Dispatch & Integration
 
 - Added final local runtime recovery execution certification composing admitted execution and execution evidence.
