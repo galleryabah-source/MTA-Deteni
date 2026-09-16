@@ -6,6 +6,9 @@ import { certifyLocalRuntimeRecoveryOperationalAuditPublicationDispatchAuthoriza
 import { createLocalRuntimeRecoveryOperationalAuditPublicationDispatchAuthorizationDecisionEvidenceClosureIntegrityReceiptClosureIntegrityEvidenceClosureIntegrity, assertLocalRuntimeRecoveryOperationalAuditPublicationDispatchAuthorizationDecisionEvidenceClosureIntegrityReceiptClosureIntegrityEvidenceClosureIntegrity } from "../src/application/local-runtime-recovery-operational-audit-publication-dispatch-authorization-decision-evidence-closure-integrity-receipt-closure-integrity-evidence-closure-integrity.js";
 import { replayLocalRuntimeRecoveryOperationalAuditPublicationDispatchAuthorizationDecisionEvidenceClosureIntegrityReceiptClosureIntegrityEvidenceClosureIntegrity, resetLocalRuntimeRecoveryOperationalAuditPublicationDispatchAuthorizationDecisionEvidenceClosureIntegrityReceiptClosureIntegrityEvidenceClosureIntegrityReplayRegistry } from "../src/application/local-runtime-recovery-operational-audit-publication-dispatch-authorization-decision-evidence-closure-integrity-receipt-closure-integrity-evidence-closure-integrity-replay.js";
 import { certifyLocalRuntimeRecoveryOperationalAuditPublicationDispatchAuthorizationDecisionEvidenceClosureIntegrityReceiptClosureIntegrityEvidenceClosureIntegrity } from "../src/application/local-runtime-recovery-operational-audit-publication-dispatch-authorization-decision-evidence-closure-integrity-receipt-closure-integrity-evidence-closure-integrity-certification.js";
+import { createLocalRuntimeRecoveryOperationalAuditPublicationDispatchAuthorizationDecisionEvidenceClosureIntegrityReceiptClosureIntegrityEvidenceClosureIntegrityEvidence } from "../src/application/local-runtime-recovery-operational-audit-publication-dispatch-authorization-decision-evidence-closure-integrity-receipt-closure-integrity-evidence-closure-integrity-evidence.js";
+import { replayLocalRuntimeRecoveryOperationalAuditPublicationDispatchAuthorizationDecisionEvidenceClosureIntegrityReceiptClosureIntegrityEvidenceClosureIntegrityEvidenceIntegrity, resetLocalRuntimeRecoveryOperationalAuditPublicationDispatchAuthorizationDecisionEvidenceClosureIntegrityReceiptClosureIntegrityEvidenceClosureIntegrityEvidenceIntegrityReplayRegistry } from "../src/application/local-runtime-recovery-operational-audit-publication-dispatch-authorization-decision-evidence-closure-integrity-receipt-closure-integrity-evidence-closure-integrity-evidence-integrity-replay.js";
+import { certifyLocalRuntimeRecoveryOperationalAuditPublicationDispatchAuthorizationDecisionEvidenceClosureIntegrityReceiptClosureIntegrityEvidenceClosureIntegrityEvidenceIntegrity } from "../src/application/local-runtime-recovery-operational-audit-publication-dispatch-authorization-decision-evidence-closure-integrity-receipt-closure-integrity-evidence-closure-integrity-evidence-integrity-certification.js";
 
 const evidenceCertification = {
   certificationId: "EVID-C",
@@ -27,6 +30,30 @@ const evidenceCertification = {
   certified: true,
 } as const;
 
+function makeClosureCertification(id: string) {
+  return {
+    certificationId: id,
+    closureId: id.replace("CERT", "CLOSE"),
+    evidenceCertificationId: "EVID-C",
+    evidenceId: "EVID",
+    integrityCertificationId: "INT-C",
+    integrityId: "INT",
+    receiptId: "RCPT",
+    decisionCertificationId: "DEC-C",
+    decisionId: "DEC",
+    decisionFingerprint: "FP",
+    closureState: "CLOSED_FOR_REVIEW",
+    authorizationGranted: false,
+    dispatchApproved: false,
+    externalTransportRequested: false,
+    dispatchExecuted: false,
+    durablePublicationCreated: false,
+    syntheticOnly: true,
+    replayDisposition: "ADMIT",
+    certified: true,
+  } as const;
+}
+
 test("P13.23681-23840: terminal evidence closure preserves the certified identity chain", () => {
   const closure = createLocalRuntimeRecoveryOperationalAuditPublicationDispatchAuthorizationDecisionEvidenceClosureIntegrityReceiptClosureIntegrityEvidenceClosure({
     closureId: "CLOSE-1",
@@ -45,9 +72,10 @@ test("P13.23841-23960: terminal evidence closure replay is deterministic and fai
     closureId: "CLOSE-2",
     evidenceCertification: evidenceCertification as Parameters<typeof createLocalRuntimeRecoveryOperationalAuditPublicationDispatchAuthorizationDecisionEvidenceClosureIntegrityReceiptClosureIntegrityEvidenceClosure>[0]["evidenceCertification"],
   });
-  assert.equal(replayLocalRuntimeRecoveryOperationalAuditPublicationDispatchAuthorizationDecisionEvidenceClosureIntegrityReceiptClosureIntegrityEvidenceClosure({ closure, evidenceCertification: evidenceCertification as Parameters<typeof replayLocalRuntimeRecoveryOperationalAuditPublicationDispatchAuthorizationDecisionEvidenceClosureIntegrityReceiptClosureIntegrityEvidenceClosure>[0]["evidenceCertification"] }), "ADMIT");
-  assert.equal(replayLocalRuntimeRecoveryOperationalAuditPublicationDispatchAuthorizationDecisionEvidenceClosureIntegrityReceiptClosureIntegrityEvidenceClosure({ closure, evidenceCertification: evidenceCertification as Parameters<typeof replayLocalRuntimeRecoveryOperationalAuditPublicationDispatchAuthorizationDecisionEvidenceClosureIntegrityReceiptClosureIntegrityEvidenceClosure>[0]["evidenceCertification"] }), "REPLAY");
-  assert.throws(() => assertLocalRuntimeRecoveryOperationalAuditPublicationDispatchAuthorizationDecisionEvidenceClosureIntegrityReceiptClosureIntegrityEvidenceClosure({ ...closure, decisionFingerprint: "DRIFT" }, evidenceCertification as Parameters<typeof assertLocalRuntimeRecoveryOperationalAuditPublicationDispatchAuthorizationDecisionEvidenceClosureIntegrityReceiptClosureIntegrityEvidenceClosure>[1]), /identity drift/i);
+  const args = { closure, evidenceCertification: evidenceCertification as Parameters<typeof replayLocalRuntimeRecoveryOperationalAuditPublicationDispatchAuthorizationDecisionEvidenceClosureIntegrityReceiptClosureIntegrityEvidenceClosure>[0]["evidenceCertification"] };
+  assert.equal(replayLocalRuntimeRecoveryOperationalAuditPublicationDispatchAuthorizationDecisionEvidenceClosureIntegrityReceiptClosureIntegrityEvidenceClosure(args), "ADMIT");
+  assert.equal(replayLocalRuntimeRecoveryOperationalAuditPublicationDispatchAuthorizationDecisionEvidenceClosureIntegrityReceiptClosureIntegrityEvidenceClosure(args), "REPLAY");
+  assert.throws(() => assertLocalRuntimeRecoveryOperationalAuditPublicationDispatchAuthorizationDecisionEvidenceClosureIntegrityReceiptClosureIntegrityEvidenceClosure({ ...closure, decisionFingerprint: "DRIFT" }, args.evidenceCertification), /identity drift/i);
 });
 
 test("P13.23961-24080: integrated closure certification remains review-only", () => {
@@ -65,60 +93,20 @@ test("P13.23961-24080: integrated closure certification remains review-only", ()
 });
 
 test("P13.24081-24240: terminal evidence closure integrity binds to the exact closure certification", () => {
-  const closureCertification = {
-    certificationId: "CLOSE-C4",
-    closureId: "CLOSE-4",
-    evidenceCertificationId: "EVID-C",
-    evidenceId: "EVID",
-    integrityCertificationId: "INT-C",
-    integrityId: "INT",
-    receiptId: "RCPT",
-    decisionCertificationId: "DEC-C",
-    decisionId: "DEC",
-    decisionFingerprint: "FP",
-    closureState: "CLOSED_FOR_REVIEW",
-    authorizationGranted: false,
-    dispatchApproved: false,
-    externalTransportRequested: false,
-    dispatchExecuted: false,
-    durablePublicationCreated: false,
-    syntheticOnly: true,
-    replayDisposition: "ADMIT",
-    certified: true,
-  } as const;
+  const closureCertification = makeClosureCertification("CLOSE-C4-CERT");
   const integrity = createLocalRuntimeRecoveryOperationalAuditPublicationDispatchAuthorizationDecisionEvidenceClosureIntegrityReceiptClosureIntegrityEvidenceClosureIntegrity({
     integrityId: "INT-VERIFIED-1",
     closureCertification: closureCertification as Parameters<typeof createLocalRuntimeRecoveryOperationalAuditPublicationDispatchAuthorizationDecisionEvidenceClosureIntegrityReceiptClosureIntegrityEvidenceClosureIntegrity>[0]["closureCertification"],
   });
   assert.equal(integrity.integrityState, "VERIFIED_TERMINAL_EVIDENCE_CLOSURE_REVIEW_ARTIFACT");
   assert.equal(integrity.integrityIdSource, "INT");
-  assert.equal(integrity.closureCertificationId, "CLOSE-C4");
+  assert.equal(integrity.closureCertificationId, "CLOSE-C4-CERT");
   assert.equal(integrity.authorizationGranted, false);
 });
 
 test("P13.24241-24360: integrity replay is deterministic", () => {
   resetLocalRuntimeRecoveryOperationalAuditPublicationDispatchAuthorizationDecisionEvidenceClosureIntegrityReceiptClosureIntegrityEvidenceClosureIntegrityReplayRegistry();
-  const closureCertification = {
-    certificationId: "CLOSE-C5",
-    closureId: "CLOSE-5",
-    evidenceCertificationId: "EVID-C",
-    evidenceId: "EVID",
-    integrityCertificationId: "INT-C",
-    integrityId: "INT",
-    receiptId: "RCPT",
-    decisionCertificationId: "DEC-C",
-    decisionId: "DEC",
-    decisionFingerprint: "FP",
-    closureState: "CLOSED_FOR_REVIEW",
-    authorizationGranted: false,
-    dispatchApproved: false,
-    externalTransportRequested: false,
-    dispatchExecuted: false,
-    durablePublicationCreated: false,
-    syntheticOnly: true,
-    replayDisposition: "ADMIT",
-    certified: true,
-  } as const;
+  const closureCertification = makeClosureCertification("CLOSE-C5-CERT");
   const integrity = createLocalRuntimeRecoveryOperationalAuditPublicationDispatchAuthorizationDecisionEvidenceClosureIntegrityReceiptClosureIntegrityEvidenceClosureIntegrity({
     integrityId: "INT-VERIFIED-2",
     closureCertification: closureCertification as Parameters<typeof createLocalRuntimeRecoveryOperationalAuditPublicationDispatchAuthorizationDecisionEvidenceClosureIntegrityReceiptClosureIntegrityEvidenceClosureIntegrity>[0]["closureCertification"],
@@ -131,27 +119,7 @@ test("P13.24241-24360: integrity replay is deterministic", () => {
 
 test("P13.24361-24480: integrated integrity certification remains non-executable", () => {
   resetLocalRuntimeRecoveryOperationalAuditPublicationDispatchAuthorizationDecisionEvidenceClosureIntegrityReceiptClosureIntegrityEvidenceClosureIntegrityReplayRegistry();
-  const closureCertification = {
-    certificationId: "CLOSE-C6",
-    closureId: "CLOSE-6",
-    evidenceCertificationId: "EVID-C",
-    evidenceId: "EVID",
-    integrityCertificationId: "INT-C",
-    integrityId: "INT",
-    receiptId: "RCPT",
-    decisionCertificationId: "DEC-C",
-    decisionId: "DEC",
-    decisionFingerprint: "FP",
-    closureState: "CLOSED_FOR_REVIEW",
-    authorizationGranted: false,
-    dispatchApproved: false,
-    externalTransportRequested: false,
-    dispatchExecuted: false,
-    durablePublicationCreated: false,
-    syntheticOnly: true,
-    replayDisposition: "ADMIT",
-    certified: true,
-  } as const;
+  const closureCertification = makeClosureCertification("CLOSE-C6-CERT");
   const certification = certifyLocalRuntimeRecoveryOperationalAuditPublicationDispatchAuthorizationDecisionEvidenceClosureIntegrityReceiptClosureIntegrityEvidenceClosureIntegrity({
     certificationId: "INT-CERT-1",
     integrityId: "INT-VERIFIED-3",
@@ -162,4 +130,101 @@ test("P13.24361-24480: integrated integrity certification remains non-executable
   assert.equal(certification.integrityState, "VERIFIED_TERMINAL_EVIDENCE_CLOSURE_REVIEW_ARTIFACT");
   assert.equal(certification.authorizationGranted, false);
   assert.equal(certification.dispatchApproved, false);
+});
+
+test("P13.24481-24640: evidence-integrity boundary preserves the review artifact chain", () => {
+  const integrityCertification = certifyLocalRuntimeRecoveryOperationalAuditPublicationDispatchAuthorizationDecisionEvidenceClosureIntegrityReceiptClosureIntegrityEvidenceClosureIntegrity({
+    certificationId: "INT-CERT-EVID",
+    integrityId: "INT-VERIFIED-EVID",
+    closureCertification: makeClosureCertification("CLOSE-C7-CERT") as Parameters<typeof certifyLocalRuntimeRecoveryOperationalAuditPublicationDispatchAuthorizationDecisionEvidenceClosureIntegrityReceiptClosureIntegrityEvidenceClosureIntegrity>[0]["closureCertification"],
+  });
+  const evidence = createLocalRuntimeRecoveryOperationalAuditPublicationDispatchAuthorizationDecisionEvidenceClosureIntegrityReceiptClosureIntegrityEvidenceClosureIntegrityEvidence({
+    evidenceId: "EVID-VERIFIED",
+    integrityCertification: integrityCertification as Parameters<typeof createLocalRuntimeRecoveryOperationalAuditPublicationDispatchAuthorizationDecisionEvidenceClosureIntegrityReceiptClosureIntegrityEvidenceClosureIntegrityEvidence>[0]["integrityCertification"],
+  });
+  assert.equal(evidence.evidenceState, "READY_FOR_REVIEW");
+  assert.equal(evidence.evidenceIdSource, "EVID");
+  assert.equal(evidence.syntheticOnly, true);
+  assert.equal(evidence.dispatchExecuted, false);
+});
+
+test("P13.24641-24760: evidence-integrity replay rejects identity drift", () => {
+  resetLocalRuntimeRecoveryOperationalAuditPublicationDispatchAuthorizationDecisionEvidenceClosureIntegrityReceiptClosureIntegrityEvidenceClosureIntegrityEvidenceIntegrityReplayRegistry();
+  const integrityCertification = certifyLocalRuntimeRecoveryOperationalAuditPublicationDispatchAuthorizationDecisionEvidenceClosureIntegrityReceiptClosureIntegrityEvidenceClosureIntegrity({
+    certificationId: "INT-CERT-EVID-2",
+    integrityId: "INT-VERIFIED-EVID-2",
+    closureCertification: makeClosureCertification("CLOSE-C8-CERT") as Parameters<typeof certifyLocalRuntimeRecoveryOperationalAuditPublicationDispatchAuthorizationDecisionEvidenceClosureIntegrityReceiptClosureIntegrityEvidenceClosureIntegrity>[0]["closureCertification"],
+  });
+  const evidence = createLocalRuntimeRecoveryOperationalAuditPublicationDispatchAuthorizationDecisionEvidenceClosureIntegrityReceiptClosureIntegrityEvidenceClosureIntegrityEvidence({
+    evidenceId: "EVID-VERIFIED-2",
+    integrityCertification: integrityCertification as Parameters<typeof createLocalRuntimeRecoveryOperationalAuditPublicationDispatchAuthorizationDecisionEvidenceClosureIntegrityReceiptClosureIntegrityEvidenceClosureIntegrityEvidence>[0]["integrityCertification"],
+  });
+  const integrity = {
+    integrityId: "INT-EVID-INTEGRITY",
+    evidenceId: evidence.evidenceId,
+    integrityCertificationId: evidence.integrityCertificationId,
+    closureCertificationId: evidence.closureCertificationId,
+    closureId: evidence.closureId,
+    evidenceCertificationId: evidence.evidenceCertificationId,
+    evidenceIdSource: evidence.evidenceIdSource,
+    receiptId: evidence.receiptId,
+    decisionCertificationId: evidence.decisionCertificationId,
+    decisionId: evidence.decisionId,
+    decisionFingerprint: evidence.decisionFingerprint,
+    integrityState: "VERIFIED_TERMINAL_EVIDENCE_CLOSURE_INTEGRITY_EVIDENCE_REVIEW_ARTIFACT",
+    authorizationGranted: false,
+    dispatchApproved: false,
+    externalTransportRequested: false,
+    dispatchExecuted: false,
+    durablePublicationCreated: false,
+    syntheticOnly: true,
+  } as const;
+  const args = { integrity: integrity as Parameters<typeof replayLocalRuntimeRecoveryOperationalAuditPublicationDispatchAuthorizationDecisionEvidenceClosureIntegrityReceiptClosureIntegrityEvidenceClosureIntegrityEvidenceIntegrity>[0]["integrity"], evidence };
+  assert.equal(replayLocalRuntimeRecoveryOperationalAuditPublicationDispatchAuthorizationDecisionEvidenceClosureIntegrityReceiptClosureIntegrityEvidenceClosureIntegrityEvidenceIntegrity(args), "ADMIT");
+  assert.equal(replayLocalRuntimeRecoveryOperationalAuditPublicationDispatchAuthorizationDecisionEvidenceClosureIntegrityReceiptClosureIntegrityEvidenceClosureIntegrityEvidenceIntegrity(args), "REPLAY");
+  assert.throws(() => replayLocalRuntimeRecoveryOperationalAuditPublicationDispatchAuthorizationDecisionEvidenceClosureIntegrityReceiptClosureIntegrityEvidenceClosureIntegrityEvidenceIntegrity({ ...args, integrity: { ...args.integrity, decisionFingerprint: "DRIFT" } }), /identity drift/i);
+});
+
+test("P13.24761-24880: evidence-integrity certification remains non-executable", () => {
+  resetLocalRuntimeRecoveryOperationalAuditPublicationDispatchAuthorizationDecisionEvidenceClosureIntegrityReceiptClosureIntegrityEvidenceClosureIntegrityEvidenceIntegrityReplayRegistry();
+  const integrityCertification = certifyLocalRuntimeRecoveryOperationalAuditPublicationDispatchAuthorizationDecisionEvidenceClosureIntegrityReceiptClosureIntegrityEvidenceClosureIntegrity({
+    certificationId: "INT-CERT-EVID-3",
+    integrityId: "INT-VERIFIED-EVID-3",
+    closureCertification: makeClosureCertification("CLOSE-C9-CERT") as Parameters<typeof certifyLocalRuntimeRecoveryOperationalAuditPublicationDispatchAuthorizationDecisionEvidenceClosureIntegrityReceiptClosureIntegrityEvidenceClosureIntegrity>[0]["closureCertification"],
+  });
+  const evidence = createLocalRuntimeRecoveryOperationalAuditPublicationDispatchAuthorizationDecisionEvidenceClosureIntegrityReceiptClosureIntegrityEvidenceClosureIntegrityEvidence({
+    evidenceId: "EVID-VERIFIED-3",
+    integrityCertification: integrityCertification as Parameters<typeof createLocalRuntimeRecoveryOperationalAuditPublicationDispatchAuthorizationDecisionEvidenceClosureIntegrityReceiptClosureIntegrityEvidenceClosureIntegrityEvidence>[0]["integrityCertification"],
+  });
+  const integrity = {
+    integrityId: "INT-EVID-CERT",
+    evidenceId: evidence.evidenceId,
+    integrityCertificationId: evidence.integrityCertificationId,
+    closureCertificationId: evidence.closureCertificationId,
+    closureId: evidence.closureId,
+    evidenceCertificationId: evidence.evidenceCertificationId,
+    evidenceIdSource: evidence.evidenceIdSource,
+    receiptId: evidence.receiptId,
+    decisionCertificationId: evidence.decisionCertificationId,
+    decisionId: evidence.decisionId,
+    decisionFingerprint: evidence.decisionFingerprint,
+    integrityState: "VERIFIED_TERMINAL_EVIDENCE_CLOSURE_INTEGRITY_EVIDENCE_REVIEW_ARTIFACT",
+    authorizationGranted: false,
+    dispatchApproved: false,
+    externalTransportRequested: false,
+    dispatchExecuted: false,
+    durablePublicationCreated: false,
+    syntheticOnly: true,
+  } as const;
+  const certification = certifyLocalRuntimeRecoveryOperationalAuditPublicationDispatchAuthorizationDecisionEvidenceClosureIntegrityReceiptClosureIntegrityEvidenceClosureIntegrityEvidenceIntegrity({
+    certificationId: "EVID-INTEGRITY-CERT",
+    integrityId: integrity.integrityId,
+    integrity: integrity as Parameters<typeof certifyLocalRuntimeRecoveryOperationalAuditPublicationDispatchAuthorizationDecisionEvidenceClosureIntegrityReceiptClosureIntegrityEvidenceClosureIntegrityEvidenceIntegrity>[0]["integrity"],
+    evidence,
+  });
+  assert.equal(certification.certified, true);
+  assert.equal(certification.replayDisposition, "ADMIT");
+  assert.equal(certification.integrityState, "VERIFIED_TERMINAL_EVIDENCE_CLOSURE_INTEGRITY_EVIDENCE_REVIEW_ARTIFACT");
+  assert.equal(certification.authorizationGranted, false);
+  assert.equal(certification.durablePublicationCreated, false);
 });
