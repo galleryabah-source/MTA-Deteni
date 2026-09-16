@@ -1,7 +1,7 @@
 # MTA DETENI — Next Gate
 
-**Foundation:** v1.116+
-**Current:** P13.14281–14400 — runtime continuity closure gate implemented; CI observation blocker remains
+**Foundation:** v1.118+
+**Current:** P13.14521–14640 — integrated runtime recovery closure replay guard implemented; CI observation blocker remains
 
 ## Completed (through current gate)
 
@@ -48,13 +48,15 @@
 - P13.13801–13920: deterministic acknowledgement replay guard with ADMIT/REPLAY/CONFLICT semantics.
 - P13.13921–14040: acknowledgement continuity certification binds acknowledgement, replay result and integrated execution certification.
 - P13.14041–14160: deterministic post-dispatch completion proof binds integrated certification, acknowledgement certification, execution, dispatch and fingerprint continuity.
-- P13.14161–14280: runtime continuity receipt binds the completion proof to the broader certified continuity state and exact execution/dispatch/acknowledgement/fingerprint identities.
+- P13.14161–14280: runtime continuity receipt binds completion proof to the broader certified continuity state and exact execution/dispatch/acknowledgement/fingerprint identities.
 - P13.14281–14400: deterministic runtime continuity closure gate; unresolved acknowledgement conflict, identity drift and non-synthetic state fail closed.
+- P13.14401–14520: integrated runtime recovery closure certification composes continuity receipt and CLOSED closure state into a final synthetic certification boundary.
+- P13.14521–14640: deterministic integrated closure replay guard; identical closure identity/fingerprint replays without a second admission effect, changed fingerprint becomes CONFLICT.
 - Historical P13.5809–5880 observable-execution contract remains part of the repository governance chain.
 
-## Next gate: P13.14401–14520
+## Next gate: P13.14641–14760
 
-Create an integrated runtime recovery closure certification that composes the continuity receipt and closure result into one final synthetic certification boundary. Preserve exact receipt/closure/execution/fingerprint identity and reject any non-CLOSED or non-synthetic state. No production transport, persistence, schema migration, AI or live database execution.
+Bind integrated runtime recovery closure certification to a final closure evidence envelope and deterministic closure audit record. Preserve exact certification, receipt, closure, execution and fingerprint identity. No production transport, persistence, schema migration, AI or live database execution.
 
 ## Governance lock
 
