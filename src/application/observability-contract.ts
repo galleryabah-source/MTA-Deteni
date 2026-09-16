@@ -1,3 +1,5 @@
+import { assertExecutionContextContinuity, type ExecutionContext } from "./execution-context-contract.js";
+
 export type ObservabilityLevel = "INFO" | "WARN" | "ERROR";
 
 export type ObservabilityEvent = Readonly<{
@@ -20,6 +22,22 @@ export function validateObservabilityEvent(event: ObservabilityEvent): void {
   const required = [event.eventId, event.eventType, event.timestamp, event.correlationId, event.requestId];
   if (required.some((value) => !value.trim())) throw new Error("OBSERVABILITY_IDENTITY_REQUIRED");
   if (event.transactionId !== undefined && !event.transactionId.trim()) throw new Error("OBSERVABILITY_TRANSACTION_ID_INVALID");
+}
+
+/**
+ * Observability is downstream of the same canonical execution context.
+ * Missing transactionId remains allowed for non-transactional events, while
+ * supplied identities must match the active context exactly.
+ */
+export function assertObservabilityContextContinuity(
+  context: ExecutionContext,
+  event: Pick<ObservabilityEvent, "requestId" | "correlationId" | "transactionId">,
+): void {
+  assertExecutionContextContinuity(context, {
+    requestId: event.requestId,
+    correlationId: event.correlationId,
+    transactionId: event.transactionId,
+  });
 }
 
 export async function emitObservabilityEvent(sink: ObservabilitySink, event: ObservabilityEvent): Promise<void> {
