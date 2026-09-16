@@ -1,5 +1,18 @@
 # Changelog
 
+## P13.14521–14640 — Integrated Runtime Recovery Closure Replay Guard
+
+- Added deterministic ADMIT/REPLAY/CONFLICT semantics for integrated recovery closure certification.
+- Same certification identity and fingerprint replays without a second admission effect.
+- Same certification identity with a different fingerprint becomes CONFLICT and is not admitted.
+- Added regression coverage for closure identity/fingerprint drift and non-synthetic state.
+
+## P13.14401–14520 — Integrated Runtime Recovery Closure Certification
+
+- Added integrated certification composing runtime continuity receipt and CLOSED closure result.
+- Preserved exact receipt, closure, completion proof, acknowledgement, execution and fingerprint identity.
+- Rejected non-CLOSED and non-synthetic recovery closure state.
+
 ## P13.14281–14400 — Runtime Continuity Closure Gate
 
 - Added deterministic runtime continuity closure after a certified continuity receipt.
