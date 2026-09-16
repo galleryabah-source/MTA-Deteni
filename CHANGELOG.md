@@ -1,5 +1,30 @@
 # Changelog
 
+## P13.11641–11760 — Local Adapter Failure-Injection & Recovery Matrix
+
+- Added a deterministic five-scenario synthetic matrix covering malformed request, expired handshake, session scope drift, idempotency conflict and reconciliation-required state.
+- Bound each scenario to a stable failure class, rejected response, retry policy and operator-review requirement.
+- Preserved fail-closed scenario/class consistency and synthetic-only operation.
+
+## P13.11761–11880 — Local Runtime Recovery Disposition Contract
+
+- Added deterministic recovery dispositions bound to certified failure evidence.
+- Distinguished corrective retry, reauthentication, valid-session reopening, operator review and reconciliation-before-retry.
+- Prevented automatic retry for idempotency conflicts and reconciliation-required states.
+
+## P13.11881–12000 — Integrated Local Failure-Recovery Journey
+
+- Composed failure evidence, failure observation, failure certification and recovery disposition into one synthetic journey.
+- Preserved evidence/disposition/certification identity continuity.
+- Rejected scenario drift and disposition drift before a recovery journey can be certified.
+
+## P13.12001–12120 — Local Runtime Safety Certification Envelope
+
+- Added a final safety envelope binding the failure-recovery journey, failure certification and recovery disposition.
+- Exposed deterministic retry safety and operator-review requirements.
+- Prevented automatic retry when operator review is required.
+- Preserved synthetic-only certification with no production transport or persistence.
+
 ## P13.11521–11640 — Local Runtime Failure Certification
 
 - Composed failure evidence, failure observation and request-boundary validation into one synthetic certification chain.
@@ -54,57 +79,3 @@
 - Restricted handshake creation to authenticated LAN/LOCAL runtime contexts.
 - Added deterministic issued/expiry validation and fail-closed invalid windows.
 - Required exact device/install/network binding for adapter requests.
-
-## P13.10561–10680 — Session Handshake Lifetime
-
-- Added regression proving a handshake is usable only inside its declared validity window.
-- Prevented expired handshakes from being accepted at the exact expiry boundary.
-- Preserved synthetic/in-memory operation.
-
-## P13.10681–10800 — Continuity-Sensitive Mutation Admission
-
-- Added fail-closed validation for malformed handshake identity/time.
-- Bound continuity-sensitive mutations to the active operational session and exact execution/device/install/network scope.
-- Required certified runtime handoff and ready recovery proof before continuity-sensitive mutation admission.
-
-## P13.10081–10200 — Local Runtime Adapter Contract
-
-- Added a narrow synthetic LOCAL/LAN adapter contract for browser, tablet and smartphone clients.
-- Required request identity, authenticated device identity, local service boundary and idempotency for mutations.
-- Preserved the separation between adapter contracts and external transport/persistence.
-
-## P13.10201–10320 — Local Runtime Routing Safety
-
-- Rejected absolute and protocol-relative URLs from the local runtime adapter.
-- Restricted adapter paths to the `/mta-local/` service boundary.
-- Prevented accidental routing of local operations to external services.
-
-## P13.10321–10440 — Synthetic Adapter Execution Boundary
-
-- Added deterministic in-memory adapter execution returning contract-level acceptance only.
-- Added regression coverage for authenticated LAN mutations, missing idempotency, external/non-local paths and unsafe authentication boundaries.
-- Preserved migration freeze, synthetic-only data and no production connectivity.
-
-## P13.9601–9720 — Unified Continuity Certification Envelope
-
-- Added an immutable synthetic certification envelope binding continuity certification, operational session, reconciliation proof and runtime handoff evidence.
-- Enforced equality across session, execution, device, installation, network and journey identities.
-- Required authorized/certification-bound runtime handoff and READY backup continuity before envelope certification.
-- Required complete reconciliation cardinality before clean continuity can be represented.
-
-## P13.9721–9840 — Local/LAN Recovery Boundary
-
-- Added deterministic LOCAL/LAN recovery proof for authenticated synthetic sessions.
-- Preserved installation and network-scope trust as the minimum recovery boundary.
-- Target installation/network drift fails closed before recovery can become READY.
-
-## P13.9841–9960 — Multi-Device LAN Continuity
-
-- Reused the installation/network trust boundary for target-device continuity.
-- Kept device changes admissible only within the same trusted installation and network scope.
-- Preserved synthetic-only recovery semantics without introducing external persistence.
-
-## P13.9961–10080 — Runtime Adapter Integration Boundary
-
-- Kept runtime integration adapter-only and isolated from database/production transport.
-- Established the separation needed for a future browser/tablet/smartphone LOCAL/LAN adapter without weakening current synthetic governance controls.
