@@ -1,5 +1,14 @@
 # Changelog
 
+## P9.8 — Governed Outbox Contract
+
+- Added `src/application/outbox-runtime-contract.ts` defining the validated pending-outbox boundary with event identity, aggregate identity, event type, payload fingerprint, timestamp, status and attempt count.
+- Added immutable event construction that starts only in `PENDING` state with zero attempts.
+- Added fail-closed validation for missing outbox identity, invalid attempt counts and non-pending append state.
+- Kept append behind a dedicated store boundary returning deterministic `ADMIT` / `REPLAY` / `CONFLICT` dispositions.
+- Added `test/outbox-runtime-contract.test.ts` covering immutable pending creation, invalid input rejection and mandatory append routing.
+- Runtime remains unbound: no PostgreSQL connection, SQL execution, migration, external transport or durable publication was introduced.
+
 ## P9.7 — Transaction + Idempotency Boundary Contract
 
 - Added `src/application/transaction-idempotency-boundary.ts` to bind transaction identity and idempotency identity at one explicit application boundary.
@@ -26,39 +35,4 @@
 - Preserved synthetic-only, review-only and explicitly non-executable behavior.
 - Added regression coverage for cardinality, sequence, immutability, governance locks, replay, drift conflict, fail-closed certification and identity aliasing.
 - No schema migration, live PostgreSQL execution, production access, AI activation, external transport, durable publication, real detainee data or production PII was introduced.
-- CI remains observation-only unless observable workflow evidence is available.
-
-## P1 Runtime Integrity — Optimistic Concurrency Contract
-
-- Added `src/application/optimistic-concurrency-contract.ts` with deterministic expected-version validation and `ACCEPT` / `STALE_VERSION` decisions.
-- Added immutable aggregate-version advancement and fail-closed invalid-version handling.
-- Added `test/optimistic-concurrency-contract.test.ts` covering exact-version acceptance, stale-version rejection, immutable increment and invalid input.
-- Updated `PROJECT_STATUS.md` to record P1 runtime integrity remediation in progress.
-- No schema migration, live PostgreSQL execution, production access, AI activation, real detainee data or production PII was introduced.
-
-## P13 Closure Audit — Exit Criteria and CI Gate Repair
-
-- Added `P13_EXIT_CRITERIA.md` with eight evidence-based closure criteria covering scope, identity continuity, replay determinism, non-executable boundaries, regression coverage, observable CI execution, documentation synchronization and governance locks.
-- Explicitly prevented checkpoint inflation: no new numbered ranges are added solely to increase checkpoint counts.
-- Repaired `.github/scripts/mta-contract-gate.mjs` so the CI gate evaluates the current P13 closure candidate rather than stale historical `PROJECT_STATUS_NEXT.md` checkpoint values and obsolete vocabulary checks.
-- Updated `PROJECT_STATUS.md` to record the current closure audit and keep P13 at **IMPLEMENTED CONTRACTS / OBSERVATION PENDING** until observable controlled-nonprod workflow evidence exists.
-- No schema migration, live PostgreSQL execution, production access, AI activation, external transport, durable publication, real detainee data or production PII was introduced.
-
-## P13.246881–260880 — Attestation Closure Certification (100 Checkpoints)
-
-- Extended the governed P13 chain across exactly 100 sequential checkpoints from P13.246881 through P13.260880.
-- Added an attestation-closure certification boundary binding the base artifact/parent identity to distinct attestation-closure and certification identities and decision fingerprints.
-- Enforced fail-closed identity alias rejection and deterministic identity-bound `ADMIT` / `REPLAY` / `CONFLICT` semantics.
-- Certification fails closed on replay fingerprint drift and returns only immutable review evidence.
-- Preserved synthetic-only, review-only and explicitly non-executable behavior.
-- Added regression coverage for cardinality, sequence, immutability, governance locks, replay, drift conflict, fail-closed certification and identity aliasing.
-- CI remains observation-only unless observable workflow evidence is available.
-
-## P13.232881–246880 — Attestation Closure (100 Checkpoints)
-
-- Extended the governed P13 chain across exactly 100 sequential checkpoints from P13.232881 through P13.246880.
-- Added an attestation-closure boundary binding artifact, parent artifact, decision fingerprint and distinct attestation identity/fingerprint.
-- Enforced fail-closed identity alias rejection and deterministic identity-bound ADMIT / REPLAY / CONFLICT semantics.
-- Preserved immutable, synthetic-only, review-only and explicitly non-executable behavior.
-- Added regression coverage for cardinality, sequence, immutability, governance locks, replay, fingerprint drift and identity aliasing.
 - CI remains observation-only unless observable workflow evidence is available.
