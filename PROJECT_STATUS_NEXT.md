@@ -1,7 +1,7 @@
 # MTA DETENI — Next Gate
 
-**Foundation:** v1.99
-**Current:** P13.12001–12120 — local runtime safety certification envelope implemented; CI observation blocker remains
+**Foundation:** v1.102
+**Current:** P13.12481–12600 — integrated local runtime recovery certification implemented; CI observation blocker remains
 
 ## Completed (through current gate)
 
@@ -31,11 +31,15 @@
 - P13.11761–11880: recovery disposition contract binds each certified failure to deterministic retry/review semantics; idempotency conflict and reconciliation-required states cannot be automatically retried.
 - P13.11881–12000: integrated failure-recovery journey composes evidence, observation, certification and disposition while rejecting scenario/evidence drift.
 - P13.12001–12120: local runtime safety certification envelope binds journey, failure certification and recovery disposition and prevents automatic retry when operator review is required.
+- P13.12121–12240: five-scenario regression traverses the complete safety chain and covers retry-policy, operator-review and synthetic-only drift.
+- P13.12241–12360: deterministic recovery action gate maps each certified scenario to a bounded action; blocked actions cannot be admitted automatically.
+- P13.12361–12480: recovery continuity gate converts safety policy into explicit READY/blocked continuity states while preserving the safety envelope boundary.
+- P13.12481–12600: integrated recovery certification composes the safety envelope and continuity gate into one synthetic recovery admission contract; operator-review and reconciliation-required states remain blocked.
 - No database driver, migration, production persistence, real detainee data, production telemetry, or AI activation.
 
-## Next gate: P13.12121–12240
+## Next gate: P13.12601–12720
 
-Build **local runtime safety regression matrix**: execute the five failure/recovery scenarios through the full evidence → observation → certification → disposition → safety-envelope chain and assert fail-closed behavior for identity drift, retry-policy drift, operator-review conflicts and non-synthetic inputs.
+Build **local runtime recovery decision integrity**: bind recovery admission to exact scenario, disposition, envelope and continuity identities; reject decision tampering, stale certification, cross-scenario substitution and non-synthetic recovery state.
 
 ## Governance lock
 
