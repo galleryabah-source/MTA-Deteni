@@ -1,5 +1,15 @@
 # Changelog
 
+## P13.246881–260880 — Attestation Closure Certification (100 Checkpoints)
+
+- Extended the governed P13 chain across exactly 100 sequential checkpoints from P13.246881 through P13.260880.
+- Added an attestation-closure certification boundary binding the base artifact/parent identity to distinct attestation-closure and certification identities and decision fingerprints.
+- Enforced fail-closed identity alias rejection and deterministic identity-bound `ADMIT` / `REPLAY` / `CONFLICT` semantics.
+- Certification fails closed on replay fingerprint drift and returns only immutable review evidence.
+- Preserved synthetic-only, review-only and explicitly non-executable behavior.
+- Added regression coverage for cardinality, sequence, immutability, governance locks, replay, drift conflict, fail-closed certification and identity aliasing.
+- CI remains observation-only unless observable workflow evidence is available.
+
 ## P13.232881–246880 — Attestation Closure (100 Checkpoints)
 
 - Extended the governed P13 chain across exactly 100 sequential checkpoints from P13.232881 through P13.246880.

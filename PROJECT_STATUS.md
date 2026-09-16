@@ -1,15 +1,15 @@
 # MTA DETENI — Project Status
 
-**Foundation:** v1.130+
-**Current Track:** P13.232881–246880 attestation-closure / CI observation pending
+**Foundation:** v1.131+
+**Current Track:** P13.246881–260880 attestation-closure certification / CI observation pending
 **Branch:** `main`
-**Latest implementation checkpoint:** P13.246880
+**Latest implementation checkpoint:** P13.260880
 
 ## Latest progress
 
-- P13.218881–232880 — integrated integrity-audit terminal closure certification seal receipt attestation, 100 checkpoints.
-- P13.232881–246880 — attestation-closure boundary, 100 checkpoints, preserving artifact/parent/decision identity continuity and deterministic replay semantics.
-- Regression coverage added for cardinality, sequential labels, immutability, governance locks, replay determinism, drift conflict and identity alias rejection.
+- P13.232881–246880 — attestation-closure boundary, 100 checkpoints.
+- P13.246881–260880 — attestation-closure certification boundary, 100 checkpoints, extending the identity chain with distinct attestation-closure and certification identities/fingerprints.
+- Regression coverage added for cardinality, sequential labels, immutability, governance locks, replay determinism, fingerprint drift, fail-closed certification and identity alias rejection.
 
 ## Governance locks
 
@@ -23,11 +23,11 @@
 
 ## Current certification state
 
-**P13.232881–246880 — IMPLEMENTED CONTRACTS / OBSERVATION PENDING**
+**P13.246881–260880 — IMPLEMENTED CONTRACTS / OBSERVATION PENDING**
 
 ## Next gate
 
-**P13.246881 onward — continue the governed integrity chain only after preserving the same review-only, synthetic-only, fail-closed and non-executable boundaries.**
+**P13.260881 onward — continue the governed integrity chain only while preserving the same review-only, synthetic-only, fail-closed and non-executable boundaries.**
 
 ## Documentation integrity
 
