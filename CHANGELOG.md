@@ -1,5 +1,23 @@
 # Changelog
 
+## P13.20081–20160 — Terminal Receipt Closure Integrity Evidence Closure Boundary
+
+- Added deterministic closure of the certified terminal receipt closure integrity evidence envelope as `CLOSED_FOR_REVIEW`.
+- Preserved integrity, receipt, decision and fingerprint continuity.
+- Closure remains synthetic-only and explicitly blocks authorization, dispatch, external transport and durable publication.
+
+## P13.20161–20240 — Terminal Receipt Closure Integrity Evidence Closure Replay Guard
+
+- Added deterministic `ADMIT` / `REPLAY` / `CONFLICT` semantics for the evidence closure artifact.
+- Replay identity binds closure, evidence and certification identities while preserving fingerprint continuity.
+- Replay remains in-memory and side-effect free.
+
+## P13.20241–20320 — Integrated Terminal Receipt Closure Integrity Evidence Closure Certification
+
+- Added integrated evidence-closure certification composing closure validation and replay protection.
+- Certification fails closed on replay conflict and preserves synthetic-only, review-only and non-executable invariants.
+- Added regression coverage for complete identity continuity, deterministic replay, drift and non-granting certification.
+
 ## P13.19721–19840 — Terminal Receipt Closure Integrity Evidence Boundary
 
 - Added deterministic review evidence envelope for the certified terminal receipt closure integrity artifact.
@@ -17,22 +35,3 @@
 - Added integrated evidence certification composing evidence validation and replay protection.
 - Certification fails closed on replay conflict and preserves synthetic-only, review-only and non-executable invariants.
 - Added regression coverage for evidence state, deterministic replay, fingerprint drift and non-granting certification.
-
-## P13.19481–19600 — Terminal Receipt Closure Integrity Replay Guard
-
-- Added deterministic `ADMIT` / `REPLAY` / `CONFLICT` semantics for the verified terminal receipt-closure integrity artifact.
-- Replay identity binds integrity, closure and receipt identities while preserving the decision fingerprint.
-- Replay remains in-memory and side-effect free.
-
-## P13.19601–19720 — Integrated Terminal Receipt Closure Integrity Certification
-
-- Added integrated integrity certification composing artifact validation and replay protection.
-- Certification fails closed on replay conflict and preserves synthetic-only, review-only and non-executable invariants.
-- Added regression coverage for deterministic replay, fingerprint drift and non-granting certification state.
-
-## P13.19361–19480 — Terminal Integrity Receipt Closure Integrity Boundary
-
-- Added deterministic integrity verification for the closed terminal receipt artifact.
-- Preserved receipt certification, integrity certification, decision certification and fingerprint continuity.
-- Integrity state is `VERIFIED_TERMINAL_RECEIPT_CLOSURE_REVIEW_ARTIFACT` and remains synthetic-only and non-executable.
-- No authorization grant, dispatch approval, dispatch execution, external transport or durable publication is introduced.
