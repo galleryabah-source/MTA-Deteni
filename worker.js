@@ -7,12 +7,12 @@ export default {
         ok: true,
         app: 'MTA DETENI',
         runtime: 'cloudflare-static-adapter',
-        preview: 'operational-v5',
+        preview: 'operational-v6',
         dataMode: 'synthetic-only',
         ai: 'OFF',
         database: 'NOT_CONNECTED',
         migrationFreeze: true,
-        capabilities: ['dashboard', 'detainee', 'placement', 'movement', 'leave', 'documents', 'audit', 'operational-monitor', 'qr-center', 'scan-center', 'operational-queue'],
+        capabilities: ['dashboard', 'detainee', 'placement', 'movement', 'leave', 'documents', 'audit', 'operational-monitor', 'qr-center', 'scan-center', 'operational-queue', 'room-ops', 'leave-qr', 'camera-scan', 'reports'],
         timestamp: new Date().toISOString()
       });
     }
@@ -24,7 +24,7 @@ export default {
         nextAdapter: 'SUPABASE_CONTROLLED_NONPROD',
         authorization: 'CONTRACT_BOUNDARY',
         audit: 'SYNTHETIC_EVENT_LEDGER',
-        previewVersion: 'v5'
+        previewVersion: 'v6'
       });
     }
 
@@ -34,7 +34,7 @@ export default {
       return new HTMLRewriter()
         .on('body', {
           element(element) {
-            element.append('<script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.js"></script><script src="/preview-v5.js"></script>', { html: true });
+            element.append('<script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.js"></script><script src="/preview-v5.js"></script><script src="/preview-v6.js"></script>', { html: true });
           }
         })
         .transform(response);
