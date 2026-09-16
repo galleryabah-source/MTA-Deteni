@@ -3,22 +3,26 @@ import test from "node:test";
 import { closeLocalRuntimeRecoveryRuntimeContinuity } from "../src/application/local-runtime-recovery-runtime-continuity-receipt-close.js";
 import { assertLocalRuntimeRecoveryRuntimeContinuityReceipt, createLocalRuntimeRecoveryRuntimeContinuityReceipt } from "../src/application/local-runtime-recovery-runtime-continuity-receipt.js";
 import type { ContinuityCertification } from "../src/application/continuity-certification.js";
+import type { IntegratedLocalRuntimeRecoveryExecutionCertification } from "../src/application/integrated-local-runtime-recovery-execution-certification.js";
 import type { LocalRuntimeRecoveryExecutionCompletionProof } from "../src/application/local-runtime-recovery-execution-completion-proof.js";
+import type { LocalRuntimeRecoveryExecutionAcknowledgement } from "../src/application/local-runtime-recovery-execution-acknowledgement.js";
 import type { LocalRuntimeRecoveryExecutionAcknowledgementCertification } from "../src/application/local-runtime-recovery-execution-acknowledgement-certification.js";
 
 const continuity = { certificationId: "CONT-1", journeyId: "J-1", executionId: "EXEC-1", sessionId: "S-1", deviceId: "DEV-1", installationId: "INST-1", networkScopeId: "NET-1", lifecycleJourneyId: "J-1", recoveryJourneyId: "J-1", runtimeDecision: "READY", backupDecision: "READY", projectionVersion: 1, lifecycleVersion: 1, certified: true, syntheticOnly: true } as ContinuityCertification;
+const integrated = { certificationId: "IRC-1", executionId: "EXEC-1", dispatchId: "DISP-1", executionCertificationId: "RX-1", evidenceId: "EXE-1", decisionId: "DEC-1", requestId: "REQ-1", decisionFingerprint: "FP-1", dispatched: true, admitted: true, certified: true, syntheticOnly: true } as IntegratedLocalRuntimeRecoveryExecutionCertification;
+const acknowledgement = { acknowledgementId: "ACK-1", certificationId: "IRC-1", executionId: "EXEC-1", dispatchId: "DISP-1", evidenceId: "EXE-1", decisionId: "DEC-1", requestId: "REQ-1", decisionFingerprint: "FP-1", acknowledged: true, syntheticOnly: true } as LocalRuntimeRecoveryExecutionAcknowledgement;
 const proof = { proofId: "PROOF-1", certificationId: "IRC-1", acknowledgementCertificationId: "ACKC-1", executionId: "EXEC-1", dispatchId: "DISP-1", acknowledgementId: "ACK-1", decisionFingerprint: "FP-1", completed: true, syntheticOnly: true } as LocalRuntimeRecoveryExecutionCompletionProof;
 const ackCertification = { certificationId: "ACKC-1", acknowledgementId: "ACK-1", integratedCertificationId: "IRC-1", executionId: "EXEC-1", dispatchId: "DISP-1", decisionFingerprint: "FP-1", admitted: true, certified: true, syntheticOnly: true } as LocalRuntimeRecoveryExecutionAcknowledgementCertification;
 
 function receipt() {
-  return createLocalRuntimeRecoveryRuntimeContinuityReceipt({ receiptId: "RCP-1", continuity, completionProof: proof, acknowledgementCertification: ackCertification });
+  return createLocalRuntimeRecoveryRuntimeContinuityReceipt({ receiptId: "RCP-1", continuity, integratedCertification: integrated, completionProof: proof, acknowledgement, acknowledgementCertification: ackCertification });
 }
 
 test("P13.14161-14280: completion proof enters runtime continuity receipt", () => {
   const result = receipt();
   assert.equal(result.continuityState, "READY");
   assert.equal(result.closed, true);
-  assertLocalRuntimeRecoveryRuntimeContinuityReceipt(result, continuity, proof, ackCertification);
+  assertLocalRuntimeRecoveryRuntimeContinuityReceipt(result, continuity, integrated, proof, acknowledgement, ackCertification);
 });
 
 test("P13.14281-14400: continuity closure is fail-closed on unresolved acknowledgement conflict", () => {
@@ -31,6 +35,6 @@ test("P13.14281-14400: continuity closure is fail-closed on unresolved acknowled
 
 test("P13.14161-14400: continuity receipt and closure fail closed on identity drift", () => {
   const result = receipt();
-  assert.throws(() => assertLocalRuntimeRecoveryRuntimeContinuityReceipt({ ...result, dispatchId: "DRIFT" }, continuity, proof, ackCertification), /drift/i);
+  assert.throws(() => assertLocalRuntimeRecoveryRuntimeContinuityReceipt({ ...result, dispatchId: "DRIFT" }, continuity, integrated, proof, acknowledgement, ackCertification), /drift/i);
   assert.throws(() => closeLocalRuntimeRecoveryRuntimeContinuity({ closureId: "CLS-3", receipt: { ...result, syntheticOnly: false } as never, continuity, completionProof: proof, acknowledgementCertification: ackCertification }), /synthetic-only/i);
 });
