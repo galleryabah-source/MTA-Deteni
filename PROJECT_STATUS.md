@@ -1,9 +1,9 @@
 # MTA DETENI — Project Status
 
 **Foundation:** v1.122+
-**Current Track:** P13.18521–18640 integrated authorization decision evidence closure certification / CI observation pending
+**Current Track:** P13.18641–18800 authorization decision evidence closure integrity certification / CI observation pending
 **Branch:** `main`
-**Latest implementation checkpoint:** P13.18640
+**Latest implementation checkpoint:** P13.18800
 
 ## Latest progress
 
@@ -13,12 +13,14 @@
 - P13.18241–18400 — deterministic authorization decision evidence closure boundary closes evidence for review while preserving complete identity/fingerprint continuity and blocking grant, approval, execution, transport and durable publication.
 - P13.18401–18520 — deterministic authorization decision evidence closure replay guard provides ADMIT/REPLAY/CONFLICT semantics without external side effects.
 - P13.18521–18640 — integrated authorization decision evidence closure certification composes closure validation and replay protection while preserving synthetic-only, review-only and non-executable invariants.
+- P13.18641–18720 — deterministic closure integrity boundary verifies the closed evidence certificate as a stable terminal review artifact while preserving the full decision identity chain.
+- P13.18721–18800 — integrated closure integrity replay/certification preserves ADMIT/REPLAY/CONFLICT semantics and rejects fingerprint drift or execution attempts.
 
 ## Runtime continuity integrity
 
-The certified chain now extends from recovery execution through acknowledgement, completion proof, continuity receipt, closure, final closure audit evidence, operational audit projection, publication readiness, publication certification, publication request admission/replay/certification, dispatch-candidate review/replay/certification, dispatch authorization review/replay/certification, authorization decision review/replay/certification, authorization decision evidence/replay/certification and authorization decision evidence closure/replay/certification.
+The certified chain now extends from recovery execution through acknowledgement, completion proof, continuity receipt, closure, final closure audit evidence, operational audit projection, publication readiness, publication certification, publication request admission/replay/certification, dispatch-candidate review/replay/certification, dispatch authorization review/replay/certification, authorization decision review/replay/certification, authorization decision evidence/replay/certification, authorization decision evidence closure/replay/certification and closure integrity/replay/certification.
 
-The authorization decision evidence closure stage is review-only and non-executable. It cannot grant authorization, approve dispatch, execute dispatch, request external transport or create durable publication. Runtime adapters remain subordinate to authorization, idempotency and evidence controls.
+The closure integrity stage is a terminal review artifact only. It cannot grant authorization, approve dispatch, execute dispatch, request external transport or create durable publication. Runtime adapters remain subordinate to authorization, idempotency and evidence controls.
 
 ## Governance locks
 
@@ -32,10 +34,10 @@ The authorization decision evidence closure stage is review-only and non-executa
 
 ## Current certification state
 
-**P13.18521–18640 — IMPLEMENTED CONTRACTS / OBSERVATION PENDING**
+**P13.18721–18800 — IMPLEMENTED CONTRACTS / OBSERVATION PENDING**
 
-The authorization decision evidence closure boundary, replay guard, integrated certification and regression coverage are committed. GitHub Actions remains subject to the existing observation blocker when job-step telemetry/logs/artifacts are unavailable. No runtime PASS is inferred until controlled CI observation is available.
+The closure integrity boundary, replay guard, integrated certification and regression coverage are committed. GitHub Actions remains subject to the existing observation blocker when job-step telemetry/logs/artifacts are unavailable. No runtime PASS is inferred until controlled CI observation is available.
 
 ## Next gate
 
-**P13.18641–18800 — authorization decision evidence closure integrity boundary:** verify the closed evidence certificate as a stable terminal review artifact, preserving complete identity/fingerprint continuity and preventing any transition into authorization grant, dispatch execution, external transport or durable publication.
+**P13.18801–18960 — terminal evidence integrity receipt boundary:** create a deterministic receipt for the verified terminal review artifact without opening any authorization, dispatch, external transport or durable publication path.
