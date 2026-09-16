@@ -1,7 +1,7 @@
 # MTA DETENI — Next Gate
 
-**Foundation:** v1.118+
-**Current:** P13.14521–14640 — integrated runtime recovery closure replay guard implemented; CI observation blocker remains
+**Foundation:** v1.119+
+**Current:** P13.14881–15000 — final runtime recovery closure certification implemented; CI observation blocker remains
 
 ## Completed (through current gate)
 
@@ -52,11 +52,14 @@
 - P13.14281–14400: deterministic runtime continuity closure gate; unresolved acknowledgement conflict, identity drift and non-synthetic state fail closed.
 - P13.14401–14520: integrated runtime recovery closure certification composes continuity receipt and CLOSED closure state into a final synthetic certification boundary.
 - P13.14521–14640: deterministic integrated closure replay guard; identical closure identity/fingerprint replays without a second admission effect, changed fingerprint becomes CONFLICT.
+- P13.14641–14760: final runtime recovery closure evidence envelope binds continuity certification, receipt, CLOSED closure, execution, dispatch, acknowledgement and fingerprint identity.
+- P13.14761–14880: deterministic closure evidence replay guard with ADMIT/REPLAY/CONFLICT semantics.
+- P13.14881–15000: final runtime recovery closure certification binds the complete evidence chain and fails closed on identity drift or non-synthetic state.
 - Historical P13.5809–5880 observable-execution contract remains part of the repository governance chain.
 
-## Next gate: P13.14641–14760
+## Next gate: P13.15001–15120
 
-Bind integrated runtime recovery closure certification to a final closure evidence envelope and deterministic closure audit record. Preserve exact certification, receipt, closure, execution and fingerprint identity. No production transport, persistence, schema migration, AI or live database execution.
+Create a final deterministic closure audit record and integrated audit-evidence certification over the completed runtime recovery closure chain. Preserve exact certification/evidence/receipt/closure/execution/fingerprint identity and ensure audit records cannot be admitted when the closure chain is incomplete, conflicted or non-synthetic. No production transport, persistence, schema migration, AI or live database execution.
 
 ## Governance lock
 
