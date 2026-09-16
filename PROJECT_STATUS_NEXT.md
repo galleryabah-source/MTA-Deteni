@@ -45,6 +45,7 @@
 - P13.13441–13560: local runtime recovery execution dispatch gate.
 - P13.13561–13680: integrated local runtime recovery execution certification.
 - P13.13681–13800: deterministic post-dispatch acknowledgement bound to exact integrated execution, dispatch, evidence, decision, request and fingerprint identities; drift and non-synthetic acknowledgement fail closed.
+- Historical P13.5809–5880 observable-execution contract remains part of the repository governance chain.
 
 ## Next gate: P13.13801–13920
 
