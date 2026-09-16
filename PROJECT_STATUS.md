@@ -3,15 +3,16 @@
 **Foundation:** v1.134+
 **Current Track:** P1 runtime integrity remediation / P9 kernel implementation / P13 closure evidence recovery
 **Branch:** `main`
-**Latest implementation checkpoint:** P9.7 transaction + idempotency boundary contract; P13 governed boundary remains P13.274880
+**Latest implementation checkpoint:** P9.8 governed outbox contract; P13 governed boundary remains P13.274880
 
 ## P9 kernel implementation
 
 - P9.0 repository audit and P9.1 runtime skeleton remain established by the project baseline.
 - P9.2–P9.5 security-kernel contracts remain established for configuration, authentication, authorization and audit.
 - P9.6 database-adapter contract is implemented with typed query/result and transaction boundaries, lifecycle state, configuration validation and explicit migration-role blocking.
-- **P9.7 is now implemented as a transaction + idempotency boundary contract**, preserving deterministic EXECUTE / REPLAY / CONFLICT decisions and commit-after-success / rollback-on-failure semantics for a database transaction handle.
-- P9.6 and P9.7 remain deliberately runtime-unbound. They do not connect to PostgreSQL, execute SQL, run migrations or alter schema.
+- P9.7 transaction + idempotency boundary contract is implemented with deterministic EXECUTE / REPLAY / CONFLICT decisions and commit-after-success / rollback-on-failure semantics.
+- **P9.8 is now implemented as a governed outbox contract**, requiring validated pending events with explicit event/aggregate identity, payload fingerprint, timestamp and attempt counter; append remains behind a dedicated store boundary.
+- P9.6–P9.8 remain deliberately runtime-unbound. They do not connect to PostgreSQL, execute SQL, run migrations or alter schema.
 - Actual PostgreSQL binding requires a separately authorized controlled non-production target and governance clearance.
 
 ## P1 runtime integrity remediation
@@ -19,7 +20,8 @@
 - Critical mutation path exists as an application orchestration path: authorization → idempotency → transaction → domain mutation → audit → outbox.
 - Failure-path regression models transactional rollback for domain, audit and outbox failures in the synthetic harness.
 - Optimistic concurrency execution contract provides deterministic ACCEPT/STALE_VERSION semantics.
-- P9.7 now gives the transaction boundary an explicit idempotency-aware contract for deterministic replay/conflict handling and atomic commit/rollback sequencing.
+- P9.7 provides an explicit idempotency-aware transaction boundary.
+- P9.8 provides a validated pending outbox boundary so downstream publication cannot bypass the transactional evidence path.
 - Further executable integration verification remains required before P1 can be certified complete.
 
 ## P13 closure audit
@@ -47,6 +49,7 @@
 **P1 Runtime Integrity — REMEDIATION IN PROGRESS**
 **P9.6 Database Adapter — CONTRACT IMPLEMENTED / RUNTIME BINDING BLOCKED**
 **P9.7 Transaction + Idempotency — CONTRACT IMPLEMENTED / RUNTIME BINDING BLOCKED**
+**P9.8 Outbox — CONTRACT IMPLEMENTED / RUNTIME BINDING BLOCKED**
 
 ## Closure rule
 
