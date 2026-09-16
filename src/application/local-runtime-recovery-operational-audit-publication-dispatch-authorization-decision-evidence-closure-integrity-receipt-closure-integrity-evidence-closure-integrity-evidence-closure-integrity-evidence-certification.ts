@@ -8,7 +8,7 @@ export function certifyLocalRuntimeRecoveryOperationalAuditPublicationDispatchAu
   if (!input.certificationId.trim()) throw new Error("Terminal evidence closure integrity evidence certification identity is required.");
   const evidence = input.evidence ?? createLocalRuntimeRecoveryOperationalAuditPublicationDispatchAuthorizationDecisionEvidenceClosureIntegrityReceiptClosureIntegrityEvidenceClosureIntegrityEvidenceClosureIntegrityEvidence({ evidenceId: input.evidenceId ?? "", integrityCertification: input.integrityCertification });
   assertLocalRuntimeRecoveryOperationalAuditPublicationDispatchAuthorizationDecisionEvidenceClosureIntegrityReceiptClosureIntegrityEvidenceClosureIntegrityEvidenceClosureIntegrityEvidence(evidence, input.integrityCertification);
-  const replayDisposition = replayLocalRuntimeRecoveryOperationalAuditPublicationDispatchAuthorizationDecisionEvidenceClosureIntegrityReceiptClosureIntegrityEvidenceClosureIntegrityEvidenceClosureIntegrityEvidence(evidence, input.integrityCertification);
+  const replayDisposition = replayLocalRuntimeRecoveryOperationalAuditPublicationDispatchAuthorizationDecisionEvidenceClosureIntegrityReceiptClosureIntegrityEvidenceClosureIntegrityEvidenceClosureIntegrityEvidence({ evidence, integrityCertification: input.integrityCertification });
   if (replayDisposition === "CONFLICT") throw new Error("Terminal evidence closure integrity evidence certification replay conflict.");
   return Object.freeze({ ...evidence, certificationId: input.certificationId, replayDisposition, certified: true });
 }
