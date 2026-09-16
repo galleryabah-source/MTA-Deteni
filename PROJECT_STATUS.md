@@ -3,7 +3,7 @@
 **Foundation:** v1.134+
 **Current Track:** P1 runtime integrity remediation / P9 kernel implementation / P13 closure evidence recovery
 **Branch:** `main`
-**Latest implementation checkpoint:** P9.13 kernel certification contract; P13 governed boundary remains P13.274880
+**Latest implementation checkpoint:** P9.13 kernel certification hardening; P13 governed boundary remains P13.274880
 
 ## P9 kernel implementation
 
@@ -15,14 +15,17 @@
 - P9.9 private storage contract is implemented with PRIVATE/RESTRICTED classification, object identity, content fingerprint and replay/content-drift protection.
 - P9.10 observability contract is implemented with structured event identity, correlation/request/transaction context and explicit outcome levels.
 - P9.11 controlled execution harness contract is implemented with fail-closed evidence validation and PASS/exit-code consistency.
-- P9.12 CI certification contract is implemented but cannot be certified until observable controlled-nonprod GitHub Actions evidence exists.
-- P9.13 kernel certification contract is implemented as an aggregate gate over required control results and remains non-authorizing: it cannot grant production access, execute migrations or enable AI.
+- P9.12 CI certification now has a direct harness-evidence certification path and rejects missing/unknown commit identity; observable controlled-nonprod GitHub Actions evidence is still required for certification.
+- P9.13 kernel certification now requires the complete canonical P9.9–P9.12 control set, rejects duplicate control identities and remains non-authorizing: it cannot grant production access, execute migrations or enable AI.
 - P9.6–P9.13 remain runtime-unbound. No live PostgreSQL connection, SQL execution, migration, production access or durable external publication is introduced by these contracts.
 
-## CI evidence recovery
+## CI evidence recovery and hardening
 
-- CI is explicitly configured for `controlled-nonprod`, with deterministic typecheck/test stages and mandatory `execution.json` validation plus artifact upload.
-- Recent GitHub Actions runs have failed before exposing usable step/log evidence (`steps: []`, log retrieval `BlobNotFound`). Therefore P13-EXIT-06 remains pending and no CI PASS is claimed.
+- CI is explicitly configured for `controlled-nonprod`, with deterministic typecheck/test stages and mandatory execution evidence validation plus artifact upload.
+- A dedicated `.github/scripts/mta-evidence-validator.mjs` now validates schema, execution identity, commit identity, environment, observed-pass status, minimum result count, unique controls and PASS/exit-code consistency.
+- The evidence verification step runs with `always()` so an incomplete harness run cannot silently skip evidence validation; the evidence artifact remains uploaded with `always()`.
+- The execution harness now records a deterministic nonzero exit code when a child process terminates without a numeric exit status.
+- The latest recovered GitHub Actions run was manually re-run after an infrastructure-style failure that exposed no steps/logs; the rerun entered `QUEUED`. No PASS is claimed until observable steps and the evidence artifact are available.
 
 ## P1 runtime integrity remediation
 
@@ -61,7 +64,7 @@
 **P9.10 Observability — CONTRACT IMPLEMENTED**
 **P9.11 Test Harness — CONTRACT IMPLEMENTED**
 **P9.12 CI Certification — CONTRACT IMPLEMENTED / OBSERVATION REQUIRED**
-**P9.13 Kernel Certification — CONTRACT IMPLEMENTED / CI EVIDENCE REQUIRED**
+**P9.13 Kernel Certification — HARDENED CONTRACT / CI EVIDENCE REQUIRED**
 **P13.260881–274880 — IMPLEMENTED CONTRACTS / OBSERVATION PENDING**
 **P1 Runtime Integrity — REMEDIATION IN PROGRESS**
 **Cloudflare CI — CONFIGURATION VALIDATION ONLY / DEPLOYMENT BLOCKED**
