@@ -1,5 +1,13 @@
 # Changelog
 
+## P1 Runtime Integrity — Optimistic Concurrency Contract
+
+- Added `src/application/optimistic-concurrency-contract.ts` with deterministic expected-version validation and `ACCEPT` / `STALE_VERSION` decisions.
+- Added immutable aggregate-version advancement and fail-closed invalid-version handling.
+- Added `test/optimistic-concurrency-contract.test.ts` covering exact-version acceptance, stale-version rejection, immutable increment and invalid input.
+- Updated `PROJECT_STATUS.md` to record P1 runtime integrity remediation in progress.
+- No schema migration, live PostgreSQL execution, production access, AI activation, real detainee data or production PII was introduced.
+
 ## P13 Closure Audit — Exit Criteria and CI Gate Repair
 
 - Added `P13_EXIT_CRITERIA.md` with eight evidence-based closure criteria covering scope, identity continuity, replay determinism, non-executable boundaries, regression coverage, observable CI execution, documentation synchronization and governance locks.
