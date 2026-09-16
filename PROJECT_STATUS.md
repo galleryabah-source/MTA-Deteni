@@ -1,9 +1,9 @@
 # MTA DETENI — Project Status
 
 **Foundation:** v1.124+
-**Current Track:** P13.107681–121280 integrated integrity-audit terminal closure / CI observation pending
+**Current Track:** P13.121281–134880 integrated integrity-audit terminal closure boundary / CI observation pending
 **Branch:** `main`
-**Latest implementation checkpoint:** P13.121280
+**Latest implementation checkpoint:** P13.134880
 
 ## Latest progress
 
@@ -24,13 +24,14 @@
 - P13.80921–94280 — added the next 100 sequential checkpoints as an integrated integrity-audit continuity-boundary chain in five auditable modules (A–E), binding the new review artifact to the preceding certification artifact and audit fingerprint with fail-closed validation and deterministic replay.
 - P13.94281–107680 — added the next 100 sequential checkpoints as an integrated integrity-audit closure-continuity chain in five auditable modules (A–E), binding each review artifact to its preceding continuity artifact and audit decision fingerprint with fail-closed validation and deterministic replay.
 - P13.107681–121280 — added the next 100 sequential checkpoints as an integrated integrity-audit terminal-closure chain in five auditable modules (A–E), binding each review artifact to its preceding closure artifact and audit decision fingerprint with fail-closed validation and deterministic replay.
-- Regression coverage added asserting exactly 100 unique checkpoint labels, immutability, replay determinism, fingerprint-drift conflict and continuity-failure behavior for P13.107681–121280.
+- P13.121281–134880 — added the next 100 sequential checkpoints as an integrated integrity-audit terminal-closure boundary chain in five auditable modules (A–E), binding each review artifact to its preceding closure artifact and audit decision fingerprint with fail-closed validation and deterministic replay.
+- Regression coverage added asserting exactly 100 unique checkpoint labels, immutability, replay determinism, fingerprint-drift conflict and continuity-failure behavior for P13.121281–134880.
 
 ## Runtime continuity integrity
 
-The governed terminal-evidence chain now extends through P13.121280. The latest terminal-closure extension remains synthetic-only, immutable, review-only and explicitly non-executable. Replay is deterministic and side-effect free. The continuity layer does not itself grant authorization, approve dispatch, request external transport, execute dispatch or create durable publication.
+The governed terminal-evidence chain now extends through P13.134880. The latest terminal-closure boundary extension remains synthetic-only, immutable, review-only and explicitly non-executable. Replay is deterministic and side-effect free. The continuity layer does not itself grant authorization, approve dispatch, request external transport, execute dispatch or create durable publication.
 
-All continuation, audit, integrated certification, continuity and closure artifacts remain review artifacts only. Runtime adapters remain subordinate to authorization, idempotency and evidence controls.
+All continuation, audit, integrated certification, continuity, closure and closure-boundary artifacts remain review artifacts only. Runtime adapters remain subordinate to authorization, idempotency and evidence controls.
 
 ## Governance locks
 
@@ -44,10 +45,10 @@ All continuation, audit, integrated certification, continuity and closure artifa
 
 ## Current certification state
 
-**P13.107681–121280 — IMPLEMENTED CONTRACTS / OBSERVATION PENDING**
+**P13.121281–134880 — IMPLEMENTED CONTRACTS / OBSERVATION PENDING**
 
-The 100-checkpoint integrated integrity-audit terminal-closure extension and regression coverage are implemented. GitHub Actions is not treated as PASS until observable workflow steps/logs/artifacts are available.
+The 100-checkpoint integrated integrity-audit terminal-closure boundary extension and regression coverage are implemented. GitHub Actions is not treated as PASS until observable workflow steps/logs/artifacts are available.
 
 ## Next gate
 
-**P13.121281 onward — next governed integrity layer:** inspect observable CI evidence for P13.80921–94280, P13.94281–107680 and P13.107681–121280, then continue with the next coherent boundary/replay/certification layer. No production activation or migration is implied by this implementation.
+**P13.134881 onward — next governed integrity layer:** inspect observable CI evidence for P13.80921–94280, P13.94281–107680, P13.107681–121280 and P13.121281–134880, then continue with the next coherent boundary/replay/certification layer. No production activation or migration is implied by this implementation.
