@@ -12,17 +12,18 @@ function run(id, command, args) {
   const started = Date.now();
   const result = spawnSync(command, args, { encoding: 'utf8', shell: process.platform === 'win32' });
   const durationMs = Date.now() - started;
-  const status = result.status === 0 ? 'PASS' : 'FAIL';
+  const exitCode = Number.isInteger(result.status) ? result.status : 1;
+  const status = exitCode === 0 ? 'PASS' : 'FAIL';
   results.push({
     controlId: id,
     status,
-    exitCode: result.status,
+    exitCode,
     signal: result.signal ?? null,
     durationMs,
     stdout: (result.stdout ?? '').slice(-12000),
     stderr: (result.stderr ?? '').slice(-12000),
   });
-  return result.status === 0;
+  return exitCode === 0;
 }
 
 const checks = [
