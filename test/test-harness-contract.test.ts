@@ -30,7 +30,7 @@ test("test harness fails closed for incomplete evidence", () => {
 
 test("test harness rejects missing, duplicate and non-canonical controls", () => {
   assert.throws(() => validateHarnessEvidence({ ...base, checks: canonicalChecks.slice(0, 4) }), /HARNESS_CHECKS_REQUIRED/);
-  assert.throws(() => validateHarnessEvidence({ ...base, checks: [...canonicalChecks.slice(0, 4), canonicalChecks[0]] }), /HARNESS_DUPLICATE_CONTROL_ID/);
+  assert.throws(() => validateHarnessEvidence({ ...base, checks: [...canonicalChecks.slice(0, 4), { ...canonicalChecks[0], controlId: "BUILD-5801" }] }), /HARNESS_DUPLICATE_CONTROL_ID/);
   assert.throws(() => validateHarnessEvidence({ ...base, checks: [...canonicalChecks.slice(0, 4), { controlId: "FAKE-9999", status: "PASS", exitCode: 0 }] }), /HARNESS_REQUIRED_CONTROL_MISSING:REG-5805/);
 });
 
