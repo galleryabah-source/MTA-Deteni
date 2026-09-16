@@ -1,5 +1,17 @@
 # Changelog
 
+## P13.13201–13320 — Local Runtime Recovery Decision Execution Evidence
+
+- Added execution evidence binding runtime execution to decision, request, certification, audit and envelope identities.
+- Added fail-closed fingerprint and identity checks.
+- Preserved admitted and synthetic-only execution boundaries.
+
+## P13.13081–13200 — Local Runtime Recovery Decision Execution Boundary
+
+- Added a runtime admission boundary requiring certified recovery decision, replay, audit and safety identities.
+- Blocked conflicted, replayed, non-admitted and non-synthetic recovery execution.
+- Hardened the request boundary with the canonical local runtime request assertion.
+
 ## P13.12961–13080 — Integrated Local Runtime Recovery Decision Certification
 
 - Added integrated certification composing decision integrity, recovery certification and decision audit evidence.
@@ -25,46 +37,3 @@
 - Added decision fingerprint continuity for tamper detection.
 - Rejected stale/cross-scenario/non-synthetic decision state and blocked continuity admission tampering.
 
-## P13.12481–12600 — Integrated Local Runtime Recovery Certification
-
-- Added integrated recovery certification composing the safety envelope with the recovery continuity gate.
-- Preserved deterministic five-scenario recovery states and explicit admission boundaries.
-- Blocked operator-review and reconciliation-required states from being represented as admitted recovery.
-- Preserved synthetic-only execution.
-
-## P13.12361–12480 — Local Runtime Recovery Continuity Gate
-
-- Added deterministic continuity states for corrective retry, handshake reauthentication, scope reopening, operator review and reconciliation.
-- Preserved the safety envelope as the mandatory input to recovery admission.
-- Blocked operator-review and reconciliation-required recovery from automatic admission.
-
-## P13.12241–12360 — Local Runtime Recovery Action Gate
-
-- Added deterministic recovery actions derived from the certified safety envelope.
-- Mapped each failure scenario to an explicit bounded action.
-- Prevented operator-review and reconciliation actions from automatic admission.
-
-## P13.12121–12240 — Local Runtime Safety Regression Matrix
-
-- Added regression coverage for all five local adapter failure scenarios through the evidence → observation → certification → disposition → safety-envelope chain.
-- Added fail-closed coverage for retry-policy, operator-review and synthetic-only drift.
-- Preserved synthetic/in-memory operation only.
-
-## P13.12001–12120 — Local Runtime Safety Certification Envelope
-
-- Added a final safety envelope binding the failure-recovery journey, failure certification and recovery disposition.
-- Exposed deterministic retry safety and operator-review requirements.
-- Prevented automatic retry when operator review is required.
-- Preserved synthetic-only certification with no production transport or persistence.
-
-## P13.11881–12000 — Integrated Local Failure-Recovery Journey
-
-- Composed failure evidence, failure observation, failure certification and recovery disposition into one synthetic journey.
-- Preserved evidence/disposition/certification identity continuity.
-- Rejected scenario drift and disposition drift before a recovery journey can be certified.
-
-## P13.11761–11880 — Local Runtime Recovery Disposition Contract
-
-- Added deterministic recovery dispositions bound to certified failure evidence.
-- Distinguished corrective retry, reauthentication, valid-session reopening, operator review and reconciliation-before-retry.
-- Prevented automatic retry for idempotency conflicts and reconciliation-required states.
