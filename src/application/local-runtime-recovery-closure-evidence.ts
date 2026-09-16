@@ -39,9 +39,19 @@ export function createLocalRuntimeRecoveryClosureEvidence(input: {
   return Object.freeze({ evidenceId: input.evidenceId, continuityCertificationId: input.continuity.certificationId, receiptId: input.receipt.receiptId, closureId: input.closure.closureId, executionId: input.receipt.executionId, dispatchId: input.receipt.dispatchId, acknowledgementId: input.receipt.acknowledgementId, decisionFingerprint: input.receipt.decisionFingerprint, closureDisposition: "CLOSED", complete: true, syntheticOnly: true });
 }
 
-export function assertLocalRuntimeRecoveryClosureEvidence(evidence: LocalRuntimeRecoveryClosureEvidence, continuity: ContinuityCertification, integratedCertification: IntegratedLocalRuntimeRecoveryExecutionCertification, receipt: LocalRuntimeRecoveryRuntimeContinuityReceipt, closure: RuntimeContinuityClosure): void {
+export function assertLocalRuntimeRecoveryClosureEvidence(input: {
+  evidence: LocalRuntimeRecoveryClosureEvidence;
+  continuity: ContinuityCertification;
+  integratedCertification: IntegratedLocalRuntimeRecoveryExecutionCertification;
+  completionProof: LocalRuntimeRecoveryExecutionCompletionProof;
+  acknowledgement: LocalRuntimeRecoveryExecutionAcknowledgement;
+  acknowledgementCertification: LocalRuntimeRecoveryExecutionAcknowledgementCertification;
+  receipt: LocalRuntimeRecoveryRuntimeContinuityReceipt;
+  closure: RuntimeContinuityClosure;
+}): void {
+  const { evidence, continuity, integratedCertification, completionProof, acknowledgement, acknowledgementCertification, receipt, closure } = input;
   if (!evidence.complete || evidence.closureDisposition !== "CLOSED" || !evidence.syntheticOnly) throw new Error("Runtime recovery closure evidence must be complete, closed and synthetic-only.");
-  assertLocalRuntimeRecoveryRuntimeContinuityReceipt(receipt, continuity, integratedCertification, { proofId: receipt.completionProofId, certificationId: integratedCertification.certificationId, acknowledgementCertificationId: receipt.acknowledgementCertificationId, executionId: receipt.executionId, dispatchId: receipt.dispatchId, acknowledgementId: receipt.acknowledgementId, decisionFingerprint: receipt.decisionFingerprint, completed: true, syntheticOnly: true }, { acknowledgementId: receipt.acknowledgementId, certificationId: receipt.acknowledgementCertificationId, integratedCertificationId: integratedCertification.certificationId, executionId: receipt.executionId, dispatchId: receipt.dispatchId, decisionFingerprint: receipt.decisionFingerprint, admitted: true, certified: true, syntheticOnly: true } as LocalRuntimeRecoveryExecutionAcknowledgement,);
+  assertLocalRuntimeRecoveryRuntimeContinuityReceipt(receipt, continuity, integratedCertification, completionProof, acknowledgement, acknowledgementCertification);
   assertLocalRuntimeRecoveryRuntimeContinuityClosure(closure, receipt);
   if (evidence.continuityCertificationId !== continuity.certificationId || evidence.receiptId !== receipt.receiptId || evidence.closureId !== closure.closureId || evidence.executionId !== receipt.executionId || evidence.dispatchId !== receipt.dispatchId || evidence.acknowledgementId !== receipt.acknowledgementId || evidence.decisionFingerprint !== receipt.decisionFingerprint) throw new Error("Runtime recovery closure evidence drift.");
 }
