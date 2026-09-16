@@ -1,23 +1,12 @@
 import type { LocalRuntimeRecoveryExecutionAcknowledgement } from "./local-runtime-recovery-execution-acknowledgement.js";
-import { assertLocalRuntimeRecoveryExecutionAcknowledgement } from "./local-runtime-recovery-execution-acknowledgement.js";
 
 export type LocalRuntimeRecoveryExecutionAcknowledgementReplayDisposition = "ADMIT" | "REPLAY" | "CONFLICT";
-
-export type LocalRuntimeRecoveryExecutionAcknowledgementReplayResult = Readonly<{
-  acknowledgementId: string;
-  fingerprint: string;
-  disposition: LocalRuntimeRecoveryExecutionAcknowledgementReplayDisposition;
-  admitted: boolean;
-  syntheticOnly: true;
-}>;
-
+export type LocalRuntimeRecoveryExecutionAcknowledgementReplayResult = Readonly<{ acknowledgementId: string; fingerprint: string; disposition: LocalRuntimeRecoveryExecutionAcknowledgementReplayDisposition; admitted: boolean; syntheticOnly: true }>;
 export type LocalRuntimeRecoveryExecutionAcknowledgementRegistry = Map<string, string>;
 
-export function assessLocalRuntimeRecoveryExecutionAcknowledgementReplay(input: {
-  acknowledgement: LocalRuntimeRecoveryExecutionAcknowledgement;
-  registry: LocalRuntimeRecoveryExecutionAcknowledgementRegistry;
-}): LocalRuntimeRecoveryExecutionAcknowledgementReplayResult {
-  assertLocalRuntimeRecoveryExecutionAcknowledgement(input.acknowledgement, input.acknowledgement as never, input.acknowledgement as never, input.acknowledgement as never, input.acknowledgement as never, input.acknowledgement as never, input.acknowledgement as never);
+export function assessLocalRuntimeRecoveryExecutionAcknowledgementReplay(input: { acknowledgement: LocalRuntimeRecoveryExecutionAcknowledgement; registry: LocalRuntimeRecoveryExecutionAcknowledgementRegistry }): LocalRuntimeRecoveryExecutionAcknowledgementReplayResult {
+  if (!input.acknowledgement.acknowledged || !input.acknowledgement.syntheticOnly) throw new Error("Acknowledgement replay requires acknowledged synthetic evidence.");
+  if (!input.acknowledgement.acknowledgementId.trim() || !input.acknowledgement.decisionFingerprint.trim()) throw new Error("Acknowledgement replay identity is required.");
   const existing = input.registry.get(input.acknowledgement.acknowledgementId);
   if (existing === undefined) {
     input.registry.set(input.acknowledgement.acknowledgementId, input.acknowledgement.decisionFingerprint);
