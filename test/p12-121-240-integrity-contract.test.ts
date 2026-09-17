@@ -29,7 +29,7 @@ test("P12.201-240 enforces domain ownership matrix", () => {
   assert.equal(authorizeByPolicy("RAP", "TEMPORARY_EXIT_VALIDATE"), false);
   assert.equal(isPermissionDeclared("PERKES", "HEALTH_RECORD_MANAGE"), true);
   assert.equal(isPermissionDeclared("SUBBAG_TU", "HEALTH_RECORD_MANAGE"), false);
-  assert.equal(policyMatrix().LEADERSHIP.includes("OVERSIGHT_READ"), true);
-  assert.doesNotThrow(() => assertLeadershipReadOnlyOperational("LEADERSHIP", "OVERSIGHT_READ"));
-  assert.throws(() => assertLeadershipReadOnlyOperational("LEADERSHIP", "TEMPORARY_EXIT_VALIDATE"), /LEADERSHIP_OPERATIONAL_EDIT_FORBIDDEN/);
+  assert.equal(policyMatrix().HEAD_RUDENIM.includes("OVERSIGHT_READ"), true);
+  assert.doesNotThrow(() => assertLeadershipReadOnlyOperational("HEAD_RUDENIM", "OVERSIGHT_READ"));
+  assert.throws(() => assertLeadershipReadOnlyOperational("HEAD_RUDENIM", "TEMPORARY_EXIT_VALIDATE"), /LEADERSHIP_OPERATIONAL_EDIT_FORBIDDEN/);
 });
