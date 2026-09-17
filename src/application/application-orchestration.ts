@@ -22,11 +22,19 @@ export async function orchestrateAggregateCommand<T extends RepositoryEntity>(
   context: ApplicationMutationContext,
   command: AggregateCommand<T>,
 ): Promise<AggregateCommandResult<T>> {
+  let payload: Readonly<Record<string, unknown>>;
+  try {
+    const parsed: unknown = JSON.parse(command.payload);
+    if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) throw new Error("AGGREGATE_COMMAND_PAYLOAD_INVALID");
+    payload = parsed as Readonly<Record<string, unknown>>;
+  } catch {
+    throw new Error("AGGREGATE_COMMAND_PAYLOAD_INVALID");
+  }
   const result = await service.execute(context, {
     commandType: command.commandType,
     aggregateId: command.entity.id,
     requestHash: command.requestHash,
-    payload: command.payload,
+    payload,
     payloadFingerprint: command.payloadFingerprint,
     responseFingerprint: command.responseFingerprint,
     run: async () => repository.save(command.entity),
