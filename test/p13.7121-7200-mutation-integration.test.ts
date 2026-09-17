@@ -2,17 +2,18 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { executeCriticalMutation, type MutationAuditRecord, type MutationIntegrationStores } from "../src/application/mutation-integration.js";
 import type { IdempotencyRecord } from "../src/application/idempotency-contract.js";
-import type { OutboxEvent } from "../src/application/outbox-contract.js";
+import type { OutboxEventContract } from "../src/application/outbox-runtime-contract.js";
+import type { TransactionRunner } from "../src/application/transaction-contract.js";
 
 function harness(existing?: IdempotencyRecord) {
   let idempotency = existing;
   const audit: MutationAuditRecord[] = [];
-  const outbox: OutboxEvent[] = [];
+  const outbox: OutboxEventContract[] = [];
   const stores: MutationIntegrationStores = {
     findIdempotency: () => idempotency,
     saveIdempotency: (record) => { idempotency = record; },
     appendAudit: (record) => { audit.push(record); },
-    appendOutbox: (event) => { outbox.push(event); },
+    appendPending: async (event) => { outbox.push(event); return "ADMIT"; },
   };
   return { stores, audit, outbox, getIdempotency: () => idempotency };
 }
@@ -25,17 +26,17 @@ const base = {
   auditId: "audit-7121",
   eventId: "event-7121",
   occurredAt: "2026-09-15T00:00:00Z",
-  payload: "{\"status\":\"APPROVED\"}",
+  payload: { status: "APPROVED" },
   payloadFingerprint: "payload-fp-a",
   responseFingerprint: "response-fp-a",
 };
 
-async function runner(_context: Parameters<NonNullable<unknown>>[0], work: () => Promise<unknown>) { return work(); }
+const runner: TransactionRunner = async (_context, work) => work();
 
 test("P13.7121-7160 mutation seam commits domain, audit and outbox under one transaction runner", async () => {
   const h = harness();
   let domainCalls = 0;
-  const result = await executeCriticalMutation({ ...base, runDomainMutation: async () => { domainCalls += 1; return "APPROVED"; } }, h.stores, runner as never);
+  const result = await executeCriticalMutation({ ...base, runDomainMutation: async () => { domainCalls += 1; return "APPROVED"; } }, h.stores, runner);
   assert.equal(result.outcome, "COMMITTED");
   assert.equal(result.value, "APPROVED");
   assert.equal(domainCalls, 1);
@@ -49,7 +50,7 @@ test("P13.7161-7180 completed idempotency key replays without domain mutation", 
   const existing: IdempotencyRecord = { idempotencyKey: "idem-7121", commandType: base.commandType, requestHash: base.requestHash, status: "COMPLETED", responseFingerprint: base.responseFingerprint, createdAt: base.occurredAt, completedAt: base.occurredAt };
   const h = harness(existing);
   let domainCalls = 0;
-  const result = await executeCriticalMutation({ ...base, runDomainMutation: async () => { domainCalls += 1; return "MUST-NOT-RUN"; } }, h.stores, runner as never);
+  const result = await executeCriticalMutation({ ...base, runDomainMutation: async () => { domainCalls += 1; return "MUST-NOT-RUN"; } }, h.stores, runner);
   assert.equal(result.outcome, "REPLAYED");
   assert.equal(domainCalls, 0);
   assert.equal(h.audit.length, 0);
@@ -59,5 +60,5 @@ test("P13.7161-7180 completed idempotency key replays without domain mutation", 
 test("P13.7181-7200 reused key with a different request is fail-closed", async () => {
   const existing: IdempotencyRecord = { idempotencyKey: "idem-7121", commandType: base.commandType, requestHash: "different-hash", status: "COMPLETED", createdAt: base.occurredAt };
   const h = harness(existing);
-  await assert.rejects(() => executeCriticalMutation({ ...base, runDomainMutation: async () => "MUST-NOT-RUN" }, h.stores, runner as never), /IDEMPOTENCY_KEY_REUSED_WITH_DIFFERENT_REQUEST/);
+  await assert.rejects(() => executeCriticalMutation({ ...base, runDomainMutation: async () => "MUST-NOT-RUN" }, h.stores, runner), /IDEMPOTENCY_KEY_REUSED_WITH_DIFFERENT_REQUEST/);
 });
