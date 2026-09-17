@@ -11,6 +11,7 @@
     "test:master-room": "node scripts/mta-master-room-contract-check.mjs"
   },
   "devDependencies": {
+    "@types/node": "^24.5.2",
     "tsx": "^4.19.2",
     "typescript": "^5.9.2"
   }
