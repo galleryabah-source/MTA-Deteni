@@ -30,6 +30,8 @@ export async function executeSyntheticContinuityJourney(input: ContinuityJourney
   const queue = new MemoryQueueAdapter<OfflineCommand>();
   await queue.append(command);
   const queued = await queue.list();
+  const queuedCommand = queued.find((item) => item.commandId === command.commandId);
+  if (!queuedCommand) throw new Error("Synthetic continuity queue did not retain the command.");
 
   assertBrowserTransportRequest({
     requestId: `req-${command.commandId}`,
@@ -45,7 +47,7 @@ export async function executeSyntheticContinuityJourney(input: ContinuityJourney
   assertBackupChain(input.previousBackup, input.backup);
 
   const reconciliation = reconcileOfflineCommand({
-    command: queued[0],
+    command: queuedCommand,
     existingIdempotencyKeys: [],
     aggregateRevisionMatches: true,
   }).action;
