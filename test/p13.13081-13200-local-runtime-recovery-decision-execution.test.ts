@@ -19,7 +19,7 @@ import type { RuntimeExecutionContext } from "../src/application/runtime-executi
 
 const context = { executionId: "EXEC-EX", runtimeMode: "LOCAL", deviceClass: "DESKTOP", networkScopeId: "NET-EX", certificationJourneyId: "J-EX", authenticated: true, syntheticOnly: true } as RuntimeExecutionContext;
 const session = { sessionId: "S-EX", executionId: "EXEC-EX", deviceId: "DEV-EX", installationId: "INST-EX", networkScopeId: "NET-EX", runtimeMode: "LOCAL", state: "ACTIVE", syntheticOnly: true } as OperationalSession;
-const request = { requestId: "REQ-EX", actorId: "ACT-EX", device: { deviceId: "DEV-EX", installationId: "INST-EX", networkScopeId: "NET-EX", deviceClass: "DESKTOP" }, method: "POST", path: "/mta-local/mutate", headers: {}, idempotencyKey: "IDEMP-EX", boundary: { serviceId: "SVC-EX", listenScope: "LOOPBACK_ONLY", authenticatedDevice: true, internetExposed: false } } as LocalRuntimeRequest;
+const request = { requestId: "REQ-EX", actorId: "ACT-EX", device: { deviceId: "DEV-EX", installationId: "INST-EX", networkScopeId: "NET-EX", deviceClass: "DESKTOP" }, method: "POST", path: "/mta-local/mutate", headers: {}, idempotencyKey: "IDEMP-EX", boundary: { serviceId: "SVC-EX", listenScope: "LOOPBACK_ONLY", allowsInternetExposure: false, requiresAuthenticatedDevice: true } } as LocalRuntimeRequest;
 
 function build() {
   const entry = getLocalRuntimeFailureMatrix()[0];
