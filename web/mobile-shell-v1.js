@@ -8,6 +8,7 @@
   function css(){
     if(document.getElementById(STYLE_ID)) return;
     const s=document.createElement('style');s.id=STYLE_ID;s.textContent=`
+      .mta-mobile-bottom,.mta-mobile-menu{display:none}
       @media (max-width:1024px){
         :root{--mta-mobile-bottom:82px;--mta-mobile-safe:max(12px,env(safe-area-inset-bottom))}
         html,body{width:100%;max-width:100%;overflow-x:hidden!important}body{padding-bottom:0!important}.app{grid-template-rows:56px 1fr 0!important;min-height:100dvh!important}.layout{display:block!important;min-height:calc(100dvh - 56px)!important}.side{display:none!important}
