@@ -1,0 +1,33 @@
+name: MTA DETENI UI Responsive and Offline Smoke
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'web/**'
+      - 'tests/ui-responsive.mjs'
+      - '.github/workflows/ui-responsive.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  browser-smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Install Playwright
+        run: npm install --no-save playwright@1.55.0
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+      - name: Serve static preview
+        run: python3 -m http.server 4173 --directory web > /tmp/mta-http.log 2>&1 &
+      - name: Run responsive/offline smoke tests
+        run: node tests/ui-responsive.mjs
