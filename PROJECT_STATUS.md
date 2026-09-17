@@ -3,7 +3,7 @@
 **Foundation:** v1.134+
 **Current Track:** P1 runtime integrity remediation / P9 kernel implementation / P13 closure evidence recovery
 **Branch:** `main`
-**Latest implementation checkpoint:** P1 unified critical-mutation context gate + corrected failure matrix; P13 governed boundary remains P13.274880
+**Latest implementation checkpoint:** Synthetic E2E execution-context harness added; P13 governed boundary remains P13.274880
 
 ## P9 kernel implementation
 
@@ -31,6 +31,7 @@
 - A dedicated critical-mutation context gate centralizes context establishment and fail-closed downstream continuity checks for transaction and observability identities.
 - Synthetic regression coverage certifies normalization, immutability, transaction/observability continuity, incomplete-context rejection and downstream identity drift rejection.
 - The critical mutation failure matrix covers replay, idempotency conflict, domain failure, audit failure and outbox conflict with rollback expectations.
+- A synthetic E2E harness now observes the same canonical context across transaction, audit, outbox and observability, plus explicit observability-drift and failed-mutation evidence checks.
 - Optimistic concurrency execution contract provides deterministic ACCEPT/STALE_VERSION semantics.
 - Further executable end-to-end integration verification remains required before P1 can be certified complete.
 
@@ -74,7 +75,7 @@
 **P9.12 CI Certification — HARDENED / OBSERVATION REQUIRED**
 **P9.13 Kernel Certification — HARDENED CONTRACT / CI EVIDENCE REQUIRED**
 **P13.260881–274880 — IMPLEMENTED CONTRACTS / OBSERVATION PENDING**
-**P1 Runtime Integrity — REMEDIATION IN PROGRESS / CONTEXT GATE + FAILURE MATRIX HARDENED**
+**P1 Runtime Integrity — E2E SYNTHETIC HARNESS ADDED / CERTIFICATION PENDING EXECUTABLE REPOSITORY RUN**
 **Cloudflare CI — CONFIGURATION VALIDATION ONLY / DEPLOYMENT BOUNDARY LOCKED**
 
 ## Closure rule
