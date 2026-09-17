@@ -31,7 +31,7 @@ test("accepts a complete synthetic P1 observed-pass evidence set", () => {
 test("rejects incomplete, duplicated or unresolved certification evidence", () => {
   assert.throws(() => validateP1RuntimeCertificationEvidence(evidence({ controls: [] })), /P1_CERTIFICATION_CONTROL_COUNT_INVALID/);
   const duplicate = [...evidence().controls];
-  duplicate[1] = duplicate[0];
+  duplicate[1] = duplicate[0]!;
   assert.throws(() => validateP1RuntimeCertificationEvidence(evidence({ controls: duplicate })), /P1_CERTIFICATION_DUPLICATE_CONTROL/);
   assert.throws(() => validateP1RuntimeCertificationEvidence(evidence({ commit: "unknown" })), /P1_CERTIFICATION_COMMIT_UNRESOLVED/);
 });
@@ -44,18 +44,18 @@ test("rejects any evidence that would cross governance locks", () => {
 
 test("does not certify pending or failed controls", () => {
   const pending = [...evidence().controls];
-  pending[0] = { ...pending[0], status: "PENDING", exitCode: null };
+  pending[0] = { ...pending[0]!, status: "PENDING", exitCode: null };
   const pendingEvidence = evidence({ status: "OBSERVATION_INCOMPLETE", controls: pending });
   assert.throws(() => assertP1RuntimeObservedPass(pendingEvidence), /P1_CERTIFICATION_NOT_OBSERVED_PASS/);
 
   const failed = [...evidence().controls];
-  failed[6] = { ...failed[6], status: "FAIL", exitCode: 1 };
+  failed[6] = { ...failed[6]!, status: "FAIL", exitCode: 1 };
   const failedEvidence = evidence({ controls: failed });
   assert.throws(() => assertP1RuntimeObservedPass(failedEvidence), /P1_CERTIFICATION_CONTROL_NOT_PASS/);
 });
 
 test("rejects PASS controls without exit code zero", () => {
   const controls = [...evidence().controls];
-  controls[0] = { ...controls[0], exitCode: 1 };
+  controls[0] = { ...controls[0]!, exitCode: 1 };
   assert.throws(() => validateP1RuntimeCertificationEvidence(evidence({ controls })), /P1_CERTIFICATION_PASS_EXIT_CODE_INVALID/);
 });
