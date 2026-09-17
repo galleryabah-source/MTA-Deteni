@@ -1,0 +1,6 @@
+const CACHE='mta-deteni-shell-v1';
+const SHELL=['/','/index.html','/responsive-v11.css','/preview-v5.js','/preview-v6.js','/qr-print-clean-v3.js','/room-ops-v9.js','/movement-v9.js','/admin-settings-v9.js','/master-room-guard-v10.js','/preview-v10.js','/offline-v1.js'];
+const QR='https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.js';
+self.addEventListener('install',event=>{event.waitUntil((async()=>{const c=await caches.open(CACHE);await Promise.all(SHELL.map(async u=>{try{const r=await fetch(u,{cache:'no-cache'});if(r.ok)await c.put(u,r)}catch{}}));try{const r=await fetch(QR,{mode:'no-cors',cache:'no-cache'});await c.put(QR,r)}catch{}await self.skipWaiting()})())});
+self.addEventListener('activate',event=>event.waitUntil(self.clients.claim()));
+self.addEventListener('fetch',event=>{const req=event.request;if(req.method!=='GET')return;event.respondWith((async()=>{const cached=await caches.match(req,{ignoreSearch:true});if(cached)return cached;try{const response=await fetch(req);if(response.ok&&new URL(req.url).origin===self.location.origin){const c=await caches.open(CACHE);c.put(req,response.clone())}return response}catch{return caches.match('/index.html')}})())});
