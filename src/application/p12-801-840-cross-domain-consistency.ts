@@ -19,6 +19,8 @@ export function buildCrossDomainIdentity(actor: ActorContext, detaineeId: string
 
 export function assertCrossDomainConsistency(records: readonly CrossDomainRecord[]): "CONSISTENT" | "BLOCKED" {
   if (records.length === 0) return "BLOCKED";
-  const first = records[0].identity;
+  const [firstRecord] = records;
+  if (!firstRecord) return "BLOCKED";
+  const first = firstRecord.identity;
   return records.every(({ identity }) => identity.detaineeId === first.detaineeId && identity.aggregateId === first.aggregateId && identity.correlationId === first.correlationId) ? "CONSISTENT" : "BLOCKED";
 }
