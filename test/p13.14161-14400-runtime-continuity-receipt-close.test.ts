@@ -22,7 +22,7 @@ test("P13.14161-14280: completion proof enters runtime continuity receipt", () =
   const result = receipt();
   assert.equal(result.continuityState, "READY");
   assert.equal(result.closed, true);
-  assertLocalRuntimeRecoveryRuntimeContinuityReceipt(result, continuity, integrated, proof, acknowledgement, ackCertification);
+  assertLocalRuntimeRecoveryRuntimeContinuityReceipt(result, continuity, proof, ackCertification);
 });
 
 test("P13.14281-14400: continuity closure is fail-closed on unresolved acknowledgement conflict", () => {
@@ -35,6 +35,6 @@ test("P13.14281-14400: continuity closure is fail-closed on unresolved acknowled
 
 test("P13.14161-14400: continuity receipt and closure fail closed on identity drift", () => {
   const result = receipt();
-  assert.throws(() => assertLocalRuntimeRecoveryRuntimeContinuityReceipt({ ...result, dispatchId: "DRIFT" }, continuity, integrated, proof, acknowledgement, ackCertification), /drift/i);
+  assert.throws(() => assertLocalRuntimeRecoveryRuntimeContinuityReceipt({ ...result, dispatchId: "DRIFT" }, continuity, proof, ackCertification), /drift/i);
   assert.throws(() => closeLocalRuntimeRecoveryRuntimeContinuity({ closureId: "CLS-3", receipt: { ...result, syntheticOnly: false } as never, continuity, completionProof: proof, acknowledgementCertification: ackCertification }), /synthetic-only/i);
 });
