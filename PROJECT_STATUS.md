@@ -3,7 +3,7 @@
 **Foundation:** v1.134+
 **Current Track:** P1 runtime integrity remediation / P9 kernel implementation / P13 closure evidence recovery
 **Branch:** `main`
-**Latest implementation checkpoint:** P1 executable runtime certification contract + failure-matrix regression added; P13 governed boundary remains P13.274880
+**Latest implementation checkpoint:** CI cache prerequisite corrected; P1 executable certification remains pending runtime evidence; P13 governed boundary remains P13.274880
 
 ## P9 kernel implementation
 
@@ -40,11 +40,13 @@
 
 ## CI evidence recovery and hardening
 
-- CI is explicitly configured for `controlled-nonprod`, with deterministic typecheck/test stages and mandatory execution evidence validation plus artifact upload.
+- CI remains explicitly configured for `controlled-nonprod`, with deterministic typecheck/test stages and mandatory execution evidence validation plus artifact upload.
+- The latest observable CI failure is now understood from runner logs: `actions/setup-node@v7` was configured with `cache: npm`, but the repository intentionally had no lockfile; setup therefore failed before dependency installation.
+- The workflow was corrected to remove the npm cache dependency rather than manufacturing an unverified lockfile. Dependency installation remains `npm install` from the declared package manifest.
+- The corrected workflow must produce a new observable run before P1/P9 runtime certification or P13-EXIT-06 can be advanced.
 - Evidence verification runs with `always()` so incomplete harness execution cannot silently skip validation; the evidence artifact remains uploaded with `always()`.
 - The execution harness records a deterministic nonzero exit code when a child process terminates without a numeric exit status.
 - P9.12 certification has regression coverage for complete observed evidence, incomplete evidence, wrong environment and forged summary-only input.
-- Previous GitHub Actions failures exposed no usable steps/logs. Certification remains pending until a completed run exposes observable steps and a valid evidence artifact.
 
 ## P13 closure audit
 
