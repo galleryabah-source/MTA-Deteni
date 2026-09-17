@@ -24,7 +24,7 @@ import type { RuntimeExecutionContext } from "../src/application/runtime-executi
 
 const context = { executionId: "EXEC-ACK", runtimeMode: "LOCAL", deviceClass: "DESKTOP", networkScopeId: "NET-ACK", certificationJourneyId: "J-ACK", authenticated: true, syntheticOnly: true } as RuntimeExecutionContext;
 const session = { sessionId: "S-ACK", executionId: "EXEC-ACK", deviceId: "DEV-ACK", installationId: "INST-ACK", networkScopeId: "NET-ACK", runtimeMode: "LOCAL", state: "ACTIVE", syntheticOnly: true } as OperationalSession;
-const request = { requestId: "REQ-ACK", actorId: "ACT-ACK", device: { deviceId: "DEV-ACK", installationId: "INST-ACK", networkScopeId: "NET-ACK", deviceClass: "DESKTOP" }, method: "POST", path: "/mta-local/mutate", headers: {}, idempotencyKey: "IDEMP-ACK", boundary: { serviceId: "SVC-ACK", listenScope: "LOOPBACK_ONLY", authenticatedDevice: true, internetExposed: false } } as LocalRuntimeRequest;
+const request = { requestId: "REQ-ACK", actorId: "ACT-ACK", device: { deviceId: "DEV-ACK", installationId: "INST-ACK", networkScopeId: "NET-ACK", deviceClass: "DESKTOP" }, method: "POST", path: "/mta-local/mutate", headers: {}, idempotencyKey: "IDEMP-ACK", boundary: { serviceId: "SVC-ACK", listenScope: "LOOPBACK_ONLY", allowsInternetExposure: false, requiresAuthenticatedDevice: true } } as LocalRuntimeRequest;
 
 function build() {
   const entry = getLocalRuntimeFailureMatrix()[0];
