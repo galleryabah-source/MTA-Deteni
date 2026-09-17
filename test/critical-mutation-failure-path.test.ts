@@ -5,40 +5,45 @@ import type { IdempotencyRecord } from "../src/application/idempotency-contract.
 import type { OutboxEventContract } from "../src/application/outbox-runtime-contract.js";
 import type { TransactionContext, TransactionRunner } from "../src/application/transaction-contract.js";
 
-function context(): TransactionContext {
-  return { transactionId: "tx-001", requestId: "req-001", correlationId: "corr-001", idempotencyKey: "idem-001" };
-}
-
-type StoreHarness = MutationIntegrationStores & {
+type StoreHarness = {
+  stores: MutationIntegrationStores;
   audits: unknown[];
   outbox: OutboxEventContract[];
   idempotency: Map<string, IdempotencyRecord>;
   failAudit: boolean;
 };
 
+function context(): TransactionContext {
+  return { transactionId: "tx-001", requestId: "req-001", correlationId: "corr-001", idempotencyKey: "idem-001" };
+}
+
 function stores(seed?: IdempotencyRecord): StoreHarness {
   const idempotency = new Map<string, IdempotencyRecord>();
   if (seed) idempotency.set(seed.idempotencyKey, seed);
   const audits: unknown[] = [];
   const outbox: OutboxEventContract[] = [];
-  const harness = {
-    idempotency,
-    audits,
-    outbox,
-    failAudit: false,
-    findIdempotency: (key: string) => idempotency.get(key),
-    saveIdempotency: (record: IdempotencyRecord) => { idempotency.set(record.idempotencyKey, record); },
-    appendAudit: (record: unknown) => {
-      if (harness.failAudit) throw new Error("AUDIT_FAILURE");
+  let failAudit = false;
+  const stores: MutationIntegrationStores = {
+    findIdempotency: key => idempotency.get(key),
+    saveIdempotency: record => { idempotency.set(record.idempotencyKey, record); },
+    appendAudit: record => {
+      if (failAudit) throw new Error("AUDIT_FAILURE");
       audits.push(record);
     },
-    appendPending: async (event: OutboxEventContract) => {
-      if (outbox.some(existing => existing.eventId === event.eventId)) return "CONFLICT" as const;
+    appendPending: async event => {
+      if (outbox.some(existing => existing.eventId === event.eventId)) return "CONFLICT";
       outbox.push(event);
-      return "ADMIT" as const;
+      return "ADMIT";
     },
-  } satisfies MutationIntegrationStores & { failAudit: boolean };
-  return harness as StoreHarness;
+  };
+  return {
+    stores,
+    audits,
+    outbox,
+    idempotency,
+    get failAudit() { return failAudit; },
+    set failAudit(value: boolean) { failAudit = value; },
+  };
 }
 
 function transactionalRunner(harness: StoreHarness, observedContexts: TransactionContext[] = []): TransactionRunner {
@@ -84,7 +89,7 @@ function input(overrides: Partial<{
 }
 
 async function execute(harness: StoreHarness, overrides: Parameters<typeof input>[0] = {}, observedContexts: TransactionContext[] = []) {
-  return executeCriticalMutation(input(overrides), harness, transactionalRunner(harness, observedContexts));
+  return executeCriticalMutation(input(overrides), harness.stores, transactionalRunner(harness, observedContexts));
 }
 
 test("critical mutation passes one canonical normalized context into the transaction boundary", async () => {
