@@ -14,12 +14,12 @@ const canonicalContext: ExecutionContext = Object.freeze({
   idempotencyKey: "idem-e2e-001",
 });
 
-type Evidence = Readonly<{
+type Evidence = {
   transaction?: TransactionContext;
   auditContext?: ExecutionContext;
   outboxContext?: ExecutionContext;
   observability?: ObservabilityEvent;
-}>;
+};
 
 function createHarness(): {
   stores: MutationIntegrationStores;
