@@ -29,13 +29,13 @@ check("ARCH-5810", pkg.scripts?.["typecheck:test"] === "tsc -p tsconfig.test.jso
 check("ARCH-5811", pkg.scripts?.test === "node --test", "JavaScript regression command is deterministic");
 check("ARCH-5812", pkg.scripts?.["test:unit"] === "tsx --test test/**/*.test.ts", "TypeScript domain test command is deterministic");
 check("ARCH-5813", workflow.includes("MTA_EXECUTION_ENV: controlled-nonprod"), "CI execution environment is controlled-nonprod");
-check("ARCH-5814", workflow.includes("mta-execution-evidence-"), "CI publishes execution evidence");
+check("ARCH-5814", workflow.includes("mta-controlled-execution-evidence-"), "CI publishes controlled execution evidence");
 check("GOV-5815", status.includes("Migration Freeze: **TRUE**"), "migration freeze remains locked");
 check("GOV-5816", status.includes("AI: **OFF**"), "AI remains disabled");
 check("GOV-5817", status.includes("SYNTHETIC ONLY"), "repository remains synthetic-only");
 check("GOV-5818", status.includes("Production access: **NOT AUTHORIZED**"), "production access remains unauthorized");
 check("GOV-5819", !workflow.includes("DATABASE_URL") && !workflow.includes("SUPABASE_URL"), "CI workflow does not require live database credentials");
-check("STATE-5820", status.includes("P13.246881–260880"), "status reflects the latest implemented P13 gate");
+check("STATE-5820", status.includes("P13.260881–274880"), "status reflects the current terminal governed P13 range");
 check("STATE-5821", status.includes("OBSERVATION PENDING"), "certification does not falsely claim execution PASS");
 check("GOV-5822", exitCriteria.includes("P13-EXIT-01") && exitCriteria.includes("P13-EXIT-08"), "P13 exit criteria are explicitly versioned");
 
