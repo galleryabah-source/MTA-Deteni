@@ -8,7 +8,7 @@ import type { RuntimeExecutionContext } from "../src/application/runtime-executi
 
 const context = { executionId: "EXEC-R", runtimeMode: "LOCAL", deviceClass: "DESKTOP", networkScopeId: "NET-R", certificationJourneyId: "J-R", authenticated: true, syntheticOnly: true } as RuntimeExecutionContext;
 const session = { sessionId: "S-R", executionId: "EXEC-R", deviceId: "DEV-R", installationId: "INST-R", networkScopeId: "NET-R", runtimeMode: "LOCAL", state: "ACTIVE", syntheticOnly: true } as OperationalSession;
-const request = { requestId: "REQ-R", actorId: "ACT-R", device: { deviceId: "DEV-R", installationId: "INST-R", networkScopeId: "NET-R", deviceClass: "DESKTOP" }, method: "POST", path: "/mta-local/mutate", headers: {}, idempotencyKey: "IDEMP-R", boundary: { serviceId: "SVC-R", listenScope: "LOOPBACK_ONLY", authenticatedDevice: true, internetExposed: false } } as LocalRuntimeRequest;
+const request = { requestId: "REQ-R", actorId: "ACT-R", device: { deviceId: "DEV-R", installationId: "INST-R", networkScopeId: "NET-R", deviceClass: "DESKTOP" }, method: "POST", path: "/mta-local/mutate", headers: {}, idempotencyKey: "IDEMP-R", boundary: { serviceId: "SVC-R", listenScope: "LOOPBACK_ONLY", requiresAuthenticatedDevice: true, allowsInternetExposure: false } } as LocalRuntimeRequest;
 
 function evidence(failureClass: "EXECUTION_REJECTED" | "REQUEST_REJECTED") {
   return createLocalRuntimeFailureEvidence({ evidenceId: "E-R", failureId: "FAIL-R", failureClass, request, response: { requestId: "REQ-R", status: "REJECTED", syntheticOnly: true } as LocalRuntimeResponse, session, context, observedAt: "2026-09-16T02:00:00Z" });
