@@ -27,7 +27,7 @@ function stores(seed?: IdempotencyRecord): StoreHarness {
     findIdempotency: key => idempotency.get(key),
     saveIdempotency: record => idempotency.set(record.idempotencyKey, record),
     appendAudit: record => audits.push(record),
-    appendOutbox: async event => {
+    appendPending: async event => {
       if (outbox.some(existing => existing.eventId === event.eventId)) return "CONFLICT";
       outbox.push(event);
       return "ADMIT";
@@ -142,6 +142,7 @@ test("outbox conflict rolls back idempotency and audit state", async () => {
     aggregateType: "DETAINEE_REGISTER",
     aggregateId: "d-001",
     eventType: "DETAINEE_REGISTER_COMMITTED",
+    executionContext: context(),
     payload: { source: "synthetic", action: "existing" },
     payloadFingerprint: "existing-fp",
     occurredAt: "2026-09-16T00:00:00.000Z",
