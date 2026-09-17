@@ -14,7 +14,7 @@ import type { RuntimeExecutionContext } from "../src/application/runtime-executi
 
 const context = { executionId: "EXEC-G", runtimeMode: "LOCAL", deviceClass: "DESKTOP", networkScopeId: "NET-G", certificationJourneyId: "J-G", authenticated: true, syntheticOnly: true } as RuntimeExecutionContext;
 const session = { sessionId: "S-G", executionId: "EXEC-G", deviceId: "DEV-G", installationId: "INST-G", networkScopeId: "NET-G", runtimeMode: "LOCAL", state: "ACTIVE", syntheticOnly: true } as OperationalSession;
-const request = { requestId: "REQ-G", actorId: "ACT-G", device: { deviceId: "DEV-G", installationId: "INST-G", networkScopeId: "NET-G", deviceClass: "DESKTOP" }, method: "POST", path: "/mta-local/mutate", headers: {}, idempotencyKey: "IDEMP-G", boundary: { serviceId: "SVC-G", listenScope: "LOOPBACK_ONLY", authenticatedDevice: true, internetExposed: false } } as LocalRuntimeRequest;
+const request = { requestId: "REQ-G", actorId: "ACT-G", device: { deviceId: "DEV-G", installationId: "INST-G", networkScopeId: "NET-G", deviceClass: "DESKTOP" }, method: "POST", path: "/mta-local/mutate", headers: {}, idempotencyKey: "IDEMP-G", boundary: { serviceId: "SVC-G", listenScope: "LOOPBACK_ONLY", allowsInternetExposure: false, requiresAuthenticatedDevice: true } } as LocalRuntimeRequest;
 
 function envelopeFor(index: number) {
   const entry = getLocalRuntimeFailureMatrix()[index];
