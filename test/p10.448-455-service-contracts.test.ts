@@ -9,7 +9,7 @@ import { actor, fixedNow } from "./service-test-support.js";
 test("core administration rejects unverified provenance and preserves status invariants", async () => {
   const store = new Map<string, any>();
   const service = new CoreAdministrationService({
-    repository: { get: async (id) => store.get(id) ?? null, save: async (d) => store.set(d.id, d) },
+    repository: { get: async (id) => store.get(id) ?? null, save: async (d) => { store.set(d.id, d); } },
     audit: { append: async () => "AUD-1" },
     now: fixedNow,
     canManage: (a) => a.domain === "RAP",
@@ -26,7 +26,7 @@ test("placement enforces one active placement and bed exclusivity", async () => 
     repository: {
       getCurrent: async (id) => store.get(`d:${id}`) ?? null,
       getBedOccupant: async (bed) => [...store.values()].find((p) => p.bedId === bed && p.active)?.detaineeId ?? null,
-      save: async (p) => store.set(`d:${p.detaineeId}`, p),
+      save: async (p) => { store.set(`d:${p.detaineeId}`, p); },
     }, now: fixedNow, canManage: (a) => a.domain === "KAMTIB",
   });
   await service.assign({ detaineeId: "SYN-D1", blockId: "B1", roomId: "R1", bedId: "BED1", actor: actor("k-1", "KAMTIB") });
@@ -37,7 +37,7 @@ test("placement enforces one active placement and bed exclusivity", async () => 
 test("movement records append-only events and headcount exposes unknown state", async () => {
   const events: any[] = [];
   const service = new MovementService({
-    repository: { append: async (e) => events.push(e), listSince: async (id) => events.filter((e) => e.detaineeId === id) },
+    repository: { append: async (e) => { events.push(e); }, listSince: async (id) => events.filter((e) => e.detaineeId === id) },
     now: fixedNow, canManage: (a) => a.domain === "KAMTIB",
   });
   await service.record({ id: "M1", detaineeId: "SYN-D1", type: "IN", actor: actor("k-1", "KAMTIB") });
@@ -48,7 +48,7 @@ test("movement records append-only events and headcount exposes unknown state", 
 
 test("temporary exit refuses invalid chronology and bypass transition", async () => {
   const store = new Map<string, any>();
-  const service = new TemporaryExitService({ repository: { get: async (id) => store.get(id) ?? null, save: async (e) => store.set(e.id, e) }, now: fixedNow, canManage: (a) => a.domain === "KAMTIB" });
+  const service = new TemporaryExitService({ repository: { get: async (id) => store.get(id) ?? null, save: async (e) => { store.set(e.id, e); } }, now: fixedNow, canManage: (a) => a.domain === "KAMTIB" });
   await assert.rejects(() => service.request({ id: "EXIT-1", detaineeId: "SYN-D1", plannedDepartureAt: "2026-09-15T10:00:00Z", plannedReturnAt: "2026-09-15T09:00:00Z", actor: actor("k-1", "KAMTIB") }));
   await service.request({ id: "EXIT-1", detaineeId: "SYN-D1", plannedDepartureAt: "2026-09-15T10:00:00Z", plannedReturnAt: "2026-09-15T12:00:00Z", actor: actor("k-1", "KAMTIB") });
   await assert.rejects(() => service.advance("EXIT-1", "DEPARTED", actor("k-1", "KAMTIB")));
