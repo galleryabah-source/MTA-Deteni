@@ -31,13 +31,14 @@ test("P13.7080 critical mutation requires all safety boundaries", () => {
 });
 
 test("P13.7100 transaction context is mandatory", async () => {
-  const result = await runCriticalTransaction(async (_context, work) => work(), { transactionId: "tx-1", requestId: "req-1", correlationId: "corr-1" }, async () => "COMMITTED");
+  const context = { transactionId: "tx-1", requestId: "req-1", correlationId: "corr-1", idempotencyKey: "idem-1" };
+  const result = await runCriticalTransaction(async (_context, work) => work(), context, async () => "COMMITTED");
   assert.equal(result, "COMMITTED");
-  await assert.rejects(() => runCriticalTransaction(async (_context, work) => work(), { transactionId: "", requestId: "req-1", correlationId: "corr-1" }, async () => "bad"), /incomplete/i);
+  await assert.rejects(() => runCriticalTransaction(async (_context, work) => work(), { ...context, transactionId: "" }, async () => "bad"), /incomplete/i);
 });
 
 test("P13.7120 outbox payload drift is rejected", () => {
-  const event = createOutboxEvent({ eventId: "event-1", aggregateType: "LEAVE", aggregateId: "leave-1", eventType: "LEAVE_RECEIVED", payload: "{}", payloadFingerprint: "fp-a", occurredAt: "2026-09-15T00:00:00Z", status: "PENDING", attemptCount: 0 });
+  const event = createOutboxEvent({ eventId: "event-1", aggregateType: "LEAVE", aggregateId: "leave-1", eventType: "LEAVE_RECEIVED", payload: {}, payloadFingerprint: "fp-a", occurredAt: "2026-09-15T00:00:00Z", status: "PENDING", attemptCount: 0 });
   assert.equal(nextOutboxAttempt(event, "PUBLISHED").attemptCount, 1);
   const drift = createOutboxEvent({ ...event, payloadFingerprint: "fp-b" });
   assert.throws(() => assertOutboxReplaySafe(event, drift), /payload drift/i);
