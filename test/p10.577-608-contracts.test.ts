@@ -1,10 +1,10 @@
-import test from "node:test";
+import { test } from "node:test";
 import assert from "node:assert/strict";
 import { evaluatePilotCertification } from "../src/application/pilot-readiness.js";
 import { assertMutationEnvelope, MTA_ROUTE_POLICIES } from "../src/application/transport-contract.js";
 import { validateReguJagaReport } from "../src/application/reporting-contract.js";
 
-const actor = { actorId: "synthetic-actor", role: "EDITOR", domain: "KAMTIB", scope: "synthetic", correlationId: "corr-1" } as const;
+const actor = { actorId: "synthetic-actor", role: "EDITOR", domain: "KAMTIB", scope: {}, correlationId: "corr-1" } as const;
 
 test("P10.577-584 certification fails closed on incomplete evidence", () => {
   assert.equal(evaluatePilotCertification({ packetId: "p", target: "SYNTHETIC", migrationFreeze: true, productionAccess: false, aiEnabled: false, evidence: [{ id: "1", checkpoint: "x", control: "y", status: "PENDING" }] }), "BLOCKED");
