@@ -11,7 +11,8 @@ export type BrowserTransportRequest = Readonly<{
 }>;
 
 export function assertBrowserTransportRequest(request: BrowserTransportRequest): void {
-  for (const [name, value] of [["requestId", request.requestId], ["actorId", request.actorId], ["path", request.path]]) {
+  const requiredFields: readonly [string, string][] = [["requestId", request.requestId], ["actorId", request.actorId], ["path", request.path]];
+  for (const [name, value] of requiredFields) {
     if (!value.trim()) throw new Error(`Browser request requires ${name}.`);
   }
   if (request.method !== "GET" && !request.idempotencyKey?.trim()) throw new Error("Mutation transport requires idempotency key.");
