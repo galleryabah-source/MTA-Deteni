@@ -17,6 +17,24 @@
 - P13.16201–16320: deterministic publication replay guard with ADMIT/REPLAY/CONFLICT semantics and no external side effect.
 - P13.16321–16440: integrated publication certification composes readiness and replay boundaries and preserves exact identity/fingerprint continuity.
 
+## Parallel UI hardening — smartphone & tablet
+
+Implemented without changing the database/migration boundary:
+
+- Smartphone/tablet shell at <=1024px replaces the cramped left sidebar with a full-width content surface and fixed bottom navigation.
+- Central **Scan QR** action is intentionally larger than neighboring actions and delegates to the existing adaptive QR camera runtime.
+- `Laporan` maps to the existing `documents` view instead of introducing a parallel route.
+- Mobile detainee table is projected into responsive cards while preserving the existing row actions and underlying synthetic data.
+- Safe-area handling and bottom content padding prevent gesture bars and the fixed navigation from covering content.
+- Mobile search keeps the card projection synchronized without a mutation-observer feedback loop.
+- Service Worker shell cache now includes the mobile shell.
+- Device regression contract covers phone 390x844, tablet 768x1024, and desktop 1440x900.
+- UI contract is documented in `docs/17-mobile-tablet-ui-hardening.md`.
+
+## Deployment observation
+
+Cloudflare deployment is still blocked at the credential/permission boundary. The latest controlled deploy reached Cloudflare API authentication and returned error code 10000; the account token is accepted as an account token but lacks the permission required to update the target Worker service. No production access was attempted.
+
 ## Next gate: P13.16441–16560
 
 Define a deterministic, synthetic-only publication request admission contract over certified publication readiness. Preserve the complete projection/certification/publication identity chain, reject drift/conflict/incomplete/non-synthetic state, and remain strictly before external transport or durable publication.
@@ -27,4 +45,4 @@ Migration Freeze TRUE. AI OFF. Repository SYNTHETIC ONLY. Production access NOT 
 
 ## Observation blocker
 
-GitHub Actions remains an observation blocker. New commits must not be described as CI-PASS until observable workflow steps/logs/artifacts exist.
+GitHub Actions remains an observation blocker for the full domain gate. New commits must not be described as CI-PASS until observable workflow steps/logs/artifacts exist. The dedicated responsive device workflow has produced successful phone/tablet/desktop smoke evidence for the earlier responsive-shell revision; the newest shell hardening revision is awaiting its current workflow run.
