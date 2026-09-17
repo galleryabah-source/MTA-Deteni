@@ -2,7 +2,7 @@ import { DAILY_GUARD_SECTION_ORDER } from "./daily-guard-report-contract.js";
 import { renderDailyGuardReport } from "./daily-guard-report-renderer.js";
 import type { OperationalReportRender, ReportSnapshot } from "./report-artifact.js";
 import type { ReportRenderer } from "./report-renderer.js";
-import { DAILY_GUARD_PRESENTATION_CONTRACT, DAILY_GUARD_SOURCE_HEADINGS, mapSnapshotToDailyGuardPresentation } from "./daily-guard-report-template.js";
+import { DAILY_GUARD_PRESENTATION_CONTRACT, mapSnapshotToDailyGuardPresentation } from "./daily-guard-report-template.js";
 
 export type SyntheticDocumentAdapterOutput = Readonly<{
   format: "PDF" | "DOCX";
@@ -31,7 +31,7 @@ function renderSourceGroundedText(snapshot: ReportSnapshot, sectionOrder: readon
           DAILY_GUARD_PRESENTATION_CONTRACT.dutyLabel,
           DAILY_GUARD_PRESENTATION_CONTRACT.dateLine,
           DAILY_GUARD_PRESENTATION_CONTRACT.dutyTimeLine,
-          ...order.map((section) => `${DAILY_GUARD_SOURCE_HEADINGS[section as keyof typeof DAILY_GUARD_SOURCE_HEADINGS] ?? section}\n${mapped[section as keyof typeof mapped]}`),
+          ...order.map((section) => `${DAILY_GUARD_PRESENTATION_CONTRACT.evidencedSectionHeadings[section as keyof typeof DAILY_GUARD_PRESENTATION_CONTRACT.evidencedSectionHeadings] ?? section}\n${mapped[section as keyof typeof mapped]}`),
           DAILY_GUARD_PRESENTATION_CONTRACT.closingLocationDateLine,
           DAILY_GUARD_PRESENTATION_CONTRACT.commandSignatureLabel,
           DAILY_GUARD_PRESENTATION_CONTRACT.acknowledgmentLabel,
