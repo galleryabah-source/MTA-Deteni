@@ -2,6 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { executeCriticalMutation, type MutationIntegrationStores } from "../src/application/mutation-integration.js";
 import type { IdempotencyRecord } from "../src/application/idempotency-contract.js";
+import type { OutboxEventContract } from "../src/application/outbox-runtime-contract.js";
 import type { TransactionRunner } from "../src/application/transaction-contract.js";
 
 const context = Object.freeze({
@@ -31,7 +32,7 @@ function input(overrides: Partial<Parameters<typeof executeCriticalMutation>[0]>
 function harness(options: { auditError?: boolean; outboxDisposition?: "ADMIT" | "REPLAY" | "CONFLICT" } = {}) {
   const idempotency = new Map<string, IdempotencyRecord>();
   const audits: unknown[] = [];
-  const outbox: unknown[] = [];
+  const outbox: OutboxEventContract[] = [];
   const stores: MutationIntegrationStores = {
     findIdempotency: key => idempotency.get(key),
     saveIdempotency: record => idempotency.set(record.idempotencyKey, record),
@@ -39,7 +40,7 @@ function harness(options: { auditError?: boolean; outboxDisposition?: "ADMIT" | 
       if (options.auditError) throw new Error("AUDIT_FAILURE");
       audits.push(record);
     },
-    appendOutbox: async event => {
+    appendPending: async event => {
       if (options.outboxDisposition === "CONFLICT") return "CONFLICT";
       if (options.outboxDisposition === "REPLAY") return "REPLAY";
       outbox.push(event);
