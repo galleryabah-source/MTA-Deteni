@@ -22,7 +22,7 @@ test("P13.12841-12960: audit evidence drift fails closed", () => {
   const decision = createLocalRuntimeRecoveryDecision({ decisionId: "DEC-AE-DRIFT", envelope });
   const replay = assessLocalRuntimeRecoveryDecisionReplay({ decision, envelope, registry: new Map() });
   const evidence = createLocalRuntimeRecoveryDecisionAuditEvidence({ evidenceId: "AUD-AE-DRIFT", decision, envelope, replay });
-  assert.throws(() => assertLocalRuntimeRecoveryDecisionAuditEvidence({ ...evidence, action: "OPERATOR_REVIEW" }, decision, envelope, replay), /semantic drift/i);
-  assert.throws(() => assertLocalRuntimeRecoveryDecisionAuditEvidence({ ...evidence, syntheticOnly: false }, decision, envelope, replay), /synthetic-only/i);
-  assert.throws(() => assertLocalRuntimeRecoveryDecisionAuditEvidence({ ...evidence, fingerprint: `${evidence.fingerprint}-tampered` }, decision, envelope, replay), /fingerprint drift/i);
+  assert.throws(() => assertLocalRuntimeRecoveryDecisionAuditEvidence({ ...evidence, action: "OPERATOR_REVIEW" } as never, decision, envelope, replay), /semantic drift/i);
+  assert.throws(() => assertLocalRuntimeRecoveryDecisionAuditEvidence({ ...evidence, syntheticOnly: false } as never, decision, envelope, replay), /synthetic-only/i);
+  assert.throws(() => assertLocalRuntimeRecoveryDecisionAuditEvidence({ ...evidence, fingerprint: `${evidence.fingerprint}-tampered` } as never, decision, envelope, replay), /fingerprint drift/i);
 });
