@@ -1,0 +1,56 @@
+name: MTA DETENI Device Regression
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'web/**'
+      - '.github/workflows/mta-device-regression.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  browser-matrix:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        viewport:
+          - { name: phone, width: 390, height: 844 }
+          - { name: tablet, width: 768, height: 1024 }
+          - { name: desktop, width: 1440, height: 900 }
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - run: npm init -y
+      - run: npm install --no-save playwright@1.55.0 http-server@14.1.1
+      - run: npx playwright install --with-deps chromium
+      - run: npx http-server web -p 4173 > /tmp/mta-http.log 2>&1 &
+      - name: Browser smoke ${{ matrix.viewport.name }}
+        env:
+          WIDTH: ${{ matrix.viewport.width }}
+          HEIGHT: ${{ matrix.viewport.height }}
+          DEVICE: ${{ matrix.viewport.name }}
+        run: |
+          node <<'NODE'
+          const { chromium } = require('playwright');
+          (async()=>{
+            const browser=await chromium.launch({headless:true});
+            const page=await browser.newPage({viewport:{width:Number(process.env.WIDTH),height:Number(process.env.HEIGHT)}});
+            const errors=[];
+            page.on('pageerror',e=>errors.push(e.message));
+            await page.goto('http://127.0.0.1:4173/',{waitUntil:'networkidle'});
+            const metrics=await page.evaluate(()=>({width:innerWidth,scrollWidth:document.documentElement.scrollWidth,bodyWidth:document.body.scrollWidth,offlineScript:!!document.querySelector('script[src*="offline-v1.js"]'),queueScript:!!document.querySelector('script[src*="offline-queue-v1.js"]')}));
+            if(metrics.scrollWidth>metrics.width+2 || metrics.bodyWidth>metrics.width+2) throw new Error(`horizontal overflow on ${process.env.DEVICE}: ${JSON.stringify(metrics)}`);
+            if(!metrics.offlineScript) throw new Error('offline runtime script missing');
+            if(!metrics.queueScript) throw new Error('durable queue script missing');
+            if(errors.length) throw new Error(`page errors: ${errors.join('; ')}`);
+            console.log(JSON.stringify({device:process.env.DEVICE,metrics}));
+            await browser.close();
+          })();
+          NODE
