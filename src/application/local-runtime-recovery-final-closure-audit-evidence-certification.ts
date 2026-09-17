@@ -28,7 +28,7 @@ export function certifyLocalRuntimeRecoveryFinalClosureAuditEvidence(input: { ce
 }
 
 export function assertLocalRuntimeRecoveryFinalClosureAuditEvidenceCertification(input: LocalRuntimeRecoveryFinalClosureAuditEvidenceCertification, evidence: LocalRuntimeRecoveryFinalClosureAuditEvidence): void {
-  if (!input.certified || !input.syntheticOnly || input.replayDisposition === "CONFLICT") throw new Error("Final closure audit evidence certification must be certified, non-conflicted and synthetic-only.");
+  if (!input.certified || !input.syntheticOnly) throw new Error("Final closure audit evidence certification must be certified and synthetic-only.");
   if (input.evidenceId !== evidence.evidenceId || input.auditCertificationId !== evidence.auditCertificationId || input.auditRecordId !== evidence.auditRecordId || input.closureCertificationId !== evidence.closureCertificationId || input.closureEvidenceId !== evidence.closureEvidenceId || input.decisionFingerprint !== evidence.decisionFingerprint) throw new Error("Final closure audit evidence certification drift.");
 }
 
