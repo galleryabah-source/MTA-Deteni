@@ -36,7 +36,7 @@ export function executeOfflineContinuityJourney(input: { sessionId: string; cont
   const receipts = decisions.map(({ command, decision }) => createReconciliationReceipt({ session: recovered.session, context: input.context, command: Object.freeze({ ...command, state: "PENDING" as const }), decision }));
   const proof = certifySessionReconciliation({ session: recovered.session, context: input.context, admittedCommands: input.commands, receipts });
   const active = markSessionReconciliationComplete(recovered.session, proof);
-  const reconciledCommands = Object.freeze(recovered.rehydratedCommands.map((command, index) => reconcileRecoveredCommand({ command, decision: decisions[index].decision })));
+  const reconciledCommands = Object.freeze(decisions.map(({ command, decision }) => reconcileRecoveredCommand({ command, decision })));
   const runtime = assessRuntimeContinuity({ context: input.context, queue: reconciledCommands });
   const backup = assessBackupContinuity(input.backupManifest);
   const continuity = certifyContinuity({ certificationId: `CONT-${input.sessionId}`, sessionId: input.sessionId, deviceId: input.deviceId, installationId: input.installationId, context: input.context, lifecycle: input.lifecycle, recovery: input.recovery, runtime, backup });
