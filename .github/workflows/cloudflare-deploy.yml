@@ -1,4 +1,4 @@
-name: MTA DETENI Cloudflare Preview Validation
+name: MTA DETENI Cloudflare Preview Deploy
 
 on:
   workflow_dispatch:
@@ -13,26 +13,41 @@ on:
 permissions:
   contents: read
 
-# Governance boundary:
-# This workflow validates the Cloudflare Worker configuration only.
-# It MUST NOT perform a real Cloudflare deployment while Production Access
-# remains NOT AUTHORIZED and no explicit controlled non-production target exists.
+# Controlled non-production boundary only.
+# This workflow deploys a separate preview Worker and MUST NOT target production.
+
+env:
+  DEPLOY_TARGET: nonprod
+  CLOUDFLARE_PREVIEW_NAME: mta-deteni-preview
 
 jobs:
-  validate:
+  deploy-preview:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
       - name: Checkout
-        uses: actions/checkout@v7
+        uses: actions/checkout@v4
 
       - name: Setup Node.js
-        uses: actions/setup-node@v7
+        uses: actions/setup-node@v4
         with:
           node-version: '24'
 
       - name: Install Wrangler
         run: npm install --global wrangler@4.132.0
 
+      - name: Enforce non-production deployment boundary
+        run: |
+          test "$DEPLOY_TARGET" = "nonprod"
+          test "$CLOUDFLARE_PREVIEW_NAME" = "mta-deteni-preview"
+          echo "Deployment target: $DEPLOY_TARGET"
+          echo "Worker target: $CLOUDFLARE_PREVIEW_NAME"
+
       - name: Validate Wrangler configuration
-        run: wrangler deploy --dry-run
+        run: wrangler deploy --dry-run --name "$CLOUDFLARE_PREVIEW_NAME"
+
+      - name: Deploy controlled non-production preview
+        run: wrangler deploy --name "$CLOUDFLARE_PREVIEW_NAME"
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
