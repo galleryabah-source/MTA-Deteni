@@ -13,7 +13,7 @@ const expectCode = async (work: () => Promise<unknown>, code: string) => {
 test("P13.5827 movement is append-only and headcount distinguishes outside from unknown", async () => {
   const events: any[] = [];
   const repository = {
-    append: async (event: any) => events.push(event),
+    append: async (event: any) => { events.push(event); },
     listSince: async (detaineeId: string) => events.filter((event) => event.detaineeId === detaineeId),
   };
   const service = new MovementService({ repository, now: fixedNow, canManage: (a) => a.domain === "KAMTIB" });
@@ -59,7 +59,7 @@ test("P13.5840 approval uses canonical HEAD_RUDENIM and enforces separation of d
   const approvals = new Map<string, any>();
   const repository = {
     get: async (id: string) => approvals.get(id) ?? null,
-    save: async (approval: any) => approvals.set(approval.id, approval),
+    save: async (approval: any) => { approvals.set(approval.id, approval); },
   };
   const service = new ApprovalLeadershipService({
     repository,
