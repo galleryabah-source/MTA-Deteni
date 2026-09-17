@@ -1,5 +1,15 @@
 # Changelog
 
+## P1 — Executable Runtime Certification + Failure Matrix
+
+- Added `src/application/p1-runtime-certification.ts` with a fixed seven-control evidence contract covering canonical context continuity, idempotency, transaction, audit, outbox, observability and failure-matrix behavior.
+- Certification evidence requires `controlled-nonprod`, a resolved commit and explicit false governance-lock flags for production authorization, migration execution and AI activation.
+- Added `test/p1-runtime-certification.test.ts` covering complete evidence, missing/duplicate controls, unresolved commit, governance-lock violations, pending/failed controls and PASS/exit-code inconsistency.
+- Added `test/p1-runtime-failure-matrix.test.ts` covering missing context, idempotency conflict, replay, domain failure, audit failure and outbox conflict/replay fail-closed behavior.
+- The certification contract is non-authorizing and does not enable production access, migrations, AI, external transport or durable publication.
+- P1 runtime certification remains pending until an actual repository execution produces observable evidence; contract-level test coverage is not recorded as runtime PASS.
+- No schema migration, live PostgreSQL execution, production access, AI activation, external transport, durable publication, real detainee data or production PII was introduced.
+
 ## P1 — Unified Critical Mutation Context + Failure Matrix
 
 - Added a dedicated critical-mutation context gate that establishes one immutable canonical execution context for request, correlation, transaction and idempotency identities.
