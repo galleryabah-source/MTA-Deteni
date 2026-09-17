@@ -13,7 +13,7 @@ import type { RuntimeExecutionContext } from "../src/application/runtime-executi
 
 const context = { executionId: "EXEC-M", runtimeMode: "LOCAL", deviceClass: "DESKTOP", networkScopeId: "NET-M", certificationJourneyId: "J-M", authenticated: true, syntheticOnly: true } as RuntimeExecutionContext;
 const session = { sessionId: "S-M", executionId: "EXEC-M", deviceId: "DEV-M", installationId: "INST-M", networkScopeId: "NET-M", runtimeMode: "LOCAL", state: "ACTIVE", syntheticOnly: true } as OperationalSession;
-const request = { requestId: "REQ-M", actorId: "ACT-M", device: { deviceId: "DEV-M", installationId: "INST-M", networkScopeId: "NET-M", deviceClass: "DESKTOP" }, method: "POST", path: "/mta-local/mutate", headers: {}, idempotencyKey: "IDEMP-M", boundary: { serviceId: "SVC-M", listenScope: "LOOPBACK_ONLY", authenticatedDevice: true, internetExposed: false } } as LocalRuntimeRequest;
+const request = { requestId: "REQ-M", actorId: "ACT-M", device: { deviceId: "DEV-M", installationId: "INST-M", networkScopeId: "NET-M", deviceClass: "DESKTOP" }, method: "POST", path: "/mta-local/mutate", headers: {}, idempotencyKey: "IDEMP-M", boundary: { serviceId: "SVC-M", listenScope: "LOOPBACK_ONLY", allowsInternetExposure: false, requiresAuthenticatedDevice: true } } as LocalRuntimeRequest;
 
 function runScenario(entry: ReturnType<typeof getLocalRuntimeFailureMatrix>[number], suffix: string) {
   const evidence = createLocalRuntimeFailureEvidence({ evidenceId: `E-${suffix}`, failureId: `FAIL-${suffix}`, failureClass: entry.failureClass, request, response: { requestId: request.requestId, status: "REJECTED", syntheticOnly: true } as LocalRuntimeResponse, session, context, observedAt: "2026-09-16T03:00:00Z" });
@@ -43,15 +43,15 @@ test("P13.12121-12240: all five failure scenarios traverse the complete safety c
 
 test("P13.12121-12240: retry policy drift fails closed", () => {
   const result = runScenario(getLocalRuntimeFailureMatrix()[3], "DRIFT");
-  assert.throws(() => assertLocalRuntimeSafetyEnvelope({ ...result.envelope, safeToRetry: true }), /automatic retry|operator review/i);
+  assert.throws(() => assertLocalRuntimeSafetyEnvelope({ ...result.envelope, safeToRetry: true } as never), /automatic retry|operator review/i);
 });
 
 test("P13.12121-12240: operator-review drift fails closed", () => {
   const result = runScenario(getLocalRuntimeFailureMatrix()[3], "REVIEW");
-  assert.throws(() => assertLocalRuntimeSafetyEnvelope({ ...result.envelope, operatorReviewRequired: false }), /synthetic|automatic retry|safety envelope/i);
+  assert.throws(() => assertLocalRuntimeSafetyEnvelope({ ...result.envelope, operatorReviewRequired: false } as never), /synthetic|automatic retry|safety envelope/i);
 });
 
 test("P13.12121-12240: non-synthetic certification input is rejected", () => {
   const result = runScenario(getLocalRuntimeFailureMatrix()[3], "SYNTH");
-  assert.throws(() => assertLocalRuntimeSafetyEnvelope({ ...result.envelope, syntheticOnly: false }), /synthetic-only|certified/i);
+  assert.throws(() => assertLocalRuntimeSafetyEnvelope({ ...result.envelope, syntheticOnly: false } as never), /synthetic-only|certified/i);
 });
