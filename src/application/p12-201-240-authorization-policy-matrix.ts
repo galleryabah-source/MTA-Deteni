@@ -22,7 +22,7 @@ const policy: Readonly<Record<DomainName, readonly OperationalPermission[]>> = {
   PERKES: ["HEALTH_RECORD_MANAGE", "HEALTH_WORKFLOW_MANAGE"],
   KAMTIB: ["PLACEMENT_MANAGE", "MOVEMENT_MANAGE", "HEADCOUNT_CAPTURE", "TEMPORARY_EXIT_VALIDATE", "ESCORT_ASSIGN", "OPERATIONAL_QR_SCAN"],
   SUBBAG_TU: ["ESCORT_DOCUMENT_ADMINISTER"],
-  LEADERSHIP: ["OVERSIGHT_READ", "OVERSIGHT_DIRECTIVE"],
+  HEAD_RUDENIM: ["OVERSIGHT_READ", "OVERSIGHT_DIRECTIVE"],
 };
 
 export function isPermissionDeclared(domain: DomainName, permission: string): boolean {
@@ -38,7 +38,7 @@ export function policyMatrix(): Readonly<Record<DomainName, readonly Operational
 }
 
 export function assertLeadershipReadOnlyOperational(domain: DomainName, permission: OperationalPermission): void {
-  if (domain === "LEADERSHIP" && !["OVERSIGHT_READ", "OVERSIGHT_DIRECTIVE"].includes(permission)) {
+  if (domain === "HEAD_RUDENIM" && !["OVERSIGHT_READ", "OVERSIGHT_DIRECTIVE"].includes(permission)) {
     throw new Error("LEADERSHIP_OPERATIONAL_EDIT_FORBIDDEN");
   }
 }
