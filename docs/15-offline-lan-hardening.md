@@ -1,10 +1,10 @@
 # MTA DETENI — P13 Offline/LAN Hardening
 
-Status: contract implemented on `main`
+Status: contract hardening implemented on `main`
 
 ## Scope
 
-This increment establishes the contract boundary for a local/LAN runtime without opening production access, database migration, or real operational data.
+This increment strengthens the local/LAN runtime boundary without opening production access, database migration, or real operational data.
 
 ## Local runtime
 
@@ -16,32 +16,42 @@ This increment establishes the contract boundary for a local/LAN runtime without
 
 ## Offline mutation queue
 
-Every mutation carries:
+Every mutation carries mutation identity, idempotency key, aggregate identity, operation, base version, payload fingerprint, lifecycle status, and synthetic-only marking.
 
-- mutation identity;
-- idempotency key;
-- aggregate identity;
-- operation;
-- base version;
-- payload fingerprint;
-- lifecycle status.
+The queue now also keeps an execution receipt. A successful application records the resulting aggregate version and acknowledgement timestamp instead of discarding that information. A conflict can be explicitly acknowledged without applying an effect.
 
-The queue rejects an idempotency-key collision when the payload fingerprint differs. An identical replay is classified as `REPLAYED` and produces no second effect.
+## Idempotency
+
+- Same idempotency key + same payload fingerprint = `REPLAYED`, no second effect.
+- Same idempotency key + different payload fingerprint = `CONFLICT`, never silently overwrite.
+- Resulting-version receipts are retained in the runtime queue boundary.
+
+## Deterministic sync
+
+The sync contract introduces a stable `syncId`, `deviceId`, cursor, positive sequence start, ordered mutation batch, per-item result, accepted-through sequence, and next cursor. The current implementation deliberately preserves supplied mutation order; it does not silently reorder mutations.
 
 ## Conflict resolution
 
-A base-version mismatch is classified as `CONFLICT` with `BASE_VERSION_CONFLICT`. Conflicts are review-required; the adapter does not silently overwrite the current aggregate.
+A base-version mismatch is classified as `CONFLICT` with `BASE_VERSION_CONFLICT`. Resolution is an explicit reviewed action: `ACCEPT_LOCAL`, `ACCEPT_REMOTE`, `MERGE`, or `REJECT`. Every resolution requires reviewer identity, rationale, resolved version, timestamp, and audit event identity. No silent overwrite is permitted.
 
 ## Database boundary
 
-No PostgreSQL connection or migration is introduced by this increment. The future local PostgreSQL adapter must be implemented behind this contract and tested against a dedicated non-production instance before any controlled data is admitted.
+No PostgreSQL connection or migration is introduced by this increment. The future local PostgreSQL adapter must remain behind the existing LAN adapter contract and be tested against a dedicated non-production instance before any controlled data is admitted.
+
+## Governance locks retained
+
+- Migration Freeze: TRUE.
+- AI: OFF.
+- Repository data: SYNTHETIC ONLY.
+- Production access: NOT AUTHORIZED.
+- Live PostgreSQL execution: BLOCKED until explicit governance clearance and an approved non-production target.
 
 ## Next hardening
 
-1. Durable queue storage with crash-safe state transitions.
-2. Deterministic sync protocol between LAN runtime and controlled central adapter.
-3. Server-side idempotency ledger with unique constraint.
-4. Explicit conflict-resolution workflow and audit evidence.
-5. LAN health/discovery endpoint without exposing sensitive data.
-6. Fully vendored offline QR dependency.
+1. Durable browser/LAN queue persistence with crash-safe state transitions.
+2. Sync engine with deterministic acknowledgement and cursor advancement.
+3. Server-side idempotency ledger design behind a future non-production database gate.
+4. Conflict review state machine with immutable decision/audit evidence.
+5. LAN health/discovery endpoint without sensitive data exposure.
+6. Fully vendored offline QR dependency; remove runtime CDN dependency.
 7. Browser/device matrix execution in CI.
