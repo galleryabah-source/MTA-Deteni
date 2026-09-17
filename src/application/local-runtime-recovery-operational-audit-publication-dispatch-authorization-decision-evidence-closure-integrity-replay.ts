@@ -6,7 +6,8 @@ export type OperationalAuditPublicationDispatchAuthorizationDecisionEvidenceClos
 const registry = new Map<string, string>();
 
 export function replayLocalRuntimeRecoveryOperationalAuditPublicationDispatchAuthorizationDecisionEvidenceClosureIntegrity(input: { integrity: LocalRuntimeRecoveryOperationalAuditPublicationDispatchAuthorizationDecisionEvidenceClosureIntegrity; closureCertification: LocalRuntimeRecoveryOperationalAuditPublicationDispatchAuthorizationDecisionEvidenceClosureCertification }): OperationalAuditPublicationDispatchAuthorizationDecisionEvidenceClosureIntegrityReplayDisposition {
-  assertLocalRuntimeRecoveryOperationalAuditPublicationDispatchAuthorizationDecisionEvidenceClosureIntegrity(input.integrity, { ...input.closureCertification, certified: true });
+  const decisionCertification = { ...input.closureCertification, decisionState: "REVIEW_REQUIRED" as const };
+  assertLocalRuntimeRecoveryOperationalAuditPublicationDispatchAuthorizationDecisionEvidenceClosureIntegrity(input.integrity, decisionCertification);
   const key = `${input.integrity.integrityId}:${input.integrity.closureCertificationId}`;
   const previous = registry.get(key);
   if (!previous) { registry.set(key, input.integrity.decisionFingerprint); return "ADMIT"; }
