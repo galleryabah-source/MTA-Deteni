@@ -65,7 +65,10 @@ export async function executeCriticalMutation<T>(
     const value = await input.runDomainMutation();
     const completed = createIdempotencyRecord({ ...inProgress, status: "COMPLETED", responseFingerprint: input.responseFingerprint, completedAt: input.occurredAt });
     stores.saveIdempotency(completed);
-    stores.appendAudit({ auditId: input.auditId, commandType: input.commandType, aggregateId: input.aggregateId, requestHash: input.requestHash, executionContext: context, outcome: "COMMITTED", recordedAt: input.occurredAt });
+
+    const audit = { auditId: input.auditId, commandType: input.commandType, aggregateId: input.aggregateId, requestHash: input.requestHash, executionContext: context, outcome: "COMMITTED" as const, recordedAt: input.occurredAt };
+    assertCriticalMutationContextContinuity(context, { audit: audit.executionContext });
+    stores.appendAudit(audit);
 
     const event = createOutboxEvent({
       eventId: input.eventId,
@@ -77,8 +80,8 @@ export async function executeCriticalMutation<T>(
       payloadFingerprint: input.payloadFingerprint,
       occurredAt: input.occurredAt,
     });
+    assertCriticalMutationContextContinuity(context, { outbox: event.executionContext });
     const outboxDisposition = await appendMandatoryOutboxEvent(stores, event);
-    assertCriticalMutationContextContinuity(context, { transaction: context, observability: { requestId: context.requestId, correlationId: context.correlationId, transactionId: context.transactionId } });
     if (outboxDisposition === "CONFLICT") throw new Error("OUTBOX_EVENT_ID_CONFLICT");
     if (outboxDisposition === "REPLAY") throw new Error("OUTBOX_EVENT_REPLAY_DURING_NEW_MUTATION");
 
