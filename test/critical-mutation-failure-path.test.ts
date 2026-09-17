@@ -92,16 +92,15 @@ test("critical mutation passes one canonical normalized context into the transac
   assert.equal(Object.isFrozen(observedContexts[0]), true);
 });
 
-test("critical mutation rejects downstream transaction identity drift before domain mutation", async () => {
+test("incomplete canonical context fails before transaction execution", async () => {
   const harness = stores();
   const observedContexts: TransactionContext[] = [];
-  const result = await execute(harness, {
-    runDomainMutation: async () => {
-      throw new Error("DOMAIN_MUST_NOT_RUN");
-    },
-  }, observedContexts).catch(error => error);
-  assert.match(String(result), /DOMAIN_MUST_NOT_RUN/);
-  assert.equal(observedContexts.length, 1);
+  await assert.rejects(() => execute(harness, {
+    context: { transactionId: "tx-001", requestId: "", correlationId: "corr-001", idempotencyKey: "idem-001" },
+    runDomainMutation: async () => { throw new Error("DOMAIN_MUST_NOT_RUN"); },
+  }, observedContexts), /REQUEST_ID_REQUIRED/);
+  assert.equal(observedContexts.length, 0);
+  assert.equal(harness.idempotency.size, 0);
 });
 
 test("duplicate completed request replays without side effects", async () => {
