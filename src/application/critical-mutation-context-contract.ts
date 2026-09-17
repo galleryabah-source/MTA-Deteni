@@ -12,11 +12,6 @@ export type DownstreamContextObservation = Readonly<{
   }>;
 }>;
 
-/**
- * One fail-closed gate for the critical-mutation identity spine.
- * It normalizes the caller context once, then verifies every supplied
- * downstream identity against that same immutable context.
- */
 export function establishCriticalMutationContext(input: ExecutionContext): ExecutionContext {
   return createExecutionContext(input);
 }
@@ -30,10 +25,10 @@ export function assertCriticalMutationContextContinuity(
   if (observed.outbox) assertExecutionContextContinuity(context, observed.outbox);
 
   if (observed.observability) {
-    assertExecutionContextContinuity(context, {
-      requestId: observed.observability.requestId,
-      correlationId: observed.observability.correlationId,
-      transactionId: observed.observability.transactionId,
-    });
+    const observation = observed.observability;
+    const downstream = observation.transactionId === undefined
+      ? { requestId: observation.requestId, correlationId: observation.correlationId }
+      : { requestId: observation.requestId, correlationId: observation.correlationId, transactionId: observation.transactionId };
+    assertExecutionContextContinuity(context, downstream);
   }
 }
