@@ -6,7 +6,7 @@ import { actor, fixedNow } from "./service-test-support.js";
 
 test("synthetic temporary-exit happy path cannot bypass governance gates", async () => {
   const exits = new Map<string, any>();
-  const exitService = new TemporaryExitService({ repository: { get: async (id) => exits.get(id) ?? null, save: async (e) => exits.set(e.id, e) }, now: fixedNow, canManage: () => true });
+  const exitService = new TemporaryExitService({ repository: { get: async (id) => exits.get(id) ?? null, save: async (e) => { exits.set(e.id, e); } }, now: fixedNow, canManage: () => true });
   await exitService.request({ id: "SYN-EXIT-0001", detaineeId: "SYN-DET-0001", plannedDepartureAt: "2026-09-15T10:00:00Z", plannedReturnAt: "2026-09-15T12:00:00Z", actor: actor("kamtib-1", "KAMTIB") });
 
   let approved = false;
@@ -22,7 +22,7 @@ test("synthetic temporary-exit happy path cannot bypass governance gates", async
       escortState: async () => escorted ? "ASSIGNED" : "MISSING",
     },
     { authorize: async () => true },
-    { append: async (e) => audit.push(e.eventType), enqueue: async () => undefined },
+    { append: async (e) => { audit.push(e.eventType); }, enqueue: async () => undefined },
     { run: async (work) => work() },
   );
 
