@@ -13,6 +13,7 @@ type StoreHarness = MutationIntegrationStores & {
   audits: unknown[];
   outbox: OutboxEventContract[];
   idempotency: Map<string, IdempotencyRecord>;
+  failAudit: boolean;
 };
 
 function stores(seed?: IdempotencyRecord): StoreHarness {
@@ -20,19 +21,24 @@ function stores(seed?: IdempotencyRecord): StoreHarness {
   if (seed) idempotency.set(seed.idempotencyKey, seed);
   const audits: unknown[] = [];
   const outbox: OutboxEventContract[] = [];
-  return {
+  const harness = {
     idempotency,
     audits,
     outbox,
-    findIdempotency: key => idempotency.get(key),
-    saveIdempotency: record => idempotency.set(record.idempotencyKey, record),
-    appendAudit: record => audits.push(record),
-    appendPending: async event => {
-      if (outbox.some(existing => existing.eventId === event.eventId)) return "CONFLICT";
-      outbox.push(event);
-      return "ADMIT";
+    failAudit: false,
+    findIdempotency: (key: string) => idempotency.get(key),
+    saveIdempotency: (record: IdempotencyRecord) => { idempotency.set(record.idempotencyKey, record); },
+    appendAudit: (record: unknown) => {
+      if (harness.failAudit) throw new Error("AUDIT_FAILURE");
+      audits.push(record);
     },
-  };
+    appendPending: async (event: OutboxEventContract) => {
+      if (outbox.some(existing => existing.eventId === event.eventId)) return "CONFLICT" as const;
+      outbox.push(event);
+      return "ADMIT" as const;
+    },
+  } satisfies MutationIntegrationStores & { failAudit: boolean };
+  return harness as StoreHarness;
 }
 
 function transactionalRunner(harness: StoreHarness, observedContexts: TransactionContext[] = []): TransactionRunner {
@@ -128,7 +134,7 @@ test("domain failure rolls back idempotency and downstream evidence", async () =
 
 test("audit failure rolls back completed mutation state and prevents outbox", async () => {
   const harness = stores();
-  harness.appendAudit = () => { throw new Error("AUDIT_FAILURE"); };
+  harness.failAudit = true;
   await assert.rejects(() => execute(harness), /AUDIT_FAILURE/);
   assert.equal(harness.idempotency.size, 0);
   assert.equal(harness.audits.length, 0);
