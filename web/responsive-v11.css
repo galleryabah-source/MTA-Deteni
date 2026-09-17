@@ -1,11 +1,12 @@
-/* MTA DETENI responsive hardening v11 — presentation-only, synthetic preview */
+/* MTA DETENI responsive hardening v12 — presentation-only, synthetic preview */
 :root{--mta-sidebar:232px;--mta-sidebar-mini:58px;--mta-mobile-sidebar:218px}
 html,body{width:100%;max-width:100%;overflow-x:hidden}
-button,input,select,textarea{max-width:100%}
-.layout{min-width:0}
-.side{min-width:0}
-.main{min-width:0;overflow-x:hidden}
-.view{min-width:0;width:100%}
+body,.app,.layout,.side,.main,.view,.hero,.grid,.card,.toolbar,.tablewrap,.report{min-width:0;max-width:100%}
+.app{width:100%;overflow-x:hidden}
+.layout{overflow:hidden}
+button,input,select,textarea{max-width:100%;min-width:0}
+.main{overflow-x:hidden}
+.view{width:100%;overflow-x:hidden}
 .hero,.card,.tablewrap,.dialog,.report{max-width:100%}
 .grid{min-width:0}
 .toolbar{max-width:100%}
@@ -20,7 +21,7 @@ button,input,select,textarea{max-width:100%}
   .side.mta-collapsed{width:var(--mta-sidebar-mini)}
   .main{width:100%;max-width:100%;padding:10px;overflow-y:auto;overflow-x:hidden}
   .hero{padding:14px}
-  .stats{grid-template-columns:repeat(2,minmax(0,1fr));}
+  .stats{grid-template-columns:repeat(2,minmax(0,1fr))}
   .kpis{grid-template-columns:repeat(2,minmax(0,1fr))}
   .formgrid{grid-template-columns:minmax(0,1fr)}
   .full{grid-column:auto}
