@@ -11,6 +11,7 @@ export type RecoveryJourneyResult = Readonly<{
   mutationCount: number;
   auditCount: number;
   outboxCount: number;
+  retries: readonly RecoveryRetryRecord[];
   retryRecords: readonly RecoveryRetryRecord[];
   evidence: readonly RecoveryEvidence[];
   syntheticOnly: true;
@@ -77,13 +78,15 @@ export function executeSyntheticRecoveryJourney(input: {
     outcome = "RECONNECT_REVIEW";
   }
 
+  const frozenRetries = Object.freeze([...retries]);
   return Object.freeze({
     journeyId: input.journeyId,
     outcome,
     mutationCount: failure.mutationCommitted ? 1 : 0,
     auditCount: failure.mutationCommitted ? 1 : 0,
     outboxCount: failure.mutationCommitted ? 1 : 0,
-    retryRecords: Object.freeze([...retries]),
+    retries: frozenRetries,
+    retryRecords: frozenRetries,
     evidence: Object.freeze([evidence]),
     syntheticOnly: true,
   });
