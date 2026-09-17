@@ -14,7 +14,7 @@ import type { RuntimeExecutionContext } from "../src/application/runtime-executi
 
 const context = { executionId: "EXEC-IC", runtimeMode: "LOCAL", deviceClass: "DESKTOP", networkScopeId: "NET-IC", certificationJourneyId: "J-IC", authenticated: true, syntheticOnly: true } as RuntimeExecutionContext;
 const session = { sessionId: "S-IC", executionId: "EXEC-IC", deviceId: "DEV-IC", installationId: "INST-IC", networkScopeId: "NET-IC", runtimeMode: "LOCAL", state: "ACTIVE", syntheticOnly: true } as OperationalSession;
-const request = { requestId: "REQ-IC", actorId: "ACT-IC", device: { deviceId: "DEV-IC", installationId: "INST-IC", networkScopeId: "NET-IC", deviceClass: "DESKTOP" }, method: "POST", path: "/mta-local/mutate", headers: {}, idempotencyKey: "IDEMP-IC", boundary: { serviceId: "SVC-IC", listenScope: "LOOPBACK_ONLY", authenticatedDevice: true, internetExposed: false } } as LocalRuntimeRequest;
+const request = { requestId: "REQ-IC", actorId: "ACT-IC", device: { deviceId: "DEV-IC", installationId: "INST-IC", networkScopeId: "NET-IC", deviceClass: "DESKTOP" }, method: "POST", path: "/mta-local/mutate", headers: {}, idempotencyKey: "IDEMP-IC", boundary: { serviceId: "SVC-IC", listenScope: "LOOPBACK_ONLY", allowsInternetExposure: false, requiresAuthenticatedDevice: true } } as LocalRuntimeRequest;
 
 function makeEnvelope(index: number) {
   const entry = getLocalRuntimeFailureMatrix()[index];
@@ -39,5 +39,5 @@ test("P13.12481-12600: integrated recovery certification preserves the five scen
 test("P13.12481-12600: blocked certification cannot be mutated into admission", () => {
   const certification = certifyLocalRuntimeRecovery({ certificationId: "RC-BLOCK", envelope: makeEnvelope(4) });
   assert.equal(certification.admitted, false);
-  assert.throws(() => assertLocalRuntimeRecoveryCertification({ ...certification, admitted: true }), /cannot be admitted|Blocked recovery/i);
+  assert.throws(() => assertLocalRuntimeRecoveryCertification({ ...certification, admitted: true } as never), /cannot be admitted|Blocked recovery/i);
 });
