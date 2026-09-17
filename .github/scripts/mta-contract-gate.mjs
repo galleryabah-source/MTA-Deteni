@@ -29,7 +29,14 @@ check("ARCH-5810", pkg.scripts?.["typecheck:test"] === "tsc -p tsconfig.test.jso
 check("ARCH-5811", pkg.scripts?.test === "node --test", "JavaScript regression command is deterministic");
 check("ARCH-5812", pkg.scripts?.["test:unit"] === "tsx --test test/**/*.test.ts", "TypeScript domain test command is deterministic");
 check("ARCH-5813", workflow.includes("MTA_EXECUTION_ENV: controlled-nonprod"), "CI execution environment is controlled-nonprod");
-check("ARCH-5814", workflow.includes("mta-controlled-execution-evidence-"), "CI publishes controlled execution evidence");
+check(
+  "ARCH-5814",
+  workflow.includes("uses: actions/upload-artifact@v4") &&
+    workflow.includes("name: mta-controlled-execution-evidence-") &&
+    workflow.includes("path: artifacts/mta-evidence/") &&
+    workflow.includes("if: always()"),
+  "CI uploads controlled execution evidence from the canonical evidence directory with an always-run upload boundary",
+);
 check("GOV-5815", status.includes("Migration Freeze: **TRUE**"), "migration freeze remains locked");
 check("GOV-5816", status.includes("AI: **OFF**"), "AI remains disabled");
 check("GOV-5817", status.includes("SYNTHETIC ONLY"), "repository remains synthetic-only");
