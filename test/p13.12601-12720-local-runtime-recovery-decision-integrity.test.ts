@@ -14,7 +14,7 @@ import type { RuntimeExecutionContext } from "../src/application/runtime-executi
 
 const context = { executionId: "EXEC-DI", runtimeMode: "LOCAL", deviceClass: "DESKTOP", networkScopeId: "NET-DI", certificationJourneyId: "J-DI", authenticated: true, syntheticOnly: true } as RuntimeExecutionContext;
 const session = { sessionId: "S-DI", executionId: "EXEC-DI", deviceId: "DEV-DI", installationId: "INST-DI", networkScopeId: "NET-DI", runtimeMode: "LOCAL", state: "ACTIVE", syntheticOnly: true } as OperationalSession;
-const request = { requestId: "REQ-DI", actorId: "ACT-DI", device: { deviceId: "DEV-DI", installationId: "INST-DI", networkScopeId: "NET-DI", deviceClass: "DESKTOP" }, method: "POST", path: "/mta-local/mutate", headers: {}, idempotencyKey: "IDEMP-DI", boundary: { serviceId: "SVC-DI", listenScope: "LOOPBACK_ONLY", authenticatedDevice: true, internetExposed: false } } as LocalRuntimeRequest;
+const request = { requestId: "REQ-DI", actorId: "ACT-DI", device: { deviceId: "DEV-DI", installationId: "INST-DI", networkScopeId: "NET-DI", deviceClass: "DESKTOP" }, method: "POST", path: "/mta-local/mutate", headers: {}, idempotencyKey: "IDEMP-DI", boundary: { serviceId: "SVC-DI", listenScope: "LOOPBACK_ONLY", allowsInternetExposure: false, requiresAuthenticatedDevice: true } } as LocalRuntimeRequest;
 
 function makeEnvelope(index: number) {
   const entry = getLocalRuntimeFailureMatrix()[index];
@@ -44,8 +44,8 @@ test("P13.12601-12720: stale, cross-scenario and tampered decisions fail closed"
   const first = makeEnvelope(0);
   const second = makeEnvelope(1);
   const decision = createLocalRuntimeRecoveryDecision({ decisionId: "DEC-DRIFT", envelope: first });
-  assert.throws(() => assertLocalRuntimeRecoveryDecisionIntegrity({ ...decision, scenario: second.scenario }, first), /integrity drift/i);
+  assert.throws(() => assertLocalRuntimeRecoveryDecisionIntegrity({ ...decision, scenario: second.scenario } as never, first), /integrity drift/i);
   assert.throws(() => assertLocalRuntimeRecoveryDecisionIntegrity(decision, second), /integrity drift/i);
-  assert.throws(() => assertLocalRuntimeRecoveryDecisionIntegrity({ ...decision, syntheticOnly: false }, first), /synthetic-only/i);
-  assert.throws(() => assertLocalRuntimeRecoveryDecisionIntegrity({ ...decision, continuityState: "RECONCILIATION_REQUIRED", admitted: true }, first), /integrity drift|cannot be admitted/i);
+  assert.throws(() => assertLocalRuntimeRecoveryDecisionIntegrity({ ...decision, syntheticOnly: false } as never, first), /synthetic-only/i);
+  assert.throws(() => assertLocalRuntimeRecoveryDecisionIntegrity({ ...decision, continuityState: "RECONCILIATION_REQUIRED", admitted: true } as never, first), /integrity drift|cannot be admitted/i);
 });
