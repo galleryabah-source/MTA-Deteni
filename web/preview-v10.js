@@ -1,0 +1,72 @@
+(()=>{
+  'use strict';
+  const STYLE_ID='mta-preview-v10-style';
+  const NAV_ID='mtaResponsiveNavToggle';
+  const KEY='mta-deteni-nav-collapsed';
+  const labels={
+    dashboard:'⌂',detainee:'♙',placement:'▦',movement:'↔',leave:'✓',documents:'▤',audit:'◷',
+    monitor:'◉','qr-center':'▣','scan-center:'▤','ops-queue':'☷','room-ops':'▥','leave-qr':'⌁','camera-scan':'⌾',reports:'▤',
+    'admin-settings':'⚙','master-block':'▤','master-room':'▥','master-operational-catalogs':'☷','room-transfer-master':'⇄'
+  };
+  function injectStyle(){
+    if(document.getElementById(STYLE_ID))return;
+    const s=document.createElement('style');s.id=STYLE_ID;s.textContent=`
+      :root{--mta-nav-width:232px;--mta-nav-mini:58px;--mta-nav-gap:8px}
+      .mta-nav-toggle{width:40px;height:40px;border:1px solid var(--line,#d7dce3);background:rgba(255,255,255,.82);border-radius:10px;display:grid;place-items:center;font-size:18px;color:#303640;cursor:pointer;flex:0 0 auto}
+      .mta-nav-toggle:hover{background:#e6f0ff;color:#0754ae}
+      .side{transition:width .18s ease,padding .18s ease;min-width:0}
+      .mta-nav-head{display:flex;justify-content:flex-end;margin:0 0 8px}
+      .nav button{min-height:40px;display:flex;align-items:center;gap:10px}
+      .nav button::before{content:attr(data-icon);display:inline-grid;place-items:center;width:20px;min-width:20px;font-size:15px;font-weight:700}
+      .side.mta-collapsed{width:var(--mta-nav-mini);padding:10px 8px}
+      .side.mta-collapsed .mta-nav-head{justify-content:center}
+      .side.mta-collapsed .nav button{justify-content:center;padding:10px 7px;font-size:0;gap:0}
+      .side.mta-collapsed .nav button::before{font-size:16px}
+      .side.mta-collapsed .mta-nav-toggle{transform:rotate(180deg)}
+      @media(min-width:761px){
+        .layout{grid-template-columns:var(--mta-nav-width) 1fr;transition:grid-template-columns .18s ease}
+        .layout:has(.side.mta-collapsed){grid-template-columns:var(--mta-nav-mini) 1fr}
+        .side{position:sticky;top:56px;height:calc(100vh - 84px);overflow:auto}
+      }
+      @media(max-width:760px){
+        .layout{grid-template-columns:var(--mta-nav-width) 1fr;align-items:stretch}
+        .side{position:sticky;top:56px;height:calc(100vh - 84px);border-right:1px solid var(--line);border-bottom:0;padding:10px 8px;overflow-y:auto;overflow-x:hidden;z-index:18;background:rgba(255,255,255,.94);backdrop-filter:blur(18px)}
+        .main{min-width:0;padding:10px}
+        .side.mta-collapsed{width:var(--mta-nav-mini);padding:10px 7px}
+        .nav{display:grid;gap:var(--mta-nav-gap);overflow:visible}
+        .nav button{width:100%;white-space:normal;text-align:left;padding:10px 9px}
+        .top{position:sticky}
+        .topright .btn{display:none}
+        .brand small{display:none}
+      }
+      @media(max-width:430px){
+        :root{--mta-nav-width:218px;--mta-nav-mini:54px}
+        .layout{grid-template-columns:var(--mta-nav-width) 1fr}
+        .side.mta-collapsed{width:var(--mta-nav-mini)}
+        .main{padding:8px}
+        .hero{border-radius:12px}
+      }
+      @media(prefers-reduced-motion:reduce){.side,.layout{transition:none!important}}
+    `;document.head.appendChild(s)
+  }
+  function setup(){
+    injectStyle();
+    const side=document.querySelector('.side'),nav=document.getElementById('nav');
+    if(!side||!nav)return;
+    if(!document.getElementById(NAV_ID)){
+      const head=document.createElement('div');head.className='mta-nav-head';
+      const b=document.createElement('button');b.id=NAV_ID;b.className='mta-nav-toggle';b.type='button';b.title='Perbesar/kecilkan menu';b.setAttribute('aria-label','Perbesar atau kecilkan menu navigasi');b.textContent='‹';
+      b.onclick=()=>{const collapsed=side.classList.toggle('mta-collapsed');localStorage.setItem(KEY,collapsed?'1':'0');b.setAttribute('aria-expanded',String(!collapsed));};
+      head.appendChild(b);nav.parentElement.insertBefore(head,nav);
+    }
+    nav.querySelectorAll('button').forEach(b=>{
+      const key=b.dataset.view||b.textContent.trim().toLowerCase().replace(/\s+/g,'-');
+      if(!b.dataset.icon)b.dataset.icon=labels[key]||'•';
+      b.title=b.title||b.textContent.trim();
+    });
+    if(localStorage.getItem(KEY)==='1')side.classList.add('mta-collapsed');
+    const toggle=document.getElementById(NAV_ID);if(toggle)toggle.setAttribute('aria-expanded',String(!side.classList.contains('mta-collapsed')));
+  }
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',setup);else setup();
+  window.addEventListener('load',setup);
+})();
