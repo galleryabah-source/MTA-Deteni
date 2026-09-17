@@ -11,7 +11,7 @@ import type { RuntimeExecutionContext } from "../src/application/runtime-executi
 
 const context = { executionId: "EXEC-J", runtimeMode: "LOCAL", deviceClass: "DESKTOP", networkScopeId: "NET-J", certificationJourneyId: "J-J", authenticated: true, syntheticOnly: true } as RuntimeExecutionContext;
 const session = { sessionId: "S-J", executionId: "EXEC-J", deviceId: "DEV-J", installationId: "INST-J", networkScopeId: "NET-J", runtimeMode: "LOCAL", state: "ACTIVE", syntheticOnly: true } as OperationalSession;
-const request = { requestId: "REQ-J", actorId: "ACT-J", device: { deviceId: "DEV-J", installationId: "INST-J", networkScopeId: "NET-J", deviceClass: "DESKTOP" }, method: "POST", path: "/mta-local/mutate", headers: {}, idempotencyKey: "IDEMP-J", boundary: { serviceId: "SVC-J", listenScope: "LOOPBACK_ONLY", authenticatedDevice: true, internetExposed: false } } as LocalRuntimeRequest;
+const request = { requestId: "REQ-J", actorId: "ACT-J", device: { deviceId: "DEV-J", installationId: "INST-J", networkScopeId: "NET-J", deviceClass: "DESKTOP" }, method: "POST", path: "/mta-local/mutate", headers: {}, idempotencyKey: "IDEMP-J", boundary: { serviceId: "SVC-J", listenScope: "LOOPBACK_ONLY", allowsInternetExposure: false, requiresAuthenticatedDevice: true } } as LocalRuntimeRequest;
 
 test("P13.11881-12000: certified failure flows into one deterministic recovery journey", () => {
   const evidence = createLocalRuntimeFailureEvidence({ evidenceId: "E-J", failureId: "FAIL-J", failureClass: "EXECUTION_REJECTED", request, response: { requestId: "REQ-J", status: "REJECTED", syntheticOnly: true } as LocalRuntimeResponse, session, context, observedAt: "2026-09-16T02:20:00Z" });
