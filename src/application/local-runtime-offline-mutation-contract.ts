@@ -24,6 +24,16 @@ export type OfflineMutationDisposition = Readonly<{
   syntheticOnly: true;
 }>;
 
+export type OfflineMutationReceipt = Readonly<{
+  mutationId: string;
+  idempotencyKey: string;
+  status: 'APPLIED' | 'REPLAYED' | 'CONFLICT' | 'REJECTED';
+  effectApplied: boolean;
+  resultingVersion?: string;
+  acknowledgedAt: string;
+  syntheticOnly: true;
+}>;
+
 export function assertOfflineMutationContract(mutation: OfflineMutation): void {
   if (!mutation.mutationId.trim() || !mutation.idempotencyKey.trim()) throw new Error('Offline mutation identity is required.');
   if (!mutation.aggregateType.trim() || !mutation.aggregateId.trim() || !mutation.operation.trim()) throw new Error('Offline mutation aggregate identity is required.');
