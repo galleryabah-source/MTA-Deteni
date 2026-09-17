@@ -9,7 +9,7 @@ import type { RuntimeExecutionContext } from "../src/application/runtime-executi
 
 const context = { executionId: "EXEC-C", runtimeMode: "LOCAL", deviceClass: "DESKTOP", networkScopeId: "NET-C", certificationJourneyId: "J-C", authenticated: true, syntheticOnly: true } as RuntimeExecutionContext;
 const session = { sessionId: "S-C", executionId: "EXEC-C", deviceId: "DEV-C", installationId: "INST-C", networkScopeId: "NET-C", runtimeMode: "LOCAL", state: "ACTIVE", syntheticOnly: true } as OperationalSession;
-const request = { requestId: "REQ-C", actorId: "ACT-C", device: { deviceId: "DEV-C", installationId: "INST-C", networkScopeId: "NET-C", deviceClass: "DESKTOP" }, method: "GET", path: "/mta-local/status", headers: {}, boundary: { serviceId: "SVC-C", listenScope: "LOOPBACK_ONLY", authenticatedDevice: true, internetExposed: false } } as LocalRuntimeRequest;
+const request = { requestId: "REQ-C", actorId: "ACT-C", device: { deviceId: "DEV-C", installationId: "INST-C", networkScopeId: "NET-C", deviceClass: "DESKTOP" }, method: "GET", path: "/mta-local/status", headers: {}, boundary: { serviceId: "SVC-C", listenScope: "LOOPBACK_ONLY", requiresAuthenticatedDevice: true, allowsInternetExposure: false } } as LocalRuntimeRequest;
 
 test("P13.11521-11640: failure evidence and observation certify as one synthetic chain", () => {
   const evidence = createLocalRuntimeFailureEvidence({ evidenceId: "E-C", failureId: "FAIL-C", failureClass: "EXECUTION_REJECTED", request, response: { requestId: "REQ-C", status: "REJECTED", syntheticOnly: true } as LocalRuntimeResponse, session, context, observedAt: "2026-09-16T01:20:00Z" });
