@@ -33,13 +33,16 @@ export function assertLifecycleStep(step: LifecycleStep): void {
 export function certifyLifecycleJourney(input: { journeyId: string; steps: readonly LifecycleStep[]; auditCount: number; outboxCount: number; projectionVersion: number }): LifecycleCertification {
   if (!input.journeyId.trim() || input.steps.length !== EXPECTED_LIFECYCLE_ORDER.length) throw new Error("Lifecycle certification requires exactly five ordered steps.");
   input.steps.forEach(assertLifecycleStep);
-  input.steps.forEach((step, index) => { if (step.name !== EXPECTED_LIFECYCLE_ORDER[index]) throw new Error("Lifecycle step order is not canonical."); });
-  const correlation = input.steps[0].correlationId;
+  input.steps.forEach((step, index) => { const expected = EXPECTED_LIFECYCLE_ORDER[index]; if (expected !== undefined && step.name !== expected) throw new Error("Lifecycle step order is not canonical."); });
+  const firstStep = input.steps[0];
+  const lastStep = input.steps[input.steps.length - 1];
+  if (!firstStep || !lastStep) throw new Error("Lifecycle certification steps are incomplete.");
+  const correlation = firstStep.correlationId;
   if (input.steps.some((step) => step.correlationId !== correlation)) throw new Error("Lifecycle correlation drift detected.");
   if (!Number.isInteger(input.auditCount) || !Number.isInteger(input.outboxCount) || input.auditCount < 0 || input.outboxCount < 0) throw new Error("Lifecycle evidence cardinality is invalid.");
   if (input.auditCount !== input.outboxCount) throw new Error("Audit/outbox cardinality mismatch.");
   const committed = input.steps.filter((step) => step.status === "COMMITTED");
-  const terminalVersion = committed.length > 0 ? committed[committed.length - 1].afterVersion : input.steps[input.steps.length - 1].afterVersion;
+  const terminalVersion = committed.length > 0 ? committed[committed.length - 1]!.afterVersion : lastStep.afterVersion;
   if (input.projectionVersion !== terminalVersion) throw new Error("Reporting projection is stale.");
   return Object.freeze({ journeyId: input.journeyId, steps: Object.freeze([...input.steps]), auditCount: input.auditCount, outboxCount: input.outboxCount, projectionVersion: input.projectionVersion, certified: true, syntheticOnly: true });
 }
