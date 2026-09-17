@@ -6,6 +6,7 @@ import { createReportingSnapshot } from "../src/domain/reporting/snapshot.js";
 import { MtaApplicationServices } from "../src/application/mta-application-services.js";
 import type { MutationIntegrationStores } from "../src/application/mutation-integration.js";
 import type { TransactionRunner } from "../src/application/transaction-contract.js";
+import type { OutboxEventContract } from "../src/application/outbox-runtime-contract.js";
 
 const entity = Object.freeze({ id: "DET-SYN-001", version: 2, state: "ACTIVE" });
 const snapshot = createReportingSnapshot({ snapshotId: "SNP-001", generatedAt: "2026-09-15T00:00:00Z", sourceRevision: "DET-SYN-001", rows: [{ id: entity.id, version: entity.version }] });
@@ -36,12 +37,16 @@ test("reconciliation fails closed for missing projection and source conflict", (
 test("application mutation service preserves authorization, idempotency, audit and outbox seams", async () => {
   const idempotency = new Map<string, any>();
   const audits: any[] = [];
-  const outbox: any[] = [];
+  const outbox: OutboxEventContract[] = [];
   const stores: MutationIntegrationStores = {
-    findIdempotency: (key) => idempotency.get(key),
-    saveIdempotency: (record) => idempotency.set(record.idempotencyKey, record),
-    appendAudit: (record) => audits.push(record),
-    appendOutbox: (event) => outbox.push(event),
+    findIdempotency: key => idempotency.get(key),
+    saveIdempotency: record => { idempotency.set(record.idempotencyKey, record); },
+    appendAudit: record => { audits.push(record); },
+    appendPending: async event => {
+      if (outbox.some(existing => existing.eventId === event.eventId)) return "CONFLICT";
+      outbox.push(event);
+      return "ADMIT";
+    },
   };
   const transactionRunner: TransactionRunner = async (_context, work) => work();
   const service = new MtaApplicationServices({ stores, transactionRunner, authorize: (actor, commandType) => { if (actor.actorId !== "ACTOR-1" || !commandType) throw new Error("FORBIDDEN"); } });
