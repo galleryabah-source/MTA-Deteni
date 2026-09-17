@@ -1,5 +1,12 @@
 # Changelog
 
+## P1 — Unified Critical Mutation Context + Failure Matrix
+
+- Added a dedicated critical-mutation context gate that establishes one immutable canonical execution context for request, correlation, transaction and idempotency identities.
+- Critical mutation continues through the canonical runtime outbox and transaction boundaries without introducing a second identity model.
+- Corrected and strengthened the synthetic critical-mutation failure matrix to cover incomplete context rejection before transaction execution, replay, idempotency conflict, domain failure, audit failure and outbox conflict.
+- No schema migration, live PostgreSQL execution, production access, AI activation, external transport, durable publication, real detainee data or production PII was introduced.
+
 ## P1 — Canonical Execution Context Continuity
 
 - Bound `TransactionContext` directly to the canonical execution-context contract so request, correlation, transaction and idempotency identities cannot diverge by type definition.
