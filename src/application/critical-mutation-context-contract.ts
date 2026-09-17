@@ -3,6 +3,8 @@ import type { TransactionContext } from "./transaction-contract.js";
 
 export type DownstreamContextObservation = Readonly<{
   transaction?: Pick<TransactionContext, "requestId" | "correlationId" | "transactionId" | "idempotencyKey">;
+  audit?: Pick<ExecutionContext, "requestId" | "correlationId" | "transactionId" | "idempotencyKey">;
+  outbox?: Pick<ExecutionContext, "requestId" | "correlationId" | "transactionId" | "idempotencyKey">;
   observability?: Readonly<{
     requestId: string;
     correlationId: string;
@@ -23,9 +25,9 @@ export function assertCriticalMutationContextContinuity(
   context: ExecutionContext,
   observed: DownstreamContextObservation,
 ): void {
-  if (observed.transaction) {
-    assertExecutionContextContinuity(context, observed.transaction);
-  }
+  if (observed.transaction) assertExecutionContextContinuity(context, observed.transaction);
+  if (observed.audit) assertExecutionContextContinuity(context, observed.audit);
+  if (observed.outbox) assertExecutionContextContinuity(context, observed.outbox);
 
   if (observed.observability) {
     assertExecutionContextContinuity(context, {
