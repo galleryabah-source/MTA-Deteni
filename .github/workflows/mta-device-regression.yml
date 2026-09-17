@@ -42,18 +42,17 @@ jobs:
           const fs=require('fs');
           const { chromium } = require('playwright');
           (async()=>{
-            for(const f of ['web/offline-v1.js','web/offline-queue-v1.js','web/qr-camera-v2.js','web/qr-camera-v2.css','web/mobile-shell-v1.js','web/desktop-shell-v2.js','web/desktop-shell-v2.css']) if(!fs.existsSync(f)) throw new Error(`runtime asset missing: ${f}`);
+            for(const f of ['web/offline-v1.js','web/offline-queue-v1.js','web/qr-camera-v2.js','web/qr-camera-v2.css','web/preview-v5.js','web/preview-v6.js','web/preview-v10.js','web/mobile-shell-v1.js','web/desktop-shell-v2.js','web/desktop-shell-v2.css']) if(!fs.existsSync(f)) throw new Error(`runtime asset missing: ${f}`);
             const browser=await chromium.launch({headless:true});
             const page=await browser.newPage({viewport:{width:Number(process.env.WIDTH),height:Number(process.env.HEIGHT)}});
             const errors=[];
             page.on('pageerror',e=>errors.push(e.message));
             await page.goto('http://127.0.0.1:4173/',{waitUntil:'networkidle'});
-            await page.addScriptTag({url:'http://127.0.0.1:4173/offline-queue-v1.js'});
-            await page.addScriptTag({url:'http://127.0.0.1:4173/qr-camera-v2.js'});
-            await page.addScriptTag({url:'http://127.0.0.1:4173/mobile-shell-v1.js'});
+            for(const s of ['offline-queue-v1.js','qr-camera-v2.js','preview-v5.js','preview-v6.js','preview-v10.js']) await page.addScriptTag({url:`http://127.0.0.1:4173/${s}`});
             await page.addStyleTag({url:'http://127.0.0.1:4173/desktop-shell-v2.css'});
             await page.addScriptTag({url:'http://127.0.0.1:4173/desktop-shell-v2.js'});
-            await page.waitForTimeout(200);
+            await page.addScriptTag({url:'http://127.0.0.1:4173/mobile-shell-v1.js'});
+            await page.waitForTimeout(250);
             const metrics=await page.evaluate(()=>{const side=document.querySelector('.side');const bottom=document.querySelector('#mtaMobileBottomNav');return {width:innerWidth,scrollWidth:document.documentElement.scrollWidth,bodyWidth:document.body.scrollWidth,queueReady:!!window.MTADeteniOfflineQueue,scannerApi:!!window.mtaQrCameraV2,mobileShell:!!bottom,mobileShellVisible:!!bottom&&getComputedStyle(bottom).display!=='none',desktopEnhanced:document.body.classList.contains('mta-desktop-enhanced'),desktopGroupLabels:document.querySelectorAll('.mta-desktop-group-label').length,desktopStatus:!!document.querySelector('.mta-desktop-status'),sidebarVisible:!!side&&getComputedStyle(side).display!=='none'};});
             if(metrics.scrollWidth>metrics.width+2 || metrics.bodyWidth>metrics.width+2) throw new Error(`horizontal overflow on ${process.env.DEVICE}: ${JSON.stringify(metrics)}`);
             if(!metrics.queueReady) throw new Error('durable queue runtime not exposed');
@@ -76,7 +75,9 @@ jobs:
               if(!metrics.desktopStatus) throw new Error('desktop runtime status strip missing');
               const navButtons=await page.locator('#nav button[data-view]').count();
               if(navButtons<10) throw new Error(`desktop nav buttons unexpectedly low: ${navButtons}`);
-              await page.locator('#mtaResponsiveNavToggle').click();
+              const toggle=page.locator('#mtaResponsiveNavToggle');
+              if(await toggle.count()!==1) throw new Error('desktop nav collapse control missing');
+              await toggle.click();
               await page.waitForTimeout(30);
               const collapsed=await page.locator('.side.mta-collapsed').count();
               if(collapsed!==1) throw new Error('desktop sidebar collapse contract failed');
