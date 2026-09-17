@@ -57,7 +57,7 @@ export function assertLocalRuntimeFailureEvidence(evidence: LocalRuntimeFailureE
   if (evidence.method !== "GET" && !evidence.idempotencyKey) throw new Error("Local runtime failure evidence requires mutation idempotency.");
 }
 
-export function assertFailureEvidenceBoundary(input: { evidence: LocalRuntimeFailureEvidence; audit?: LocalRuntimeAuditEnvelope; request: LocalRuntimeRequest }): void {
+export function assertFailureEvidenceBoundary(input: { evidence: LocalRuntimeFailureEvidence; audit?: LocalRuntimeAuditEnvelope | undefined; request: LocalRuntimeRequest }): void {
   assertLocalRuntimeFailureEvidence(input.evidence);
   if (input.audit) {
     assertLocalRuntimeAuditEnvelope(input.audit);
