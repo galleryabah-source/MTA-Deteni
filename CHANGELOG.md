@@ -1,5 +1,13 @@
 # Changelog
 
+## CI — Lockfile Prerequisite Remediation
+
+- Observable GitHub Actions Run #925 exposed a concrete workflow failure: `actions/setup-node@v7` with `cache: npm` requires a lockfile, while the repository intentionally uses `npm install` and did not contain `package-lock.json`, `npm-shrinkwrap.json` or `yarn.lock`.
+- Removed the `cache: npm` requirement from `.github/workflows/mta-domain-ci.yml` rather than manufacturing an unverified lockfile or changing dependency resolution semantics.
+- The workflow remains `controlled-nonprod`, installs from the declared package manifest with `npm install`, and retains mandatory evidence validation and artifact upload.
+- Runtime certification remains pending until a new run reaches the actual build/test/harness stages and exposes valid evidence.
+- No schema migration, live PostgreSQL execution, production access, AI activation, external transport, durable publication, real detainee data or production PII was introduced.
+
 ## P1 — Executable Runtime Certification + Failure Matrix
 
 - Added `src/application/p1-runtime-certification.ts` with a fixed seven-control evidence contract covering canonical context continuity, idempotency, transaction, audit, outbox, observability and failure-matrix behavior.
