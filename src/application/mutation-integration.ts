@@ -1,6 +1,7 @@
 import { assertIdempotencyKey, createIdempotencyRecord, resolveIdempotency, type IdempotencyRecord } from "./idempotency-contract.js";
 import { appendMandatoryOutboxEvent, createOutboxEvent, type OutboxEventContract } from "./outbox-runtime-contract.js";
 import { createExecutionContext, type ExecutionContext } from "./execution-context-contract.js";
+import { assertCriticalMutationContextContinuity } from "./critical-mutation-context-contract.js";
 import { assertCriticalTransactionBoundary, runCriticalTransaction, type TransactionContext, type TransactionRunner } from "./transaction-contract.js";
 
 export type MutationAuditRecord = Readonly<{
@@ -8,6 +9,7 @@ export type MutationAuditRecord = Readonly<{
   commandType: string;
   aggregateId: string;
   requestHash: string;
+  executionContext: ExecutionContext;
   outcome: "COMMITTED" | "REPLAYED";
   recordedAt: string;
 }>;
@@ -63,18 +65,20 @@ export async function executeCriticalMutation<T>(
     const value = await input.runDomainMutation();
     const completed = createIdempotencyRecord({ ...inProgress, status: "COMPLETED", responseFingerprint: input.responseFingerprint, completedAt: input.occurredAt });
     stores.saveIdempotency(completed);
-    stores.appendAudit({ auditId: input.auditId, commandType: input.commandType, aggregateId: input.aggregateId, requestHash: input.requestHash, outcome: "COMMITTED", recordedAt: input.occurredAt });
+    stores.appendAudit({ auditId: input.auditId, commandType: input.commandType, aggregateId: input.aggregateId, requestHash: input.requestHash, executionContext: context, outcome: "COMMITTED", recordedAt: input.occurredAt });
 
     const event = createOutboxEvent({
       eventId: input.eventId,
       aggregateType: input.commandType,
       aggregateId: input.aggregateId,
       eventType: `${input.commandType}_COMMITTED`,
+      executionContext: context,
       payload: input.payload,
       payloadFingerprint: input.payloadFingerprint,
       occurredAt: input.occurredAt,
     });
     const outboxDisposition = await appendMandatoryOutboxEvent(stores, event);
+    assertCriticalMutationContextContinuity(context, { transaction: context, observability: { requestId: context.requestId, correlationId: context.correlationId, transactionId: context.transactionId } });
     if (outboxDisposition === "CONFLICT") throw new Error("OUTBOX_EVENT_ID_CONFLICT");
     if (outboxDisposition === "REPLAY") throw new Error("OUTBOX_EVENT_REPLAY_DURING_NEW_MUTATION");
 
