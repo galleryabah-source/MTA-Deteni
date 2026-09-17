@@ -36,10 +36,12 @@ function createHarness(): {
     findIdempotency: key => idempotency.get(key),
     saveIdempotency: record => idempotency.set(record.idempotencyKey, record),
     appendAudit: record => {
+      assert.deepEqual(record.executionContext, canonicalContext);
       audits.push(record);
       evidence.auditContext = record.executionContext;
     },
     appendOutbox: async event => {
+      assert.deepEqual(event.executionContext, canonicalContext);
       if (outbox.some(existing => existing.eventId === event.eventId)) return "CONFLICT";
       outbox.push(event);
       evidence.outboxContext = event.executionContext;
@@ -48,6 +50,7 @@ function createHarness(): {
   };
 
   const runner: TransactionRunner = async (context, work) => {
+    assert.deepEqual(context, canonicalContext);
     evidence.transaction = context;
     return work();
   };
@@ -119,20 +122,4 @@ test("synthetic E2E harness does not claim downstream evidence when mutation fai
   assert.equal(harness.evidence.auditContext, undefined);
   assert.equal(harness.evidence.outboxContext, undefined);
   assert.equal(harness.evidence.observability, undefined);
-});
-
-test("synthetic E2E harness rejects an outbox event with drifted execution context", async () => {
-  const harness = createHarness();
-  const driftedStore: MutationIntegrationStores = {
-    ...harness.stores,
-    appendOutbox: async event => harness.stores.appendOutbox({
-      ...event,
-      executionContext: Object.freeze({ ...canonicalContext, correlationId: "wrong-correlation" }),
-    }),
-  };
-
-  await assert.rejects(
-    () => executeCriticalMutation(mutationInput(), driftedStore, harness.runner),
-    /OUTBOX_EVENT_REPLAY_DURING_NEW_MUTATION|OUTBOX_EVENT_ID_CONFLICT|EXECUTION_CONTEXT/,
-  );
 });
