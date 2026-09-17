@@ -3,7 +3,8 @@
   "compilerOptions": {
     "noEmit": true,
     "exactOptionalPropertyTypes": false,
-    "noUncheckedIndexedAccess": false
+    "noUncheckedIndexedAccess": false,
+    "allowImportingTsExtensions": true
   },
   "include": ["src/**/*", "test/**/*.ts"]
 }
