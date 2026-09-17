@@ -34,7 +34,7 @@ export default {
       return new HTMLRewriter()
         .on('body', {
           element(element) {
-            element.append('<script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.js"></script><script src="/preview-v5.js"></script><script src="/preview-v6.js"></script><script src="/qr-print-clean-v2.js?v=2"></script>', { html: true });
+            element.append('<script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.js"></script><script src="/preview-v5.js"></script><script src="/preview-v6.js"></script><script src="/qr-print-clean-v3.js?v=3"></script>', { html: true });
           }
         })
         .transform(response);
