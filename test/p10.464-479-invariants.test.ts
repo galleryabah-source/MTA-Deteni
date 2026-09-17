@@ -19,7 +19,7 @@ test("temporary-exit workflow fails closed before approval/document/escort prere
       escortState: async () => "MISSING",
     },
     { authorize: async () => true },
-    { append: async (e) => audit.push(e.eventType), enqueue: async () => undefined },
+    { append: async (e) => { audit.push(e.eventType); }, enqueue: async () => undefined },
     { run: async (work) => work() },
   );
   await assert.rejects(() => workflow.advance({ exitId: "EXIT-1", from: "REQUESTED", to: "APPROVED", actor: actor("k-1", "KAMTIB") }));
