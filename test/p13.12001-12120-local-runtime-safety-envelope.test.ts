@@ -12,7 +12,7 @@ import type { RuntimeExecutionContext } from "../src/application/runtime-executi
 
 const context = { executionId: "EXEC-S", runtimeMode: "LOCAL", deviceClass: "DESKTOP", networkScopeId: "NET-S", certificationJourneyId: "J-S", authenticated: true, syntheticOnly: true } as RuntimeExecutionContext;
 const session = { sessionId: "S-S", executionId: "EXEC-S", deviceId: "DEV-S", installationId: "INST-S", networkScopeId: "NET-S", runtimeMode: "LOCAL", state: "ACTIVE", syntheticOnly: true } as OperationalSession;
-const request = { requestId: "REQ-S", actorId: "ACT-S", device: { deviceId: "DEV-S", installationId: "INST-S", networkScopeId: "NET-S", deviceClass: "DESKTOP" }, method: "POST", path: "/mta-local/mutate", headers: {}, idempotencyKey: "IDEMP-S", boundary: { serviceId: "SVC-S", listenScope: "LOOPBACK_ONLY", authenticatedDevice: true, internetExposed: false } } as LocalRuntimeRequest;
+const request = { requestId: "REQ-S", actorId: "ACT-S", device: { deviceId: "DEV-S", installationId: "INST-S", networkScopeId: "NET-S", deviceClass: "DESKTOP" }, method: "POST", path: "/mta-local/mutate", headers: {}, idempotencyKey: "IDEMP-S", boundary: { serviceId: "SVC-S", listenScope: "LOOPBACK_ONLY", allowsInternetExposure: false, requiresAuthenticatedDevice: true } } as LocalRuntimeRequest;
 
 test("P13.12001-12120: safety envelope binds certified failure, recovery and retry policy", () => {
   const evidence = createLocalRuntimeFailureEvidence({ evidenceId: "E-S", failureId: "FAIL-S", failureClass: "EXECUTION_REJECTED", request, response: { requestId: "REQ-S", status: "REJECTED", syntheticOnly: true } as LocalRuntimeResponse, session, context, observedAt: "2026-09-16T02:40:00Z" });
