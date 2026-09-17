@@ -5,7 +5,7 @@ export type BackupContinuityDecision = "READY" | "CHAIN_REQUIRED" | "BLOCKED";
 
 export type BackupContinuityAssessment = Readonly<{
   backupId: string;
-  previousBackupId?: string;
+  previousBackupId?: string | undefined;
   sourceRuntime: BackupManifest["sourceRuntime"];
   sourceDeviceId: string;
   sourceInstallationId: string;
