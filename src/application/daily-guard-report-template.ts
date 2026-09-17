@@ -2,10 +2,6 @@ import type { DailyGuardSection } from "./daily-guard-report-contract.js";
 import { DAILY_GUARD_SECTION_ORDER } from "./daily-guard-report-contract.js";
 import type { ReportSnapshot } from "./report-artifact.js";
 
-/**
- * Source-grounded presentation facts only. Business data remains in
- * ReportSnapshot; layout metadata is deliberately separate.
- */
 export type DailyGuardPresentationContract = Readonly<{
   title: "LAPORAN HARIAN REGU JAGA";
   organizationLines: readonly [
