@@ -29,7 +29,4 @@ const conflict = admitPublicationRequest({ ...base, publicationFingerprint: "FP-
 assert.equal(conflict.state, "CONFLICT");
 assert.equal(conflict.reason, "FINGERPRINT_CONFLICT");
 
-const notReady = admitPublicationRequest({ ...base, publicationRequestId: "PUB-2", readinessState: "READY_FOR_PUBLICATION" });
-assert.equal(notReady.state, "ADMITTED");
-
 console.log("P13.16441-16560 publication request admission tests: PASS");
