@@ -38,7 +38,7 @@ export function createLocalRuntimeRecoveryDecisionAuditEvidence(input: { auditEv
 export function assertLocalRuntimeRecoveryDecisionAuditEvidence(evidence: LocalRuntimeRecoveryDecisionAuditEvidence, decision: LocalRuntimeRecoveryDecision): void {
   if (!evidence.syntheticOnly) throw new Error("Local runtime recovery decision audit evidence must be synthetic-only.");
   if (!evidence.auditEvidenceId.trim()) throw new Error("Local runtime recovery decision audit identity is required.");
-  const fields: Array<keyof LocalRuntimeRecoveryDecisionAuditEvidence> = ["decisionId", "envelopeId", "journeyId", "certificationId", "evidenceId", "dispositionId", "scenario", "action", "admitted", "decisionFingerprint"];
+  const fields: Array<keyof LocalRuntimeRecoveryDecision> = ["decisionId", "envelopeId", "journeyId", "certificationId", "evidenceId", "dispositionId", "scenario", "action", "admitted", "decisionFingerprint"];
   for (const field of fields) {
     if (evidence[field] !== decision[field]) throw new Error(`Local runtime recovery decision audit drift: ${field}.`);
   }
