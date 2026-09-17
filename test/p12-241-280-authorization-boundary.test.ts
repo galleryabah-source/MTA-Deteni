@@ -7,7 +7,7 @@ const actor: ActorContext = { actorId: "ACT-SYN-AUTH", role: "OPERATOR", domain:
 
 test("P12.241-280 allows only permissions declared for actor domain", async () => {
   const decisions: string[] = [];
-  const authorization = new PolicyEnforcingAuthorization({ record: async (decision) => decisions.push(`${decision.permission}:${decision.allowed}`) });
+  const authorization = new PolicyEnforcingAuthorization({ record: async (decision) => { decisions.push(`${decision.permission}:${decision.allowed}`); } });
   assert.equal(await authorization.authorize(actor, "TEMPORARY_EXIT_VALIDATE"), true);
   assert.equal(await authorization.authorize(actor, "HEALTH_RECORD_MANAGE"), false);
   assert.deepEqual(decisions, ["TEMPORARY_EXIT_VALIDATE:true", "HEALTH_RECORD_MANAGE:false"]);
@@ -18,9 +18,9 @@ test("P12.241-280 denies missing actor identity", async () => {
   assert.throws(() => assertAuthorizationBoundary({ ...actor, actorId: "" }, "TEMPORARY_EXIT_VALIDATE"), /ACTOR_CONTEXT_REQUIRED/);
 });
 
-test("P12.241-280 keeps leadership out of direct operational mutation permissions", async () => {
-  const leadership = { ...actor, domain: "LEADERSHIP" } as const;
+test("P12.241-280 keeps legacy leadership vocabulary out of direct operational mutation permissions", async () => {
+  const leadership = { ...actor, domain: "LEADERSHIP" } as unknown as ActorContext;
   const authorization = new PolicyEnforcingAuthorization();
-  assert.equal(await authorization.authorize(leadership, "OVERSIGHT_READ"), true);
+  assert.equal(await authorization.authorize(leadership, "OVERSIGHT_READ"), false);
   assert.equal(await authorization.authorize(leadership, "TEMPORARY_EXIT_VALIDATE"), false);
 });
