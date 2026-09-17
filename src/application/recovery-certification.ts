@@ -29,6 +29,7 @@ export function certifyRecoveryJourney(input: {
   if (![input.mutationCount, input.auditCount, input.outboxCount].every((value) => Number.isInteger(value) && value >= 0)) throw new Error("Recovery effect cardinality is invalid.");
   if (input.mutationCount !== input.auditCount || input.mutationCount !== input.outboxCount) throw new Error("Recovery mutation/audit/outbox cardinality mismatch.");
   const evidence = input.evidence[0];
+  if (!evidence) throw new Error("Recovery certification evidence is required.");
   const committed = evidence.mutationCommitted;
   if (committed !== (input.mutationCount === 1)) throw new Error("Recovery evidence and mutation cardinality mismatch.");
   if (!committed && input.retries.length !== 0) throw new Error("Rejected recovery cannot produce retry records.");
