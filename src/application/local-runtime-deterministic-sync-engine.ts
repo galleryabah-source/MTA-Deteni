@@ -13,7 +13,7 @@ export class LocalRuntimeDeterministicSyncEngine {
     const results: OfflineSyncItemResult[] = [];
     let acceptedThroughSequence = batch.sequenceStart - 1;
     for (let index = 0; index < batch.mutations.length; index += 1) {
-      const mutation = batch.mutations[index];
+      const mutation = batch.mutations[index]!;
       const currentVersion = currentVersions.get(mutation.aggregateId);
       if (!currentVersion) throw new Error(`Missing current version for aggregate ${mutation.aggregateId}.`);
       const disposition: OfflineMutationDisposition = this.queue.admit(mutation, currentVersion);
