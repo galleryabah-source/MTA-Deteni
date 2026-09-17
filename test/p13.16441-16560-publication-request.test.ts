@@ -29,12 +29,12 @@ test("P13.16441-16560: publication request admission preserves certified publica
 test("P13.16441-16560: request admission fails closed on drift or transport", () => {
   const p = prepared();
   const request = createLocalRuntimeRecoveryOperationalAuditPublicationRequest({ requestId: "PUBREQ-2", certification: p.certification, envelope: p.envelope });
-  assert.throws(() => assertLocalRuntimeRecoveryOperationalAuditPublicationRequest({ ...request, executionId: "EXEC-DRIFT" }, p.certification, p.envelope), /drift/i);
-  assert.throws(() => assertLocalRuntimeRecoveryOperationalAuditPublicationRequest({ ...request, externalTransportRequested: true }, p.certification, p.envelope), /transport/i);
+  assert.throws(() => assertLocalRuntimeRecoveryOperationalAuditPublicationRequest({ ...request, executionId: "EXEC-DRIFT" } as never, p.certification, p.envelope), /drift/i);
+  assert.throws(() => assertLocalRuntimeRecoveryOperationalAuditPublicationRequest({ ...request, externalTransportRequested: true } as never, p.certification, p.envelope), /transport/i);
   assert.throws(() => createLocalRuntimeRecoveryOperationalAuditPublicationRequest({ requestId: "", certification: p.certification, envelope: p.envelope }), /identity/i);
 });
 
 test("P13.16441-16560: request admission rejects non-admissible publication certification", () => {
   const p = prepared();
-  assert.throws(() => createLocalRuntimeRecoveryOperationalAuditPublicationRequest({ requestId: "PUBREQ-3", certification: { ...p.certification, externalPublicationPerformed: true }, envelope: p.envelope }), /unpublished|publication/i);
+  assert.throws(() => createLocalRuntimeRecoveryOperationalAuditPublicationRequest({ requestId: "PUBREQ-3", certification: { ...p.certification, externalPublicationPerformed: true } as never, envelope: p.envelope }), /unpublished|publication/i);
 });
