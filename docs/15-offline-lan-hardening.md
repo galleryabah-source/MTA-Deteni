@@ -1,57 +1,60 @@
 # MTA DETENI — P13 Offline/LAN Hardening
 
-Status: contract hardening implemented on `main`
+Status: **implemented contract + browser runtime hardening; production database remains blocked**
 
-## Scope
+## Completed in this increment
 
-This increment strengthens the local/LAN runtime boundary without opening production access, database migration, or real operational data.
+### 1. Durable Offline Queue
 
-## Local runtime
+Browser mutations are persisted through IndexedDB using transactional object-store writes. The queue is synthetic-only and keyed by `idempotencyKey`. Crash recovery is based on the durable browser transaction boundary rather than in-memory state alone.
 
-- `LAN_HTTP` is the transport boundary for devices on the trusted local network.
-- `BROWSER_LOCAL` remains the synthetic browser fallback.
-- Local PostgreSQL is represented as `LOCAL_POSTGRESQL` but remains explicitly `NONPRODUCTION_LOCAL_ONLY`.
-- Authentication is required and authorization is deny-by-default.
-- Material actions require audit evidence.
+### 2. Deterministic Sync Engine
 
-## Offline mutation queue
+The sync boundary carries `syncId`, `deviceId`, cursor, sequence start, ordered mutations, per-item disposition, accepted-through sequence, and next cursor. Supplied mutation order is preserved; a conflict stops further admission in that batch.
 
-Every mutation carries mutation identity, idempotency key, aggregate identity, operation, base version, payload fingerprint, lifecycle status, and synthetic-only marking.
+### 3. Idempotency Ledger Contract
 
-The queue now also keeps an execution receipt. A successful application records the resulting aggregate version and acknowledgement timestamp instead of discarding that information. A conflict can be explicitly acknowledged without applying an effect.
+The future server-side ledger contract defines the minimum identity needed for a unique idempotency record: key, mutation identity, payload fingerprint, aggregate identity, lifecycle status, resulting version, receipt, and timestamp. Same key + same fingerprint is replay-only; same key + different fingerprint is a conflict.
 
-## Idempotency
+No executable PostgreSQL migration has been introduced because Migration Freeze remains active.
 
-- Same idempotency key + same payload fingerprint = `REPLAYED`, no second effect.
-- Same idempotency key + different payload fingerprint = `CONFLICT`, never silently overwrite.
-- Resulting-version receipts are retained in the runtime queue boundary.
+### 4. Conflict State Machine
 
-## Deterministic sync
+Conflict lifecycle is explicit:
 
-The sync contract introduces a stable `syncId`, `deviceId`, cursor, positive sequence start, ordered mutation batch, per-item result, accepted-through sequence, and next cursor. The current implementation deliberately preserves supplied mutation order; it does not silently reorder mutations.
+`OPEN → UNDER_REVIEW → RESOLVED | REJECTED`
 
-## Conflict resolution
+Final disposition requires reviewer identity, rationale, resolved version, timestamp, and audit event evidence. Silent overwrite is not permitted.
 
-A base-version mismatch is classified as `CONFLICT` with `BASE_VERSION_CONFLICT`. Resolution is an explicit reviewed action: `ACCEPT_LOCAL`, `ACCEPT_REMOTE`, `MERGE`, or `REJECT`. Every resolution requires reviewer identity, rationale, resolved version, timestamp, and audit event identity. No silent overwrite is permitted.
+### 5. LAN Health / Discovery Contract
 
-## Database boundary
+The health contract identifies a LAN runtime while exposing no operational data. The boundary remains `LOCAL_NETWORK_ONLY`, authentication is required, authorization is deny-by-default, and local PostgreSQL is explicitly non-production.
 
-No PostgreSQL connection or migration is introduced by this increment. The future local PostgreSQL adapter must remain behind the existing LAN adapter contract and be tested against a dedicated non-production instance before any controlled data is admitted.
+### 6. Offline Shell + Queue
 
-## Governance locks retained
+Service Worker cache was advanced to v2 and now pre-caches the durable queue runtime. The browser exposes `INDEXED_DB` queue capability through `window.MTADeteniOfflineQueue`.
 
-- Migration Freeze: TRUE.
-- AI: OFF.
-- Repository data: SYNTHETIC ONLY.
-- Production access: NOT AUTHORIZED.
-- Live PostgreSQL execution: BLOCKED until explicit governance clearance and an approved non-production target.
+### 7. QR Offline Runtime
 
-## Next hardening
+The Service Worker continues to pre-cache the QR generator dependency during online bootstrap, allowing QR generation after connectivity loss once the offline shell has completed its initial bootstrap. **A truly dependency-free first-load QR implementation is still a separate vendoring gate**; the current implementation does not falsely claim that a fresh device with no prior online bootstrap can generate QR while completely disconnected.
 
-1. Durable browser/LAN queue persistence with crash-safe state transitions.
-2. Sync engine with deterministic acknowledgement and cursor advancement.
-3. Server-side idempotency ledger design behind a future non-production database gate.
-4. Conflict review state machine with immutable decision/audit evidence.
-5. LAN health/discovery endpoint without sensitive data exposure.
-6. Fully vendored offline QR dependency; remove runtime CDN dependency.
-7. Browser/device matrix execution in CI.
+### 8. Browser / Device Regression
+
+A GitHub Actions browser matrix has been added for phone (390×844), tablet (768×1024), and desktop (1440×900). The smoke gate checks horizontal overflow, offline runtime presence, durable queue presence, and page errors.
+
+## Governance locks
+
+- Migration Freeze: TRUE
+- AI: OFF
+- Repository data: SYNTHETIC ONLY
+- Production access: NOT AUTHORIZED
+- Live PostgreSQL execution: BLOCKED
+- Real detainee data / credentials / health records / WhatsApp exports / production PII: PROHIBITED
+
+## Next gate
+
+1. Vendor QR generator into repository and remove all runtime CDN dependency.
+2. Add durable queue state transitions and retry/backoff contract.
+3. Bind sync engine to a future controlled LAN HTTP adapter.
+4. Define server-side idempotency ledger SQL as a future non-executable design artifact only.
+5. Add end-to-end offline/online recovery scenario tests.
