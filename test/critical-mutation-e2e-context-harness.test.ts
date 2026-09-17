@@ -40,7 +40,7 @@ function createHarness(): {
       audits.push(record);
       evidence.auditContext = record.executionContext;
     },
-    appendOutbox: async event => {
+    appendPending: async event => {
       assert.deepEqual(event.executionContext, canonicalContext);
       if (outbox.some(existing => existing.eventId === event.eventId)) return "CONFLICT";
       outbox.push(event);
