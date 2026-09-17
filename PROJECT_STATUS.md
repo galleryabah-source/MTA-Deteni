@@ -3,7 +3,7 @@
 **Foundation:** v1.134+
 **Current Track:** P1 runtime integrity remediation / P9 kernel implementation / P13 closure evidence recovery
 **Branch:** `main`
-**Latest implementation checkpoint:** CI cache prerequisite corrected; P1 executable certification remains pending runtime evidence; P13 governed boundary remains P13.274880
+**Latest implementation checkpoint:** CI static contract gate hardened after observable run #927; P1 executable certification remains pending runtime evidence; P13 governed boundary remains P13.274880
 
 ## P9 kernel implementation
 
@@ -41,9 +41,11 @@
 ## CI evidence recovery and hardening
 
 - CI remains explicitly configured for `controlled-nonprod`, with deterministic typecheck/test stages and mandatory execution evidence validation plus artifact upload.
-- The latest observable CI failure is now understood from runner logs: `actions/setup-node@v7` was configured with `cache: npm`, but the repository intentionally had no lockfile; setup therefore failed before dependency installation.
-- The workflow was corrected to remove the npm cache dependency rather than manufacturing an unverified lockfile. Dependency installation remains `npm install` from the declared package manifest.
-- The corrected workflow must produce a new observable run before P1/P9 runtime certification or P13-EXIT-06 can be advanced.
+- Observable run #927 reached the runner successfully and exposed two static contract-gate defects: ARCH-5814 used a brittle artifact-name substring assertion, while STATE-5820 had a stale P13 range expectation.
+- STATE-5820 is now aligned with the terminal governed range `P13.260881–274880`.
+- ARCH-5814 is now semantic: it requires `actions/upload-artifact@v4`, the canonical controlled-evidence artifact name, the canonical `artifacts/mta-evidence/` path and an `always()` upload boundary.
+- Run #927 independently confirmed that the actual artifact upload succeeded; the previous ARCH-5814 failure was therefore a false-negative static contract assertion rather than an upload failure.
+- The corrected contract gate has been committed to `main`; the resulting CI run must still be observed end-to-end before certification advances.
 - Evidence verification runs with `always()` so incomplete harness execution cannot silently skip validation; the evidence artifact remains uploaded with `always()`.
 - The execution harness records a deterministic nonzero exit code when a child process terminates without a numeric exit status.
 - P9.12 certification has regression coverage for complete observed evidence, incomplete evidence, wrong environment and forged summary-only input.
