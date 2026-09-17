@@ -1,7 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { executeCriticalMutation, type MutationIntegrationStores } from "../src/application/mutation-integration.js";
-import { emitObservabilityEvent, type ObservabilityEvent, type ObservabilitySink } from "../src/application/observability-contract.js";
+import { assertObservabilityContextContinuity, emitObservabilityEvent, type ObservabilityEvent, type ObservabilitySink } from "../src/application/observability-contract.js";
 import type { IdempotencyRecord } from "../src/application/idempotency-contract.js";
 import type { OutboxEventContract } from "../src/application/outbox-runtime-contract.js";
 import type { ExecutionContext } from "../src/application/execution-context-contract.js";
@@ -30,11 +30,7 @@ function createHarness(): {
   const idempotency = new Map<string, IdempotencyRecord>();
   const audits: unknown[] = [];
   const outbox: OutboxEventContract[] = [];
-  const evidence: Evidence & { audits: unknown[]; outbox: OutboxEventContract[]; idempotency: Map<string, IdempotencyRecord> } = {
-    audits,
-    outbox,
-    idempotency,
-  };
+  const evidence: Evidence & { audits: unknown[]; outbox: OutboxEventContract[]; idempotency: Map<string, IdempotencyRecord> } = { audits, outbox, idempotency };
 
   const stores: MutationIntegrationStores = {
     findIdempotency: key => idempotency.get(key),
@@ -56,12 +52,7 @@ function createHarness(): {
     return work();
   };
 
-  const sink: ObservabilitySink = {
-    emit: async event => {
-      evidence.observability = event;
-    },
-  };
-
+  const sink: ObservabilitySink = { emit: async event => { evidence.observability = event; } };
   return { stores, evidence, runner, sink };
 }
 
@@ -83,11 +74,7 @@ function mutationInput() {
 
 test("synthetic E2E harness observes one canonical context across transaction, audit, outbox and observability", async () => {
   const harness = createHarness();
-  const result = await executeCriticalMutation(mutationInput(), harness.stores, async (context, work) => {
-    harness.evidence.transaction = context;
-    return work();
-  });
-
+  const result = await executeCriticalMutation(mutationInput(), harness.stores, harness.runner);
   await emitObservabilityEvent(harness.sink, {
     eventId: "synthetic-observation-001",
     eventType: "CRITICAL_MUTATION_COMPLETED",
@@ -110,35 +97,18 @@ test("synthetic E2E harness observes one canonical context across transaction, a
   assert.equal(harness.evidence.outbox.length, 1);
 });
 
-test("synthetic E2E harness rejects observability identity drift", async () => {
-  const harness = createHarness();
-  await assert.rejects(
-    () => emitObservabilityEvent(harness.sink, {
-      eventId: "synthetic-observation-drift-001",
-      eventType: "CRITICAL_MUTATION_COMPLETED",
-      level: "ERROR",
-      timestamp: "2026-09-16T00:00:00.000Z",
-      correlationId: "wrong-correlation",
+test("synthetic E2E harness rejects observability identity drift", () => {
+  assert.throws(
+    () => assertObservabilityContextContinuity(canonicalContext, {
       requestId: canonicalContext.requestId,
+      correlationId: "wrong-correlation",
       transactionId: canonicalContext.transactionId,
-      outcome: "FAILED",
     }),
-    /OBSERVABILITY/,
-  ).catch(async () => {
-    // The generic emitter validates event shape but continuity is asserted explicitly below.
-    const { assertObservabilityContextContinuity } = await import("../src/application/observability-contract.js");
-    assert.throws(
-      () => assertObservabilityContextContinuity(canonicalContext, {
-        requestId: canonicalContext.requestId,
-        correlationId: "wrong-correlation",
-        transactionId: canonicalContext.transactionId,
-      }),
-      /EXECUTION_CONTEXT_MISMATCH:correlationId/,
-    );
-  });
+    /EXECUTION_CONTEXT_MISMATCH:correlationId/,
+  );
 });
 
-test("synthetic E2E harness does not claim evidence when the mutation fails", async () => {
+test("synthetic E2E harness does not claim downstream evidence when mutation fails", async () => {
   const harness = createHarness();
   await assert.rejects(
     () => executeCriticalMutation({ ...mutationInput(), runDomainMutation: async () => { throw new Error("DOMAIN_FAILURE"); } }, harness.stores, harness.runner),
