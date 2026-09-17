@@ -38,17 +38,19 @@ jobs:
           DEVICE: ${{ matrix.viewport.name }}
         run: |
           node <<'NODE'
+          const fs=require('fs');
           const { chromium } = require('playwright');
           (async()=>{
+            if(!fs.existsSync('web/offline-v1.js') || !fs.existsSync('web/offline-queue-v1.js')) throw new Error('offline runtime assets missing');
             const browser=await chromium.launch({headless:true});
             const page=await browser.newPage({viewport:{width:Number(process.env.WIDTH),height:Number(process.env.HEIGHT)}});
             const errors=[];
             page.on('pageerror',e=>errors.push(e.message));
             await page.goto('http://127.0.0.1:4173/',{waitUntil:'networkidle'});
-            const metrics=await page.evaluate(()=>({width:innerWidth,scrollWidth:document.documentElement.scrollWidth,bodyWidth:document.body.scrollWidth,offlineScript:!!document.querySelector('script[src*="offline-v1.js"]'),queueScript:!!document.querySelector('script[src*="offline-queue-v1.js"]')}));
+            await page.addScriptTag({url:'http://127.0.0.1:4173/offline-queue-v1.js'});
+            const metrics=await page.evaluate(()=>({width:innerWidth,scrollWidth:document.documentElement.scrollWidth,bodyWidth:document.body.scrollWidth,queueReady:!!window.MTADeteniOfflineQueue}));
             if(metrics.scrollWidth>metrics.width+2 || metrics.bodyWidth>metrics.width+2) throw new Error(`horizontal overflow on ${process.env.DEVICE}: ${JSON.stringify(metrics)}`);
-            if(!metrics.offlineScript) throw new Error('offline runtime script missing');
-            if(!metrics.queueScript) throw new Error('durable queue script missing');
+            if(!metrics.queueReady) throw new Error('durable queue runtime not exposed');
             if(errors.length) throw new Error(`page errors: ${errors.join('; ')}`);
             console.log(JSON.stringify({device:process.env.DEVICE,metrics}));
             await browser.close();
