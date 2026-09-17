@@ -1,8 +1,9 @@
 import { execFileSync } from 'node:child_process';
 import { readFileSync, existsSync } from 'node:fs';
-import { resolve } from 'node:path';
+import { fileURLToPath } from 'node:url';
+import { dirname, resolve } from 'node:path';
 
-const root = resolve(new URL('..', import.meta.url).pathname);
+const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const files = [
   'web/admin-settings-v9.js',
   'web/movement-v9.js',
