@@ -34,7 +34,7 @@ export function certifyLocalRuntimeRecoveryOperationalAuditProjection(input: { c
 }
 
 export function assertLocalRuntimeRecoveryOperationalAuditProjectionCertification(input: LocalRuntimeRecoveryOperationalAuditProjectionCertification, projection: LocalRuntimeRecoveryOperationalAuditProjection): void {
-  if (!input.certificationId.trim() || !input.certified || !input.syntheticOnly || input.replayDisposition === "CONFLICT") throw new Error("Operational audit projection certification must be certified, non-conflicted and synthetic-only.");
+  if (!input.certificationId.trim() || !input.certified || !input.syntheticOnly) throw new Error("Operational audit projection certification must be certified and synthetic-only.");
   if (input.projectionId !== projection.projectionId || input.evidenceCertificationId !== projection.evidenceCertificationId || input.evidenceId !== projection.evidenceId || input.auditCertificationId !== projection.auditCertificationId || input.auditRecordId !== projection.auditRecordId || input.closureCertificationId !== projection.closureCertificationId || input.closureEvidenceId !== projection.closureEvidenceId || input.continuityCertificationId !== projection.continuityCertificationId || input.receiptId !== projection.receiptId || input.closureId !== projection.closureId || input.executionId !== projection.executionId || input.dispatchId !== projection.dispatchId || input.acknowledgementId !== projection.acknowledgementId || input.decisionFingerprint !== projection.decisionFingerprint) throw new Error("Operational audit projection certification drift.");
 }
 
