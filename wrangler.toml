@@ -1,6 +1,6 @@
 name = "mta-deteni"
 compatibility_date = "2026-09-16"
-main = "worker.js"
+main = "worker-v8.js"
 
 [assets]
 directory = "./web"
