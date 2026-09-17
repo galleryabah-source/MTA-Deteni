@@ -1,6 +1,11 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { appendMandatoryOutboxEvent, createOutboxEvent, validateOutboxEvent } from "../src/application/outbox-runtime-contract.js";
+import {
+  appendMandatoryOutboxEvent,
+  createOutboxEvent,
+  validateOutboxEvent,
+  type OutboxEventContract,
+} from "../src/application/outbox-runtime-contract.js";
 
 const executionContext = Object.freeze({
   requestId: "req-outbox-001",
@@ -37,7 +42,12 @@ test("rejects invalid outbox identity, context and non-pending append state", ()
 
 test("appends only through the mandatory pending boundary", async () => {
   const seen: string[] = [];
-  const store = { appendPending: async (event: typeof createOutboxEvent(input)) => { seen.push(event.eventId); return "ADMIT" as const; } };
+  const store = {
+    appendPending: async (event: OutboxEventContract) => {
+      seen.push(event.eventId);
+      return "ADMIT" as const;
+    },
+  };
   const result = await appendMandatoryOutboxEvent(store, createOutboxEvent(input));
   assert.equal(result, "ADMIT");
   assert.deepEqual(seen, ["evt-001"]);
