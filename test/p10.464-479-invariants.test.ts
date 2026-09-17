@@ -7,7 +7,7 @@ import { actor, fixedNow } from "./service-test-support.js";
 
 test("temporary-exit workflow fails closed before approval/document/escort prerequisites", async () => {
   const exits = new Map<string, any>();
-  const exitService = new TemporaryExitService({ repository: { get: async (id) => exits.get(id) ?? null, save: async (e) => exits.set(e.id, e) }, now: fixedNow, canManage: () => true });
+  const exitService = new TemporaryExitService({ repository: { get: async (id) => exits.get(id) ?? null, save: async (e) => { exits.set(e.id, e); } }, now: fixedNow, canManage: () => true });
   await exitService.request({ id: "EXIT-1", detaineeId: "SYN-D1", plannedDepartureAt: "2026-09-15T10:00:00Z", plannedReturnAt: "2026-09-15T12:00:00Z", actor: actor("k-1", "KAMTIB") });
   const audit: string[] = [];
   const workflow = new TemporaryExitWorkflow(
@@ -29,7 +29,7 @@ test("temporary-exit workflow fails closed before approval/document/escort prere
 
 test("temporary-exit workflow rejects stale caller state", async () => {
   const exits = new Map<string, any>();
-  const exitService = new TemporaryExitService({ repository: { get: async (id) => exits.get(id) ?? null, save: async (e) => exits.set(e.id, e) }, now: fixedNow, canManage: () => true });
+  const exitService = new TemporaryExitService({ repository: { get: async (id) => exits.get(id) ?? null, save: async (e) => { exits.set(e.id, e); } }, now: fixedNow, canManage: () => true });
   await exitService.request({ id: "EXIT-2", detaineeId: "SYN-D1", plannedDepartureAt: "2026-09-15T10:00:00Z", plannedReturnAt: "2026-09-15T12:00:00Z", actor: actor("k-1", "KAMTIB") });
   const workflow = new TemporaryExitWorkflow(exitService, { currentState: async () => "VALIDATED", approvalState: async () => "APPROVED", documentState: async () => "VALID", escortState: async () => "ASSIGNED" }, { authorize: async () => true }, { append: async () => undefined, enqueue: async () => undefined }, { run: async (work) => work() });
   await assert.rejects(() => workflow.advance({ exitId: "EXIT-2", from: "REQUESTED", to: "VALIDATED", actor: actor("k-1", "KAMTIB") }));
