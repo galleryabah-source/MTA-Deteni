@@ -3,7 +3,7 @@
 **Foundation:** v1.134+
 **Current Track:** P1 runtime integrity remediation / P9 kernel implementation / P13 closure evidence recovery
 **Branch:** `main`
-**Latest implementation checkpoint:** Synthetic E2E execution-context harness added; P13 governed boundary remains P13.274880
+**Latest implementation checkpoint:** Canonical execution context bound explicitly to audit/outbox adapter contracts; P13 governed boundary remains P13.274880
 
 ## P9 kernel implementation
 
@@ -28,10 +28,10 @@
 - The canonical execution-context contract defines request, correlation, transaction and idempotency identities as one immutable boundary.
 - TransactionContext is now a direct alias of the canonical execution context, eliminating an independent transaction identity schema.
 - Critical mutation normalizes and freezes one canonical execution context before idempotency and transaction execution.
-- A dedicated critical-mutation context gate centralizes context establishment and fail-closed downstream continuity checks for transaction and observability identities.
-- Synthetic regression coverage certifies normalization, immutability, transaction/observability continuity, incomplete-context rejection and downstream identity drift rejection.
+- The dedicated critical-mutation context gate now covers transaction, audit and outbox downstream identities, with fail-closed continuity checks.
+- Mutation audit records and runtime outbox events explicitly carry the canonical execution context rather than relying on synthetic side-channel evidence.
+- Synthetic E2E regression verifies that transaction, audit and outbox adapters receive the same canonical context, while observability drift remains explicitly rejected.
 - The critical mutation failure matrix covers replay, idempotency conflict, domain failure, audit failure and outbox conflict with rollback expectations.
-- A synthetic E2E harness now observes the same canonical context across transaction, audit, outbox and observability, plus explicit observability-drift and failed-mutation evidence checks.
 - Optimistic concurrency execution contract provides deterministic ACCEPT/STALE_VERSION semantics.
 - Further executable end-to-end integration verification remains required before P1 can be certified complete.
 
@@ -75,7 +75,7 @@
 **P9.12 CI Certification — HARDENED / OBSERVATION REQUIRED**
 **P9.13 Kernel Certification — HARDENED CONTRACT / CI EVIDENCE REQUIRED**
 **P13.260881–274880 — IMPLEMENTED CONTRACTS / OBSERVATION PENDING**
-**P1 Runtime Integrity — E2E SYNTHETIC HARNESS ADDED / CERTIFICATION PENDING EXECUTABLE REPOSITORY RUN**
+**P1 Runtime Integrity — ADAPTER CONTEXT PROPAGATION HARDENED / CERTIFICATION PENDING EXECUTABLE REPOSITORY RUN**
 **Cloudflare CI — CONFIGURATION VALIDATION ONLY / DEPLOYMENT BOUNDARY LOCKED**
 
 ## Closure rule
