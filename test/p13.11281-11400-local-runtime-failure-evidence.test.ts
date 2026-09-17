@@ -7,7 +7,7 @@ import type { RuntimeExecutionContext } from "../src/application/runtime-executi
 
 const context = { executionId: "EXEC-F", runtimeMode: "LAN", deviceClass: "TABLET", networkScopeId: "NET-F", certificationJourneyId: "J-F", authenticated: true, syntheticOnly: true } as RuntimeExecutionContext;
 const session = { sessionId: "S-F", executionId: "EXEC-F", deviceId: "DEV-F", installationId: "INST-F", networkScopeId: "NET-F", runtimeMode: "LAN", state: "ACTIVE", syntheticOnly: true } as OperationalSession;
-const request = { requestId: "REQ-F", actorId: "ACT-F", device: { deviceId: "DEV-F", installationId: "INST-F", networkScopeId: "NET-F", deviceClass: "TABLET" }, method: "POST", path: "/mta-local/mutation", idempotencyKey: "IDEMP-F", headers: {}, bodyHash: "BODY-F", boundary: { serviceId: "SVC-F", listenScope: "LAN_ONLY", authenticatedDevice: true, internetExposed: false } } as LocalRuntimeRequest;
+const request = { requestId: "REQ-F", actorId: "ACT-F", device: { deviceId: "DEV-F", installationId: "INST-F", networkScopeId: "NET-F", deviceClass: "TABLET" }, method: "POST", path: "/mta-local/mutation", idempotencyKey: "IDEMP-F", headers: {}, bodyHash: "BODY-F", boundary: { serviceId: "SVC-F", listenScope: "LAN_ONLY", requiresAuthenticatedDevice: true, allowsInternetExposure: false } } as LocalRuntimeRequest;
 const response = { requestId: "REQ-F", status: "REJECTED", syntheticOnly: true } as LocalRuntimeResponse;
 
 test("P13.11281-11400: failure evidence binds request/session scope", () => {
