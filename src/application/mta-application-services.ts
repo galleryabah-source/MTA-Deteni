@@ -24,7 +24,7 @@ export type DomainMutation<T> = Readonly<{
   commandType: string;
   aggregateId: string;
   requestHash: string;
-  payload: string;
+  payload: Readonly<Record<string, unknown>>;
   payloadFingerprint: string;
   responseFingerprint: string;
   run: () => Promise<T>;
@@ -52,19 +52,19 @@ export class MtaApplicationServices {
   }
 
   registerDetainee(input: ApplicationMutationContext & { detainee: Detainee; requestHash: string }): Promise<{ outcome: "COMMITTED" | "REPLAYED"; value: Detainee | undefined }> {
-    return this.execute(input, { commandType: "DETAINEE_REGISTER", aggregateId: input.detainee.id, requestHash: input.requestHash, payload: JSON.stringify(input.detainee), payloadFingerprint: input.requestHash, responseFingerprint: input.requestHash, run: async () => input.detainee });
+    return this.execute(input, { commandType: "DETAINEE_REGISTER", aggregateId: input.detainee.id, requestHash: input.requestHash, payload: input.detainee as unknown as Readonly<Record<string, unknown>>, payloadFingerprint: input.requestHash, responseFingerprint: input.requestHash, run: async () => input.detainee });
   }
 
   placeDetainee(input: ApplicationMutationContext & { placement: Placement; requestHash: string }): Promise<{ outcome: "COMMITTED" | "REPLAYED"; value: Placement | undefined }> {
-    return this.execute(input, { commandType: "PLACEMENT_ASSIGN", aggregateId: input.placement.detaineeId, requestHash: input.requestHash, payload: JSON.stringify(input.placement), payloadFingerprint: input.requestHash, responseFingerprint: input.requestHash, run: async () => input.placement });
+    return this.execute(input, { commandType: "PLACEMENT_ASSIGN", aggregateId: input.placement.detaineeId, requestHash: input.requestHash, payload: input.placement as unknown as Readonly<Record<string, unknown>>, payloadFingerprint: input.requestHash, responseFingerprint: input.requestHash, run: async () => input.placement });
   }
 
   recordMovement(input: ApplicationMutationContext & { movement: MovementEvent; requestHash: string }): Promise<{ outcome: "COMMITTED" | "REPLAYED"; value: MovementEvent | undefined }> {
-    return this.execute(input, { commandType: "MOVEMENT_RECORD", aggregateId: input.movement.detaineeId, requestHash: input.requestHash, payload: JSON.stringify(input.movement), payloadFingerprint: input.requestHash, responseFingerprint: input.requestHash, run: async () => input.movement });
+    return this.execute(input, { commandType: "MOVEMENT_RECORD", aggregateId: input.movement.detaineeId, requestHash: input.requestHash, payload: input.movement as unknown as Readonly<Record<string, unknown>>, payloadFingerprint: input.requestHash, responseFingerprint: input.requestHash, run: async () => input.movement });
   }
 
-  advanceTemporaryExit(input: ApplicationMutationContext & { exitId: string; from: TemporaryExitState; to: TemporaryExitState; requestHash: string; apply: () => Promise<TemporaryExitState> }): Promise<{ outcome: "COMMITTED" | "REPLAYED"; value: TemporaryExitState | undefined }> {
-    return this.execute(input, { commandType: "TEMPORARY_EXIT_ADVANCE", aggregateId: input.exitId, requestHash: input.requestHash, payload: JSON.stringify({ exitId: input.exitId, from: input.from, to: input.to }), payloadFingerprint: input.requestHash, responseFingerprint: input.requestHash, run: input.apply });
+  advanceTemporaryExit(input: ApplicationMutationContext & { exitId: string; from: TemporaryExitState; to: TemporaryExitState; requestHash: string; apply: () => Promise<TemporaryExitState }): Promise<{ outcome: "COMMITTED" | "REPLAYED"; value: TemporaryExitState | undefined }> {
+    return this.execute(input, { commandType: "TEMPORARY_EXIT_ADVANCE", aggregateId: input.exitId, requestHash: input.requestHash, payload: { exitId: input.exitId, from: input.from, to: input.to }, payloadFingerprint: input.requestHash, responseFingerprint: input.requestHash, run: input.apply });
   }
 }
 
