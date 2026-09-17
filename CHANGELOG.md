@@ -1,5 +1,14 @@
 # Changelog
 
+## 2026-09-17 — Integrated Audit Reconciliation
+
+- Completed a repository-level integrated audit across governance, master blueprint, domain architecture, P9/P1 runtime contracts, QR, reporting/document, offline/local continuity, CI and Cloudflare deployment boundaries.
+- Confirmed that the current architecture is coherent and does not require a rebuild from the beginning; the active priority is runtime integration proof and observable evidence rather than additional checkpoint expansion.
+- Corrected `AUDIT_REMEDIATION_PRIORITY.md`, which contained a stale baseline `P13.260880`; it now references the authoritative terminal governed range `P13.260881–274880`.
+- Added explicit audit priorities for QR/device readiness, canonical runtime/renderer paths and integrated offline/reconnect verification.
+- Reaffirmed that P13 remains OPEN until all eight exit criteria have observable evidence, including P13-EXIT-06 controlled-nonprod workflow execution and evidence artifact.
+- No schema migration, live production database execution, production access, AI activation, real detainee data, production PII or external durable publication was introduced.
+
 ## CI — Contract Gate Synchronization
 
 - Observable Run #927 reached dependency installation successfully after removal of the lockfile-dependent npm cache configuration.
@@ -58,26 +67,3 @@
 - P9.10: added structured observability contract with event, request, correlation and optional transaction identity plus explicit outcome levels.
 - P9.11: added controlled execution harness evidence contract with fail-closed validation of environment, commit, checks, status and exit codes.
 - P9.12: added CI certification contract; certification requires a valid controlled-nonprod `OBSERVED_PASS` and available evidence artifact.
-- P9.13: added kernel certification aggregate gate over required control results; certification cannot grant production access, execute migrations or enable AI.
-- Added regression coverage for P9.11 and P9.13 fail-closed behavior.
-- Hardened GitHub Actions CI with deterministic typecheck/test stages, execution-evidence validation, artifact verification and concurrency control.
-- Recent GitHub Actions infrastructure did not expose usable steps/logs for the latest runs, so observable CI certification remains pending; no false PASS is recorded.
-
-## Governance Fix — Cloudflare Deployment Boundary + Documentation Synchronization
-
-- Changed `.github/workflows/cloudflare-deploy.yml` from real deployment to validation-only using `wrangler deploy --dry-run`.
-- Removed Cloudflare API credential usage from the workflow so CI cannot implicitly perform a Cloudflare deployment.
-- Synchronized project status and P13 exit assessment with the controlled deployment boundary.
-- Clarified that `src/application/outbox-runtime-contract.ts` is the canonical P9.8 runtime contract and the older `src/application/outbox-contract.ts` is compatibility-only.
-
-## P9.8 — Governed Outbox Contract
-
-- Added `src/application/outbox-runtime-contract.ts` defining the validated pending-outbox boundary with event identity, aggregate identity, event type, payload fingerprint, timestamp, status and attempt count.
-- Added immutable event construction that starts only in `PENDING` state with zero attempts.
-- Added fail-closed validation for missing outbox identity, invalid attempt counts and non-pending append state.
-- Kept append behind a dedicated store boundary returning deterministic `ADMIT` / `REPLAY` / `CONFLICT` dispositions.
-- Added regression coverage for immutable pending creation, invalid input rejection and mandatory append routing.
-
-## P9.7 — Transaction + Idempotency Boundary Contract
-
-- Added transaction + idempotency boundary with deterministic `EXECUTE` / `REPLAY` / `CONFLICT` semantics and commit-after-success / rollback-on-failure behavior.
