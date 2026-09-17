@@ -13,7 +13,7 @@ export type InterruptedSessionRecord = Readonly<{
   networkScopeId: string;
   admittedCommandIds: readonly string[];
   reconciledCommandIds: readonly string[];
-  lastCommandId?: string;
+  lastCommandId?: string | undefined;
   interruptedAt: string;
   reason: string;
   syntheticOnly: true;
