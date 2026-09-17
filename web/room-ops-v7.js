@@ -9,10 +9,11 @@ function ensure(){
  const d=get();
  d.detainees=d.detainees||[];d.placements=d.placements||[];d.rooms=d.rooms||[];d.qr=d.qr||{detainee:{},room:{},leave:{}};d.qr.room=d.qr.room||{};
  const seen=new Set(d.rooms.map(x=>`${x.block}::${x.room}`));
- d.placements.forEach(p=>{if(!p.block||!p.room||seen.has(`${p.block}::${p.room}`))return;});
  d.placements.forEach(p=>{
-   if(!p.block||!p.room||seen.has(`${p.block}::${p.room}`))return;
-   const id=uid('ROOM');d.rooms.push({id,block:p.block,room:p.room,capacity:4,status:'ACTIVE',createdAt:new Date().toISOString(),source:'INFERRED_FROM_SYNTHETIC_PLACEMENT'});seen.add(`${p.block}::${p.room}`);
+   if(!p.block||!p.room)return;
+   const key=`${p.block}::${p.room}`;
+   if(seen.has(key))return;
+   const id=uid('ROOM');d.rooms.push({id,block:p.block,room:p.room,capacity:4,status:'ACTIVE',createdAt:new Date().toISOString(),source:'INFERRED_FROM_SYNTHETIC_PLACEMENT'});seen.add(key);
  });
  d.rooms.forEach(x=>d.qr.room[x.id]=d.qr.room[x.id]||{token:uid('RMQR'),status:x.status||'ACTIVE'});
  put(d);return d;
@@ -31,7 +32,7 @@ function render(){
  r.innerHTML=`<section class="hero"><h1>Room Operations</h1><p class="sub">Kelola master kamar, occupancy, lifecycle QR permanen, dan perubahan state pada runtime synthetic lokal.</p></section><div class="toolbar"><button class="btn primary" onclick="window.p7addRoom()">+ Tambah Kamar</button><button class="btn" onclick="window.p7refreshRooms()">Refresh</button></div><div class="p6card"><div class="tablewrap"><table class="table"><thead><tr><th>Blok</th><th>Kamar</th><th>Occupancy</th><th>QR State</th><th>Token</th><th>Aksi</th></tr></thead><tbody>${rows||'<tr><td colspan="6" class="empty">Belum ada kamar. Tambahkan master kamar untuk memulai Room Ops.</td></tr>'}</tbody></table></div></div><div class="p6grid"><div class="p6card"><h2>Room Summary</h2><div class="kpis"><div><div class="label">Total Kamar</div><b>${d.rooms.length}</b></div><div><div class="label">Terisi</div><b>${d.rooms.filter(x=>d.placements.some(p=>p.block===x.block&&p.room===x.room)).length}</b></div><div><div class="label">QR Aktif</div><b>${d.rooms.filter(x=>(d.qr.room[x.id]?.status||x.status)==='ACTIVE').length}</b></div></div></div><div class="p6card"><h2>Lifecycle</h2><p class="p6mini">ACTIVE → SUSPENDED → REVOKED → ACTIVE. Perubahan menghasilkan audit event synthetic.</p></div></div>`;
 }
 window.p7addRoom=()=>{
- const d=ensure();
+ ensure();
  openModal(`<div class="dialoghead"><h2>Tambah Kamar</h2><button class="x" onclick="closeModal()">×</button></div><div class="formgrid"><div class="field"><label>Blok</label><input id="p7block" placeholder="Blok A"></div><div class="field"><label>Kamar</label><input id="p7room" placeholder="Kamar 01"></div><div class="field"><label>Kapasitas</label><input id="p7cap" type="number" min="1" max="999" value="4"></div></div><div class="actions"><button class="btn" onclick="closeModal()">Batal</button><button class="btn primary" onclick="window.p7saveRoom()">Simpan Kamar</button></div>`);
 };
 window.p7saveRoom=()=>{
