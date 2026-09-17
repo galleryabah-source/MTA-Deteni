@@ -1,3 +1,5 @@
+import type { ExecutionContext } from "./execution-context-contract.js";
+
 export type OutboxEventStatus = "PENDING" | "DISPATCHED" | "FAILED";
 
 export type OutboxEventContract = Readonly<{
@@ -5,6 +7,7 @@ export type OutboxEventContract = Readonly<{
   aggregateType: string;
   aggregateId: string;
   eventType: string;
+  executionContext: ExecutionContext;
   payload: Readonly<Record<string, unknown>>;
   payloadFingerprint: string;
   occurredAt: string;
@@ -21,6 +24,9 @@ export type OutboxStoreContract = Readonly<{
 export function validateOutboxEvent(event: OutboxEventContract): void {
   const required = [event.eventId, event.aggregateType, event.aggregateId, event.eventType, event.payloadFingerprint, event.occurredAt];
   if (required.some((value) => !value.trim())) throw new Error("OUTBOX_IDENTITY_REQUIRED");
+  if (!event.executionContext.requestId.trim() || !event.executionContext.correlationId.trim() || !event.executionContext.transactionId.trim() || !event.executionContext.idempotencyKey.trim()) {
+    throw new Error("OUTBOX_EXECUTION_CONTEXT_REQUIRED");
+  }
   if (!Number.isInteger(event.attemptCount) || event.attemptCount < 0) throw new Error("OUTBOX_ATTEMPT_COUNT_INVALID");
   if (event.status !== "PENDING") throw new Error("OUTBOX_APPEND_REQUIRES_PENDING");
 }
