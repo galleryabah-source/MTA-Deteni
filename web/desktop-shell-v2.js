@@ -5,7 +5,7 @@
   const GROUPS={
     dashboard:'UTAMA',
     detainee:'DATA & PENEMPATAN',placement:'DATA & PENEMPATAN',
-    movement:'OPERASIONAL',leave:'OPERASIONAL',monitor:'OPERASIONAL',ops-queue:'OPERASIONAL',
+    movement:'OPERASIONAL',leave:'OPERASIONAL',monitor:'OPERASIONAL','ops-queue':'OPERASIONAL',
     documents:'REKAM & KEPATUHAN',audit:'REKAM & KEPATUHAN',reports:'REKAM & KEPATUHAN',
     'qr-center':'QR & PEMINDAIAN','scan-center':'QR & PEMINDAIAN','leave-qr':'QR & PEMINDAIAN','camera-scan':'QR & PEMINDAIAN',
     'room-ops':'FASILITAS','p6rooms':'FASILITAS','master-block':'FASILITAS','master-room':'FASILITAS','master-operational-catalogs':'FASILITAS','room-transfer-master':'FASILITAS',
@@ -29,9 +29,8 @@
   }
   function statusStrip(){
     if(document.querySelector('.mta-desktop-status'))return;
-    const main=document.querySelector('.main');
     const view=document.querySelector('.view');
-    if(!main||!view)return;
+    if(!view||!view.parentElement)return;
     const strip=document.createElement('div');strip.className='mta-desktop-status';strip.setAttribute('role','status');
     strip.innerHTML='<span class="dot" aria-hidden="true"></span><span><strong>Runtime:</strong> Local Synthetic · AI OFF · Database NOT CONNECTED · Migration Freeze</span>';
     view.parentElement.insertBefore(strip,view);
