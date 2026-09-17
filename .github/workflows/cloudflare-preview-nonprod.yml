@@ -24,31 +24,27 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '24'
-
       - name: Install Wrangler
         run: npm install --global wrangler@4.132.0
-
       - name: Verify non-production target
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
         run: |
           test "$DEPLOY_WORKER_NAME" = "mta-deteni-preview"
           test -n "${CLOUDFLARE_API_TOKEN:-}"
           test -n "${CLOUDFLARE_ACCOUNT_ID:-}"
           echo "Cloudflare target: $DEPLOY_WORKER_NAME"
-
       - name: Deploy controlled non-production preview
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
         run: wrangler deploy --name "$DEPLOY_WORKER_NAME"
-
-      - name: Verify deployed health endpoint
-        env:
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+      - name: Record deployment verification boundary
         run: |
-          echo "Deployment completed; health verification is performed by the Cloudflare endpoint contract in the next controlled check."
+          echo "Deployment step completed for controlled non-production target."
+          echo "Independent /api/health verification remains a separate controlled check until the preview hostname is fixed in deployment configuration."
