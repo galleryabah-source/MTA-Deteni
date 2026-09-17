@@ -1,5 +1,14 @@
 # Changelog
 
+## CI — Contract Gate Synchronization
+
+- Observable Run #927 reached dependency installation successfully after removal of the lockfile-dependent npm cache configuration.
+- The next concrete failure was in the static contract gate: `ARCH-5814` checked an outdated evidence artifact name, and `STATE-5820` still referenced the superseded P13 range `P13.246881–260880`.
+- Corrected the contract gate to recognize the current controlled-execution evidence artifact naming and the current terminal governed range `P13.260881–274880`.
+- The gate remains fail-closed and continues to emit `contract-gate.json` before returning its exit status.
+- Runtime certification and P13-EXIT-06 remain pending until a subsequent run reaches typecheck, tests, controlled execution harness and valid evidence validation.
+- No schema migration, live PostgreSQL execution, production access, AI activation, external transport, durable publication, real detainee data or production PII was introduced.
+
 ## CI — Lockfile Prerequisite Remediation
 
 - Observable GitHub Actions Run #925 exposed a concrete workflow failure: `actions/setup-node@v7` with `cache: npm` requires a lockfile, while the repository intentionally uses `npm install` and did not contain `package-lock.json`, `npm-shrinkwrap.json` or `yarn.lock`.
