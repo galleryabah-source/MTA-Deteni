@@ -3,7 +3,7 @@
 **Foundation:** v1.134+
 **Current Track:** P1 runtime integrity remediation / P9 kernel implementation / P13 closure evidence recovery
 **Branch:** `main`
-**Latest implementation checkpoint:** P1 canonical execution-context continuity bound into transaction, critical mutation and observability boundaries; P13 governed boundary remains P13.274880
+**Latest implementation checkpoint:** P1 unified critical-mutation context gate + corrected failure matrix; P13 governed boundary remains P13.274880
 
 ## P9 kernel implementation
 
@@ -25,11 +25,12 @@
 - Critical mutation orchestration binds its outbox boundary to the canonical runtime outbox contract rather than the legacy compatibility contract.
 - The critical path remains: authorization → idempotency → transaction → domain mutation → audit → canonical outbox admission.
 - Canonical outbox admission is asynchronous and fail-closed on event identity conflict or unexpected replay during a new mutation.
-- The canonical execution-context contract now defines request, correlation, transaction and idempotency identities as one immutable boundary.
+- The canonical execution-context contract defines request, correlation, transaction and idempotency identities as one immutable boundary.
 - TransactionContext is now a direct alias of the canonical execution context, eliminating an independent transaction identity schema.
 - Critical mutation normalizes and freezes one canonical execution context before idempotency and transaction execution.
-- Observability now exposes an explicit continuity assertion against the same canonical context; request/correlation/transaction drift fails closed.
-- Synthetic regression coverage certifies canonical context normalization at the critical transaction boundary and observability drift rejection.
+- A dedicated critical-mutation context gate centralizes context establishment and fail-closed downstream continuity checks for transaction and observability identities.
+- Synthetic regression coverage certifies normalization, immutability, transaction/observability continuity, incomplete-context rejection and downstream identity drift rejection.
+- The critical mutation failure matrix covers replay, idempotency conflict, domain failure, audit failure and outbox conflict with rollback expectations.
 - Optimistic concurrency execution contract provides deterministic ACCEPT/STALE_VERSION semantics.
 - Further executable end-to-end integration verification remains required before P1 can be certified complete.
 
@@ -73,7 +74,7 @@
 **P9.12 CI Certification — HARDENED / OBSERVATION REQUIRED**
 **P9.13 Kernel Certification — HARDENED CONTRACT / CI EVIDENCE REQUIRED**
 **P13.260881–274880 — IMPLEMENTED CONTRACTS / OBSERVATION PENDING**
-**P1 Runtime Integrity — REMEDIATION IN PROGRESS**
+**P1 Runtime Integrity — REMEDIATION IN PROGRESS / CONTEXT GATE + FAILURE MATRIX HARDENED**
 **Cloudflare CI — CONFIGURATION VALIDATION ONLY / DEPLOYMENT BOUNDARY LOCKED**
 
 ## Closure rule
