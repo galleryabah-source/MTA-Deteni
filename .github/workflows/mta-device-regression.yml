@@ -14,7 +14,7 @@ permissions:
 jobs:
   browser-matrix:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 20
     strategy:
       fail-fast: false
       matrix:
@@ -41,16 +41,18 @@ jobs:
           const fs=require('fs');
           const { chromium } = require('playwright');
           (async()=>{
-            if(!fs.existsSync('web/offline-v1.js') || !fs.existsSync('web/offline-queue-v1.js')) throw new Error('offline runtime assets missing');
+            for(const f of ['web/offline-v1.js','web/offline-queue-v1.js','web/qr-camera-v2.js','web/qr-camera-v2.css']) if(!fs.existsSync(f)) throw new Error(`runtime asset missing: ${f}`);
             const browser=await chromium.launch({headless:true});
             const page=await browser.newPage({viewport:{width:Number(process.env.WIDTH),height:Number(process.env.HEIGHT)}});
             const errors=[];
             page.on('pageerror',e=>errors.push(e.message));
             await page.goto('http://127.0.0.1:4173/',{waitUntil:'networkidle'});
             await page.addScriptTag({url:'http://127.0.0.1:4173/offline-queue-v1.js'});
-            const metrics=await page.evaluate(()=>({width:innerWidth,scrollWidth:document.documentElement.scrollWidth,bodyWidth:document.body.scrollWidth,queueReady:!!window.MTADeteniOfflineQueue}));
+            await page.addScriptTag({url:'http://127.0.0.1:4173/qr-camera-v2.js'});
+            const metrics=await page.evaluate(()=>({width:innerWidth,scrollWidth:document.documentElement.scrollWidth,bodyWidth:document.body.scrollWidth,queueReady:!!window.MTADeteniOfflineQueue,scannerApi:!!window.mtaQrCameraV2,scannerCss:!!document.querySelector('link[data-mta-qr-css]')}));
             if(metrics.scrollWidth>metrics.width+2 || metrics.bodyWidth>metrics.width+2) throw new Error(`horizontal overflow on ${process.env.DEVICE}: ${JSON.stringify(metrics)}`);
             if(!metrics.queueReady) throw new Error('durable queue runtime not exposed');
+            if(!metrics.scannerApi) throw new Error('adaptive QR scanner API not exposed');
             if(errors.length) throw new Error(`page errors: ${errors.join('; ')}`);
             console.log(JSON.stringify({device:process.env.DEVICE,metrics}));
             await browser.close();
