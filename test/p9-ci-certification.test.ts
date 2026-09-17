@@ -35,10 +35,8 @@ test("P9.12 rejects incomplete harness evidence", () => {
 });
 
 test("P9.12 rejects wrong-environment harness evidence", () => {
-  const evidence = canonicalEvidence();
-  assert.throws(() => certifyP9Ci({
-    harnessEvidence: { ...evidence, environment: "production" },
-  }), /HARNESS_ENVIRONMENT_INVALID/);
+  const evidence = { ...canonicalEvidence(), environment: "production" } as never;
+  assert.throws(() => certifyP9Ci({ harnessEvidence: evidence }), /HARNESS_ENVIRONMENT_INVALID/);
 });
 
 test("P9.12 rejects forged summary-only certification input", () => {
