@@ -7,7 +7,7 @@ export default {
         ok: true,
         app: 'MTA DETENI',
         runtime: 'cloudflare-static-adapter',
-        preview: 'operational-v6',
+        preview: 'operational-v7',
         dataMode: 'synthetic-only',
         ai: 'OFF',
         database: 'NOT_CONNECTED',
@@ -24,7 +24,7 @@ export default {
         nextAdapter: 'SUPABASE_CONTROLLED_NONPROD',
         authorization: 'CONTRACT_BOUNDARY',
         audit: 'SYNTHETIC_EVENT_LEDGER',
-        previewVersion: 'v6'
+        previewVersion: 'v7'
       });
     }
 
@@ -34,7 +34,7 @@ export default {
       return new HTMLRewriter()
         .on('body', {
           element(element) {
-            element.append('<script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.js"></script><script src="/preview-v5.js"></script><script src="/preview-v6.js"></script><script src="/qr-print-clean-v3.js?v=3"></script>', { html: true });
+            element.append('<script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.js"></script><script src="/preview-v5.js"></script><script src="/preview-v6.js"></script><script src="/qr-print-clean-v3.js?v=3"></script><script src="/room-ops-v7.js?v=7"></script>', { html: true });
           }
         })
         .transform(response);
