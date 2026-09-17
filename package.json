@@ -8,7 +8,8 @@
     "test:unit": "tsx --test test/**/*.test.ts",
     "typecheck": "tsc --noEmit",
     "typecheck:test": "tsc -p tsconfig.test.json --noEmit",
-    "test:master-room": "node scripts/mta-master-room-contract-check.mjs"
+    "test:master-room": "node scripts/mta-master-room-contract-check.mjs",
+    "test:offline-mutation": "tsx --test test/local-runtime-offline-mutation.test.ts"
   },
   "devDependencies": {
     "@types/node": "^24.5.2",
