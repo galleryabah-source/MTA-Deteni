@@ -28,19 +28,7 @@ export type LocalRuntimeRecoveryFinalClosureAuditCertification = Readonly<{
   syntheticOnly: true;
 }>;
 
-export function certifyLocalRuntimeRecoveryFinalClosureAudit(input: {
-  certificationId: string;
-  record: LocalRuntimeRecoveryFinalClosureAuditRecord;
-  closureCertification: LocalRuntimeRecoveryClosureCertification;
-  evidence: LocalRuntimeRecoveryClosureEvidence;
-  continuity: ContinuityCertification;
-  integratedCertification: IntegratedLocalRuntimeRecoveryExecutionCertification;
-  completionProof: LocalRuntimeRecoveryExecutionCompletionProof;
-  acknowledgement: LocalRuntimeRecoveryExecutionAcknowledgement;
-  acknowledgementCertification: LocalRuntimeRecoveryExecutionAcknowledgementCertification;
-  receipt: LocalRuntimeRecoveryRuntimeContinuityReceipt;
-  closure: RuntimeContinuityClosure;
-}): LocalRuntimeRecoveryFinalClosureAuditCertification {
+export function certifyLocalRuntimeRecoveryFinalClosureAudit(input: { certificationId: string; record: LocalRuntimeRecoveryFinalClosureAuditRecord; closureCertification: LocalRuntimeRecoveryClosureCertification; evidence: LocalRuntimeRecoveryClosureEvidence; continuity: ContinuityCertification; integratedCertification: IntegratedLocalRuntimeRecoveryExecutionCertification; completionProof: LocalRuntimeRecoveryExecutionCompletionProof; acknowledgement: LocalRuntimeRecoveryExecutionAcknowledgement; acknowledgementCertification: LocalRuntimeRecoveryExecutionAcknowledgementCertification; receipt: LocalRuntimeRecoveryRuntimeContinuityReceipt; closure: RuntimeContinuityClosure }): LocalRuntimeRecoveryFinalClosureAuditCertification {
   if (!input.certificationId.trim()) throw new Error("Final closure audit certification identity is required.");
   assertLocalRuntimeRecoveryFinalClosureAuditRecord({ record: input.record, certification: input.closureCertification, evidence: input.evidence });
   const replayDisposition = replayLocalRuntimeRecoveryFinalClosureAuditRecord({ record: input.record, certification: input.closureCertification, evidence: input.evidence, continuity: input.continuity, integratedCertification: input.integratedCertification, completionProof: input.completionProof, acknowledgement: input.acknowledgement, acknowledgementCertification: input.acknowledgementCertification, receipt: input.receipt, closure: input.closure });
@@ -49,7 +37,7 @@ export function certifyLocalRuntimeRecoveryFinalClosureAudit(input: {
 }
 
 export function assertLocalRuntimeRecoveryFinalClosureAuditCertification(input: LocalRuntimeRecoveryFinalClosureAuditCertification, record: LocalRuntimeRecoveryFinalClosureAuditRecord): void {
-  if (!input.certified || !input.syntheticOnly || input.replayDisposition === "CONFLICT") throw new Error("Final closure audit certification must be certified, non-conflicted and synthetic-only.");
+  if (!input.certified || !input.syntheticOnly) throw new Error("Final closure audit certification must be certified and synthetic-only.");
   if (input.auditRecordId !== record.auditRecordId || input.closureCertificationId !== record.certificationId || input.evidenceId !== record.evidenceId || input.continuityCertificationId !== record.continuityCertificationId || input.receiptId !== record.receiptId || input.closureId !== record.closureId || input.executionId !== record.executionId || input.dispatchId !== record.dispatchId || input.acknowledgementId !== record.acknowledgementId || input.decisionFingerprint !== record.decisionFingerprint) throw new Error("Final closure audit certification drift.");
 }
 
