@@ -45,4 +45,4 @@ assert.equal(replayIntegratedIntegrityAuditTerminalClosureCertificationContinuat
 assert.throws(()=>createIntegratedIntegrityAuditTerminalClosureCertificationContinuationNode({...node,closureArtifactId:"wrong-parent"}));
 assert.throws(()=>createIntegratedIntegrityAuditTerminalClosureCertificationContinuationNode({...node,continuityCertificateId:"artifact-176881"}));
 assert.throws(()=>createIntegratedIntegrityAuditTerminalClosureCertificationContinuationNode({...node,checkpoint:"P13.999999-1000000"}));
-assert.throws(()=>replayIntegratedIntegrityAuditTerminalClosureCertificationContinuationNode({...node,dispatchExecuted:true}));
+assert.throws(()=>replayIntegratedIntegrityAuditTerminalClosureCertificationContinuationNode({...node,dispatchExecuted:true} as never));
