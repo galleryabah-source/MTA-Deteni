@@ -1,0 +1,81 @@
+name: MTA DETENI P1 Runtime Observation
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'src/application/**'
+      - 'test/**'
+      - 'scripts/mta-p1-runtime-observation.mjs'
+      - '.github/workflows/p1-runtime-observation.yml'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'src/application/**'
+      - 'test/**'
+      - 'scripts/mta-p1-runtime-observation.mjs'
+      - '.github/workflows/p1-runtime-observation.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: mta-p1-runtime-observation-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  MTA_EXECUTION_ENV: controlled-nonprod
+  CI: true
+
+jobs:
+  observe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: '24'
+          cache: npm
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Verify governed execution boundary
+        run: |
+          test "$MTA_EXECUTION_ENV" = "controlled-nonprod"
+          test ! -f .env.production
+          test ! -f .env.local
+          echo "P1 execution target: controlled-nonprod"
+
+      - name: Execute P1 synthetic runtime observation
+        run: node scripts/mta-p1-runtime-observation.mjs
+
+      - name: Validate P1 certification evidence
+        if: always()
+        run: |
+          test -s artifacts/p1-runtime-evidence/p1-runtime-certification.json
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          const p = 'artifacts/p1-runtime-evidence/p1-runtime-certification.json';
+          const evidence = JSON.parse(fs.readFileSync(p, 'utf8'));
+          if (evidence.environment !== 'controlled-nonprod') throw new Error('P1 environment boundary invalid');
+          if (evidence.productionAccessAuthorized !== false) throw new Error('production authorization boundary invalid');
+          if (evidence.migrationExecuted !== false) throw new Error('migration boundary invalid');
+          if (evidence.aiEnabled !== false) throw new Error('AI boundary invalid');
+          if (evidence.controls.length !== 7) throw new Error('P1 control count invalid');
+          console.log('P1 certification evidence boundary: PASS');
+          NODE
+
+      - name: Upload P1 runtime evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: mta-p1-runtime-evidence-${{ github.sha }}
+          path: artifacts/p1-runtime-evidence/
+          if-no-files-found: error
+          retention-days: 14
