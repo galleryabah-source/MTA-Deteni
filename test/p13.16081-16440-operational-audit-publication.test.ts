@@ -33,7 +33,7 @@ test("P13.16081-16200: publication envelope preserves complete projection certif
 test("P13.16081-16200: publication readiness fails closed on drift, conflict or non-synthetic state", () => {
   const p = prepared();
   assert.throws(() => createLocalRuntimeRecoveryOperationalAuditPublicationEnvelope({ publicationId: "PUB-D", certification: { ...p.projectionCertification, decisionFingerprint: "FP-DRIFT" }, projection: p.projection }), /drift/i);
-  assert.throws(() => createLocalRuntimeRecoveryOperationalAuditPublicationEnvelope({ publicationId: "PUB-D", certification: p.projectionCertification, projection: { ...p.projection, syntheticOnly: false } }), /synthetic/i);
+  assert.throws(() => createLocalRuntimeRecoveryOperationalAuditPublicationEnvelope({ publicationId: "PUB-D", certification: p.projectionCertification, projection: ({ ...p.projection, syntheticOnly: false } as unknown as typeof p.projection) }), /synthetic/i);
   assert.throws(() => createLocalRuntimeRecoveryOperationalAuditPublicationEnvelope({ publicationId: "", certification: p.projectionCertification, projection: p.projection }), /identity/i);
 });
 
