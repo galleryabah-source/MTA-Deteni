@@ -1,10 +1,10 @@
 import { strict as assert } from "node:assert";
 import { test } from "node:test";
 import { createTerminalEvidenceIntegrityAuditNode, replayTerminalEvidenceIntegrityAuditNode, certifyTerminalEvidenceIntegrityAuditNode, resetTerminalEvidenceIntegrityAuditReplayRegistry, terminalEvidenceIntegrityAuditCheckpoints } from "../src/application/p13-54281-56960-terminal-evidence-integrity-audit.js";
-import { terminalEvidenceIntegrityAuditBCheckpoints } from "../src/application/p13-56961-59520-terminal-evidence-integrity-audit-b.js";
-import { terminalEvidenceIntegrityAuditCCheckpoints } from "../src/application/p13-59521-62240-terminal-evidence-integrity-audit-c.js";
-import { terminalEvidenceIntegrityAuditDCheckpoints } from "../src/application/p13-62241-64920-terminal-evidence-integrity-audit-d.js";
-import { terminalEvidenceIntegrityAuditECheckpoints } from "../src/application/p13-64921-67560-terminal-evidence-integrity-audit-e.js";
+import { terminalEvidenceIntegrityAuditBCheckpoints } from "../src/application/p13-56961-59520-terminal-evidence-integrity-audit.js";
+import { terminalEvidenceIntegrityAuditCCheckpoints } from "../src/application/p13-59521-62080-terminal-evidence-integrity-audit.js";
+import { terminalEvidenceIntegrityAuditDCheckpoints } from "../src/application/p13-62241-64800-terminal-evidence-integrity-audit.js";
+import { terminalEvidenceIntegrityAuditECheckpoints } from "../src/application/p13-64921-67560-terminal-evidence-integrity-audit.js";
 
 test("P13.54281-67560 registers exactly 100 unique checkpoints",()=>{
  const all=[...terminalEvidenceIntegrityAuditCheckpoints(),...terminalEvidenceIntegrityAuditBCheckpoints(),...terminalEvidenceIntegrityAuditCCheckpoints(),...terminalEvidenceIntegrityAuditDCheckpoints(),...terminalEvidenceIntegrityAuditECheckpoints()];
