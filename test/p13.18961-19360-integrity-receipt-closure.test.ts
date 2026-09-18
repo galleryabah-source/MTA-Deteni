@@ -8,8 +8,21 @@ import { createLocalRuntimeRecoveryOperationalAuditPublicationDispatchAuthorizat
 import { replayLocalRuntimeRecoveryOperationalAuditPublicationDispatchAuthorizationDecisionEvidenceClosureIntegrityReceiptClosure, resetLocalRuntimeRecoveryOperationalAuditPublicationDispatchAuthorizationDecisionEvidenceClosureIntegrityReceiptClosureReplayRegistry } from "../src/application/local-runtime-recovery-operational-audit-publication-dispatch-authorization-decision-evidence-closure-integrity-receipt-closure-replay.js";
 import { certifyLocalRuntimeRecoveryOperationalAuditPublicationDispatchAuthorizationDecisionEvidenceClosureIntegrityReceiptClosure } from "../src/application/local-runtime-recovery-operational-audit-publication-dispatch-authorization-decision-evidence-closure-integrity-receipt-closure-certification.js";
 
-const decisionCertification = ({{ certificationId: "DECCERT-C", decisionId: "DEC-C", authorizationCertificationId: "AUTHCERT-C", authorizationId: "AUTH-C", candidateId: "CAND-C", requestId: "REQ-C", publicationCertificationId: "PUBCERT-C", publicationId: "PUB-C", decisionFingerprint: "FP-C", decisionState: "REVIEW_REQUIRED", authorizationGranted: false, dispatchApproved: false, externalTransportRequested: false, dispatchExecuted: false, syntheticOnly: true} as unknown as typeof closure, replayDisposition: "ADMIT", certified: true } as const as LocalRuntimeRecoveryOperationalAuditPublicationDispatchAuthorizationDecisionCertification;
-const integrityCertification = ({{ certificationId: "INTCERT-C", integrityId: "INT-C", closureCertificationId: "CLOSECERT-C", closureId: "CLOSE-C", decisionCertificationId: "DECCERT-C", decisionId: "DEC-C", authorizationCertificationId: "AUTHCERT-C", authorizationId: "AUTH-C", candidateId: "CAND-C", requestId: "REQ-C", publicationCertificationId: "PUBCERT-C", publicationId: "PUB-C", decisionFingerprint: "FP-C", integrityState: "VERIFIED_TERMINAL_REVIEW_ARTIFACT", authorizationGranted: false, dispatchApproved: false, externalTransportRequested: false, dispatchExecuted: false, durablePublicationCreated: false, syntheticOnly: true} as unknown as typeof closure, replayDisposition: "ADMIT", certified: true } as const as LocalRuntimeRecoveryOperationalAuditPublicationDispatchAuthorizationDecisionEvidenceClosureIntegrityCertification;
+const decisionCertification = {
+  certificationId: "DECCERT-C", decisionId: "DEC-C", authorizationCertificationId: "AUTHCERT-C", authorizationId: "AUTH-C",
+  candidateId: "CAND-C", requestId: "REQ-C", publicationCertificationId: "PUBCERT-C", publicationId: "PUB-C",
+  decisionFingerprint: "FP-C", decisionState: "REVIEW_REQUIRED", authorizationGranted: false, dispatchApproved: false,
+  externalTransportRequested: false, dispatchExecuted: false, syntheticOnly: true, replayDisposition: "ADMIT", certified: true,
+} as unknown as LocalRuntimeRecoveryOperationalAuditPublicationDispatchAuthorizationDecisionCertification;
+
+const integrityCertification = {
+  certificationId: "INTCERT-C", integrityId: "INT-C", closureCertificationId: "CLOSECERT-C", closureId: "CLOSE-C",
+  decisionCertificationId: "DECCERT-C", decisionId: "DEC-C", authorizationCertificationId: "AUTHCERT-C", authorizationId: "AUTH-C",
+  candidateId: "CAND-C", requestId: "REQ-C", publicationCertificationId: "PUBCERT-C", publicationId: "PUB-C",
+  decisionFingerprint: "FP-C", integrityState: "VERIFIED_TERMINAL_REVIEW_ARTIFACT", authorizationGranted: false,
+  dispatchApproved: false, externalTransportRequested: false, dispatchExecuted: false, durablePublicationCreated: false,
+  syntheticOnly: true, replayDisposition: "ADMIT", certified: true,
+} as unknown as LocalRuntimeRecoveryOperationalAuditPublicationDispatchAuthorizationDecisionEvidenceClosureIntegrityCertification;
 
 function receiptCertification() {
   const receipt = createLocalRuntimeRecoveryOperationalAuditPublicationDispatchAuthorizationDecisionEvidenceClosureIntegrityReceipt({ receiptId: "RCPT-C", integrityCertification, decisionCertification });
@@ -44,6 +57,6 @@ test("P13.19241-19360: integrated receipt closure certification fails closed on 
   const cert = certifyLocalRuntimeRecoveryOperationalAuditPublicationDispatchAuthorizationDecisionEvidenceClosureIntegrityReceiptClosure({ certificationId: "RCPTCLOSECERT-C", closure, receiptCertification: receipt, integrityCertification, decisionCertification });
   assert.equal(cert.certified, true);
   assert.equal(cert.replayDisposition, "ADMIT");
-  assert.throws(() => assertLocalRuntimeRecoveryOperationalAuditPublicationDispatchAuthorizationDecisionEvidenceClosureIntegrityReceiptClosure({ ...closure, dispatchExecuted: true }, receipt, integrityCertification, decisionCertification), /invalid|executable/i);
+  assert.throws(() => assertLocalRuntimeRecoveryOperationalAuditPublicationDispatchAuthorizationDecisionEvidenceClosureIntegrityReceiptClosure({ ...closure, dispatchExecuted: true } as never, receipt, integrityCertification, decisionCertification), /invalid|executable/i);
   assert.throws(() => assertLocalRuntimeRecoveryOperationalAuditPublicationDispatchAuthorizationDecisionEvidenceClosureIntegrityReceiptClosure({ ...closure, decisionId: "DEC-DRIFT" }, receipt, integrityCertification, decisionCertification), /drift|identity/i);
 });
