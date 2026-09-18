@@ -17,7 +17,7 @@ import type { RuntimeExecutionContext } from "../src/application/runtime-executi
 
 const context = { executionId: "EXEC-CERT", runtimeMode: "LOCAL", deviceClass: "DESKTOP", networkScopeId: "NET-CERT", certificationJourneyId: "J-CERT", authenticated: true, syntheticOnly: true } as RuntimeExecutionContext;
 const session = { sessionId: "S-CERT", executionId: "EXEC-CERT", deviceId: "DEV-CERT", installationId: "INST-CERT", networkScopeId: "NET-CERT", runtimeMode: "LOCAL", state: "ACTIVE", syntheticOnly: true } as OperationalSession;
-const request = { requestId: "REQ-CERT", actorId: "ACT-CERT", device: { deviceId: "DEV-CERT", installationId: "INST-CERT", networkScopeId: "NET-CERT", deviceClass: "DESKTOP" }, method: "POST", path: "/mta-local/mutate", headers: {}, idempotencyKey: "IDEMP-CERT", boundary: { serviceId: "SVC-CERT", listenScope: "LOOPBACK_ONLY", authenticatedDevice: true, internetExposed: false } } as LocalRuntimeRequest;
+const request = { requestId: "REQ-CERT", actorId: "ACT-CERT", device: { deviceId: "DEV-CERT", installationId: "INST-CERT", networkScopeId: "NET-CERT", deviceClass: "DESKTOP" }, method: "POST", path: "/mta-local/mutate", headers: {}, idempotencyKey: "IDEMP-CERT", boundary: { serviceId: "SVC-CERT", listenScope: "LOOPBACK_ONLY", allowsInternetExposure: false, requiresAuthenticatedDevice: true } } as LocalRuntimeRequest;
 
 function build(index: number) {
   const entry = getLocalRuntimeFailureMatrix()[index];
@@ -51,5 +51,5 @@ test("P13.12961-13080: cross-chain substitution and blocked admission fail close
   assert.throws(() => assertLocalRuntimeRecoveryDecisionCertification({ ...first.certification, action: "OPERATOR_REVIEW" }, first.decision, first.auditEvidence, first.envelope), /drift/i);
   const blocked = build(4);
   assert.equal(blocked.certification.admitted, false);
-  assert.throws(() => assertLocalRuntimeRecoveryDecisionCertification({ ...blocked.certification, admitted: true }, blocked.decision, blocked.auditEvidence, blocked.envelope), /drift|cannot be admitted/i);
+  assert.throws(() => assertLocalRuntimeRecoveryDecisionCertification(({ ...blocked.certification, admitted: true } as unknown as typeof blocked.certification), blocked.decision, blocked.auditEvidence, blocked.envelope), /drift|cannot be admitted/i);
 });
