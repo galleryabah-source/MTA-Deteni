@@ -1,5 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
+import type { LocalServiceBoundary } from "../src/application/runtime-surface.js";
 import { assertLanDeviceIdentity, assertLocalServiceBoundary, navigationForRole, assertNavigationAllowed, RESPONSIVE_INVARIANTS } from "../src/application/runtime-surface.js";
 import { assertBackupRestoreChain, assertContinuityEvidence, createContinuityEvidence } from "../src/application/continuity-evidence.js";
 
