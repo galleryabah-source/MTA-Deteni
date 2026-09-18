@@ -62,7 +62,7 @@ test("P13.5861 integrated synthetic journey preserves domain ownership boundarie
       if (permission === "temporary_exit.document") return a.domain === "SUBBAG_TU";
       return a.domain === "KAMTIB";
     } },
-    { append: async (event) => audit.push(`${event.aggregateType}:${event.eventType}`), enqueue: async () => undefined },
+    { append: async (event) => { audit.push(`${event.aggregateType}:${event.eventType}`); return; }, enqueue: async () => undefined },
     { run: async (work) => work() },
   );
 
