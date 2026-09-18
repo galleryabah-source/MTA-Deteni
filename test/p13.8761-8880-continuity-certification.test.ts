@@ -15,7 +15,7 @@ test("unified continuity certification binds runtime, lifecycle, recovery and ba
   const context = { executionId: "EXEC-C", runtimeMode: "LAN" as const, deviceClass: "TABLET" as const, networkScopeId: "NET-C", certificationJourneyId: "J-C", authenticated: true, syntheticOnly: true as const };
   const runtime = assessRuntimeContinuity({ context, queue: [] });
   const backup = assessBackupContinuity({ schemaVersion: 1, backupId: "B-C", sourceRuntime: "LAN", sourceDeviceId: "DEV-C", sourceInstallationId: "INST-C", createdAt: "2026-09-16T00:00:00Z", payloadFingerprint: "BFP-C", syntheticOnly: true });
-  const certification = certifyContinuity({ certificationId: "CONT-C", context, lifecycle, recovery, runtime, backup });
+  const certification = certifyContinuity({ certificationId: "CONT-C", sessionId: "SES-C", deviceId: "DEV-C", installationId: "INST-C", context, lifecycle, recovery, runtime, backup });
   assertContinuityCertification(certification);
   assert.equal(certification.certified, true);
   assert.equal(certification.projectionVersion, 5);
@@ -29,5 +29,5 @@ test("blocked runtime continuity cannot be certified", () => {
   const context = { executionId: "EXEC-B", runtimeMode: "LAN" as const, deviceClass: "TABLET" as const, networkScopeId: "NET-B", certificationJourneyId: "J-B", authenticated: true, syntheticOnly: true as const };
   const runtime = assessRuntimeContinuity({ context, queue: [{ commandId: "C-B", aggregateId: "DET-B", commandType: "MOVEMENT_RECORD", payloadHash: "FP-B", idempotencyKey: "I-B", createdAt: "2026-09-16T00:00:00Z", state: "PENDING" }] });
   const backup = assessBackupContinuity({ schemaVersion: 1, backupId: "B-B", sourceRuntime: "LAN", sourceDeviceId: "DEV-B", sourceInstallationId: "INST-B", createdAt: "2026-09-16T00:00:00Z", payloadFingerprint: "BFP-B", syntheticOnly: true });
-  assert.throws(() => certifyContinuity({ certificationId: "CONT-B", context, lifecycle, recovery, runtime, backup }));
+  assert.throws(() => certifyContinuity({ certificationId: "CONT-B", sessionId: "SES-B", deviceId: "DEV-B", installationId: "INST-B", context, lifecycle, recovery, runtime, backup }));
 });
