@@ -27,10 +27,10 @@ test("runtime execution is bound to authenticated capability and certification j
 });
 
 test("runtime mode handoff preserves authorization and reconciliation gates", () => {
-  const handoff = createRuntimeHandoff({ executionId: "EXEC-2", fromMode: "LAN", toMode: "LOCAL", queuePending: true });
+  const handoff = createRuntimeHandoff({ executionId: "EXEC-2", fromMode: "LAN", toMode: "LOCAL", fromDeviceId: "DEV-1", toDeviceId: "DEV-2", fromNetworkScopeId: "LAN-1", toNetworkScopeId: "LAN-2", authorizationId: "AUTH-2", queuePending: true });
   assert.equal(handoff.reconciliationRequired, true);
   assert.equal(handoff.authorizationRequired, true);
   assert.doesNotThrow(() => assertRuntimeHandoffSafety(handoff));
-  assert.throws(() => assertRuntimeHandoffSafety({ ...handoff, authorizationRequired: false }));
-  assert.throws(() => assertRuntimeHandoffSafety({ ...handoff, reconciliationRequired: false }));
+  assert.throws(() => assertRuntimeHandoffSafety({ ...handoff, authorizationRequired: false } as never));
+  assert.throws(() => assertRuntimeHandoffSafety({ ...handoff, reconciliationRequired: false } as never));
 });
