@@ -37,5 +37,5 @@ test("P13.16801-16920: dispatch candidate rejects identity drift", () => {
   const requestCertification = prepared();
   const candidate = createLocalRuntimeRecoveryOperationalAuditPublicationDispatchCandidate({ candidateId: "CAND-DPC", requestCertification });
   assert.throws(() => assertLocalRuntimeRecoveryOperationalAuditPublicationDispatchCandidate({ ...candidate, publicationId: "PUB-DRIFT" }, requestCertification), /drift/i);
-  assert.throws(() => assertLocalRuntimeRecoveryOperationalAuditPublicationDispatchCandidate({ ...candidate, dispatchExecuted: true }, requestCertification), /invalid|execution/i);
+  assert.throws(() => assertLocalRuntimeRecoveryOperationalAuditPublicationDispatchCandidate(({ ...candidate, dispatchExecuted: true } as unknown as typeof candidate), requestCertification), /invalid|execution/i);
 });
