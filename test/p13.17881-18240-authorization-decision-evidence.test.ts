@@ -26,5 +26,5 @@ test("P13.18121-18240: evidence rejects identity drift and attempted execution",
   resetLocalRuntimeRecoveryOperationalAuditPublicationDispatchAuthorizationDecisionEvidenceReplayRegistry();
   const evidence = createLocalRuntimeRecoveryOperationalAuditPublicationDispatchAuthorizationDecisionEvidence({ evidenceId: "EVID-02", decisionCertification });
   assert.throws(() => certifyLocalRuntimeRecoveryOperationalAuditPublicationDispatchAuthorizationDecisionEvidence({ certificationId: "EVCERT-02", evidence: { ...evidence, publicationId: "DRIFT" }, decisionCertification }), /identity drift/i);
-  assert.throws(() => certifyLocalRuntimeRecoveryOperationalAuditPublicationDispatchAuthorizationDecisionEvidence({ certificationId: "EVCERT-02B", evidence: { ...evidence, dispatchExecuted: true }, decisionCertification }), /invalid|executable/i);
+  assert.throws(() => certifyLocalRuntimeRecoveryOperationalAuditPublicationDispatchAuthorizationDecisionEvidence({ certificationId: "EVCERT-02B", evidence: { ...evidence, dispatchExecuted: true } as never, decisionCertification }), /invalid|executable/i);
 });
