@@ -16,6 +16,7 @@ const reconnectCommand = {
 const base = {
   journeyId: "J-MATRIX",
   commandId: "CMD-MATRIX",
+  requestHash: "REQ-MATRIX",
   eventId: "EVT-MATRIX",
   correlationId: "CORR-MATRIX",
   aggregateId: "DET-MATRIX",
