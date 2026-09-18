@@ -26,7 +26,7 @@ test("reconnect conflict blocks continuity", () => {
   const result = assessRuntimeContinuity({
     context,
     queue: [{ commandId: "C-2", aggregateId: "DET-1", commandType: "MOVEMENT_RECORD", payloadHash: "FP-2", idempotencyKey: "I-2", createdAt: "2026-09-16T00:00:00Z", state: "PENDING" }],
-    reconciliation: { commandId: "C-2", action: "REVIEW_CONFLICT", reason: "CONFLICT" as const },
+    reconciliation: { commandId: "C-2", action: "REVIEW_CONFLICT" },
   });
   assertRuntimeContinuityAssessment(result);
   assert.equal(result.decision, "BLOCKED");
@@ -34,7 +34,7 @@ test("reconnect conflict blocks continuity", () => {
 });
 
 test("runtime handoff preserves execution identity and reconciliation requirement", () => {
-  const handoff = createRuntimeHandoff({ executionId: "EXEC-1", fromMode: "LOCAL", toMode: "LAN", queuePending: true });
+  const handoff = createRuntimeHandoff({ executionId: "EXEC-1", fromMode: "LOCAL", toMode: "LAN", fromDeviceId: "DEV-LOCAL", toDeviceId: "DEV-LAN", fromNetworkScopeId: "NET-LOCAL", toNetworkScopeId: "NET-1", authorizationId: "AUTH-1", queuePending: true });
   assert.equal(handoff.reconciliationRequired, true);
   assert.equal(handoff.authorizationRequired, true);
   assert.throws(() => assessRuntimeContinuity({ context, queue: [], handoff: { ...handoff, executionId: "EXEC-TAMPER" } }));
