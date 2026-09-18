@@ -12,8 +12,8 @@ test("recovery evidence binds failure classification and version semantics", () 
     expectedVersion: 4, resultingVersion: 4, failureClass: "STALE_VERSION", reasonCode: "VERSION_STALE",
     terminalState: "REVIEW_PENDING", recovery: "REVIEW_REQUIRED", mutationCommitted: false, retrySafe: false, compensationAllowed: false,
   });
-  assertRecoveryEventBinding(evidence, "CMD-001", "EVT-001", "CORR-001", "DET-001");
-  assert.throws(() => assertRecoveryEventBinding(evidence, "CMD-002", "EVT-001", "CORR-001", "DET-001"));
+  assertRecoveryEventBinding(evidence, "CMD-001", "EVT-001", "CORR-001", "DET-001", "REQ-001");
+  assert.throws(() => assertRecoveryEventBinding(evidence, "CMD-002", "EVT-001", "CORR-001", "DET-001", "REQ-001"));
 });
 
 test("committed retry is idempotent while failure review remains explicit", () => {
