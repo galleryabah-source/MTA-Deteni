@@ -15,7 +15,7 @@ import type { RuntimeExecutionContext } from "../src/application/runtime-executi
 
 const context = { executionId: "EXEC-RP", runtimeMode: "LOCAL", deviceClass: "DESKTOP", networkScopeId: "NET-RP", certificationJourneyId: "J-RP", authenticated: true, syntheticOnly: true } as RuntimeExecutionContext;
 const session = { sessionId: "S-RP", executionId: "EXEC-RP", deviceId: "DEV-RP", installationId: "INST-RP", networkScopeId: "NET-RP", runtimeMode: "LOCAL", state: "ACTIVE", syntheticOnly: true } as OperationalSession;
-const request = { requestId: "REQ-RP", actorId: "ACT-RP", device: { deviceId: "DEV-RP", installationId: "INST-RP", networkScopeId: "NET-RP", deviceClass: "DESKTOP" }, method: "POST", path: "/mta-local/mutate", headers: {}, idempotencyKey: "IDEMP-RP", boundary: { serviceId: "SVC-RP", listenScope: "LOOPBACK_ONLY", authenticatedDevice: true, internetExposed: false } } as LocalRuntimeRequest;
+const request = { requestId: "REQ-RP", actorId: "ACT-RP", device: { deviceId: "DEV-RP", installationId: "INST-RP", networkScopeId: "NET-RP", deviceClass: "DESKTOP" }, method: "POST", path: "/mta-local/mutate", headers: {}, idempotencyKey: "IDEMP-RP", boundary: { serviceId: "SVC-RP", listenScope: "LOOPBACK_ONLY", allowsInternetExposure: false, requiresAuthenticatedDevice: true } } as LocalRuntimeRequest;
 
 function makeEnvelope(index: number) {
   const entry = getLocalRuntimeFailureMatrix()[index];
