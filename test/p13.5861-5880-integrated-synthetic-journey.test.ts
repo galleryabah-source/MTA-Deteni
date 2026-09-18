@@ -26,7 +26,7 @@ test("P13.5861 integrated synthetic journey preserves domain ownership boundarie
   });
   const movement = new MovementService({
     repository: {
-      append: async (event) => { movements.push(event); return undefined; },
+      append: async (event) => { movements.push(event); return; },
       listSince: async (id) => movements.filter((event) => event.detaineeId === id),
     },
     now: fixedNow,
