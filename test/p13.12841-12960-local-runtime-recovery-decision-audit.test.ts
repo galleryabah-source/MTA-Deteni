@@ -15,7 +15,7 @@ import type { RuntimeExecutionContext } from "../src/application/runtime-executi
 
 const context = { executionId: "EXEC-AU", runtimeMode: "LOCAL", deviceClass: "DESKTOP", networkScopeId: "NET-AU", certificationJourneyId: "J-AU", authenticated: true, syntheticOnly: true } as RuntimeExecutionContext;
 const session = { sessionId: "S-AU", executionId: "EXEC-AU", deviceId: "DEV-AU", installationId: "INST-AU", networkScopeId: "NET-AU", runtimeMode: "LOCAL", state: "ACTIVE", syntheticOnly: true } as OperationalSession;
-const request = { requestId: "REQ-AU", actorId: "ACT-AU", device: { deviceId: "DEV-AU", installationId: "INST-AU", networkScopeId: "NET-AU", deviceClass: "DESKTOP" }, method: "POST", path: "/mta-local/mutate", headers: {}, idempotencyKey: "IDEMP-AU", boundary: { serviceId: "SVC-AU", listenScope: "LOOPBACK_ONLY", authenticatedDevice: true, internetExposed: false } } as LocalRuntimeRequest;
+const request = { requestId: "REQ-AU", actorId: "ACT-AU", device: { deviceId: "DEV-AU", installationId: "INST-AU", networkScopeId: "NET-AU", deviceClass: "DESKTOP" }, method: "POST", path: "/mta-local/mutate", headers: {}, idempotencyKey: "IDEMP-AU", boundary: { serviceId: "SVC-AU", listenScope: "LOOPBACK_ONLY", allowsInternetExposure: false, requiresAuthenticatedDevice: true } } as LocalRuntimeRequest;
 
 function makeEnvelope(index: number) {
   const entry = getLocalRuntimeFailureMatrix()[index];
@@ -40,5 +40,5 @@ test("P13.12841-12960: audit evidence drift fails closed", () => {
   const decision = createLocalRuntimeRecoveryDecision({ decisionId: "DEC-AU-DRIFT", envelope });
   const audit = createLocalRuntimeRecoveryDecisionAuditEvidence({ auditEvidenceId: "AUD-AU-DRIFT", decision, envelope });
   assert.throws(() => assertLocalRuntimeRecoveryDecisionAuditEvidence({ ...audit, action: "OPERATOR_REVIEW" }, decision), /audit drift/i);
-  assert.throws(() => assertLocalRuntimeRecoveryDecisionAuditEvidence({ ...audit, syntheticOnly: false }, decision), /synthetic-only/i);
+  assert.throws(() => assertLocalRuntimeRecoveryDecisionAuditEvidence(({ ...audit, syntheticOnly: false } as unknown as typeof audit), decision), /synthetic-only/i);
 });
