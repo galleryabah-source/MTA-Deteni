@@ -44,5 +44,5 @@ test("P13.17041-17160: certification rejects identity drift and execution", () =
   const p = prepared();
   const certification = certifyLocalRuntimeRecoveryOperationalAuditPublicationDispatchCandidate({ certificationId: "CANDCERT-DCC", ...p });
   assert.throws(() => assertLocalRuntimeRecoveryOperationalAuditPublicationDispatchCandidateCertification({ ...certification, publicationId: "PUB-DRIFT" }, p.candidate), /drift/i);
-  assert.throws(() => assertLocalRuntimeRecoveryOperationalAuditPublicationDispatchCandidateCertification({ ...certification, dispatchExecuted: true }, p.candidate), /invalid/i);
+  assert.throws(() => assertLocalRuntimeRecoveryOperationalAuditPublicationDispatchCandidateCertification(({ ...certification, dispatchExecuted: true } as unknown as typeof certification), p.candidate), /invalid/i);
 });
