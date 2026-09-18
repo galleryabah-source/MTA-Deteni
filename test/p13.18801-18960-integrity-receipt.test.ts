@@ -6,8 +6,50 @@ import { createLocalRuntimeRecoveryOperationalAuditPublicationDispatchAuthorizat
 import { certifyLocalRuntimeRecoveryOperationalAuditPublicationDispatchAuthorizationDecisionEvidenceClosureIntegrityReceipt } from "../src/application/local-runtime-recovery-operational-audit-publication-dispatch-authorization-decision-evidence-closure-integrity-receipt-certification.js";
 import { replayLocalRuntimeRecoveryOperationalAuditPublicationDispatchAuthorizationDecisionEvidenceClosureIntegrityReceipt, resetLocalRuntimeRecoveryOperationalAuditPublicationDispatchAuthorizationDecisionEvidenceClosureIntegrityReceiptReplayRegistry } from "../src/application/local-runtime-recovery-operational-audit-publication-dispatch-authorization-decision-evidence-closure-integrity-receipt-replay.js";
 
-const decisionCertification = ({{ certificationId: "DECCERT-R", decisionId: "DEC-R", authorizationCertificationId: "AUTHCERT-R", authorizationId: "AUTH-R", candidateId: "CAND-R", requestId: "REQ-R", publicationCertificationId: "PUBCERT-R", publicationId: "PUB-R", decisionFingerprint: "FP-R", decisionState: "REVIEW_REQUIRED", authorizationGranted: false, dispatchApproved: false, externalTransportRequested: false, dispatchExecuted: false, syntheticOnly: true} as unknown as typeof receipt, replayDisposition: "ADMIT", certified: true } as const as LocalRuntimeRecoveryOperationalAuditPublicationDispatchAuthorizationDecisionCertification;
-const integrityCertification = ({{ certificationId: "INTCERT-R", integrityId: "INT-R", closureCertificationId: "CLOSECERT-R", closureId: "CLOSE-R", decisionCertificationId: "DECCERT-R", decisionId: "DEC-R", authorizationCertificationId: "AUTHCERT-R", authorizationId: "AUTH-R", candidateId: "CAND-R", requestId: "REQ-R", publicationCertificationId: "PUBCERT-R", publicationId: "PUB-R", decisionFingerprint: "FP-R", integrityState: "VERIFIED_TERMINAL_REVIEW_ARTIFACT", authorizationGranted: false, dispatchApproved: false, externalTransportRequested: false, dispatchExecuted: false, durablePublicationCreated: false, syntheticOnly: true} as unknown as typeof receipt, replayDisposition: "ADMIT", certified: true } as const as LocalRuntimeRecoveryOperationalAuditPublicationDispatchAuthorizationDecisionEvidenceClosureIntegrityCertification;
+const decisionCertification = {
+  certificationId: "DECCERT-R",
+  decisionId: "DEC-R",
+  authorizationCertificationId: "AUTHCERT-R",
+  authorizationId: "AUTH-R",
+  candidateId: "CAND-R",
+  requestId: "REQ-R",
+  publicationCertificationId: "PUBCERT-R",
+  publicationId: "PUB-R",
+  decisionFingerprint: "FP-R",
+  decisionState: "REVIEW_REQUIRED",
+  authorizationGranted: false,
+  dispatchApproved: false,
+  externalTransportRequested: false,
+  dispatchExecuted: false,
+  syntheticOnly: true,
+  replayDisposition: "ADMIT",
+  certified: true,
+} as const as LocalRuntimeRecoveryOperationalAuditPublicationDispatchAuthorizationDecisionCertification;
+
+const integrityCertification = {
+  certificationId: "INTCERT-R",
+  integrityId: "INT-R",
+  closureCertificationId: "CLOSECERT-R",
+  closureId: "CLOSE-R",
+  decisionCertificationId: "DECCERT-R",
+  decisionId: "DEC-R",
+  authorizationCertificationId: "AUTHCERT-R",
+  authorizationId: "AUTH-R",
+  candidateId: "CAND-R",
+  requestId: "REQ-R",
+  publicationCertificationId: "PUBCERT-R",
+  publicationId: "PUB-R",
+  decisionFingerprint: "FP-R",
+  integrityState: "VERIFIED_TERMINAL_REVIEW_ARTIFACT",
+  authorizationGranted: false,
+  dispatchApproved: false,
+  externalTransportRequested: false,
+  dispatchExecuted: false,
+  durablePublicationCreated: false,
+  syntheticOnly: true,
+  replayDisposition: "ADMIT",
+  certified: true,
+} as const as LocalRuntimeRecoveryOperationalAuditPublicationDispatchAuthorizationDecisionEvidenceClosureIntegrityCertification;
 
 test("P13.18801-18920: terminal integrity receipt preserves review-only chain", () => {
   resetLocalRuntimeRecoveryOperationalAuditPublicationDispatchAuthorizationDecisionEvidenceClosureIntegrityReceiptReplayRegistry();
@@ -27,7 +69,7 @@ test("P13.18921-18960: receipt replay is deterministic and drift/execution fail 
   assert.equal(replayLocalRuntimeRecoveryOperationalAuditPublicationDispatchAuthorizationDecisionEvidenceClosureIntegrityReceipt({ receipt, integrityCertification, decisionCertification }), "ADMIT");
   assert.equal(replayLocalRuntimeRecoveryOperationalAuditPublicationDispatchAuthorizationDecisionEvidenceClosureIntegrityReceipt({ receipt, integrityCertification, decisionCertification }), "REPLAY");
   assert.throws(() => assertLocalRuntimeRecoveryOperationalAuditPublicationDispatchAuthorizationDecisionEvidenceClosureIntegrityReceipt({ ...receipt, decisionFingerprint: "FP-DRIFT" }, integrityCertification, decisionCertification), /drift/i);
-  assert.throws(() => assertLocalRuntimeRecoveryOperationalAuditPublicationDispatchAuthorizationDecisionEvidenceClosureIntegrityReceipt({ ...receipt, dispatchExecuted: true }, integrityCertification, decisionCertification), /invalid|executable/i);
+  assert.throws(() => assertLocalRuntimeRecoveryOperationalAuditPublicationDispatchAuthorizationDecisionEvidenceClosureIntegrityReceipt({ ...receipt, dispatchExecuted: true } as never, integrityCertification, decisionCertification), /invalid|executable/i);
   const cert = certifyLocalRuntimeRecoveryOperationalAuditPublicationDispatchAuthorizationDecisionEvidenceClosureIntegrityReceipt({ certificationId: "RCPTCERT-R", receipt, integrityCertification, decisionCertification });
   assert.equal(cert.certified, true);
 });
