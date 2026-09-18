@@ -23,7 +23,7 @@ test("P13.5923 LAN device identity is mandatory", () => {
 
 test("P13.5924 local service fails closed against internet exposure", () => {
   assert.doesNotThrow(() => assertLocalServiceBoundary({ serviceId: "mta-local-runtime", listenScope: "LAN_ONLY", allowsInternetExposure: false, requiresAuthenticatedDevice: true }));
-  assert.throws(() => assertLocalServiceBoundary({ serviceId: "mta-local-runtime", listenScope: "LAN_ONLY", allowsInternetExposure: true, requiresAuthenticatedDevice: true }));
+  assert.throws(() => assertLocalServiceBoundary(({ serviceId: "mta-local-runtime", listenScope: "LAN_ONLY", allowsInternetExposure: true, requiresAuthenticatedDevice: true } as unknown as LocalServiceBoundary)));
 });
 
 test("P13.5925 continuity evidence binds execution identity", () => {
