@@ -25,6 +25,6 @@ test("P13.17521-17640: authorization decision is non-granting and transport-free
 test("P13.17761-17880: authorization decision certification rejects grant or fingerprint drift", () => {
   resetLocalRuntimeRecoveryOperationalAuditPublicationDispatchAuthorizationDecisionReplayRegistry();
   const decision = createLocalRuntimeRecoveryOperationalAuditPublicationDispatchAuthorizationDecision({ decisionId: "DEC-02", authorizationCertification: authorization });
-  assert.throws(() => certifyLocalRuntimeRecoveryOperationalAuditPublicationDispatchAuthorizationDecision({ certificationId: "DECCERT-02", decision: { ...decision, authorizationGranted: true }, authorizationCertification: authorization }), /invalid|grants/i);
+  assert.throws(() => certifyLocalRuntimeRecoveryOperationalAuditPublicationDispatchAuthorizationDecision({ certificationId: "DECCERT-02", decision: ({ ...decision, authorizationGranted: true } as unknown as typeof decision), authorizationCertification: authorization }), /invalid|grants/i);
   assert.throws(() => certifyLocalRuntimeRecoveryOperationalAuditPublicationDispatchAuthorizationDecision({ certificationId: "DECCERT-02B", decision: { ...decision, decisionFingerprint: "FP-DRIFT" }, authorizationCertification: authorization }), /drift/i);
 });
