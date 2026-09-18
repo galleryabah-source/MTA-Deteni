@@ -15,7 +15,7 @@ function lifecycleCertification(): LifecycleCertification {
     ["MOVEMENT", "DET-BIND", "CMD-BIND-3", "EVT-BIND-3", 2, 3],
     ["TEMPORARY_EXIT", "DET-BIND", "CMD-BIND-4", "EVT-BIND-4", 3, 4],
     ["REPORTING", "DET-BIND", "CMD-BIND-5", "EVT-BIND-5", 4, 5],
-  ].map(([name, aggregateId, commandId, eventId, beforeVersion, afterVersion]) => ({ name, aggregateId, commandId, eventId, correlationId, beforeVersion, afterVersion, status: "COMMITTED" as const }));
+  ].map(([name, aggregateId, commandId, eventId, beforeVersion, afterVersion]) => ({ name: name as "REGISTRATION"|"PLACEMENT"|"MOVEMENT"|"TEMPORARY_EXIT"|"REPORTING", aggregateId: aggregateId as string, commandId: commandId as string, eventId: eventId as string, correlationId, beforeVersion: beforeVersion as number, afterVersion: afterVersion as number, status: "COMMITTED" as const }));
   return certifyLifecycleJourney({ journeyId: "J-BIND", steps, auditCount: 5, outboxCount: 5, projectionVersion: 5 });
 }
 
