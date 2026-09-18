@@ -20,5 +20,5 @@ test("P13.13201-13320: execution evidence preserves decision and runtime identit
 test("P13.13201-13320: execution evidence tampering fails closed", () => {
   const evidence = createLocalRuntimeRecoveryDecisionExecutionEvidence({ evidenceId: "EXE-EV-DRIFT", execution, decision, auditEvidence: audit });
   assert.throws(() => assertLocalRuntimeRecoveryDecisionExecutionEvidence({ ...evidence, decisionFingerprint: "tampered" }, execution, decision), /evidence drift/i);
-  assert.throws(() => assertLocalRuntimeRecoveryDecisionExecutionEvidence({ ...evidence, syntheticOnly: false } as unknown as typeof evidence), execution, decision), /synthetic-only/i);
+  assert.throws(() => assertLocalRuntimeRecoveryDecisionExecutionEvidence({ ...evidence, syntheticOnly: false } as unknown as typeof evidence), /synthetic-only/i);
 });
