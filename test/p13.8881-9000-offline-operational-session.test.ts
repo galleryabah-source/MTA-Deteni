@@ -20,7 +20,7 @@ function certifiedContinuity() {
   const recovery = certifyRecoveryJourney({ ...recoveryJourney });
   const runtime = assessRuntimeContinuity({ context, queue: [] });
   const backup = assessBackupContinuity({ schemaVersion: 1, backupId: "B-S", sourceRuntime: "LAN", sourceDeviceId: "DEV-S", sourceInstallationId: "INST-S", createdAt: "2026-09-16T00:00:00Z", payloadFingerprint: "BFP-S", syntheticOnly: true });
-  const continuity = certifyContinuity({ certificationId: "CONT-S", context, lifecycle, recovery, runtime, backup });
+  const continuity = certifyContinuity({ certificationId: "CONT-S", sessionId: "SES-S", deviceId: "DEV-S", installationId: "INST-S", context, lifecycle, recovery, runtime, backup });
   return { runtime, backup, continuity };
 }
 
