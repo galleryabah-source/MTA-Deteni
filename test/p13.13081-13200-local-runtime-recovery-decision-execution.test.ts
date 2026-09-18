@@ -48,5 +48,5 @@ test("P13.13081-13200: only an exact admitted recovery decision reaches executio
 test("P13.13081-13200: conflicted or blocked decisions cannot execute", () => {
   const result = build();
   assert.throws(() => admitLocalRuntimeRecoveryDecisionExecution({ executionId: "RUN-CONFLICT", request, decision: result.decision, certification: result.certification, replay: { ...result.replay, disposition: "CONFLICT", admitted: false }, auditEvidence: result.auditEvidence, envelope: result.envelope }), /requires an admitted|drift/i);
-  assert.throws(() => assertLocalRuntimeRecoveryDecisionExecution({ ...({ executionId: "RUN-BLOCK", decisionId: "DEC", requestId: "REQ", certificationId: "CERT", auditEvidenceId: "AUD", envelopeId: "ENV", admitted: false, syntheticOnly: true } as unknown as typeof execution } as const) }), /admitted/i);
+  assert.throws(() => assertLocalRuntimeRecoveryDecisionExecution({ executionId: "RUN-BLOCK", decisionId: "DEC", requestId: "REQ", certificationId: "CERT", auditEvidenceId: "AUD", envelopeId: "ENV", admitted: false, syntheticOnly: true } as unknown as typeof result.execution), /admitted/i);
 });
