@@ -39,7 +39,7 @@ test("P13.5965 browser and local adapter boundaries fail closed", () => {
   assert.doesNotThrow(() => assertBrowserTransportRequest({ requestId: "req-02", actorId: "actor-01", device, method: "POST", path: "/api/movement", idempotencyKey: "idem-02" }));
   assert.throws(() => assertBrowserTransportRequest({ requestId: "req-03", actorId: "actor-01", device, method: "POST", path: "/api/movement" }), /idempotency/);
   assert.doesNotThrow(() => assertLocalAdapterBoundary(DEFAULT_LOCAL_SERVICE_BOUNDARY, device));
-  assert.throws(() => assertLocalAdapterBoundary({ ...DEFAULT_LOCAL_SERVICE_BOUNDARY, allowsInternetExposure: true }, device), /unsafe/);
+  assert.throws(() => assertLocalAdapterBoundary(({ ...DEFAULT_LOCAL_SERVICE_BOUNDARY, allowsInternetExposure: true } as unknown as typeof DEFAULT_LOCAL_SERVICE_BOUNDARY), device), /unsafe/);
 });
 
 test("P13.5966 backup manifest chain is identity-linked and synthetic", () => {
