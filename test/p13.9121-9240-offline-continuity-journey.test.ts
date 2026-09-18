@@ -16,7 +16,7 @@ function prerequisites() {
   const lifecycle = certifyLifecycleJourney({ journeyId: "J-J", steps, auditCount: 5, outboxCount: 5, projectionVersion: 5 });
   const recoveryJourney = executeSyntheticRecoveryJourney({ journeyId: "J-J", commandId: "CMD-L-3", requestHash: "REQ-J-3", eventId: "EVT-L-3", correlationId: "CORR-J", aggregateId: "DET-J", expectedVersion: 3, failureClass: "OUTBOX_FAILURE", payloadHash: "FP-J-3" });
   const recovery = certifyRecoveryJourney({ ...recoveryJourney });
-  const backupManifest = { schemaVersion: 1, backupId: "B-J", sourceRuntime: "LAN" as const, sourceDeviceId: "DEV-J", sourceInstallationId: "INST-J", createdAt: "2026-09-16T00:00:00Z", payloadFingerprint: "BFP-J", syntheticOnly: true as const };
+  const backupManifest = { schemaVersion: 1 as const, backupId: "B-J", sourceRuntime: "LAN" as const, sourceDeviceId: "DEV-J", sourceInstallationId: "INST-J", createdAt: "2026-09-16T00:00:00Z", payloadFingerprint: "BFP-J", syntheticOnly: true as const };
   return { lifecycle, recovery, backupManifest };
 }
 
