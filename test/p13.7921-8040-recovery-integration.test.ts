@@ -8,7 +8,7 @@ import { assertLifecycleEnvelope } from "../src/application/lifecycle-orchestrat
 
 test("recovery evidence binds failure classification and version semantics", () => {
   const evidence = createRecoveryEvidence({
-    evidenceId: "REC-E-001", commandId: "CMD-001", eventId: "EVT-001", correlationId: "CORR-001", aggregateId: "DET-001",
+    evidenceId: "REC-E-001", commandId: "CMD-001", requestHash: "REQ-001", eventId: "EVT-001", correlationId: "CORR-001", aggregateId: "DET-001",
     expectedVersion: 4, resultingVersion: 4, failureClass: "STALE_VERSION", reasonCode: "VERSION_STALE",
     terminalState: "REVIEW_PENDING", recovery: "REVIEW_REQUIRED", mutationCommitted: false, retrySafe: false, compensationAllowed: false,
   });
