@@ -4,7 +4,7 @@
   "version": "0.1.0",
   "type": "module",
   "scripts": {
-    "test": "node --test test/p10.376-domain-state-machine.test.mjs test/p10.378-synthetic-fixture.test.mjs test/p10.45-ci-evidence-transport.test.mjs test/p13.5824-5880-controlled-synthetic-journey.test.mjs",
+    "test": "node --test test/**/*.test.mjs",
     "test:unit": "tsx --test test/**/*.test.ts",
     "typecheck": "tsc --noEmit",
     "typecheck:test": "tsc -p tsconfig.test.json --noEmit",
