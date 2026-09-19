@@ -26,7 +26,7 @@ const exitCriteria = read("P13_EXIT_CRITERIA.md");
 
 check("ARCH-5809", pkg.scripts?.typecheck === "tsc --noEmit", "production typecheck script is explicit");
 check("ARCH-5810", pkg.scripts?.["typecheck:test"] === "tsc -p tsconfig.test.json --noEmit", "test typecheck boundary is explicit");
-check("ARCH-5811", pkg.scripts?.test === "node --test", "JavaScript regression command is deterministic");
+check("ARCH-5811", pkg.scripts?.test === "node --test test/**/*.test.mjs", "JavaScript regression command is deterministic");
 check("ARCH-5812", pkg.scripts?.["test:unit"] === "tsx --test test/**/*.test.ts", "TypeScript domain test command is deterministic");
 check("ARCH-5813", workflow.includes("MTA_EXECUTION_ENV: controlled-nonprod"), "CI execution environment is controlled-nonprod");
 check(
