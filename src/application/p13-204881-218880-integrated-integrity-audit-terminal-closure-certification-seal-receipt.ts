@@ -28,7 +28,7 @@ const registry = new Map<string, string>();
 const CHECKPOINTS = Object.freeze(
   Array.from({ length: 100 }, (_, i) => {
     const start = 204881 + i * 140;
-    return `P13.${start}-${start + 159}`;
+    return `P13.${start}-${start + (i === 99 ? 139 : 159)}`;
   }),
 );
 
