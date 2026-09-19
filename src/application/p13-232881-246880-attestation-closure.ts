@@ -7,7 +7,7 @@ export type P13AttestationClosureNode = Readonly<{
   dispatchExecuted:false; durablePublicationCreated:false; syntheticOnly:true;
 }>;
 const registry=new Map<string,string>();
-const CHECKPOINTS=Object.freeze(Array.from({length:100},(_,i)=>{const start=232881+i*140;return `P13.${start}-${start+139}`;}));
+const CHECKPOINTS=Object.freeze(Array.from({length:100},(_,i)=>{const start=232881+i*140;return `P13.${start}-${start + (i === 99 ? 139 : 159)}`;}));
 export function p13AttestationClosureCheckpoints():readonly string[]{return CHECKPOINTS;}
 export function createP13AttestationClosureNode(input:Omit<P13AttestationClosureNode,"state"|"authorizationGranted"|"dispatchApproved"|"externalTransportRequested"|"dispatchExecuted"|"durablePublicationCreated"|"syntheticOnly">):P13AttestationClosureNode{
  if(!CHECKPOINTS.includes(input.checkpoint))throw new Error("Unsupported P13 attestation-closure checkpoint.");
