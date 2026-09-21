@@ -1,7 +1,7 @@
 # MTA DETENI — Project Status
 
 **Foundation:** v1.134+
-**Current Track:** Integrated synthetic runtime acceptance / offline-LAN continuity / reporting-QR readiness
+**Current Track:** Integrated synthetic runtime acceptance / offline-LAN continuity / reporting-QR readiness / controlled daily-guard-report renderer
 **Branch:** `main`
 **Latest implementation checkpoint:** Domain CI Run #1310 completed successfully on commit `e228c9fbaa2dfe8be572d99a79f76034b1d6625a`; audit remediation documentation is synchronized; P1 controlled-nonprod runtime evidence is OBSERVED_PASS; P13.260881–274880 is CLOSED; the active workstream is integrated synthetic runtime acceptance and resilience
 
@@ -69,9 +69,10 @@
 
 ## Cloudflare deployment boundary
 
-- The repository Cloudflare workflow is validation-only and does not perform a real deployment.
-- Cloudflare API credentials are not required by this workflow.
-- Any real Cloudflare deployment requires a separately approved controlled non-production target and explicit governance clearance.
+- The repository now performs a controlled deployment of the synthetic MTA DETENI web runtime to the configured Cloudflare Worker target `mta-deteni`.
+- Deployment is restricted to the repository's synthetic web/runtime boundary; this does not authorize production database access, schema migration, real detainee data, AI activation or other production access.
+- The deployment workflow independently verifies `https://mta-deteni.galleryabah.workers.dev/api/health` after upload, so a Wrangler postflight read error cannot be mistaken for a runtime deployment failure.
+- Latest observed production-runtime deployment: GitHub Actions Run #66 (`35564857577`) on commit `0c21325003bc103ff7cace2e0ea32831c18be8c0`, with live health verification PASS.
 
 ## Governance locks
 
@@ -92,7 +93,7 @@
 **P9.13 Kernel Certification — HARDENED CONTRACT / CONTROLLED EVIDENCE OBSERVED**
 **P13.260881–274880 — CLOSED / CONTROLLED-NONPROD EVIDENCE OBSERVED**
 **P1 Runtime Integrity — EXECUTABLE CERTIFICATION EVIDENCE OBSERVED_PASS / GOVERNANCE LOCKS INTACT**
-**Cloudflare CI — CONFIGURATION VALIDATION ONLY / DEPLOYMENT BOUNDARY LOCKED**
+**Cloudflare CI — CONTROLLED SYNTHETIC RUNTIME DEPLOYMENT / LIVE HEALTH VERIFIED**
 
 ## Closure rule
 
