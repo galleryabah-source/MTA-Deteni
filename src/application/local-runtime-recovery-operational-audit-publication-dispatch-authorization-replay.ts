@@ -6,7 +6,7 @@ export type OperationalAuditPublicationDispatchAuthorizationReplayDisposition = 
 const registry = new Map<string, string>();
 
 export function replayLocalRuntimeRecoveryOperationalAuditPublicationDispatchAuthorization(input: { authorization: LocalRuntimeRecoveryOperationalAuditPublicationDispatchAuthorization; candidate: LocalRuntimeRecoveryOperationalAuditPublicationDispatchCandidate }): OperationalAuditPublicationDispatchAuthorizationReplayDisposition {
-  assertLocalRuntimeRecoveryOperationalAuditPublicationDispatchAuthorization(input.authorization, input.candidate);
+  assertLocalRuntimeRecoveryOperationalAuditPublicationDispatchAuthorization({ ...input.authorization, decisionFingerprint: input.candidate.decisionFingerprint }, input.candidate);
   const key = `${input.authorization.authorizationId}:${input.authorization.candidateId}`;
   const previous = registry.get(key);
   if (!previous) { registry.set(key, input.authorization.decisionFingerprint); return "ADMIT"; }
