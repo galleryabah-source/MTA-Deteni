@@ -38,7 +38,7 @@ export function reconcileRepositoryQueueProjection<T extends RepositoryEntity>(i
 }
 
 export function assertReconciliationSafe(result: ReconciliationResult): void {
-  if (result.status === "CONFLICT" || result.status === "MISSING_PROJECTION") throw new Error(`Reconciliation is not safe: ${result.status}.`);
+  if (result.status !== "CONSISTENT") throw new Error(`Reconciliation is not safe: ${result.status}.`);
 }
 
 export function assertOfflineReconnectBoundToReconciliation(decision: ReconciliationDecision, result: ReconciliationResult): void {
