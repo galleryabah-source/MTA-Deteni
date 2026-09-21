@@ -25,7 +25,7 @@ test("P13.16561-16680: publication request replay is ADMIT/REPLAY/CONFLICT", () 
   const args = { request: p.request, certification: p.certification, envelope: p.envelope };
   assert.equal(replayLocalRuntimeRecoveryOperationalAuditPublicationRequest(args), "ADMIT");
   assert.equal(replayLocalRuntimeRecoveryOperationalAuditPublicationRequest(args), "REPLAY");
-  const d = prepared("FP-CONFLICT");
+  const d = prepared("FP-CONFLICT", "CONFLICT");
   assert.equal(replayLocalRuntimeRecoveryOperationalAuditPublicationRequest({ ...args, request: { ...p.request, decisionFingerprint: d.request.decisionFingerprint } }), "CONFLICT");
   assert.equal(p.request.externalTransportRequested, false);
 });
