@@ -20,7 +20,7 @@ export type IntegratedIntegrityAuditTerminalClosureCertificationBoundaryNode=Rea
 }>;
 
 const registry=new Map<string,string>();
-const CHECKPOINTS=Object.freeze(Array.from({length:100},(_,i)=>{const s=176881+i*140;const e=s+159;return `P13.${s}-${e}`}));
+const CHECKPOINTS=Object.freeze(Array.from({length:100},(_,i)=>{const s=176881+i*140;const e=s+(i===99?139:159);return `P13.${s}-${e}`}));
 
 export function integratedIntegrityAuditTerminalClosureCertificationBoundaryCheckpoints():readonly string[]{return CHECKPOINTS;}
 
