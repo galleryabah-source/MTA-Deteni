@@ -97,9 +97,9 @@ test('daily guard report lifecycle supports request-changes and revision loop',(
 });
 
 test('daily guard report lifecycle action contract exposes the expected next action',()=>{
-  assert.deepEqual(api.lifecycleAction(api.WORKFLOW.DRAFT),{label:'Validate',next:api.WORKFLOW.VALIDATED});
-  assert.deepEqual(api.lifecycleAction(api.WORKFLOW.VALIDATED),{label:'Generate',next:api.WORKFLOW.GENERATED});
-  assert.deepEqual(api.lifecycleAction(api.WORKFLOW.GENERATED),{label:'Start Review',next:api.WORKFLOW.IN_REVIEW});
-  assert.deepEqual(api.lifecycleAction(api.WORKFLOW.APPROVED),{label:'Finalize',next:api.WORKFLOW.FINAL});
+  assert.deepEqual({...api.lifecycleAction(api.WORKFLOW.DRAFT)},{label:'Validate',next:api.WORKFLOW.VALIDATED});
+  assert.deepEqual({...api.lifecycleAction(api.WORKFLOW.VALIDATED)},{label:'Generate',next:api.WORKFLOW.GENERATED});
+  assert.deepEqual({...api.lifecycleAction(api.WORKFLOW.GENERATED)},{label:'Start Review',next:api.WORKFLOW.IN_REVIEW});
+  assert.deepEqual({...api.lifecycleAction(api.WORKFLOW.APPROVED)},{label:'Finalize',next:api.WORKFLOW.FINAL});
   assert.equal(api.lifecycleAction(api.WORKFLOW.FINAL).next,null);
 });
