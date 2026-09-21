@@ -18,6 +18,7 @@ Deno.serve(async(req)=>{
   const url=new URL(req.url);
   const parts=url.pathname.replace(/^\/+/,"").split("/").filter(Boolean);
   const resource=parts[0],id=parts[1];
+  if(resource==="me" && req.method==="GET") return json({ok:true,user:{id:user.id,email:user.email},profile,role});
   if(!TABLES.has(resource)) return json({ok:false,error:"RESOURCE_NOT_FOUND"},404);
   if(["POST","PATCH","DELETE"].includes(req.method)&&!WRITE_ROLES.has(role)) return json({ok:false,error:"RBAC_WRITE_DENIED",role},403);
   const table="mta_"+resource;
