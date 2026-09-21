@@ -18,6 +18,9 @@ try {
       clientWidth:document.documentElement.clientWidth,
       bodyWidth:document.body.scrollWidth,
       nav:!!document.querySelector('#nav'),
+      mobileRecords:!!document.querySelector('.mta-mobile-records'),
+      mobileRecordsDisplay:!!document.querySelector('.mta-mobile-records')&&getComputedStyle(document.querySelector('.mta-mobile-records')).display,
+      detaineeTable:!!document.querySelector('.detainee-table'),
       main:!!document.querySelector('.main'),
       backup:!!document.querySelector('#backupBtn'),
       metaViewport:!!document.querySelector('meta[name="viewport"]'),
@@ -28,6 +31,11 @@ try {
     if(result.scrollWidth>result.clientWidth+1 || result.bodyWidth>result.clientWidth+1) failures.push(`${width}px horizontal overflow ${Math.max(result.scrollWidth,result.bodyWidth)}>${result.clientWidth}`);
     if(!result.nav||!result.main||!result.backup||!result.metaViewport) failures.push(`${width}px required shell element missing`);
     if(width<=1024 && (!result.mobileShell||!result.mobileShellVisible||!result.mobileScan)) failures.push(`${width}px mobile/tablet shell contract missing`);
+    await page.evaluate(()=>window.show?.('detainee'));
+    await page.waitForTimeout(80);
+    const responsiveDetainee = await page.evaluate(()=>({table:!!document.querySelector('.detainee-table'),cards:!!document.querySelector('.mta-mobile-records'),cardsDisplay:document.querySelector('.mta-mobile-records')?getComputedStyle(document.querySelector('.mta-mobile-records')).display:'none'}));
+    if(width>=1025 && responsiveDetainee.cardsDisplay!=='none') failures.push(`${width}px mobile detainee records leaked into desktop`);
+    if(width<=1024 && (!responsiveDetainee.cards || responsiveDetainee.cardsDisplay==='none')) failures.push(`${width}px mobile detainee records missing`);
     await page.close();
   }
   const page=await browser.newPage({viewport:{width:390,height:800},isMobile:true});
