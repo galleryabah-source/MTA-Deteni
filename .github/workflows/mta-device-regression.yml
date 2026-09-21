@@ -52,7 +52,7 @@ jobs:
               else if(name.endsWith('.js')) files.push(p);
               else if(name.endsWith('.html')){
                 const html=fs.readFileSync(p,'utf8');
-                const re=/<script\\b[^>]*type=["']module["'][^>]*src=["']([^"']+\.js)["'][^>]*>/gi;
+                const re=/<script[^>]*type=["']module["'][^>]*src=["']([^"']+\.js)["'][^>]*>/gi;
                 let m;
                 while((m=re.exec(html))) moduleSources.add(path.resolve('web',m[1].replace(/^\/+/,'')));
               }
