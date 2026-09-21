@@ -16,7 +16,7 @@ function prepared(fingerprint: string, suffix = "BASE") {
   const evidenceCertification = { certificationId: "AECERT-DCR", evidenceId: "AE-DCR", auditCertificationId: "AUDCERT-DCR", auditRecordId: "AUD-DCR", closureCertificationId: "CERT-DCR", closureEvidenceId: "CE-DCR", decisionFingerprint: fingerprint, replayDisposition: "ADMIT", certified: true, syntheticOnly: true } as LocalRuntimeRecoveryFinalClosureAuditEvidenceCertification;
   const projection = createLocalRuntimeRecoveryOperationalAuditProjection({ projectionId: `PROJ-DCR-${suffix}`, evidenceCertification, evidence });
   const projectionCertification = certifyLocalRuntimeRecoveryOperationalAuditProjection({ certificationId: "PROJCERT-DCR", projection, evidenceCertification });
-  const envelope = createLocalRuntimeRecoveryOperationalAuditPublicationEnvelope({ publicationId: "PUB-DCR", certification: projectionCertification, projection });
+  const envelope = createLocalRuntimeRecoveryOperationalAuditPublicationEnvelope({ publicationId: `PUB-DCR-${suffix}`, certification: projectionCertification, projection });
   const publicationCertification = certifyLocalRuntimeRecoveryOperationalAuditPublication({ publicationCertificationId: "PUBCERT-DCR", envelope, certification: projectionCertification, projection });
   const request = createLocalRuntimeRecoveryOperationalAuditPublicationRequest({ requestId: "PUBREQ-DCR", certification: publicationCertification, envelope });
   resetLocalRuntimeRecoveryOperationalAuditPublicationRequestReplayRegistry();
