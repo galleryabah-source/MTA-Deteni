@@ -11,7 +11,7 @@ const checkpoints=integratedIntegrityAuditTerminalClosureCertificationContinuati
 assert.equal(checkpoints.length,100);
 assert.equal(new Set(checkpoints).size,100);
 assert.equal(checkpoints[0],"P13.176881-177040");
-assert.equal(checkpoints[99],"P13.190721-190880");
+assert.equal(checkpoints[99],"P13.190741-190880");
 
 resetIntegratedIntegrityAuditTerminalClosureCertificationContinuationReplayRegistry();
 const node=createIntegratedIntegrityAuditTerminalClosureCertificationContinuationNode({
