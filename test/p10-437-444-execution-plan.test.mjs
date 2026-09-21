@@ -1,0 +1,3 @@
+import {describe,it,expect} from 'vitest';import {createExecutionPlan} from '../src/infrastructure/certification/execution-plan.mjs';
+const b={boundaryReady:true,requestId:'REQ-1',correlationId:'COR-1',command:'CREATE_DETAINEE',resourceType:'DETAINEE',resourceId:'D-1'};
+describe('P10.437-444 execution plan',()=>{it('creates deterministic ordered plan',()=>{const x=createExecutionPlan(b);expect(x.steps[0]).toBe('authorize');expect(x.steps.at(-1)).toBe('emit_evidence')});it('requires boundary',()=>expect(()=>createExecutionPlan({...b,boundaryReady:false})).toThrow('EXECUTION_PLAN_DENIED:boundaryReady'));it('does not authorize',()=>expect(createExecutionPlan(b).executionAuthorized).toBe(false))});
