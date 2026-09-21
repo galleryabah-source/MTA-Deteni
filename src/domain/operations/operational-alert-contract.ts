@@ -1,0 +1,5 @@
+export const OPERATIONAL_ALERT_CONTRACT_VERSION="P10.12-INFERRED-v2";
+export type AlertSeverity="INFO"|"WARNING"|"CRITICAL";export type AlertStatus="OPEN"|"ACKNOWLEDGED"|"RESOLVED";
+export type OperationalAlert={alertId:string;type:string;resourceId:string;severity:AlertSeverity;status:AlertStatus;createdAt:string};
+const ID=/^[A-Za-z0-9._-]{1,128}$/;
+export function validateAlert(a:OperationalAlert):string[]{const x:string[]=[];if(!ID.test(a.alertId))x.push("INVALID_ALERT_ID");if(!ID.test(a.type))x.push("INVALID_ALERT_TYPE");if(!ID.test(a.resourceId))x.push("INVALID_RESOURCE_ID");if(!["INFO","WARNING","CRITICAL"].includes(a.severity))x.push("INVALID_SEVERITY");if(!["OPEN","ACKNOWLEDGED","RESOLVED"].includes(a.status))x.push("INVALID_STATUS");if(Number.isNaN(Date.parse(a.createdAt)))x.push("INVALID_CREATED_AT");return x;}
