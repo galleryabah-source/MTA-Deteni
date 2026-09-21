@@ -27,7 +27,7 @@ test("admits only exact certified synthetic identity", () => {
   assert.equal(result.decision, "ADMIT");
   assert.equal(result.externalTransport, false);
   assert.equal(result.durablePublication, false);
-  assert.equal(result.admissionFingerprint.length, 8);
+  assert.equal(result.admissionFingerprint.length, 64);
 });
 
 test("same request is deterministic and becomes REPLAY", () => {
@@ -58,12 +58,12 @@ test("not-ready certification is rejected", () => {
   );
 });
 
-test("conflicting prior admission is rejected", () => {
+test("conflicting prior admission returns CONFLICT without overwriting prior material", () => {
   const first = admitPublication(certification, request);
-  assert.throws(
-    () => admitPublication(certification, { ...request, requestId: "REQ-002" }, first),
-    /PUBLICATION_ADMISSION_CONFLICT/
-  );
+  const conflict = admitPublication(certification, { ...request, requestId: "REQ-002" }, first);
+  assert.equal(conflict.decision, "CONFLICT");
+  assert.notEqual(conflict.admissionFingerprint, first.admissionFingerprint);
+  assert.equal(first.requestId, "REQ-001");
 });
 
 test("admission fingerprint is stable for the same material", () => {
