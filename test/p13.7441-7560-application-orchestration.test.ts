@@ -22,7 +22,7 @@ test("repository-backed orchestration propagates aggregate identity and version"
     context: { transactionId: "T1", requestId: "R1", correlationId: "C1", idempotencyKey: "I1" },
     auditId: "AUD1", eventId: "EV1", occurredAt: "2026-09-15T00:00:00Z",
   }, {
-    commandType: "DETAINEE_REGISTER", entity: { id: "DET-SYN-002", version: 1, status: "ACTIVE" }, requestHash: "H1", payload: "P1", payloadFingerprint: "PF1", responseFingerprint: "RF1",
+    commandType: "DETAINEE_REGISTER", entity: { id: "DET-SYN-002", version: 1, status: "ACTIVE" }, requestHash: "H1", payload: "{}", payloadFingerprint: "PF1", responseFingerprint: "RF1",
   });
   assert.equal(result.outcome, "COMMITTED");
   assertAggregateCommandResult(result);
