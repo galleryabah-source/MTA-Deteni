@@ -26,7 +26,7 @@ export function defaultTemporaryExitWorkflow(): readonly WorkflowStep[] {
 }
 
 export function validateWorkflowContract(contract: WorkflowContract): "READY" | "BLOCKED" {
-  if (!contract.contractId.trim() || contract.target !== "SYNTHETIC" || contract.steps.length !== ORDER.length) return "BLOCKED";
+  if (!contract.contractId.trim() || contract.target !== "SYNTHETIC" || contract.steps.length !== ORDER.length - 1) return "BLOCKED";
   return contract.steps.every((step, index) =>
     step.domain === ORDER[index] &&
     step.nextOwner === ORDER[index + 1] &&
