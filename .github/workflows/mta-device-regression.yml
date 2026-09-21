@@ -37,24 +37,50 @@ jobs:
           node <<'NODE'
           const fs=require('fs');
           const vm=require('vm');
+          const cp=require('child_process');
           const path=require('path');
+          const os=require('os');
           const root=path.resolve('web');
           const files=[];
+          const moduleSources=new Set();
+
           function walk(dir){
             for(const name of fs.readdirSync(dir)){
               const p=path.join(dir,name);
               const st=fs.statSync(p);
               if(st.isDirectory()) walk(p);
               else if(name.endsWith('.js')) files.push(p);
+              else if(name.endsWith('.html')){
+                const html=fs.readFileSync(p,'utf8');
+                const re=/<script\\b[^>]*type=["']module["'][^>]*src=["']([^"']+\.js)["'][^>]*>/gi;
+                let m;
+                while((m=re.exec(html))) moduleSources.add(path.resolve('web',m[1].replace(/^\/+/,'')));
+              }
             }
           }
+
           walk(root);
           const failures=[];
           for(const file of files){
-            try{new vm.Script(fs.readFileSync(file,'utf8'),{filename:file});}
-            catch(err){failures.push({file:path.relative(process.cwd(),file),message:err.message});}
+            const source=fs.readFileSync(file,'utf8');
+            const relative=path.relative(process.cwd(),file);
+            const isModule=moduleSources.has(file);
+            try{
+              if(isModule){
+                const temp=path.join(os.tmpdir(),'mta-syntax-'+process.pid+'-'+path.basename(file)+'.mjs');
+                fs.writeFileSync(temp,source);
+                const result=cp.spawnSync(process.execPath,['--check',temp],{encoding:'utf8'});
+                if(result.status!==0) throw new Error((result.stderr||result.stdout||'module syntax check failed').trim());
+                fs.unlinkSync(temp);
+              }else{
+                new vm.Script(source,{filename:file});
+              }
+            }catch(err){
+              failures.push({file:relative,type:isModule?'module':'classic',message:err.message});
+            }
           }
-          console.log('WEB_JS_SYNTAX '+JSON.stringify({checked:files.length,failures}));
+
+          console.log('WEB_JS_SYNTAX '+JSON.stringify({checked:files.length,modules:[...moduleSources].map(x=>path.relative(process.cwd(),x)),failures}));
           if(failures.length) throw new Error('web JavaScript syntax failures: '+JSON.stringify(failures));
           NODE
       - name: Browser smoke ${{ matrix.viewport.name }}
