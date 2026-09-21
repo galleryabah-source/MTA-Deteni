@@ -151,3 +151,55 @@ Not yet certified by this checkpoint:
 - pixel-level regression against the formally approved production template.
 
 No production schema migration or real detainee data is introduced by this implementation.
+
+
+## Current Workflow Evidence — v1.2
+
+The synthetic runtime now implements the controlled document lifecycle:
+
+`DRAFT → VALIDATED → GENERATED → IN_REVIEW → APPROVED → FINAL → DOWNLOAD`
+
+with an explicit review branch:
+
+`IN_REVIEW → CHANGES_REQUESTED → DRAFT`
+
+and revision creation:
+
+`CHANGES_REQUESTED → Create Revision → DRAFT (revision + 1)`
+
+Implemented controls:
+
+- state transitions are deny-by-default through a central lifecycle state machine;
+- validation is a mandatory state transition before generation;
+- preview is available at every material state;
+- generation binds the generated state and generation timestamp into the integrity material;
+- review requires an explicit review note;
+- approval requires an explicit approval note;
+- Request Changes preserves the reviewed revision and creates a new revision instead of overwriting history;
+- FINAL is immutable at the UI workflow boundary;
+- Download is available only for FINAL documents;
+- Download records `DOCUMENT_DOWNLOAD` audit evidence and opens the controlled browser Print/Save-as-PDF flow;
+- deterministic filename and SHA-256 integrity remain bound to the generated report material.
+
+The current runtime intentionally does **not** claim server-side PDF generation. The browser Print/Save-as-PDF path is the download mechanism for the synthetic acceptance boundary.
+
+### Migration / data boundary
+
+- No schema migration.
+- No production database access.
+- No real detainee records.
+- No real signatures.
+- No production photo/object storage.
+- All workflow actors and records remain synthetic.
+
+### Remaining D5 gates
+
+- official approved template assets;
+- production authorization/RBAC enforcement;
+- persistent database-backed lifecycle;
+- real object/photo access controls;
+- electronic signature integration;
+- server-side PDF renderer if required by the production deployment;
+- pixel-level regression against the approved template;
+- authorized bulk ZIP download;
+- final end-to-end acceptance evidence.
