@@ -1,0 +1,5 @@
+import assert from"node:assert/strict";import test from"node:test";import{decideRestrictedAccess}from"../src/domain/security/restricted-domain-contract.js";
+test("P10.11 denies unauthenticated",()=>assert.equal(decideRestrictedAccess({authenticated:false,scopeAllowed:true,classificationAllowed:true}),"AUTH_REQUIRED"));
+test("P10.11 denies wrong scope",()=>assert.equal(decideRestrictedAccess({authenticated:true,scopeAllowed:false,classificationAllowed:true}),"SCOPE_DENIED"));
+test("P10.11 denies classification mismatch",()=>assert.equal(decideRestrictedAccess({authenticated:true,scopeAllowed:true,classificationAllowed:false}),"CLASSIFICATION_DENIED"));
+test("P10.11 authorizes matching context",()=>assert.equal(decideRestrictedAccess({authenticated:true,scopeAllowed:true,classificationAllowed:true}),"AUTHORIZED"));
