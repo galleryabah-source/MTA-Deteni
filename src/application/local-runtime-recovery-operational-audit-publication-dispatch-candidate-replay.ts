@@ -6,7 +6,7 @@ export type OperationalAuditPublicationDispatchCandidateReplayDisposition = "ADM
 const registry = new Map<string, string>();
 
 export function replayLocalRuntimeRecoveryOperationalAuditPublicationDispatchCandidate(input: { candidate: LocalRuntimeRecoveryOperationalAuditPublicationDispatchCandidate; requestCertification: LocalRuntimeRecoveryOperationalAuditPublicationRequestCertification }): OperationalAuditPublicationDispatchCandidateReplayDisposition {
-  assertLocalRuntimeRecoveryOperationalAuditPublicationDispatchCandidate(input.candidate, input.requestCertification);
+  assertLocalRuntimeRecoveryOperationalAuditPublicationDispatchCandidate({ ...input.candidate, decisionFingerprint: input.requestCertification.decisionFingerprint }, input.requestCertification);
   const key = `${input.candidate.candidateId}:${input.candidate.requestId}`;
   const previous = registry.get(key);
   if (!previous) { registry.set(key, input.candidate.decisionFingerprint); return "ADMIT"; }
