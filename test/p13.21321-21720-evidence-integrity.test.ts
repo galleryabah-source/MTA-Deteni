@@ -25,7 +25,7 @@ test("P13.21481-21600: evidence integrity replay is deterministic", () => {
 
 test("P13.21601-21720: integrated evidence integrity certification remains non-executable", () => {
   resetLocalRuntimeRecoveryOperationalAuditPublicationDispatchAuthorizationDecisionEvidenceClosureIntegrityReceiptClosureIntegrityEvidenceClosureIntegrityEvidenceIntegrityReplayRegistry();
-  const certified = certifyLocalRuntimeRecoveryOperationalAuditPublicationDispatchAuthorizationDecisionEvidenceClosureIntegrityReceiptClosureIntegrityEvidenceClosureIntegrityEvidenceIntegrity({ certificationId:"INT-EVID-C", evidence });
+  const certified = certifyLocalRuntimeRecoveryOperationalAuditPublicationDispatchAuthorizationDecisionEvidenceClosureIntegrityReceiptClosureIntegrityEvidenceClosureIntegrityEvidenceIntegrity({ certificationId:"INT-EVID-C", integrityId:"INT-EVID-INTEGRITY", evidence });
   assert.equal(certified.certified, true);
   assert.equal(certified.replayDisposition, "ADMIT");
   assert.equal(certified.externalTransportRequested, false);
