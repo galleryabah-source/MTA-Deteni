@@ -73,3 +73,32 @@ test('daily guard report renderer produces the complete 11-page structure',async
   assert.match(html,/LAPORAN HARIAN REGU JAGA/);
   assert.match(html,/CLOSING &amp; SIGNATURES/);
 });
+
+test('daily guard report lifecycle allows only the controlled workflow path',()=>{
+  const api2=api;
+  assert.equal(api2.canTransition(api2.WORKFLOW.DRAFT,api2.WORKFLOW.VALIDATED),true);
+  assert.equal(api2.canTransition(api2.WORKFLOW.VALIDATED,api2.WORKFLOW.GENERATED),true);
+  assert.equal(api2.canTransition(api2.WORKFLOW.GENERATED,api2.WORKFLOW.IN_REVIEW),true);
+  assert.equal(api2.canTransition(api2.WORKFLOW.IN_REVIEW,api2.WORKFLOW.APPROVED),true);
+  assert.equal(api2.canTransition(api2.WORKFLOW.APPROVED,api2.WORKFLOW.FINAL),true);
+  assert.equal(api2.canTransition(api2.WORKFLOW.FINAL,api2.WORKFLOW.DRAFT),false);
+  assert.equal(api2.canTransition(api2.WORKFLOW.GENERATED,api2.WORKFLOW.FINAL),false);
+});
+
+test('daily guard report lifecycle supports request-changes and revision loop',()=>{
+  const r=fixture();
+  r.status=api.WORKFLOW.GENERATED;
+  api.transitionStatus(r,api.WORKFLOW.IN_REVIEW);
+  api.transitionStatus(r,api.WORKFLOW.CHANGES_REQUESTED);
+  assert.equal(r.status,api.WORKFLOW.CHANGES_REQUESTED);
+  api.transitionStatus(r,api.WORKFLOW.DRAFT);
+  assert.equal(r.status,api.WORKFLOW.DRAFT);
+});
+
+test('daily guard report lifecycle action contract exposes the expected next action',()=>{
+  assert.deepEqual(api.lifecycleAction(api.WORKFLOW.DRAFT),{label:'Validate',next:api.WORKFLOW.VALIDATED});
+  assert.deepEqual(api.lifecycleAction(api.WORKFLOW.VALIDATED),{label:'Generate',next:api.WORKFLOW.GENERATED});
+  assert.deepEqual(api.lifecycleAction(api.WORKFLOW.GENERATED),{label:'Start Review',next:api.WORKFLOW.IN_REVIEW});
+  assert.deepEqual(api.lifecycleAction(api.WORKFLOW.APPROVED),{label:'Finalize',next:api.WORKFLOW.FINAL});
+  assert.equal(api.lifecycleAction(api.WORKFLOW.FINAL).next,null);
+});
