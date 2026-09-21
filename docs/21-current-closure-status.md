@@ -42,6 +42,12 @@
 7. Canonical scope-authorization model before tightening domain SELECT RLS.
 8. Final production-readiness review.
 
+## Deployment hardening
+
+- Cloudflare production deployment is now **manual (`workflow_dispatch`)** rather than automatic on every `main` push.
+- The production workflow performs an artifact preflight before reading deployment credentials or invoking Wrangler.
+- Cloudflare preview remains the controlled non-production path; its independent runtime-health verification is still open because the preview hostname is not yet fixed in deployment configuration.
+
 ## Governance locks
 
 - No production migration execution is implied by this status.
