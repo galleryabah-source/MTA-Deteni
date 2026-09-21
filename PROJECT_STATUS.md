@@ -107,3 +107,8 @@ P13 is **CLOSED** because all eight P13 exit criteria have observable evidence, 
 ### D5 Workflow Checkpoint v1.2
 
 The synthetic Daily Guard Report now has a deny-by-default lifecycle: `DRAFT → VALIDATED → GENERATED → IN_REVIEW → APPROVED → FINAL`, with `CHANGES_REQUESTED → DRAFT` revision recovery and FINAL-only download. Migration freeze remains active and no real detainee data is introduced.
+
+
+### D5.7 Retrieval & Revision History
+
+The Daily Guard Report synthetic runtime now provides date/regu/shift filtering, revision-history inspection, FINAL-only bulk selection, and a deterministic bulk-download manifest foundation. Single-report FINAL download remains browser Print/Save-as-PDF with DOCUMENT_DOWNLOAD audit evidence. Actual ZIP aggregation and production storage remain gated; migration freeze and synthetic-only boundaries are intact.
