@@ -53,7 +53,16 @@ jobs:
         run: |
           CF_ACCOUNT_ID="$(printf '%s' "$CLOUDFLARE_ACCOUNT_ID" | tr -d '[:space:]')"
           CF_API_TOKEN="$(printf '%s' "$CLOUDFLARE_API_TOKEN" | sed 's/[[:space:]]*$//')"
-          CLOUDFLARE_ACCOUNT_ID="$CF_ACCOUNT_ID" CLOUDFLARE_API_TOKEN="$CF_API_TOKEN" wrangler deploy --config wrangler.toml --name "$DEPLOY_WORKER_NAME" --log-level debug
+          set -o pipefail
+          CLOUDFLARE_ACCOUNT_ID="$CF_ACCOUNT_ID" CLOUDFLARE_API_TOKEN="$CF_API_TOKEN" wrangler deploy --config wrangler.toml --name "$DEPLOY_WORKER_NAME" --log-level debug 2>&1 | tee cloudflare-deploy.log
+
+      - name: Upload Cloudflare deploy diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: mta-deteni-cloudflare-deploy-${{ github.run_id }}
+          path: cloudflare-deploy.log
+          if-no-files-found: ignore
 
       - name: Verify deployment artifact contract
         run: |
