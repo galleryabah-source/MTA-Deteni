@@ -37,6 +37,6 @@ export const MTA_ROUTE_POLICIES: readonly RoutePolicy[] = [
 ];
 
 export function assertMutationEnvelope(request: TransportRequest): void {
-  if (request.method !== "GET" && !request.idempotencyKey) throw new Error("IDEMPOTENCY_KEY_REQUIRED");
-  if (!request.correlationId) throw new Error("CORRELATION_ID_REQUIRED");
+  if (request.method !== "GET" && !request.idempotencyKey) throw new DomainError("VALIDATION_FAILED", "IDEMPOTENCY_KEY_REQUIRED");
+  if (!request.correlationId) throw new DomainError("VALIDATION_FAILED", "CORRELATION_ID_REQUIRED");
 }
