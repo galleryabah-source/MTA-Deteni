@@ -11,7 +11,7 @@ test("P13.6041 stable queue identity replaces an equivalent command object", asy
   await queue.append(original);
   await queue.replaceByIdentity(replacement, (item) => item.commandId);
   assert.equal((await queue.list())[0]?.state, "SYNCED");
-  assert.throws(() => queue.replaceByIdentity({ ...replacement, commandId: "missing" }, (item) => item.commandId), /not present/);
+  await assert.rejects(() => queue.replaceByIdentity({ ...replacement, commandId: "missing" }, (item) => item.commandId), /not present/);
 });
 
 test("P13.5963 persistent queue preserves offline command identity", async () => {
