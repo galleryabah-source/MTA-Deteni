@@ -41,7 +41,8 @@ const fixture=()=>({
     escort:{count:0,destination:'Synthetic',purpose:'Synthetic',activity:'Synthetic'},
     meal:{time:'12.00 WIB',result:'Synthetic result',distributionStatus:'Synthetic'},
     end_handover:{time:'14.00 WIB',incomingRegu:'Alpha',condition:'Synthetic',outstandingIssues:'None'},
-    closing:{statement:'Synthetic document'}
+    closing:{statement:'Synthetic document'},
+    closing_page:{}
   }
 });
 
