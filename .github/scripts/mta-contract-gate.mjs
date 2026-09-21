@@ -43,7 +43,7 @@ check("GOV-5817", status.includes("SYNTHETIC ONLY"), "repository remains synthet
 check("GOV-5818", status.includes("Production access: **NOT AUTHORIZED**"), "production access remains unauthorized");
 check("GOV-5819", !workflow.includes("DATABASE_URL") && !workflow.includes("SUPABASE_URL"), "CI workflow does not require live database credentials");
 check("STATE-5820", status.includes("P13.260881–274880"), "status reflects the current terminal governed P13 range");
-check("STATE-5821", status.includes("OBSERVATION PENDING"), "certification does not falsely claim execution PASS");
+check("STATE-5821", status.includes("P13.260881–274880 — CLOSED / CONTROLLED-NONPROD EVIDENCE OBSERVED") && !status.includes("OBSERVATION PENDING"), "status reflects observed controlled-nonprod execution evidence without falsely claiming production authorization");
 check("GOV-5822", exitCriteria.includes("P13-EXIT-01") && exitCriteria.includes("P13-EXIT-08"), "P13 exit criteria are explicitly versioned");
 
 const evidenceDir = path.join(root, "artifacts", "mta-evidence");
