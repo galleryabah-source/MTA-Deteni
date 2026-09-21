@@ -15,32 +15,25 @@ export type SyntheticDocumentAdapterOutput = Readonly<{
 
 function renderSourceGroundedText(snapshot: ReportSnapshot, sectionOrder: readonly string[]): OperationalReportRender {
   const mapped = mapSnapshotToDailyGuardPresentation(snapshot);
-  const base = renderDailyGuardReport({
-    snapshot,
-    sectionOrder,
-    renderer: {
-      format: "REFERENCE_TEXT",
-      render: (currentSnapshot, order) => ({
-        snapshotId: currentSnapshot.snapshotId,
-        documentNumber: currentSnapshot.documentNumber,
-        sectionOrder: Object.freeze([...order]),
-        content: [
-          DAILY_GUARD_PRESENTATION_CONTRACT.title,
-          ...DAILY_GUARD_PRESENTATION_CONTRACT.organizationLines,
-          DAILY_GUARD_PRESENTATION_CONTRACT.locationLine,
-          DAILY_GUARD_PRESENTATION_CONTRACT.dutyLabel,
-          DAILY_GUARD_PRESENTATION_CONTRACT.dateLine,
-          DAILY_GUARD_PRESENTATION_CONTRACT.dutyTimeLine,
-          ...order.map((section) => `${DAILY_GUARD_PRESENTATION_CONTRACT.evidencedSectionHeadings[section as keyof typeof DAILY_GUARD_PRESENTATION_CONTRACT.evidencedSectionHeadings] ?? section}\n${mapped[section as keyof typeof mapped]}`),
-          DAILY_GUARD_PRESENTATION_CONTRACT.closingLocationDateLine,
-          DAILY_GUARD_PRESENTATION_CONTRACT.commandSignatureLabel,
-          DAILY_GUARD_PRESENTATION_CONTRACT.acknowledgmentLabel,
-          DAILY_GUARD_PRESENTATION_CONTRACT.acknowledgmentRole,
-        ].join("\n\n"),
-      }),
-    },
+  return Object.freeze({
+    snapshotId: snapshot.snapshotId,
+    documentNumber: snapshot.documentNumber,
+    sectionOrder: Object.freeze([...sectionOrder]),
+    content: [
+      DAILY_GUARD_PRESENTATION_CONTRACT.title,
+      ...DAILY_GUARD_PRESENTATION_CONTRACT.organizationLines,
+      DAILY_GUARD_PRESENTATION_CONTRACT.locationLine,
+      DAILY_GUARD_PRESENTATION_CONTRACT.dutyLabel,
+      DAILY_GUARD_PRESENTATION_CONTRACT.dateLine,
+      DAILY_GUARD_PRESENTATION_CONTRACT.dutyTimeLine,
+      ...sectionOrder.map((section) => `${DAILY_GUARD_PRESENTATION_CONTRACT.evidencedSectionHeadings[section as keyof typeof DAILY_GUARD_PRESENTATION_CONTRACT.evidencedSectionHeadings] ?? section}
+${mapped[section as keyof typeof mapped]}`),
+      DAILY_GUARD_PRESENTATION_CONTRACT.closingLocationDateLine,
+      DAILY_GUARD_PRESENTATION_CONTRACT.commandSignatureLabel,
+      DAILY_GUARD_PRESENTATION_CONTRACT.acknowledgmentLabel,
+      DAILY_GUARD_PRESENTATION_CONTRACT.acknowledgmentRole,
+    ].join("\n\n"),
   });
-  return base.render;
 }
 
 export const SYNTHETIC_PDF_RENDERER: ReportRenderer = Object.freeze({
