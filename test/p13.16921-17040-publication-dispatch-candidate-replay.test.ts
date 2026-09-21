@@ -11,7 +11,7 @@ import { certifyLocalRuntimeRecoveryOperationalAuditPublicationRequest } from ".
 import { createLocalRuntimeRecoveryOperationalAuditPublicationDispatchCandidate } from "../src/application/local-runtime-recovery-operational-audit-publication-dispatch-candidate.js";
 import { replayLocalRuntimeRecoveryOperationalAuditPublicationDispatchCandidate, resetLocalRuntimeRecoveryOperationalAuditPublicationDispatchCandidateReplayRegistry } from "../src/application/local-runtime-recovery-operational-audit-publication-dispatch-candidate-replay.js";
 
-function prepared(fingerprint: string) {
+function prepared(fingerprint: string, suffix = "BASE") {
   const evidence = { evidenceId: "AE-DCR", auditCertificationId: "AUDCERT-DCR", auditRecordId: "AUD-DCR", closureCertificationId: "CERT-DCR", closureEvidenceId: "CE-DCR", continuityCertificationId: "CONT-DCR", receiptId: "RCP-DCR", closureId: "CLS-DCR", executionId: "EXEC-DCR", dispatchId: "DISP-DCR", acknowledgementId: "ACK-DCR", decisionFingerprint: fingerprint, complete: true, syntheticOnly: true } as const;
   const evidenceCertification = { certificationId: "AECERT-DCR", evidenceId: "AE-DCR", auditCertificationId: "AUDCERT-DCR", auditRecordId: "AUD-DCR", closureCertificationId: "CERT-DCR", closureEvidenceId: "CE-DCR", decisionFingerprint: fingerprint, replayDisposition: "ADMIT", certified: true, syntheticOnly: true } as LocalRuntimeRecoveryFinalClosureAuditEvidenceCertification;
   const projection = createLocalRuntimeRecoveryOperationalAuditProjection({ projectionId: "PROJ-DCR", evidenceCertification, evidence });
