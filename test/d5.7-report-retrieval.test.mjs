@@ -1,9 +1,10 @@
 import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import vm from 'node:vm';
 
 function loadContract(){
   const box={};
-  const code=require('node:fs').readFileSync('web/daily-guard-report-d57.js','utf8');
-  const vm=require('node:vm');
+  const code=fs.readFileSync('web/daily-guard-report-d57.js','utf8');
   const ctx={window:box,console};
   vm.runInNewContext(code,ctx);
   return box.mtaDailyGuardD57;
