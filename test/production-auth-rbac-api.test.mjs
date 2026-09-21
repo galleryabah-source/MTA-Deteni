@@ -19,3 +19,6 @@ assert.match(auth,/signInWithPassword/);
 assert.match(auth,/signUp/);
 assert.match(auth,/onAuthStateChange/);
 console.log('Production Auth/RBAC API contract PASS');
+
+assert.doesNotMatch(edge,/detail:error\.message/);
+assert.doesNotMatch(edge,/detail:String\(error\)/);
