@@ -203,3 +203,13 @@ The current runtime intentionally does **not** claim server-side PDF generation.
 - pixel-level regression against the approved template;
 - authorized bulk ZIP download;
 - final end-to-end acceptance evidence.
+
+
+### D5.7 — Regu/Shift Download & Revision History
+
+- Added deterministic retrieval filters for tanggal, regu, and shift over the synthetic Daily Guard Report collection.
+- Added revision-history inspection that follows the append-only revisionOf chain without overwriting prior reviewed/final documents.
+- Added FINAL-only multi-select retrieval and a deterministic bulk-download manifest contract: D5.7-BULK-DOWNLOAD-MANIFEST-v1.
+- Single-report FINAL download continues to emit DOCUMENT_DOWNLOAD audit evidence before browser Print/Save-as-PDF.
+- Bulk ZIP is intentionally only a foundation at this checkpoint: the runtime prepares a manifest, while actual ZIP/PDF aggregation remains gated on governed storage/PDF adapters.
+- No production database, schema migration, real detainee data, or production object storage was introduced.
