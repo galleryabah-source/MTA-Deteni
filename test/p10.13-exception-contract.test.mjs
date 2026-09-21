@@ -1,0 +1,3 @@
+import assert from"node:assert/strict";import test from"node:test";import{validateException}from"../src/domain/operations/exception-contract.js";
+test("P10.13 accepts open synthetic exception",()=>assert.deepEqual(validateException({exceptionId:"EX-1",code:"RETURN_MISMATCH",resourceId:"LV-1",status:"OPEN",openedAt:"2026-09-21T08:00:00Z"}),[]));
+test("P10.13 requires resolution reason",()=>assert.deepEqual(validateException({exceptionId:"EX-1",code:"RETURN_MISMATCH",resourceId:"LV-1",status:"RESOLVED",openedAt:"2026-09-21T08:00:00Z"}),["MISSING_RESOLUTION_REASON"]));
