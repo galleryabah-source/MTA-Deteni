@@ -1,9 +1,9 @@
 # MTA DETENI — Project Status
 
 **Foundation:** v1.134+
-**Current Track:** P1 runtime integrity remediation / P9 kernel implementation / P13 closure evidence recovery
+**Current Track:** Integrated synthetic runtime acceptance / offline-LAN continuity / reporting-QR readiness
 **Branch:** `main`
-**Latest implementation checkpoint:** Controlled-nonprod Domain CI Run #1301 completed successfully on commit `d96429e13728a274943447d5770e3af434ca1ca8`; P1 executable certification evidence is now OBSERVED_PASS in controlled-nonprod; no production authorization is implied; P13 terminal closure is evidenced and CLOSED at P13.260881–274880
+**Latest implementation checkpoint:** Domain CI Run #1307 completed successfully on commit `9bf72b17fe6b2da4467c7846f0fc32735b938b0b`; P1 controlled-nonprod runtime evidence is OBSERVED_PASS; P13.260881–274880 is CLOSED; the active workstream is integrated synthetic runtime acceptance and resilience
 
 ## P9 kernel implementation
 
@@ -44,7 +44,7 @@
 - Static architecture gate, production typecheck, test typecheck, JavaScript regression, TypeScript domain tests, controlled execution evidence harness, evidence validation and artifact upload all completed successfully.
 - Execution evidence status was `OBSERVED_PASS` with exactly five canonical controls: BUILD-5801, BUILD-5802, BUILD-5803, REG-5804 and REG-5805.
 - Controlled execution artifact `10623155809` was successfully uploaded.
-- P1 Runtime Observation Run #138 (`35562575299`) also completed successfully for the same commit; it remains observation-only and does not establish P1 certification.
+- P1 Runtime Observation Run #138 (`35562575299`) completed successfully for commit `d96429e13728a274943447d5770e3af434ca1ca8`, producing OBSERVED_PASS evidence across all seven canonical controls. This is controlled-nonprod executable evidence and does not authorize production access, migration, AI activation or external delivery.
 
 ## CI evidence recovery and hardening
 
@@ -53,7 +53,7 @@
 - STATE-5820 is now aligned with the terminal governed range `P13.260881–274880`.
 - ARCH-5814 is now semantic: it requires `actions/upload-artifact@v4`, the canonical controlled-evidence artifact name, the canonical `artifacts/mta-evidence/` path and an `always()` upload boundary.
 - Run #927 independently confirmed that the actual artifact upload succeeded; the previous ARCH-5814 failure was therefore a false-negative static contract assertion rather than an upload failure.
-- The corrected contract gate has been committed to `main`; the resulting CI run must still be observed end-to-end before certification advances.
+- The corrected contract gate is now aligned with the observed P13 closure state; Domain CI Run #1307 completed successfully after the gate remediation.
 - Evidence verification runs with `always()` so incomplete harness execution cannot silently skip validation; the evidence artifact remains uploaded with `always()`.
 - The execution harness records a deterministic nonzero exit code when a child process terminates without a numeric exit status.
 - P9.12 certification has regression coverage for complete observed evidence, incomplete evidence, wrong environment and forged summary-only input.
@@ -61,8 +61,8 @@
 ## P13 closure audit
 
 - P13.260881–274880 remains the terminal governed checkpoint range.
-- P13-EXIT-01, 02, 03, 04, 05 and 08 retain repository evidence.
-- P13-EXIT-06 remains pending observable successful controlled-nonprod workflow execution and evidence artifact.
+- P13-EXIT-01 through P13-EXIT-08 all have repository and/or controlled-nonprod observable evidence.
+- P13-EXIT-06 is evidenced by successful controlled-nonprod Domain CI Run #1301 and artifact `10623155809`.
 - P13-EXIT-07 is synchronized by the current status, changelog and exit-criteria document.
 - No additional numbered checkpoints are manufactured solely to increase counts.
 
@@ -87,8 +87,8 @@
 **P9.9 Private Storage — CONTRACT IMPLEMENTED**
 **P9.10 Observability — CONTRACT IMPLEMENTED / CONTEXT CONTINUITY HARDENED**
 **P9.11 Test Harness — CONTRACT IMPLEMENTED**
-**P9.12 CI Certification — HARDENED / OBSERVATION REQUIRED**
-**P9.13 Kernel Certification — HARDENED CONTRACT / CI EVIDENCE REQUIRED**
+**P9.12 CI Certification — HARDENED / OBSERVED PASS**
+**P9.13 Kernel Certification — HARDENED CONTRACT / CONTROLLED EVIDENCE OBSERVED**
 **P13.260881–274880 — CLOSED / CONTROLLED-NONPROD EVIDENCE OBSERVED**
 **P1 Runtime Integrity — EXECUTABLE CERTIFICATION EVIDENCE OBSERVED_PASS / GOVERNANCE LOCKS INTACT**
 **Cloudflare CI — CONFIGURATION VALIDATION ONLY / DEPLOYMENT BOUNDARY LOCKED**
