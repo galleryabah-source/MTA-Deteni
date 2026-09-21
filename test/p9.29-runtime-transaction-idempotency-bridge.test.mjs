@@ -1,0 +1,6 @@
+import assert from "node:assert/strict"; import test from "node:test"; import {executeRuntimeIdempotent} from "../src/infrastructure/database/runtime-transaction-idempotency-bridge.ts";
+const c={transactionId:"TX",requestId:"REQ",correlationId:"CORR",idempotencyKey:"IDEM",requestHash:"HASH"};
+const tx={transaction:async(ctx,fn)=>fn(ctx)};
+test("replay avoids transaction",async()=>{let ran=false; const r=await executeRuntimeIdempotent(tx,{begin:async()=> "REPLAY",complete:async()=>{}},c,async()=>{ran=true;return 1}); assert.equal(r.status,"REPLAY"); assert.equal(ran,false);});
+test("conflict is fail-closed",async()=>await assert.rejects(()=>executeRuntimeIdempotent(tx,{begin:async()=> "CONFLICT",complete:async()=>{}},c,async()=>1),/IDEMPOTENCY_CONFLICT/));
+test("acquired executes once",async()=>{let ran=0; const r=await executeRuntimeIdempotent(tx,{begin:async()=> "ACQUIRED",complete:async()=>{}},c,async()=>{ran++;return 7}); assert.equal(r.status,"EXECUTED"); assert.equal(r.value,7); assert.equal(ran,1);});
