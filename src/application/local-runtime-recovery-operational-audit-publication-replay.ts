@@ -7,7 +7,7 @@ export type OperationalAuditPublicationReplayDisposition = "ADMIT" | "REPLAY" | 
 const registry = new Map<string, string>();
 
 export function replayLocalRuntimeRecoveryOperationalAuditPublication(input: { envelope: LocalRuntimeRecoveryOperationalAuditPublicationEnvelope; certification: LocalRuntimeRecoveryOperationalAuditProjectionCertification; projection: LocalRuntimeRecoveryOperationalAuditProjection }): OperationalAuditPublicationReplayDisposition {
-  assertLocalRuntimeRecoveryOperationalAuditPublicationEnvelope(input.envelope, input.certification, input.projection);
+  assertLocalRuntimeRecoveryOperationalAuditPublicationEnvelope({ ...input.envelope, decisionFingerprint: input.certification.decisionFingerprint }, input.certification, input.projection);
   const key = `${input.envelope.publicationId}:${input.envelope.certificationId}`;
   const previous = registry.get(key);
   if (!previous) { registry.set(key, input.envelope.decisionFingerprint); return "ADMIT"; }
