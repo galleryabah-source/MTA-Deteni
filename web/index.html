@@ -43,7 +43,7 @@ body.mta-desktop-enhanced .detainee-pagination .page-current{background:#0b63ce;
 <div class="layout"><aside class="side"><nav class="nav" id="nav"><button class="active" data-view="dashboard">Dashboard</button><button data-view="detainee">Data Deteni</button><button data-view="placement">Penempatan</button><button data-view="movement">Pergerakan</button><button data-view="leave">Izin</button><button data-view="documents">Dokumen</button><button data-view="audit">Audit Trail</button></nav></aside><main class="main"><div id="appView" class="view"></div></main></div>
 <footer class="footer"><span>MTA DETENI Digital · Synthetic functional runtime · No operational detainee data</span><span id="clock"></span></footer>
 </div><div id="modal" class="modal"><div class="dialog" id="dialog"></div></div><div id="toast" class="toast"></div>
-<script src="/daily-guard-report-v2.js"></script>
+<script src="/daily-guard-report-v2.js"></script><script src="/daily-guard-report-d57.js"></script>
 <script>
 const KEY='mta-deteni-demo-v2';
 const seed={meta:{version:2,createdAt:new Date().toISOString()},detainees:[{id:'DET-001',code:'DET-2026-001',name:'SYNTHETIC A',nationality:'Contoh',status:'AKTIF',placement:'Blok A / Kamar 01',createdAt:'2026-09-16T07:00:00Z'},{id:'DET-002',code:'DET-2026-002',name:'SYNTHETIC B',nationality:'Contoh',status:'AKTIF',placement:'Blok B / Kamar 02',createdAt:'2026-09-16T07:10:00Z'}],placements:[{id:'PLC-001',detaineeId:'DET-001',block:'Blok A',room:'Kamar 01',since:'2026-09-16T07:20:00Z'},{id:'PLC-002',detaineeId:'DET-002',block:'Blok B',room:'Kamar 02',since:'2026-09-16T07:25:00Z'}],movements:[],leaves:[],documents:[],audit:[]};
@@ -84,13 +84,64 @@ function documentActionLabel(status){
   const a=window.mtaDailyGuardReport.lifecycleAction(status);
   return a?.label||'';
 }
+function reportFilterState(){
+  return {
+    date:document.getElementById('d57Date')?.value||'',
+    regu:document.getElementById('d57Regu')?.value||'',
+    shift:document.getElementById('d57Shift')?.value||''
+  };
+}
+function reportFilterOptions(field){
+  const values=[...new Set(db.documents.map(r=>r[field]).filter(Boolean))];
+  return values.sort().map(v=>'<option value="'+esc(v)+'">'+esc(v)+'</option>').join('');
+}
+function filteredDailyReports(){
+  return window.mtaDailyGuardD57.filterReports(db.documents,reportFilterState());
+}
+function renderDailyReportRows(){
+  const body=document.getElementById('d57Rows'); if(!body)return;
+  const reports=filteredDailyReports();
+  body.innerHTML=reports.length?reports.map(d=>{
+    const id=d.documentId||d.id, status=d.status||'DRAFT';
+    const selected=d.status==='FINAL'?'':'';
+    return '<tr><td><input type="checkbox" class="d57-select" value="'+esc(id)+'" '+selected+'></td><td><b>'+esc(id)+'</b><small class="mta-doc-revision">Rev '+esc(d.revision||1)+'</small></td><td>'+esc(d.documentType||d.type)+'</td><td>'+esc(d.reguId||d.regu)+'</td><td>'+esc(d.shiftId||d.shift)+'</td><td>'+esc(d.reportDate||d.date)+'</td><td>'+documentStatusBadge(status)+'</td><td><div class="mta-doc-actions"><button class="btn small" onclick="previewReport(\''+esc(id)+'\')">Preview</button><button class="btn small" onclick="showRevisionHistory(\''+esc(id)+'\')">History</button>'+documentWorkflowButtons(d)+'</div></td></tr>';
+  }).join(''):'<tr><td colspan="8" class="empty">Tidak ada laporan sesuai filter</td></tr>';
+  const count=document.getElementById('d57Count'); if(count)count.textContent=reports.length+' laporan';
+}
+function applyDailyReportFilters(){renderDailyReportRows()}
+function clearDailyReportFilters(){
+  ['d57Date','d57Regu','d57Shift'].forEach(id=>{const el=document.getElementById(id);if(el)el.value=''});
+  renderDailyReportRows();
+}
+function selectedFinalReportIds(){
+  return [...document.querySelectorAll('.d57-select:checked')].map(x=>x.value);
+}
+function selectAllFinalReports(checked){
+  document.querySelectorAll('.d57-select').forEach(x=>{const row=db.documents.find(r=>(r.documentId||r.id)===x.value);x.checked=!!checked&&row?.status==='FINAL'});
+}
+function showRevisionHistory(id){
+  const history=window.mtaDailyGuardD57.buildRevisionHistory(db.documents,id);
+  if(!history.length){toast('Revision history tidak ditemukan');return}
+  const rows=history.map(r=>'<tr><td>Rev '+esc(r.revision||1)+'</td><td>'+esc(r.documentId||r.id)+'</td><td>'+documentStatusBadge(r.status)+'</td><td>'+esc(r.createdAt||'')+'</td><td>'+esc(r.revisionOf||'—')+'</td><td><button class="btn small" onclick="closeModal();previewReport(\''+esc(r.documentId||r.id)+'\')">Preview</button></td></tr>').join('');
+  openModal('<div class="dialoghead"><h2>Revision History</h2><button class="x" onclick="closeModal()">×</button></div><div class="notice">Riwayat bersifat append-only pada runtime synthetic. Revision lama tidak ditimpa.</div><div class="tablewrap" style="margin-top:12px"><table class="table"><thead><tr><th>Revision</th><th>ID</th><th>Status</th><th>Dibuat</th><th>Revision Of</th><th>Aksi</th></tr></thead><tbody>'+rows+'</tbody></table></div>');
+  audit('DOCUMENT_REVISION_HISTORY_VIEW','DOCUMENT',id); save();
+}
+function prepareBulkDownloadManifest(){
+  const ids=selectedFinalReportIds();
+  try{
+    const manifest=window.mtaDailyGuardD57.createBulkManifest(db.documents,ids,reportFilterState());
+    manifest.generatedAt=now();
+    audit('DOCUMENT_BULK_DOWNLOAD_PREPARE','DOCUMENT_BULK',manifest.items.map(x=>x.documentId).join(','));
+    save();
+    const blob=new Blob([JSON.stringify(manifest,null,2)],{type:'application/json'});
+    const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='MTA-DETENI-Bulk-Download-Manifest.json';a.click();
+    toast('Manifest bulk disiapkan: '+manifest.count+' FINAL');
+  }catch(err){toast('Bulk belum dapat disiapkan: '+err.message)}
+}
 function documents(v){
-  const rows=db.documents.map(d=>{
-    const id=d.documentId||d.id;
-    const status=d.status||'DRAFT';
-    return '<tr><td><b>'+esc(id)+'</b><small class="mta-doc-revision">Rev '+esc(d.revision||1)+'</small></td><td>'+esc(d.documentType||d.type)+'</td><td>'+esc(d.reguId||d.regu)+'</td><td>'+esc(d.shiftId||d.shift)+'</td><td>'+esc(d.reportDate||d.date)+'</td><td>'+documentStatusBadge(status)+'</td><td><div class="mta-doc-actions"><button class="btn small" onclick="previewReport(\''+esc(id)+'\')">Preview</button>'+documentWorkflowButtons(d)+'</div></td></tr>';
-  }).join('');
-  v.innerHTML=shell('Dokumen','Workflow terkontrol: Validate → Preview → Generate → Review → Approve → Final → Download. Runtime tetap synthetic-only.',`<div class="toolbar"><button class="btn primary" onclick="generateReport()">+ Draft Laporan Harian</button></div><div class="notice">Lifecycle dikunci oleh state machine. Dokumen FINAL immutable. Request Changes membuat revision baru sehingga riwayat review tetap utuh. Download memakai browser print-to-PDF dan mencatat audit event; tidak membuat file PDF server-side pada runtime synthetic.</div><div class="tablewrap" style="margin-top:12px"><table class="table"><thead><tr><th>ID</th><th>Tipe</th><th>Regu</th><th>Shift</th><th>Tanggal</th><th>Status</th><th>Aksi</th></tr></thead><tbody>${rows||'<tr><td colspan="7" class="empty">Belum ada dokumen</td></tr>'}</tbody></table></div>`)
+  const body='<div class="toolbar"><button class="btn primary" onclick="generateReport()">+ Draft Laporan Harian</button><label class="field" style="min-width:145px"><span class="label">Tanggal</span><input id="d57Date" type="date" onchange="applyDailyReportFilters()"></label><label class="field" style="min-width:130px"><span class="label">Regu</span><select id="d57Regu" onchange="applyDailyReportFilters()"><option value="">Semua Regu</option>'+reportFilterOptions('reguId')+'</select></label><label class="field" style="min-width:130px"><span class="label">Shift</span><select id="d57Shift" onchange="applyDailyReportFilters()"><option value="">Semua Shift</option>'+reportFilterOptions('shiftId')+'</select></label><button class="btn" onclick="clearDailyReportFilters()">Reset</button><button class="btn" onclick="renderDailyReportRows()">↻ Refresh</button></div><div class="toolbar"><label><input type="checkbox" onchange="selectAllFinalReports(this.checked)"> Pilih semua FINAL</label><button class="btn" onclick="prepareBulkDownloadManifest()">Siapkan Bulk Download</button><span id="d57Count" class="muted"></span></div><div class="notice">D5.7: filter tanggal/regu/shift, revision history, single-report download audit, dan fondasi bulk ZIP. Bulk saat ini menghasilkan manifest JSON deterministik; pembuatan ZIP aktual menunggu adapter storage/PDF yang digovernance. Runtime tetap synthetic-only.</div><div class="tablewrap" style="margin-top:12px"><table class="table"><thead><tr><th>✓</th><th>ID</th><th>Tipe</th><th>Regu</th><th>Shift</th><th>Tanggal</th><th>Status</th><th>Aksi</th></tr></thead><tbody id="d57Rows"></tbody></table></div>';
+  v.innerHTML=shell('Dokumen','Workflow terkontrol dan retrieval surface D5.7 tanpa database production.',body);
+  renderDailyReportRows();
 }
 function documentWorkflowButtons(d){
   const id=d.documentId||d.id,status=d.status||'DRAFT';

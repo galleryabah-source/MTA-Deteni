@@ -97,3 +97,12 @@ undefined## 2026-09-17 — Integrated Audit Reconciliation
 - P9.10: added structured observability contract with event, request, correlation and optional transaction identity plus explicit outcome levels.
 - P9.11: added controlled execution harness evidence contract with fail-closed validation of environment, commit, checks, status and exit codes.
 - P9.12: added CI certification contract; certification requires a valid controlled-nonprod `OBSERVED_PASS` and available evidence artifact.
+
+## 2026-09-21 — D5.7 Retrieval & Revision History
+
+- Added date/regu/shift filters for Daily Guard Reports.
+- Added append-only revision history inspection.
+- Added FINAL-only multi-select bulk-download manifest foundation.
+- Preserved single-report DOCUMENT_DOWNLOAD audit behavior.
+- Actual ZIP generation remains gated on governed storage/PDF adapters.
+- Migration freeze and synthetic-only boundaries remain intact.
