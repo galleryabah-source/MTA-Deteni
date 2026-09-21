@@ -26,7 +26,7 @@ test("P13.21201-21280: evidence closure replay is deterministic", () => {
 
 test("P13.21281-21320: integrated closure certification remains non-executable", () => {
   resetLocalRuntimeRecoveryOperationalAuditPublicationDispatchAuthorizationDecisionEvidenceClosureIntegrityReceiptClosureIntegrityEvidenceClosureIntegrityEvidenceClosureReplayRegistry();
-  const certified = certifyLocalRuntimeRecoveryOperationalAuditPublicationDispatchAuthorizationDecisionEvidenceClosureIntegrityReceiptClosureIntegrityEvidenceClosureIntegrityEvidenceClosure({ certificationId:"ECIEC-C", evidenceCertification:evidence });
+  const certified = certifyLocalRuntimeRecoveryOperationalAuditPublicationDispatchAuthorizationDecisionEvidenceClosureIntegrityReceiptClosureIntegrityEvidenceClosureIntegrityEvidenceClosure({ certificationId:"ECIEC-C", closureId:"ECIEC-CLOSURE", evidenceCertification:evidence });
   assert.equal(certified.certified, true);
   assert.equal(certified.replayDisposition, "ADMIT");
   assert.equal(certified.authorizationGranted, false);
