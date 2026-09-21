@@ -1,0 +1,3 @@
+import {describe,it,expect} from 'vitest';import {createCommandEvidence} from '../src/infrastructure/certification/command-evidence.mjs';
+const b={requestId:'REQ-1',correlationId:'COR-1',command:'CREATE_DETAINEE',planFingerprint:'a'.repeat(64),authorizationDecision:'ALLOW',transactionId:'TX-1'};
+describe('P10.445-452 command evidence',()=>{it('binds command evidence',()=>expect(createCommandEvidence(b).evidenceFingerprint).toHaveLength(64));it('requires transaction binding',()=>expect(()=>createCommandEvidence({...b,transactionId:''})).toThrow('COMMAND_EVIDENCE_FIELD_REQUIRED:transactionId'));it('preserves safety boundary',()=>{const x=createCommandEvidence(b);expect(x.productionMutation).toBe(false);expect(x.externalTransport).toBe(false)})});
