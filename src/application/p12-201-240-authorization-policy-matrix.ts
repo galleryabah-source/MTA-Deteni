@@ -26,7 +26,8 @@ const policy: Readonly<Record<DomainName, readonly OperationalPermission[]>> = {
 };
 
 export function isPermissionDeclared(domain: DomainName, permission: string): boolean {
-  return policy[domain].includes(permission as OperationalPermission);
+  const declared = policy[domain as DomainName];
+  return declared !== undefined && declared.includes(permission as OperationalPermission);
 }
 
 export function authorizeByPolicy(domain: DomainName, permission: string): boolean {
