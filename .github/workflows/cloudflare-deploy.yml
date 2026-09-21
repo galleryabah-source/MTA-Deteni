@@ -13,6 +13,7 @@ on:
 
 permissions:
   contents: read
+  issues: write
 
 env:
   DEPLOY_WORKER_NAME: mta-deteni
@@ -63,6 +64,17 @@ jobs:
           name: mta-deteni-cloudflare-deploy-${{ github.run_id }}
           path: cloudflare-deploy.log
           if-no-files-found: ignore
+
+      - name: Publish Cloudflare failure diagnostics
+        if: failure()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if test -s cloudflare-deploy.log; then
+            gh issue create --title "CI diagnostic: Cloudflare deploy run ${{ github.run_id }}" --body-file cloudflare-deploy.log
+          else
+            gh issue create --title "CI diagnostic: Cloudflare deploy run ${{ github.run_id }}" --body "Cloudflare deployment failed but no deploy log file was produced."
+          fi
 
       - name: Verify deployment artifact contract
         run: |
