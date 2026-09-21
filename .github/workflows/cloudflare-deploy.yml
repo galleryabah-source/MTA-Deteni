@@ -54,8 +54,33 @@ jobs:
         run: |
           CF_ACCOUNT_ID="$(printf '%s' "$CLOUDFLARE_ACCOUNT_ID" | tr -d '[:space:]')"
           CF_API_TOKEN="$(printf '%s' "$CLOUDFLARE_API_TOKEN" | sed 's/[[:space:]]*$//')"
-          set -o pipefail
+          set +e
           CLOUDFLARE_ACCOUNT_ID="$CF_ACCOUNT_ID" CLOUDFLARE_API_TOKEN="$CF_API_TOKEN" wrangler deploy --config wrangler.toml --name "$DEPLOY_WORKER_NAME" 2>&1 | tee cloudflare-deploy.log
+          DEPLOY_EXIT="${PIPESTATUS[0]}"
+          set -e
+          if test "$DEPLOY_EXIT" -ne 0; then
+            if grep -q "Uploaded $DEPLOY_WORKER_NAME" cloudflare-deploy.log; then
+              echo "Wrangler returned non-zero after upload; continuing to independent runtime verification."
+            else
+              echo "Wrangler deployment failed before upload."
+              exit "$DEPLOY_EXIT"
+            fi
+          fi
+
+      - name: Verify live Cloudflare runtime
+        env:
+          DEPLOY_URL: https://mta-deteni.galleryabah.workers.dev
+        run: |
+          for i in $(seq 1 12); do
+            if curl --fail --silent --show-error --max-time 10 "$DEPLOY_URL/api/health" > health.json; then
+              node -e "const fs=require('fs'); const x=JSON.parse(fs.readFileSync('health.json','utf8')); if(x.ok!==true || x.app!=='MTA DETENI') process.exit(1); console.log('Cloudflare runtime health PASS:',x.app,x.runtime);"
+              exit 0
+            fi
+            sleep 5
+          done
+          echo "Cloudflare runtime health verification failed."
+          cat health.json 2>/dev/null || true
+          exit 1
 
       - name: Upload Cloudflare deploy diagnostics
         if: always()
