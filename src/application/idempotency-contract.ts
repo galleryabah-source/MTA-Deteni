@@ -20,7 +20,7 @@ export function createIdempotencyRecord(input: IdempotencyRecord): IdempotencyRe
 
 export function assertIdempotencyReplaySafe(existing: IdempotencyRecord, requestHash: string): void {
   assertIdempotencyKey(existing.idempotencyKey);
-  if (existing.requestHash !== requestHash) throw new Error("IDEMPOTENCY_KEY_REUSED_WITH_DIFFERENT_REQUEST");
+  if (existing.requestHash !== requestHash) throw new Error("IDEMPOTENCY_KEY_REUSED_WITH_DIFFERENT_REQUEST: idempotency key reused with a different request.");
 }
 
 export function resolveIdempotency(existing: IdempotencyRecord | undefined, requestHash: string): "EXECUTE" | "REPLAY" | "CONFLICT" {
