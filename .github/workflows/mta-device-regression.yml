@@ -32,6 +32,31 @@ jobs:
       - run: npm install --no-save playwright@1.55.0 http-server@14.1.1
       - run: npx playwright install --with-deps chromium
       - run: npx http-server web -p 4173 > /tmp/mta-http.log 2>&1 &
+      - name: Static web JavaScript syntax check
+        run: |
+          node <<'NODE'
+          const fs=require('fs');
+          const vm=require('vm');
+          const path=require('path');
+          const root=path.resolve('web');
+          const files=[];
+          function walk(dir){
+            for(const name of fs.readdirSync(dir)){
+              const p=path.join(dir,name);
+              const st=fs.statSync(p);
+              if(st.isDirectory()) walk(p);
+              else if(name.endsWith('.js')) files.push(p);
+            }
+          }
+          walk(root);
+          const failures=[];
+          for(const file of files){
+            try{new vm.Script(fs.readFileSync(file,'utf8'),{filename:file});}
+            catch(err){failures.push({file:path.relative(process.cwd(),file),message:err.message});}
+          }
+          console.log('WEB_JS_SYNTAX '+JSON.stringify({checked:files.length,failures}));
+          if(failures.length) throw new Error('web JavaScript syntax failures: '+JSON.stringify(failures));
+          NODE
       - name: Browser smoke ${{ matrix.viewport.name }}
         env:
           WIDTH: ${{ matrix.viewport.width }}
