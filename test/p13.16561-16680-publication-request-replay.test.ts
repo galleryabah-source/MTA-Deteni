@@ -13,7 +13,7 @@ function prepared(fingerprint = "FP-RQRP", suffix = "BASE") {
   const evidenceCertification = { certificationId: "AECERT-RQRP", evidenceId: "AE-RQRP", auditCertificationId: "AUDCERT-RQRP", auditRecordId: "AUD-RQRP", closureCertificationId: "CERT-RQRP", closureEvidenceId: "CE-RQRP", decisionFingerprint: fingerprint, replayDisposition: "ADMIT", certified: true, syntheticOnly: true } as LocalRuntimeRecoveryFinalClosureAuditEvidenceCertification;
   const projection = createLocalRuntimeRecoveryOperationalAuditProjection({ projectionId: `PROJ-RQRP-${suffix}`, evidenceCertification, evidence });
   const projectionCertification = certifyLocalRuntimeRecoveryOperationalAuditProjection({ certificationId: "PROJCERT-RQRP", projection, evidenceCertification });
-  const envelope = createLocalRuntimeRecoveryOperationalAuditPublicationEnvelope({ publicationId: "PUB-RQRP", certification: projectionCertification, projection });
+  const envelope = createLocalRuntimeRecoveryOperationalAuditPublicationEnvelope({ publicationId: `PUB-RQRP-${suffix}`, certification: projectionCertification, projection });
   const certification = certifyLocalRuntimeRecoveryOperationalAuditPublication({ publicationCertificationId: "PUBCERT-RQRP", envelope, certification: projectionCertification, projection });
   const request = createLocalRuntimeRecoveryOperationalAuditPublicationRequest({ requestId: "PUBREQ-RQRP", certification, envelope });
   return { request, certification, envelope };
