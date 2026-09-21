@@ -1,4 +1,4 @@
-name: MTA DETENI Cloudflare Preview Validation
+name: MTA DETENI Cloudflare Production Deploy
 
 on:
   workflow_dispatch:
@@ -7,22 +7,18 @@ on:
     paths:
       - 'wrangler.toml'
       - 'worker.js'
+      - 'worker-*.js'
       - 'web/**'
       - '.github/workflows/cloudflare-deploy.yml'
 
 permissions:
   contents: read
 
-# Governance boundary:
-# This workflow validates the Cloudflare Worker configuration only.
-# It MUST NOT perform a real Cloudflare deployment while Production Access
-# remains NOT AUTHORIZED and no explicit controlled non-production target exists.
-
 env:
-  DEPLOY_TARGET: validation-only
+  DEPLOY_WORKER_NAME: mta-deteni
 
 jobs:
-  validate:
+  deploy:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
@@ -37,12 +33,43 @@ jobs:
       - name: Install Wrangler
         run: npm install --global wrangler@4.132.0
 
-      - name: Enforce validation-only boundary
+      - name: Verify production target
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
         run: |
-          test "$DEPLOY_TARGET" = "validation-only"
-          test -z "${CLOUDFLARE_API_TOKEN:-}"
-          test -z "${CLOUDFLARE_ACCOUNT_ID:-}"
-          echo "Cloudflare target: validation-only"
+          test "$DEPLOY_WORKER_NAME" = "mta-deteni"
+          test -n "${CLOUDFLARE_API_TOKEN:-}"
+          CF_ACCOUNT_ID="$(printf '%s' "$CLOUDFLARE_ACCOUNT_ID" | tr -d '[:space:]')"
+          test -n "$CF_ACCOUNT_ID"
+          case "$CF_ACCOUNT_ID" in *[!A-Za-z0-9_-]*) echo 'Cloudflare account id contains unsupported characters after whitespace normalization'; exit 1;; esac
+          echo "Cloudflare target: $DEPLOY_WORKER_NAME"
 
-      - name: Validate Wrangler configuration
-        run: wrangler deploy --dry-run
+      - name: Deploy all MTA DETENI modules
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          CF_ACCOUNT_ID="$(printf '%s' "$CLOUDFLARE_ACCOUNT_ID" | tr -d '[:space:]')"
+          CF_API_TOKEN="$(printf '%s' "$CLOUDFLARE_API_TOKEN" | sed 's/[[:space:]]*$//')"
+          CLOUDFLARE_ACCOUNT_ID="$CF_ACCOUNT_ID" CLOUDFLARE_API_TOKEN="$CF_API_TOKEN" wrangler deploy --name "$DEPLOY_WORKER_NAME"
+
+      - name: Verify deployment artifact contract
+        run: |
+          test -f wrangler.toml
+          test -f worker.js
+          test -f worker-v11.js
+          test -d web
+          test -f web/index.html
+          test -f web/mobile-shell-v1.js
+          test -f web/desktop-shell-v2.js
+          test -f web/offline-v1.js
+          test -f web/offline-queue-v1.js
+          test -f web/qr-camera-v2.js
+          test -f web/room-ops-v9.js
+          test -f web/movement-v9.js
+          test -f web/admin-settings-v9.js
+          test -f web/master-room-guard-v10.js
+          test -f web/preview-v10.js
+          test -f web/qr-print-clean-v3.js
+          echo "MTA DETENI Cloudflare artifact contract: PASS"
