@@ -18,7 +18,7 @@ assert.match(rbac,/security definer/);
 assert.match(edge,/supabase\.auth\.getUser\(\)/);
 assert.match(edge,/RBAC_WRITE_DENIED/);
 assert.match(edge,/const TABLES=new Set\(\["detainees","placements","movements","leaves","documents"\]\)/);
-assert.match(edge,/const table="mta_"\\+resource/);
+assert.equal(edge.includes('const table="mta_"+resource;'),true);
 assert.doesNotMatch(edge,/detail:error\.message/);
 assert.doesNotMatch(edge,/detail:String\(error\)/);
 
