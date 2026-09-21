@@ -34,6 +34,17 @@ jobs:
       - name: Install Wrangler
         run: npm install --global wrangler@4.132.0
 
+      - name: Preview artifact and syntax preflight
+        run: |
+          test -f wrangler.preview.toml
+          test -f worker-v11.js
+          test -f web/index.html
+          test -f web/admin-settings-v9.js
+          node --check web/admin-settings-v9.js
+          cp web/mta-auth.js /tmp/mta-auth-preview-check.mjs
+          node --check /tmp/mta-auth-preview-check.mjs
+          rm -f /tmp/mta-auth-preview-check.mjs
+
       - name: Verify non-production target
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
