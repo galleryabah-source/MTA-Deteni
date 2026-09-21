@@ -3,7 +3,7 @@
 **Foundation:** v1.134+
 **Current Track:** P1 runtime integrity remediation / P9 kernel implementation / P13 closure evidence recovery
 **Branch:** `main`
-**Latest implementation checkpoint:** CI static contract gate hardened after observable run #927; P1 executable certification remains pending runtime evidence; P13 governed boundary remains P13.274880
+**Latest implementation checkpoint:** Controlled-nonprod Domain CI Run #1301 completed successfully on commit `d96429e13728a274943447d5770e3af434ca1ca8`; P1 executable certification remains pending dedicated certification evidence; P13 terminal closure is evidenced and CLOSED at P13.260881–274880
 
 ## P9 kernel implementation
 
@@ -40,10 +40,11 @@
 
 ## Latest CI observation boundary
 
-- The latest implementation commit `e56685922ffe4ebd19498426e7d7f34091871595` restores the canonical JavaScript regression command required by ARCH-5811: `node --test test/**/*.test.mjs`.
-- As of the latest repository inspection, no observable workflow run or commit status is associated with that commit through the available GitHub Actions status surfaces.
-- This absence is treated as **NOT_OBSERVED**, never as PASS or certification.
-- The next repository-triggered CI run remains the required evidence boundary before P1/P9/P13 certification can advance.
+- Commit `d96429e13728a274943447d5770e3af434ca1ca8` completed GitHub Actions Domain CI Run #1301 (`35562575271`) successfully.
+- Static architecture gate, production typecheck, test typecheck, JavaScript regression, TypeScript domain tests, controlled execution evidence harness, evidence validation and artifact upload all completed successfully.
+- Execution evidence status was `OBSERVED_PASS` with exactly five canonical controls: BUILD-5801, BUILD-5802, BUILD-5803, REG-5804 and REG-5805.
+- Controlled execution artifact `10623155809` was successfully uploaded.
+- P1 Runtime Observation Run #138 (`35562575299`) also completed successfully for the same commit; it remains observation-only and does not establish P1 certification.
 
 ## CI evidence recovery and hardening
 
@@ -88,13 +89,13 @@
 **P9.11 Test Harness — CONTRACT IMPLEMENTED**
 **P9.12 CI Certification — HARDENED / OBSERVATION REQUIRED**
 **P9.13 Kernel Certification — HARDENED CONTRACT / CI EVIDENCE REQUIRED**
-**P13.260881–274880 — IMPLEMENTED CONTRACTS / OBSERVATION PENDING**
+**P13.260881–274880 — CLOSED / CONTROLLED-NONPROD EVIDENCE OBSERVED**
 **P1 Runtime Integrity — EXECUTABLE CERTIFICATION CONTRACT + FAILURE MATRIX IMPLEMENTED / RUNTIME OBSERVATION PENDING**
 **Cloudflare CI — CONFIGURATION VALIDATION ONLY / DEPLOYMENT BOUNDARY LOCKED**
 
 ## Closure rule
 
-P13 is **NOT CLOSED** until all eight P13 exit criteria have observable evidence, including successful controlled-nonprod workflow execution and evidence artifacts for the closure candidate.
+P13 is **CLOSED** because all eight P13 exit criteria have observable evidence, including successful controlled-nonprod workflow execution and evidence artifact for the closure candidate.
 
 ## Documentation integrity
 
