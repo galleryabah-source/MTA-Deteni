@@ -1,3 +1,15 @@
+## 2026-09-21 — D5 Workflow Lifecycle v1.2
+
+- Added deny-by-default Daily Guard Report lifecycle state machine.
+- Implemented `DRAFT → VALIDATED → GENERATED → IN_REVIEW → APPROVED → FINAL → DOWNLOAD`.
+- Added `CHANGES_REQUESTED → DRAFT` revision path without overwriting review history.
+- Added explicit review and approval notes.
+- Restricted download to FINAL documents and recorded `DOCUMENT_DOWNLOAD` audit evidence.
+- Bound generated state/timestamp into the SHA-256 integrity material.
+- Added lifecycle regression tests.
+- Kept migration freeze and synthetic-only boundaries intact.
+- Browser Print/Save-as-PDF remains the synthetic download mechanism; server-side PDF generation is not claimed.
+
 ## 2026-09-21 — D5 Daily Guard Report Renderer v1.1
 
 - Added the synthetic `DAILY_GUARD_REPORT` renderer contract with template version `DAILY-GUARD-v1.1`.

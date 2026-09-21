@@ -1,7 +1,7 @@
 # MTA DETENI — Project Status
 
 **Foundation:** v1.134+
-**Current Track:** Integrated synthetic runtime acceptance / offline-LAN continuity / reporting-QR readiness / controlled daily-guard-report renderer
+**Current Track:** Integrated synthetic runtime acceptance / offline-LAN continuity / reporting-QR readiness / controlled daily-guard-report renderer + lifecycle workflow
 **Branch:** `main`
 **Latest implementation checkpoint:** Domain CI Run #1310 completed successfully on commit `e228c9fbaa2dfe8be572d99a79f76034b1d6625a`; audit remediation documentation is synchronized; P1 controlled-nonprod runtime evidence is OBSERVED_PASS; P13.260881–274880 is CLOSED; the active workstream is integrated synthetic runtime acceptance and resilience
 
@@ -102,3 +102,8 @@ P13 is **CLOSED** because all eight P13 exit criteria have observable evidence, 
 ## Documentation integrity
 
 `PROJECT_STATUS_NEXT.md` is retained as historical/stale planning context and must not override this current status.
+
+
+### D5 Workflow Checkpoint v1.2
+
+The synthetic Daily Guard Report now has a deny-by-default lifecycle: `DRAFT → VALIDATED → GENERATED → IN_REVIEW → APPROVED → FINAL`, with `CHANGES_REQUESTED → DRAFT` revision recovery and FINAL-only download. Migration freeze remains active and no real detainee data is introduced.
