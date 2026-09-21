@@ -26,7 +26,7 @@ test("P13.22241-22360: evidence closure integrity replay is deterministic", () =
 
 test("P13.22361-22480: integrated evidence closure integrity certification remains review-only", () => {
   resetLocalRuntimeRecoveryOperationalAuditPublicationDispatchAuthorizationDecisionEvidenceClosureIntegrityReceiptClosureIntegrityEvidenceClosureIntegrityEvidenceClosureIntegrityReplayRegistry();
-  const certified = certifyLocalRuntimeRecoveryOperationalAuditPublicationDispatchAuthorizationDecisionEvidenceClosureIntegrityReceiptClosureIntegrityEvidenceClosureIntegrityEvidenceClosureIntegrity({ certificationId:"ECI-C", closureCertification:closure });
+  const certified = certifyLocalRuntimeRecoveryOperationalAuditPublicationDispatchAuthorizationDecisionEvidenceClosureIntegrityReceiptClosureIntegrityEvidenceClosureIntegrityEvidenceClosureIntegrity({ certificationId:"ECI-C", integrityId:"ECI-C-INTEGRITY", closureCertification:closure });
   assert.equal(certified.certified, true);
   assert.equal(certified.replayDisposition, "ADMIT");
   assert.equal(certified.integrityState, "VERIFIED_TERMINAL_EVIDENCE_CLOSURE_REVIEW_ARTIFACT");
