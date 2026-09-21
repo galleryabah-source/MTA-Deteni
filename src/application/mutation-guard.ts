@@ -6,8 +6,6 @@ export async function acquireMutation<T>(
   fingerprint: string,
   idempotency: IdempotencyPort<T>,
 ): Promise<T | null> {
-  const replay = await idempotency.replay(guard.idempotencyKey);
-  if (replay !== null) return replay;
   const state = await idempotency.begin(guard.idempotencyKey, fingerprint);
   if (state === "REPLAY") {
     const result = await idempotency.replay(guard.idempotencyKey);
