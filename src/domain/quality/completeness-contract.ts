@@ -1,0 +1,3 @@
+export const COMPLETENESS_CONTRACT_VERSION = "P10.9-INFERRED-v1";
+export type RequiredFieldCheck = { field:string; required:boolean; present:boolean; verified:boolean };
+export function evaluateCompleteness(checks:RequiredFieldCheck[]):{complete:boolean;missing:string[];unverified:string[]}{const missing=checks.filter(x=>x.required&&!x.present).map(x=>x.field);const unverified=checks.filter(x=>x.required&&x.present&&!x.verified).map(x=>x.field);return{complete:missing.length===0&&unverified.length===0,missing,unverified};}
