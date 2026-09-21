@@ -1,0 +1,5 @@
+export const DETAINEE_TIMELINE_CONTRACT_VERSION = "P10.7-INFERRED-v1";
+export type TimelineEventType = "STATUS_CHANGE" | "PLACEMENT_CHANGE" | "MOVEMENT" | "LEAVE" | "ESCORT" | "DOCUMENT";
+export type TimelineEvent = { eventId:string; detaineeId:string; type:TimelineEventType; occurredAt:string; sourceId:string; verified:boolean };
+const ID=/^[A-Za-z0-9._-]{1,128}$/;
+export function validateTimelineEvent(e:TimelineEvent):string[]{const x:string[]=[];if(!ID.test(e.eventId))x.push("INVALID_EVENT_ID");if(!ID.test(e.detaineeId))x.push("INVALID_DETAINEE_ID");if(!["STATUS_CHANGE","PLACEMENT_CHANGE","MOVEMENT","LEAVE","ESCORT","DOCUMENT"].includes(e.type))x.push("INVALID_EVENT_TYPE");if(Number.isNaN(Date.parse(e.occurredAt)))x.push("INVALID_OCCURRED_AT");if(!ID.test(e.sourceId))x.push("INVALID_SOURCE_ID");if(typeof e.verified!=="boolean")x.push("INVALID_VERIFICATION_STATE");return x;}
