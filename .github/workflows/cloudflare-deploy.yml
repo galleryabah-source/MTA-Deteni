@@ -2,14 +2,6 @@ name: MTA DETENI Cloudflare Production Deploy
 
 on:
   workflow_dispatch:
-  push:
-    branches: [main]
-    paths:
-      - 'wrangler.toml'
-      - 'worker.js'
-      - 'worker-*.js'
-      - 'web/**'
-      - '.github/workflows/cloudflare-deploy.yml'
 
 permissions:
   contents: read
@@ -33,6 +25,30 @@ jobs:
 
       - name: Install Wrangler
         run: npm install --global wrangler@4.132.0
+
+      - name: Verify deployment artifact contract before credentials/deploy
+        run: |
+          test -f wrangler.toml
+          test -f worker-v11.js
+          test -d web
+          test -f web/index.html
+          test -f web/daily-guard-report-v2.js
+          test -f web/daily-guard-report-d57.js
+          test -f web/mta-production-api.js
+          test -f web/mta-auth.js
+          test -f web/mta-auth-ui.js
+          test -f web/mobile-shell-v1.js
+          test -f web/desktop-shell-v2.js
+          test -f web/offline-v1.js
+          test -f web/offline-queue-v1.js
+          test -f web/qr-camera-v2.js
+          test -f web/room-ops-v9.js
+          test -f web/movement-v9.js
+          test -f web/admin-settings-v9.js
+          test -f web/master-room-guard-v10.js
+          test -f web/preview-v10.js
+          test -f web/qr-print-clean-v3.js
+          echo "MTA DETENI Cloudflare artifact contract: PASS"
 
       - name: Verify production target
         env:
@@ -101,27 +117,3 @@ jobs:
             gh issue create --title "CI diagnostic: Cloudflare deploy run ${{ github.run_id }}" --body "Cloudflare deployment failed but no deploy log file was produced."
           fi
 
-      - name: Verify deployment artifact contract
-        run: |
-          test -f wrangler.toml
-          test -f worker.js
-          test -f worker-v11.js
-          test -d web
-          test -f web/index.html
-          test -f web/daily-guard-report-v2.js
-          test -f web/daily-guard-report-d57.js
-          test -f web/mta-production-api.js
-          test -f web/mta-auth.js
-          test -f web/mta-auth-ui.js
-          test -f web/mobile-shell-v1.js
-          test -f web/desktop-shell-v2.js
-          test -f web/offline-v1.js
-          test -f web/offline-queue-v1.js
-          test -f web/qr-camera-v2.js
-          test -f web/room-ops-v9.js
-          test -f web/movement-v9.js
-          test -f web/admin-settings-v9.js
-          test -f web/master-room-guard-v10.js
-          test -f web/preview-v10.js
-          test -f web/qr-print-clean-v3.js
-          echo "MTA DETENI Cloudflare artifact contract: PASS"
