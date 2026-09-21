@@ -1,0 +1,3 @@
+import {describe,it,expect} from 'vitest';import {createRepositoryBoundary} from '../src/infrastructure/repository/repository-runtime-boundary.mjs';
+function a(){return{queries:[],async query(q){this.queries.push(q);return{rows:[],rowCount:0}}}}
+describe('P9.15 repository boundary',()=>{it('parameterizes identifiers',async()=>{const d=a();const r=createRepositoryBoundary(d,'mta_detainees');await r.getById('D1');expect(d.queries[0].values).toEqual(['D1'])});it('rejects arbitrary table names',()=>expect(()=>createRepositoryBoundary(a(),'users')).toThrow('REPOSITORY_TABLE_INVALID'));it('requires ids',async()=>await expect(createRepositoryBoundary(a(),'mta_detainees').getById('')).rejects.toThrow('RESOURCE_ID_REQUIRED'))});
