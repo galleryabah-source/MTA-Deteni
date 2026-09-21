@@ -4,16 +4,17 @@ import {
   assertIntegratedAcceptanceReady,
   certifyIntegratedAcceptance,
   INTEGRATED_ACCEPTANCE_JOURNEY_VERSION,
+  type IntegratedAcceptanceInput,
 } from "../src/application/integrated-acceptance-journey.js";
 
-const ready = {
+const ready: IntegratedAcceptanceInput = {
   journeyId: "IAJ-SYN-0001",
-  syntheticOnly: true as const,
-  domainReady: true as const,
-  offlineReconnectReady: true as const,
-  qrReady: true as const,
-  reportReady: true as const,
-  auditOutboxReady: true as const,
+  syntheticOnly: true,
+  domainReady: true,
+  offlineReconnectReady: true,
+  qrReady: true,
+  reportReady: true,
+  auditOutboxReady: true,
   lifecycleJourneyId: "LIFE-SYN-0001",
   offlineSessionId: "OFF-SYN-0001",
   reportSnapshotId: "REPORT-SYN-0001",
