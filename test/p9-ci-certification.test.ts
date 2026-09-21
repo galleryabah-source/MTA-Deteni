@@ -31,7 +31,7 @@ test("P9.12 rejects incomplete harness evidence", () => {
     environment: "controlled-nonprod",
     status: "OBSERVATION_INCOMPLETE",
     checks: [{ controlId: "BUILD-5801", status: "PASS", exitCode: 0 }],
-  }), /HARNESS_OBSERVATION_INCOMPLETE/);
+  }), /HARNESS_CHECKS_REQUIRED/);
 });
 
 test("P9.12 rejects wrong-environment harness evidence", () => {
