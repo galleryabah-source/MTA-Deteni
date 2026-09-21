@@ -19,9 +19,11 @@ export interface IntegratedCommandPorts<TCommand, TResult> {
   authorize(context: IntegratedCommandContext, command: TCommand): Promise<boolean>;
   idempotency(command: TCommand): Promise<"ACQUIRED" | "REPLAY" | "CONFLICT">;
   validateState(command: TCommand): Promise<boolean>;
+  ensureAuditAvailable(context: IntegratedCommandContext, command: TCommand): Promise<boolean>;
   transaction<T>(operation: (context: IntegratedCommandContext) => Promise<T>): Promise<T>;
-  audit(context: IntegratedCommandContext, command: TCommand, result: "SUCCESS" | "DENIED" | "FAILED"): Promise<boolean>;
-  outbox(context: IntegratedCommandContext, command: TCommand): Promise<boolean>;
+  persistAudit(context: IntegratedCommandContext, command: TCommand, result: "SUCCESS" | "DENIED" | "FAILED"): Promise<void>;
+  persistOutbox(context: IntegratedCommandContext, command: TCommand): Promise<void>;
+  executeDomainMutation(context: IntegratedCommandContext, command: TCommand): Promise<TResult>;
 }
 
 export async function executeIntegratedCommand<TCommand, TResult>(
@@ -41,18 +43,17 @@ export async function executeIntegratedCommand<TCommand, TResult>(
   if (!await ports.validateState(command))
     return { status:"DENIED", auditRequired:true, outboxRequired:false };
 
-  const auditReady = await ports.audit(context, command, "SUCCESS");
-  if (!auditReady)
+  if (!await ports.ensureAuditAvailable(context, command))
     return { status:"FAILED_SAFE", auditRequired:true, outboxRequired:false };
 
   try {
     const value = await ports.transaction(async (txContext) => {
-      const outboxReady = await ports.outbox(txContext, command);
-      if (!outboxReady) throw new Error("OUTBOX_UNAVAILABLE");
-      return txContext.transactionId ? await ports.transaction(async () => {
-        return undefined as TResult;
-      }) : (undefined as TResult);
+      const result = await ports.executeDomainMutation(txContext, command);
+      await ports.persistAudit(txContext, command, "SUCCESS");
+      await ports.persistOutbox(txContext, command);
+      return result;
     });
+
     return { status:"EXECUTED", value, auditRequired:true, outboxRequired:true };
   } catch {
     return { status:"FAILED_SAFE", auditRequired:true, outboxRequired:true };
