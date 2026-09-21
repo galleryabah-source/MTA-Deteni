@@ -31,7 +31,7 @@ test("P13.15721-15840: operational audit projection preserves complete evidence 
 test("P13.15721-15840: projection fails closed on identity or fingerprint drift", () => {
   const c = chain();
   const projection = createLocalRuntimeRecoveryOperationalAuditProjection({ projectionId: "PROJ-D", evidenceCertification: c.evidenceCertification, evidence: c.evidence });
-  assert.throws(() => assertLocalRuntimeRecoveryOperationalAuditProjection({ ...projection, executionId: "EXEC-DRIFT" } as never, c.evidenceCertification), /drift/i);
+  assert.throws(() => assertLocalRuntimeRecoveryOperationalAuditProjection({ ...projection, evidenceId: "EVIDENCE-DRIFT" } as never, c.evidenceCertification), /drift/i);
   assert.throws(() => createLocalRuntimeRecoveryOperationalAuditProjection({ projectionId: "PROJ-D", evidenceCertification: c.evidenceCertification, evidence: { ...c.evidence, decisionFingerprint: "FP-DRIFT" } }), /drift/i);
   assert.throws(() => createLocalRuntimeRecoveryOperationalAuditProjection({ projectionId: "PROJ-D", evidenceCertification: { ...c.evidenceCertification, syntheticOnly: false } as never, evidence: c.evidence }), /synthetic/i);
 });
