@@ -27,27 +27,27 @@ Deno.serve(async(req)=>{
       let query=supabase.from(table).select("*");
       if(id) query=query.eq("id",id).single();
       const {data,error}=await query;
-      if(error) return json({ok:false,error:"DB_READ_FAILED",detail:error.message},400);
+      if(error) return json({ok:false,error:"DB_READ_FAILED"},400);
       return json({ok:true,resource,role,data});
     }
     if(req.method==="POST"){
       const body=await req.json();
       const {data,error}=await supabase.from(table).insert(body).select("*").single();
-      if(error) return json({ok:false,error:"DB_INSERT_FAILED",detail:error.message},400);
+      if(error) return json({ok:false,error:"DB_INSERT_FAILED"},400);
       return json({ok:true,resource,role,data},201);
     }
     if(!id) return json({ok:false,error:"ID_REQUIRED"},400);
     if(req.method==="PATCH"){
       const body=await req.json();
       const {data,error}=await supabase.from(table).update(body).eq("id",id).select("*").single();
-      if(error) return json({ok:false,error:"DB_UPDATE_FAILED",detail:error.message},400);
+      if(error) return json({ok:false,error:"DB_UPDATE_FAILED"},400);
       return json({ok:true,resource,role,data});
     }
     if(req.method==="DELETE"){
       const {data,error}=await supabase.from(table).delete().eq("id",id).select("id").single();
-      if(error) return json({ok:false,error:"DB_DELETE_FAILED",detail:error.message},400);
+      if(error) return json({ok:false,error:"DB_DELETE_FAILED"},400);
       return json({ok:true,resource,role,deleted:data});
     }
     return json({ok:false,error:"METHOD_NOT_ALLOWED"},405);
-  }catch(error){return json({ok:false,error:"UNHANDLED_API_ERROR",detail:String(error)},500);}
+  }catch(error){console.error("MTA_API_UNHANDLED_ERROR",error);return json({ok:false,error:"UNHANDLED_API_ERROR"},500);}
 });
