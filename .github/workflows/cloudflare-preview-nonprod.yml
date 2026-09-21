@@ -6,6 +6,7 @@ on:
     branches: [main]
     paths:
       - 'wrangler.toml'
+      - 'wrangler.preview.toml'
       - 'worker.js'
       - 'worker-v*.js'
       - 'web/**'
@@ -24,23 +25,29 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '24'
+
       - name: Install Wrangler
         run: npm install --global wrangler@4.132.0
+
       - name: Verify non-production target
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
         run: |
           test "$DEPLOY_WORKER_NAME" = "mta-deteni-preview"
+          test -f wrangler.preview.toml
           test -n "${CLOUDFLARE_API_TOKEN:-}"
           CF_ACCOUNT_ID="$(printf '%s' "$CLOUDFLARE_ACCOUNT_ID" | tr -d '[:space:]')"
           test -n "$CF_ACCOUNT_ID"
           case "$CF_ACCOUNT_ID" in *[!A-Za-z0-9_-]*) echo 'Cloudflare account id contains unsupported characters after whitespace normalization'; exit 1;; esac
           echo "Cloudflare target: $DEPLOY_WORKER_NAME"
+          CLOUDFLARE_ACCOUNT_ID="$CF_ACCOUNT_ID" CLOUDFLARE_API_TOKEN="$CLOUDFLARE_API_TOKEN" wrangler whoami
+
       - name: Deploy controlled non-production preview
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
@@ -48,7 +55,8 @@ jobs:
         run: |
           CF_ACCOUNT_ID="$(printf '%s' "$CLOUDFLARE_ACCOUNT_ID" | tr -d '[:space:]')"
           CF_API_TOKEN="$(printf '%s' "$CLOUDFLARE_API_TOKEN" | sed 's/[[:space:]]*$//')"
-          CLOUDFLARE_ACCOUNT_ID="$CF_ACCOUNT_ID" CLOUDFLARE_API_TOKEN="$CF_API_TOKEN" wrangler deploy --name "$DEPLOY_WORKER_NAME"
+          CLOUDFLARE_ACCOUNT_ID="$CF_ACCOUNT_ID" CLOUDFLARE_API_TOKEN="$CF_API_TOKEN" wrangler deploy --config wrangler.preview.toml --name "$DEPLOY_WORKER_NAME"
+
       - name: Record deployment verification boundary
         run: |
           echo "Deployment step completed for controlled non-production target."
