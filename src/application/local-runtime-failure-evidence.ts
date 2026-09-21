@@ -63,5 +63,6 @@ export function assertFailureEvidenceBoundary(input: { evidence: LocalRuntimeFai
     assertLocalRuntimeAuditEnvelope(input.audit);
     if (input.evidence.evidenceId !== input.audit.evidenceId || input.evidence.requestId !== input.audit.requestId || input.evidence.actorId !== input.audit.actorId || input.evidence.sessionId !== input.audit.sessionId || input.evidence.executionId !== input.audit.executionId) throw new Error("Local runtime failure/audit evidence identity drift.");
   }
+  if (input.evidence.requestId !== input.request.requestId || input.evidence.actorId !== input.request.actorId || input.evidence.deviceId !== input.request.device.deviceId || input.evidence.installationId !== input.request.device.installationId || input.evidence.networkScopeId !== input.request.device.networkScopeId || input.evidence.method !== input.request.method || input.evidence.path !== input.request.path || input.evidence.idempotencyKey !== input.request.idempotencyKey) throw new Error("Local runtime failure request/session scope identity drift.");
   try { assertLocalRuntimeRequest(input.request); } catch { if (input.evidence.failureClass !== "REQUEST_REJECTED") throw new Error("Local runtime failure class does not match rejected request boundary."); }
 }
