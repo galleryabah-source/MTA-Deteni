@@ -8,7 +8,84 @@ const now=()=>new Date().toISOString();
 const audit=(a,t,i,r='SUCCESS')=>{const d=get();d.audit=d.audit||[];d.audit.unshift({id:uid('AUD'),action:a,resourceType:t,resourceId:i||'',result:r,occurredAt:now(),actor:'DEMO-ADMIN',requestId:uid('REQ'),correlationId:uid('COR'),policyVersion:'AUTHZ-1.0'});put(d)};
 function ensure(){const d=get();d.adminSettings=d.adminSettings||{role:'ADMIN',facilityName:'MTA DETENI Digital',timezone:'Asia/Jakarta',qrPolicy:'OPAQUE_TOKEN',migrationFreeze:true,ai:'OFF'};d.blocks=d.blocks||[];d.rooms=d.rooms||[];d.qr=d.qr||{detainee:{},room:{},leave:{}};d.qr.room=d.qr.room||{};d.adminCatalogs=d.adminCatalogs||{};const defaults={dutyGroups:['REGU A','REGU B','REGU C','REGU D'],shifts:['PAGI','SIANG','MALAM'],movementTypes:['INTERNAL','TRANSFER_KAMAR','KLINIK','SIDANG','LAINNYA'],leaveTypes:['IZIN SEMENTARA','PEMERIKSAAN KESEHATAN','PENGAWALAN','LAINNYA'],documentTypes:['LAPORAN HARIAN','BERITA ACARA','SURAT TUGAS','SURAT PENGANTAR','LAINNYA'],classifications:['INTERNAL','TERBATAS','RAHASIA'],roomTypes:['STANDARD','ISOLATION','OBSERVATION','MEDICAL','TRANSIT'],roomCategories:['UMUM','PRIA','WANITA','KHUSUS']};for(const [k,v] of Object.entries(defaults))d.adminCatalogs[k]=Array.isArray(d.adminCatalogs[k])&&d.adminCatalogs[k].length?d.adminCatalogs[k]:v;d.rooms.forEach(r=>{if(!r.blockId){const b=d.blocks.find(b=>String(b.name).toLowerCase()===String(r.block).toLowerCase());if(b)r.blockId=b.id}if(!d.qr.room[r.id])d.qr.room[r.id]={token:uid('RMQR'),status:r.status==='ACTIVE'?'ACTIVE':'SUSPENDED'}});put(d);return d}
 function nav(){const n=document.querySelector('#nav');if(!n||document.querySelector('#p9settings'))return;const b=document.createElement('button');b.id='p9settings';b.dataset.view='p9settings';b.textContent='Pengaturan';b.onclick=e=>{e.stopPropagation();settings()};n.appendChild(b)}
-function settings(){const d=ensure();if(d.adminSettings.role!=='ADMIN'){document.querySelector('#appView').innerHTML=shell('Pengaturan','Akses dibatasi untuk Administrator.',`<div class="p6card"><div class="notice p6danger">ADMIN ONLY · Role synthetic saat ini: ${E(d.adminSettings.role||'UNSET')}</div></div>`);return}const blocks=d.blocks.map(b=>`<tr><td><b>${E(b.name)}</b></td><td>${E(b.status)}</td><td>${d.rooms.filter(r=>r.blockId===b.id||r.block===b.name).length}</td><td><button class="btn small" onclick="window.p9editBlock('${E(b.id)}')">Edit</button></td></tr>`).join('');const rooms=d.rooms.map(r=>`<tr><td>${E(r.block)}</td><td><b>${E(r.room)}</b></td><td>${E(String((d.placements||[]).filter(p=>{const c=(d.placements||[]).filter(q=>q.detaineeId===p.detaineeId).sort((a,b)=>String(b.since||'').localeCompare(String(a.since||'')))[0];return c&&c.id===p.id&&((p.roomId&&p.roomId===r.id)||(!p.roomId&&p.block===r.block&&p.room===r.room))}).length)}/${Number(r.capacity)||0}</td><td>${E(r.type||'STANDARD')}</td><td>${E(r.gender||'UMUM')}</td><td>${E(r.status||'ACTIVE')}</td><td><button class="btn small" onclick="window.p9editRoom('${E(r.id)}')">Edit</button></td></tr>`).join('');const catalogCards=[['dutyGroups','Regu Jaga'],['shifts','Shift'],['movementTypes','Jenis Pergerakan'],['leaveTypes','Jenis Izin'],['documentTypes','Jenis Dokumen'],['classifications','Klasifikasi Dokumen']].map(([k,label])=>`<div class="p6card"><div class="toolbar"><h2 style="margin-right:auto">${label}</h2><button class="btn primary small" onclick="window.p9addCatalog('${k}','${label}')">+ Tambah</button></div><div class="tablewrap"><table class="table"><thead><tr><th>Nilai</th><th>Aksi</th></tr></thead><tbody>${d.adminCatalogs[k].map((x,i)=>`<tr><td>${E(x)}</td><td><button class="btn small danger" onclick="window.p9removeCatalog('${k}',${i})">Nonaktifkan</button></td></tr>`).join('')}</tbody></table></div></div>`).join('');document.querySelector('#appView').innerHTML=shell('Pengaturan Administrator','Control plane untuk master data dan konfigurasi operasional. Runtime tetap synthetic/local.',`<div class="p6grid"><div class="p6card"><h2>System</h2><div class="formgrid"><div class="field"><label>Nama fasilitas</label><input id="p9facility" value="${E(d.adminSettings.facilityName)}"></div><div class="field"><label>Zona waktu</label><select id="p9tz"><option ${d.adminSettings.timezone==='Asia/Jakarta'?'selected':''}>Asia/Jakarta</option><option ${d.adminSettings.timezone==='Asia/Makassar'?'selected':''}>Asia/Makassar</option><option ${d.adminSettings.timezone==='Asia/Jayapura'?'selected':''}>Asia/Jayapura</option></select></div><div class="field"><label>AI Runtime</label><input value="OFF" disabled></div><div class="field"><label>Migration Freeze</label><input value="${d.adminSettings.migrationFreeze?'TRUE':'FALSE'}" disabled></div></div><div class="actions"><button class="btn primary" onclick="window.p9saveSystem()">Simpan System</button></div></div><div class="p6card"><h2>Security & Governance</h2><div class="notice">Role synthetic: <b>${E(d.adminSettings.role)}</b><br>QR Policy: <b>${E(d.adminSettings.qrPolicy)}</b><br>Real data: <b>DISALLOWED IN PREVIEW</b></div><p class="p6mini">User, role, permission, scope, duty assignment, dan policy produksi tetap mengikuti authorization boundary; password/secret tidak disimpan di runtime preview.</p></div></div><div class="p6card" style="margin-top:12px"><div class="toolbar"><h2 style="margin-right:auto">Master Blok</h2><button class="btn primary" onclick="window.p9addBlock()">+ Tambah Blok</button></div><div class="tablewrap"><table class="table"><thead><tr><th>Blok</th><th>Status</th><th>Jumlah Kamar</th><th>Aksi</th></tr></thead><tbody>${blocks||'<tr><td colspan="4" class="empty">Belum ada blok.</td></tr>'}</tbody></table></div></div><div class="p6card" style="margin-top:12px"><div class="toolbar"><h2 style="margin-right:auto">Master Kamar</h2><button class="btn primary" onclick="window.p9addRoom()">+ Tambah Kamar</button></div><div class="tablewrap"><table class="table"><thead><tr><th>Blok</th><th>Kamar</th><th>Occupancy</th><th>Tipe</th><th>Kategori</th><th>Status</th><th>Aksi</th></tr></thead><tbody>${rooms||'<tr><td colspan="7" class="empty">Belum ada master kamar.</td></tr>'}</tbody></table></div><div class="notice" style="margin-top:10px">Kamar hanya dibuat/diubah di sini. Modul Data Deteni, Penempatan, dan Pergerakan hanya memilih Room ID dari master.</div></div><div class="p6grid" style="margin-top:12px">${catalogCards}</div><div class="p6card" style="margin-top:12px"><h2>Master Room Parameter</h2><div class="notice">Tipe: ${d.adminCatalogs.roomTypes.map(E).join(' · ')}<br>Kategori: ${d.adminCatalogs.roomCategories.map(E).join(' · ')}</div></div>`)}
+function settings(){
+  const d=ensure();
+  const app=document.querySelector('#appView');
+  if(!app)return;
+  if(d.adminSettings.role!=='ADMIN'){
+    app.innerHTML=shell('Pengaturan','Akses dibatasi untuk Administrator.',
+      '<div class="p6card"><div class="notice p6danger">ADMIN ONLY · Role synthetic saat ini: '+E(d.adminSettings.role||'UNSET')+'</div></div>');
+    return;
+  }
+
+  const blockRows=d.blocks.map(b=>{
+    const count=d.rooms.filter(r=>r.blockId===b.id||r.block===b.name).length;
+    return '<tr><td><b>'+E(b.name)+'</b></td><td>'+E(b.status)+'</td><td>'+count+'</td>'+
+      '<td><button class="btn small" onclick="window.p9editBlock(\''+E(b.id)+'\')">Edit</button></td></tr>';
+  }).join('');
+
+  const roomRows=d.rooms.map(r=>{
+    const occupancy=roomOccupancy(d,r);
+    return '<tr><td>'+E(r.block)+'</td><td><b>'+E(r.room)+'</b></td><td>'+occupancy+'/'+(Number(r.capacity)||0)+'</td>'+
+      '<td>'+E(r.type||'STANDARD')+'</td><td>'+E(r.gender||'UMUM')+'</td><td>'+E(r.status||'ACTIVE')+'</td>'+
+      '<td><button class="btn small" onclick="window.p9editRoom(\''+E(r.id)+'\')">Edit</button></td></tr>';
+  }).join('');
+
+  const catalogDefs=[
+    ['dutyGroups','Regu Jaga'],
+    ['shifts','Shift'],
+    ['movementTypes','Jenis Pergerakan'],
+    ['leaveTypes','Jenis Izin'],
+    ['documentTypes','Jenis Dokumen'],
+    ['classifications','Klasifikasi Dokumen']
+  ];
+
+  const catalogCards=catalogDefs.map(([key,label])=>{
+    const rows=d.adminCatalogs[key].map((value,index)=>
+      '<tr><td>'+E(value)+'</td><td><button class="btn small danger" onclick="window.p9removeCatalog(\''+
+      E(key)+'\','+index+')">Nonaktifkan</button></td></tr>'
+    ).join('');
+    return '<div class="p6card"><div class="toolbar"><h2 style="margin-right:auto">'+E(label)+'</h2>'+
+      '<button class="btn primary small" onclick="window.p9addCatalog(\''+E(key)+'\',\''+E(label)+'\')">+ Tambah</button></div>'+
+      '<div class="tablewrap"><table class="table"><thead><tr><th>Nilai</th><th>Aksi</th></tr></thead><tbody>'+
+      rows+'</tbody></table></div></div>';
+  }).join('');
+
+  const body=
+    '<div class="p6grid">'+
+      '<div class="p6card"><h2>System</h2><div class="formgrid">'+
+        '<div class="field"><label>Nama fasilitas</label><input id="p9facility" value="'+E(d.adminSettings.facilityName)+'"></div>'+
+        '<div class="field"><label>Zona waktu</label><select id="p9tz">'+
+          '<option '+(d.adminSettings.timezone==='Asia/Jakarta'?'selected':'')+'>Asia/Jakarta</option>'+
+          '<option '+(d.adminSettings.timezone==='Asia/Makassar'?'selected':'')+'>Asia/Makassar</option>'+
+          '<option '+(d.adminSettings.timezone==='Asia/Jayapura'?'selected':'')+'>Asia/Jayapura</option>'+
+        '</select></div>'+
+        '<div class="field"><label>AI Runtime</label><input value="OFF" disabled></div>'+
+        '<div class="field"><label>Migration Freeze</label><input value="'+(d.adminSettings.migrationFreeze?'TRUE':'FALSE')+'" disabled></div>'+
+      '</div><div class="actions"><button class="btn primary" onclick="window.p9saveSystem()">Simpan System</button></div></div>'+
+      '<div class="p6card"><h2>Security &amp; Governance</h2><div class="notice">Role synthetic: <b>'+E(d.adminSettings.role)+
+        '</b><br>QR Policy: <b>'+E(d.adminSettings.qrPolicy)+'</b><br>Real data: <b>DISALLOWED IN PREVIEW</b></div>'+
+        '<p class="p6mini">User, role, permission, scope, duty assignment, dan policy produksi tetap mengikuti authorization boundary; password/secret tidak disimpan di runtime preview.</p></div>'+
+    '</div>'+
+    '<div class="p6card" style="margin-top:12px"><div class="toolbar"><h2 style="margin-right:auto">Master Blok</h2>'+
+      '<button class="btn primary" onclick="window.p9addBlock()">+ Tambah Blok</button></div>'+
+      '<div class="tablewrap"><table class="table"><thead><tr><th>Blok</th><th>Status</th><th>Jumlah Kamar</th><th>Aksi</th></tr></thead><tbody>'+
+      (blockRows||'<tr><td colspan="4" class="empty">Belum ada blok.</td></tr>')+'</tbody></table></div></div>'+
+    '<div class="p6card" style="margin-top:12px"><div class="toolbar"><h2 style="margin-right:auto">Master Kamar</h2>'+
+      '<button class="btn primary" onclick="window.p9addRoom()">+ Tambah Kamar</button></div>'+
+      '<div class="tablewrap"><table class="table"><thead><tr><th>Blok</th><th>Kamar</th><th>Occupancy</th><th>Tipe</th><th>Kategori</th><th>Status</th><th>Aksi</th></tr></thead><tbody>'+
+      (roomRows||'<tr><td colspan="7" class="empty">Belum ada master kamar.</td></tr>')+'</tbody></table>'+
+      '<div class="notice" style="margin-top:10px">Kamar hanya dibuat/diubah di sini. Modul Data Deteni, Penempatan, dan Pergerakan hanya memilih Room ID dari master.</div></div></div>'+
+    '<div class="p6grid" style="margin-top:12px">'+catalogCards+'</div>'+
+    '<div class="p6card" style="margin-top:12px"><h2>Master Room Parameter</h2><div class="notice">Tipe: '+
+      d.adminCatalogs.roomTypes.map(E).join(' · ')+'<br>Kategori: '+d.adminCatalogs.roomCategories.map(E).join(' · ')+'</div></div>';
+
+  app.innerHTML=shell(
+    'Pengaturan Administrator',
+    'Control plane untuk master data dan konfigurasi operasional. Runtime tetap synthetic/local.',
+    body
+  );
+}
 function shell(t,desc,b){return `<section class="hero"><h1>${t}</h1><p class="sub">${desc}</p></section>${b}`}
 window.p9saveSystem=()=>{const d=ensure();d.adminSettings.facilityName=(document.querySelector('#p9facility')?.value||d.adminSettings.facilityName).trim();d.adminSettings.timezone=document.querySelector('#p9tz')?.value||d.adminSettings.timezone;audit('ADMIN_SETTINGS_UPDATE','SYSTEM','ADMIN');put(d);settings();toast('Pengaturan system tersimpan.')};
 window.p9addCatalog=(key,label)=>{openModal(`<div class="dialoghead"><h2>Tambah ${E(label)}</h2><button class="x" onclick="closeModal()">×</button></div><div class="field"><label>Nilai</label><input id="p9cat" placeholder="Masukkan nilai master"></div><div class="actions"><button class="btn" onclick="closeModal()">Batal</button><button class="btn primary" onclick="window.p9saveCatalog('${E(key)}')">Simpan</button></div>`) };
