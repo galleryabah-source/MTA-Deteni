@@ -3,7 +3,7 @@
 **Foundation:** v1.134+
 **Current Track:** P1 runtime integrity remediation / P9 kernel implementation / P13 closure evidence recovery
 **Branch:** `main`
-**Latest implementation checkpoint:** Controlled-nonprod Domain CI Run #1301 completed successfully on commit `d96429e13728a274943447d5770e3af434ca1ca8`; P1 executable certification remains pending dedicated certification evidence; P13 terminal closure is evidenced and CLOSED at P13.260881–274880
+**Latest implementation checkpoint:** Controlled-nonprod Domain CI Run #1301 completed successfully on commit `d96429e13728a274943447d5770e3af434ca1ca8`; P1 executable certification evidence is now OBSERVED_PASS in controlled-nonprod; no production authorization is implied; P13 terminal closure is evidenced and CLOSED at P13.260881–274880
 
 ## P9 kernel implementation
 
@@ -36,7 +36,7 @@
 - The P1 failure-matrix regression now exercises missing context, idempotency conflict, replay, domain failure, audit failure and outbox conflict/replay fail-closed behavior.
 - The certification contract is evidence validation only; it cannot authorize production access, migrations, AI or external delivery.
 - Optimistic concurrency execution contract provides deterministic ACCEPT/STALE_VERSION semantics.
-- P1 remains pending an actual executable repository run with observable evidence; contract-level tests alone do not establish runtime certification.
+- P1 controlled-nonprod executable evidence is now observed: Run #138 (`35562575299`) for commit `d96429e13728a274943447d5770e3af434ca1ca8` produced `OBSERVED_PASS` across all seven canonical controls. Artifact `10622772279` was uploaded successfully. This satisfies the runtime evidence boundary; it does not authorize production access, migrations, AI or external delivery.
 
 ## Latest CI observation boundary
 
@@ -90,7 +90,7 @@
 **P9.12 CI Certification — HARDENED / OBSERVATION REQUIRED**
 **P9.13 Kernel Certification — HARDENED CONTRACT / CI EVIDENCE REQUIRED**
 **P13.260881–274880 — CLOSED / CONTROLLED-NONPROD EVIDENCE OBSERVED**
-**P1 Runtime Integrity — EXECUTABLE CERTIFICATION CONTRACT + FAILURE MATRIX IMPLEMENTED / RUNTIME OBSERVATION PENDING**
+**P1 Runtime Integrity — EXECUTABLE CERTIFICATION EVIDENCE OBSERVED_PASS / GOVERNANCE LOCKS INTACT**
 **Cloudflare CI — CONFIGURATION VALIDATION ONLY / DEPLOYMENT BOUNDARY LOCKED**
 
 ## Closure rule
