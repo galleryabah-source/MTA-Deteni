@@ -1,0 +1,4 @@
+export const STATUS_HISTORY_CONTRACT_VERSION="P10.10-INFERRED-v2";
+export type StatusHistoryEntry={entryId:string;detaineeId:string;fromStatus?:string;toStatus:string;changedAt:string;sourceId:string;verified:boolean};
+const ID=/^[A-Za-z0-9._-]{1,128}$/;
+export function validateStatusHistory(e:StatusHistoryEntry):string[]{const x:string[]=[];if(!ID.test(e.entryId))x.push("INVALID_ENTRY_ID");if(!ID.test(e.detaineeId))x.push("INVALID_DETAINEE_ID");if(e.fromStatus!==undefined&&!ID.test(e.fromStatus))x.push("INVALID_FROM_STATUS");if(!ID.test(e.toStatus))x.push("INVALID_TO_STATUS");if(Number.isNaN(Date.parse(e.changedAt)))x.push("INVALID_CHANGED_AT");if(!ID.test(e.sourceId))x.push("INVALID_SOURCE_ID");if(typeof e.verified!=="boolean")x.push("INVALID_VERIFICATION_STATE");return x;}
