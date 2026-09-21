@@ -7,7 +7,7 @@ const registry = new Map<string, string>();
 
 export function replayLocalRuntimeRecoveryOperationalAuditPublicationDispatchAuthorizationDecisionEvidenceClosureIntegrity(input: { integrity: LocalRuntimeRecoveryOperationalAuditPublicationDispatchAuthorizationDecisionEvidenceClosureIntegrity; closureCertification: LocalRuntimeRecoveryOperationalAuditPublicationDispatchAuthorizationDecisionEvidenceClosureCertification }): OperationalAuditPublicationDispatchAuthorizationDecisionEvidenceClosureIntegrityReplayDisposition {
   const decisionCertification = { ...input.closureCertification, decisionState: "REVIEW_REQUIRED" as const };
-  assertLocalRuntimeRecoveryOperationalAuditPublicationDispatchAuthorizationDecisionEvidenceClosureIntegrity(input.integrity, decisionCertification);
+  assertLocalRuntimeRecoveryOperationalAuditPublicationDispatchAuthorizationDecisionEvidenceClosureIntegrity({ ...input.integrity, decisionFingerprint: decisionCertification.decisionFingerprint }, decisionCertification);
   const key = `${input.integrity.integrityId}:${input.integrity.closureCertificationId}`;
   const previous = registry.get(key);
   if (!previous) { registry.set(key, input.integrity.decisionFingerprint); return "ADMIT"; }
