@@ -33,7 +33,7 @@ A gate is PASS only when implementation, test coverage, observable execution evi
 
 ## Current open gates
 
-- Integrated synthetic end-to-end journey.
+- Integrated synthetic end-to-end runtime evidence (composition contract is now implemented; runtime execution evidence remains open).
 - Offline/LAN runtime and reconnect/reconciliation validation.
 - Daily Guard Report + QR + device/browser acceptance on the current revision.
 - Controlled-nonprod PostgreSQL execution.
