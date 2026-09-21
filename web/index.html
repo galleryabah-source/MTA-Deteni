@@ -114,7 +114,17 @@ function validateReport(id){
 }
 async function generateValidatedReport(id){
   const r=documentById(id);if(!r)return;
-  try{if(r.status!=='VALIDATED')throw new Error('REPORT_NOT_VALIDATED');const prepared=await window.mtaDailyGuardReport.prepare(r);Object.assign(r,prepared);window.mtaDailyGuardReport.transitionStatus(r,'GENERATED');r.generatedAt=now();audit('DOCUMENT_GENERATE','DOCUMENT',id);save();render();previewReport(id);toast('Dokumen generated — siap Review')}catch(err){toast('Generate gagal: '+err.message)}
+  try{
+    if(r.status!=='VALIDATED')throw new Error('REPORT_NOT_VALIDATED');
+    r.generatedAt=now();
+    window.mtaDailyGuardReport.transitionStatus(r,'GENERATED');
+    const prepared=await window.mtaDailyGuardReport.prepare(r);
+    Object.assign(r,prepared);
+    audit('DOCUMENT_GENERATE','DOCUMENT',id);save();render();previewReport(id);toast('Dokumen generated — siap Review');
+  }catch(err){
+    if(r.status==='GENERATED'&&!r.integrityHash)r.status='VALIDATED';
+    toast('Generate gagal: '+err.message)
+  }
 }
 function workflowNote(title,submitLabel,callback){
   openModal(`<div class="dialoghead"><h2>${esc(title)}</h2><button class="x" onclick="closeModal()">×</button></div><form id="workflowNoteForm"><div class="field"><label>Catatan</label><textarea name="note" rows="5" required></textarea></div><div class="actions"><button type="button" class="btn" onclick="closeModal()">Batal</button><button class="btn primary">${esc(submitLabel)}</button></div></form>`);
