@@ -21,7 +21,7 @@ export type P13IntegrityCertificationEvidenceContinuationNode = Readonly<{
 const registry = new Map<string, string>();
 const CHECKPOINTS = Object.freeze(Array.from({ length: 100 }, (_, i) => {
   const start = 260881 + i * 140;
-  return `P13.${start}-${start + 159}`;
+  return `P13.${start}-${start + (i === 99 ? 139 : 159)}`;
 }));
 
 export function p13IntegrityCertificationEvidenceContinuationCheckpoints(): readonly string[] {
