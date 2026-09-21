@@ -114,3 +114,40 @@ D5 Daily Guard Report is complete only when an authorized synthetic user can:
 `Select Date + Regu + Shift → Complete Activities → Attach Photos → Validate → Preview → Generate → Review/Approve → Download`
 
 and the resulting PDF conforms to the approved template version, has provenance and integrity metadata, and produces the required audit trail.
+
+
+## Current Implementation Evidence — v1.1
+
+The synthetic runtime now contains a controlled daily-guard-report contract and renderer at:
+
+- `web/daily-guard-report-v2.js`
+- `test/daily-guard-report.test.mjs`
+
+Implemented in this checkpoint:
+
+- deterministic structured `DAILY_GUARD_REPORT` data validation;
+- template version binding: `DAILY-GUARD-v1.1`;
+- canonical serialization with sorted object keys;
+- SHA-256 integrity hash derived from report material;
+- deterministic filename contract;
+- 11-page baseline structural renderer;
+- 1440 × 810 point / 16:9 landscape print target;
+- explicit page ordering matching the baseline sections;
+- controlled photo slots using synthetic placeholders only;
+- closing/signature composition with synthetic signatory data;
+- browser preview and print-to-PDF flow;
+- finalized-report guard against silent overwrite;
+- provenance via `sourceRecordIds`;
+- regression tests for validation, deterministic hashing, mutation sensitivity and 11-page rendering.
+
+Not yet certified by this checkpoint:
+
+- official production template artwork/assets;
+- real photo/object storage;
+- production authorization enforcement;
+- persistent database-backed report lifecycle;
+- electronic signature integration;
+- approval/finalization persistence outside the synthetic browser runtime;
+- pixel-level regression against the formally approved production template.
+
+No production schema migration or real detainee data is introduced by this implementation.
