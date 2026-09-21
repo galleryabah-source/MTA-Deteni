@@ -19,7 +19,7 @@ export function createOutboxEvent(input: OutboxEvent): OutboxEvent {
 
 export function assertOutboxReplaySafe(existing: OutboxEvent, candidate: OutboxEvent): void {
   if (existing.eventId !== candidate.eventId) throw new Error("Outbox event identity mismatch.");
-  if (existing.payloadFingerprint !== candidate.payloadFingerprint) throw new Error("OUTBOX_EVENT_PAYLOAD_DRIFT");
+  if (existing.payloadFingerprint !== candidate.payloadFingerprint) throw new Error("OUTBOX_EVENT_PAYLOAD_DRIFT: payload drift detected.");
 }
 
 export function nextOutboxAttempt(event: OutboxEvent, status: OutboxEvent["status"]): OutboxEvent {
