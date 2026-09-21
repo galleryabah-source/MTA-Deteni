@@ -9,7 +9,9 @@ test("LAN to LOCAL handoff requires authorization and reconciliation", () => {
 });
 
 test("device and network drift cannot bypass reconciliation requirement", () => {
-  assert.throws(() => createRuntimeHandoff({ executionId: "EXEC-H2", fromMode: "LAN", toMode: "LAN" as never, fromDeviceId: "DEV-A", toDeviceId: "DEV-B", fromNetworkScopeId: "NET-A", toNetworkScopeId: "NET-B", authorizationId: "AUTH-H2", queuePending: false }));
+  const handoff = createRuntimeHandoff({ executionId: "EXEC-H2", fromMode: "LAN", toMode: "LOCAL", fromDeviceId: "DEV-A", toDeviceId: "DEV-B", fromNetworkScopeId: "NET-A", toNetworkScopeId: "NET-B", authorizationId: "AUTH-H2", queuePending: false });
+  assert.equal(handoff.reconciliationRequired, true);
+  assert.doesNotThrow(() => assertRuntimeHandoffSafety(handoff));
 });
 
 test("same runtime mode is rejected as a handoff", () => {
