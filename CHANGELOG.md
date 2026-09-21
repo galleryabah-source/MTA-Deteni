@@ -1,3 +1,15 @@
+## 2026-09-21 — D5 Daily Guard Report Renderer v1.1
+
+- Added the synthetic `DAILY_GUARD_REPORT` renderer contract with template version `DAILY-GUARD-v1.1`.
+- Added deterministic canonical serialization and SHA-256 report integrity hashing.
+- Added the 11-page 16:9 landscape structural renderer aligned to the approved Daily Guard Report baseline.
+- Added deterministic PDF filename generation and browser print-to-PDF preview flow.
+- Added provenance references, synthetic photo slots and controlled signature blocks.
+- Added regression tests for validation, deterministic hashing, mutation sensitivity and 11-page rendering.
+- Finalized reports are protected from silent overwrite in the synthetic runtime.
+- Production artwork, storage, authorization, approval persistence and pixel-level template regression remain gated.
+- No schema migration or real detainee data was introduced.
+
 ## 2026-09-21 — P1 Runtime Evidence Observed
 
 - P1 Runtime Observation Run #138 (`35562575299`) completed successfully for commit `d96429e13728a274943447d5770e3af434ca1ca8`.
