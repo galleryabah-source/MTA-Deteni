@@ -4,6 +4,7 @@ const migration=fs.readFileSync('supabase/migrations/20260921060500_mta_deteni_p
 const rbac=fs.readFileSync('supabase/migrations/20260921070000_mta_production_auth_rbac_v1.sql','utf8');
 const edge=fs.readFileSync('supabase/functions/mta-api/index.ts','utf8');
 const client=fs.readFileSync('web/mta-production-api.js','utf8');
+const auth=fs.readFileSync('web/mta-auth.js','utf8');
 assert.match(rbac,/create table if not exists public\.mta_profiles/);
 assert.match(rbac,/check \(role in \('OWNER','ADMIN','EDITOR','REVIEWER','AUDITOR','VIEWER'\)\)/);
 assert.match(rbac,/alter table public\.mta_profiles enable row level security/);
@@ -14,4 +15,7 @@ assert.match(edge,/supabase\.auth\.getUser\(\)/);
 assert.match(edge,/RBAC_WRITE_DENIED/);
 assert.match(edge,/mta_detainees/);
 assert.match(client,/mtaProductionApi/);
+assert.match(auth,/signInWithPassword/);
+assert.match(auth,/signUp/);
+assert.match(auth,/onAuthStateChange/);
 console.log('Production Auth/RBAC API contract PASS');
