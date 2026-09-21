@@ -10,10 +10,10 @@ assert.match(rbac,/check \(role in \('OWNER','ADMIN','EDITOR','REVIEWER','AUDITO
 assert.match(rbac,/alter table public\.mta_profiles enable row level security/);
 assert.match(rbac,/mta_detainees_insert_editor/);
 assert.match(rbac,/mta_detainees_delete_admin/);
-assert.match(rbac,/mta_audit_row_change/);
+assert.match(rbac,/mta_audit_row_change/);\nassert.match(rbac,/security definer/);
 assert.match(edge,/supabase\.auth\.getUser\(\)/);
-assert.match(edge,/RBAC_WRITE_DENIED/);
-assert.match(edge,/mta_detainees/);
+assert.match(edge,/RBAC_WRITE_DENIED/);\nassert.match(edge,/const table="mta_"\+resource/);
+assert.match(edge,/const TABLES=new Set\(\["detainees","placements","movements","leaves","documents"\]\)/);
 assert.match(client,/mtaProductionApi/);
 assert.match(auth,/signInWithPassword/);
 assert.match(auth,/signUp/);
