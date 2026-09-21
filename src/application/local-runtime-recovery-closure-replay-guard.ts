@@ -22,7 +22,7 @@ export function assessLocalRuntimeRecoveryClosureReplay(input: {
   acknowledgementCertification: Parameters<typeof assertIntegratedLocalRuntimeRecoveryClosureCertification>[6];
   registry: LocalRuntimeRecoveryClosureRegistry;
 }): LocalRuntimeRecoveryClosureReplayResult {
-  assertIntegratedLocalRuntimeRecoveryClosureCertification(input.certification, input.continuity, input.receipt, input.closure, input.completionProof, input.acknowledgement, input.acknowledgementCertification);
+  assertIntegratedLocalRuntimeRecoveryClosureCertification({ ...input.certification, decisionFingerprint: input.completionProof.decisionFingerprint }, input.continuity, input.receipt, input.closure, input.completionProof, input.acknowledgement, input.acknowledgementCertification);
   const key = input.certification.certificationId;
   const existing = input.registry.get(key);
   if (existing === undefined) {
