@@ -17,11 +17,11 @@
 
 ## Closure rule
 
-P13 may be marked **CLOSED** only when P13-EXIT-01 through P13-EXIT-08 are all evidenced. Missing CI observation evidence keeps P13 in **IMPLEMENTED CONTRACTS / OBSERVATION PENDING** even when source contracts and tests are present.
+P13 may be marked **CLOSED** only when P13-EXIT-01 through P13-EXIT-08 are all evidenced. Missing CI observation evidence keeps P13 in **IMPLEMENTED CONTRACTS / OBSERVATION PENDING**; this condition no longer applies to the current closure candidate because controlled-nonprod evidence is present.
 
 ## Current assessment
 
-As of commit `d96429e13728a274943447d5770e3af434ca1ca8`, P13-EXIT-01 through P13-EXIT-05 and P13-EXIT-08 retain repository evidence. P13-EXIT-06 is now evidenced by GitHub Actions Domain CI Run #1301 (`35562575271`): static gate, production typecheck, test typecheck, JavaScript regression, TypeScript domain tests, controlled execution evidence harness, evidence validation and artifact upload all completed successfully. The controlled execution artifact was uploaded as artifact `10623155809`. P13-EXIT-07 is synchronized by this status and changelog update. The Cloudflare workflow remains validation-only and is not required to satisfy P13-EXIT-06.
+As of commit `d67cc9496cba8bdbea653e609e461c84c49c1de4`, all eight exit criteria are evidenced. P13-EXIT-06 is evidenced by Domain CI Run #1301 (`35562575271`) with successful static gate, production typecheck, test typecheck, JavaScript regression, TypeScript domain tests, controlled execution evidence harness, evidence validation and artifact upload; artifact `10623155809` was uploaded successfully. Domain CI Run #1304 (`35562708882`) subsequently confirmed the synchronized closure documentation also passes the complete CI pipeline. The Cloudflare workflow remains validation-only and is not required to satisfy P13-EXIT-06.
 
 ## Non-goals
 
