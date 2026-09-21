@@ -1,0 +1,3 @@
+import assert from "node:assert/strict";import test from "node:test";import{evaluateCompleteness}from "../src/domain/quality/completeness-contract.js";
+test("P10.9 marks fully present verified synthetic data complete",()=>assert.deepEqual(evaluateCompleteness([{field:"registrationNumber",required:true,present:true,verified:true}]),{complete:true,missing:[],unverified:[]}));
+test("P10.9 distinguishes missing and unverified fields",()=>assert.deepEqual(evaluateCompleteness([{field:"registrationNumber",required:true,present:false,verified:false},{field:"status",required:true,present:true,verified:false}]),{complete:false,missing:["registrationNumber"],unverified:["status"]}));
