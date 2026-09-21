@@ -1,66 +1,42 @@
 # MTA DETENI — Audit Remediation Priority
 
 **Audit baseline:** `main` / terminal governed range `P13.260881–274880`
-**Audit date:** 2026-09-17
+**Audit date:** 2026-09-21
 **Mode:** Integrated application audit — architecture, domain, security, runtime, CI, reporting, QR, offline/local and deployment boundaries
 
 ## Audit conclusion
 
-The MTA DETENI architecture is coherent and does not require a rebuild from the beginning. The current priority is **integration proof and runtime evidence**, not additional checkpoint expansion.
+The audit remediation cycle for the CI/P1/P13 evidence boundary is complete. The architecture does not require a rebuild from the beginning. The completed findings were repaired at their canonical source/test boundary and re-run through controlled-nonprod CI.
 
-P13 remains OPEN because P13-EXIT-06 still requires observable successful controlled-nonprod workflow execution and its evidence artifact. Contract-level implementation and source inspection are not treated as runtime certification.
+### Findings closed in this remediation cycle
 
-## Priority 0 — Blocking closure evidence
+1. CI static contract false negatives and stale P13 state assertions.
+2. Production/test TypeScript syntax and contract mismatches exposed during executable regression.
+3. P13 terminal identity/replay fixture mismatches that caused false conflict or incomplete identity binding.
+4. Report snapshot whitespace-only identity acceptance.
+5. P13 documentation/status contradictions after observable closure evidence became available.
+6. P1 controlled-nonprod seven-control runtime observation evidence.
+7. Final P13 EXIT-06 controlled execution evidence and artifact verification.
 
-1. Restore and observe a successful `domain-ci` execution for the current closure candidate.
-2. Require the controlled-nonprod harness and canonical evidence artifact to pass before P13 can be CLOSED.
-3. Preserve accessible step/log/artifact evidence for the closure candidate; do not infer PASS from source inspection.
+## Verified evidence
 
-## Priority 1 — Runtime integrity before feature expansion
+- Domain CI Run #1307: **PASS** for commit `9bf72b17fe6b2da4467c7846f0fc32735b938b0b`.
+- Run #1307 stages: static architecture gate, production typecheck, test typecheck, JavaScript regression, TypeScript domain tests, controlled execution evidence harness, evidence verification and artifact upload — all PASS.
+- Domain CI Run #1301: **PASS** for commit `d96429e13728a274943447d5770e3af434ca1ca8`; controlled execution evidence was `OBSERVED_PASS` with BUILD-5801, BUILD-5802, BUILD-5803, REG-5804 and REG-5805; artifact `10623155809` uploaded.
+- P1 Runtime Observation Run #138: **PASS** for commit `d96429e13728a274943447d5770e3af434ca1ca8`; all seven P1 controls were `OBSERVED_PASS`; artifact `10622772279` uploaded.
 
-1. Verify the P9 kernel chain in executable code: authentication → authorization → validation → domain → transaction → audit → outbox.
-2. Verify PostgreSQL adapter and transaction boundaries against an approved controlled-nonprod target without performing migrations or live production execution.
-3. Verify idempotency and optimistic-concurrency behavior for critical mutations.
-4. Verify audit writer/verifier canonical hash material, immutability, tamper detection and audit-failure behavior.
-5. Verify private storage and document handling boundaries.
-6. Verify observability and deterministic test harnesses.
+## Remaining engineering work — not failures
 
-## Priority 2 — Application/domain integration
+The following are deliberate next-stage engineering gates, not unresolved audit failures:
 
-1. Reconcile blueprint requirements against actual application modules and routes.
-2. Verify detainee, placement, movement, leave, escort, document, export, emergency, reconciliation and exception workflows as one coherent application.
-3. Ensure API handlers remain thin and business rules remain in application/domain services.
-4. Verify RBAC/ABAC, scope, duty assignment and segregation-of-duties enforcement at the server boundary.
+1. Integrated synthetic end-to-end domain journey.
+2. Offline/LAN runtime and reconnect/reconciliation validation.
+3. Daily Guard Report + QR + device/browser acceptance.
+4. Controlled-nonprod PostgreSQL adapter execution, only after governance clearance and approved target.
+5. Cloudflare controlled-nonprod validation/deployment gate, only after explicit governance clearance.
+6. Backup/restore and disaster-recovery validation.
 
-## Priority 3 — Document/reporting readiness
-
-1. Verify Daily Guard Report chain: operational records → validation → mapping → template → renderer → preview → review/approval → final document → hash/audit/archive.
-2. Verify document template registry, field mapping, lifecycle, SHA-256 and audit references.
-3. Verify synthetic fixtures reproduce representative report/document outputs without production data.
-
-## Priority 4 — QR and operational-device readiness
-
-1. Verify room, detainee and temporary-leave QR identity flows remain distinct from authorization.
-2. Verify camera scanning and manual fallback across supported browsers.
-3. Verify canonical QR print renderer and prevent obsolete renderer paths from becoming authoritative.
-4. Verify QR resolution remains behind authentication/RBAC/policy boundaries in the real application runtime.
-
-## Priority 5 — Deployment and continuity resilience
-
-1. Verify Cloudflare online runtime through an approved controlled non-production target.
-2. Verify local/offline runtime adapter and LAN access design on multiple devices.
-3. Verify synchronization/reconciliation boundaries between local and cloud runtimes after reconnect.
-4. Verify backup/restore and recovery procedures before any production authorization.
-
-## Priority 6 — Hygiene and documentation
-
-1. Keep `PROJECT_STATUS.md` authoritative.
-2. Mark stale planning/status documents clearly as historical.
-3. Keep changelog complete and append-only in practice.
-4. Keep one canonical contract/renderer/runtime path where duplicate compatibility surfaces exist.
-5. Do not manufacture numbered P13 checkpoints merely to increase progress counts.
-
-## Explicit non-goals
+## Governance locks remain active
 
 - No schema migration.
 - No live PostgreSQL execution outside an explicitly approved controlled-nonprod target.
@@ -71,4 +47,4 @@ P13 remains OPEN because P13-EXIT-06 still requires observable successful contro
 
 ## Completion principle
 
-A remediation is complete only when implementation, regression coverage, integration evidence, observability and documentation agree. P13 remains OPEN until all eight P13 exit criteria have observable evidence.
+A finding is closed only when implementation, regression coverage, integration evidence, observability and documentation agree. The current CI/P1/P13 audit findings satisfy that condition. Future gates above remain open as engineering work, not silently reclassified as completed.
