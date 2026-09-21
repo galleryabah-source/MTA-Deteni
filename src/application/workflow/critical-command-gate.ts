@@ -6,6 +6,7 @@ export interface CriticalCommandInput {
   domainStateValid: boolean;
   auditAvailable: boolean;
   outboxRequired: boolean;
+  outboxAvailable: boolean;
 }
 
 export type CriticalCommandDecision =
@@ -23,6 +24,6 @@ export function evaluateCriticalCommand(input: CriticalCommandInput): CriticalCo
   if (input.idempotencyOutcome === "REPLAY") return "REPLAY";
   if (!input.domainStateValid) return "DENY_STATE";
   if (!input.auditAvailable) return "FAIL_SAFE_AUDIT";
-  if (input.outboxRequired === false) return "EXECUTE";
-  return "FAIL_SAFE_OUTBOX";
+  if (input.outboxRequired && !input.outboxAvailable) return "FAIL_SAFE_OUTBOX";
+  return "EXECUTE";
 }
