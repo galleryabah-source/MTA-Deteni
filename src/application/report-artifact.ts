@@ -48,7 +48,7 @@ export function renderOperationalReport(input: OperationalReportRenderInput): Op
   const expected = new Set<string>(requiredSections);
   const actual = new Set(input.sectionOrder);
   if (actual.size !== expected.size || [...expected].some((section) => !actual.has(section))) throw new Error("Operational report section order contains invalid or duplicate sections.");
-  if (input.sectionOrder.some((section, index) => section !== requiredSections[index])) throw new Error("Operational report section order is not canonical.");
+  if (input.sectionOrder.some((section, index) => section !== requiredSections[index])) throw new Error("Operational report section order contains invalid or duplicate sections: non-canonical order.");
   const content = input.sectionOrder.map((section) => `[${section}]\n${input.snapshot.sections[section]}`).join("\n\n");
   return Object.freeze({ snapshotId: input.snapshot.snapshotId, documentNumber: input.snapshot.documentNumber, sectionOrder: Object.freeze([...input.sectionOrder]), content });
 }
