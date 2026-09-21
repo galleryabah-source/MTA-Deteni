@@ -1,0 +1,3 @@
+import assert from "node:assert/strict";import test from "node:test";import{validateTimelineEvent}from "../src/domain/timeline/detainee-timeline-contract.js";
+test("P10.7 accepts synthetic timeline event",()=>assert.deepEqual(validateTimelineEvent({eventId:"EV-1",detaineeId:"SYN-1",type:"MOVEMENT",occurredAt:"2026-09-21T08:00:00Z",sourceId:"MOV-1",verified:false}),[]));
+test("P10.7 rejects malformed timeline event",()=>assert.deepEqual(validateTimelineEvent({eventId:"",detaineeId:"",type:"BAD",occurredAt:"bad",sourceId:"",verified:"x"}),["INVALID_EVENT_ID","INVALID_DETAINEE_ID","INVALID_EVENT_TYPE","INVALID_OCCURRED_AT","INVALID_SOURCE_ID","INVALID_VERIFICATION_STATE"]));
