@@ -15,7 +15,7 @@ function chain(fingerprint = "FP-PUB") {
 
 function prepared(fingerprint = "FP-PUB", publicationId = "PUB-P") {
   const c = chain(fingerprint);
-  const projection = createLocalRuntimeRecoveryOperationalAuditProjection({ projectionId: "PROJ-PUB", evidenceCertification: c.evidenceCertification, evidence: c.evidence });
+  const projection = createLocalRuntimeRecoveryOperationalAuditProjection({ projectionId: `PROJ-PUB-${publicationId}`, evidenceCertification: c.evidenceCertification, evidence: c.evidence });
   const projectionCertification = certifyLocalRuntimeRecoveryOperationalAuditProjection({ certificationId: "PROJCERT-PUB", projection, evidenceCertification: c.evidenceCertification });
   const envelope = createLocalRuntimeRecoveryOperationalAuditPublicationEnvelope({ publicationId, certification: projectionCertification, projection });
   return { c, projection, projectionCertification, envelope };
