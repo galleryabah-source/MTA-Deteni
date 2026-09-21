@@ -94,6 +94,6 @@ export function assertMigrationFreeze(matrix: SchemaContractMatrix): void {
 
 export function assertNoUnreviewedSchemaDrift(matrix: SchemaContractMatrix): void {
   assertMigrationFreeze(matrix);
-  const blocking = matrix.entries.filter((entry) => entry.status === "MISSING" || entry.status === "DRIFT");
+  const blocking = matrix.entries.filter((entry) => entry.status === "MISSING" || entry.status === "DRIFT" || entry.status === "NOT_INSPECTED");
   if (blocking.length > 0) throw new Error(`Schema contract has ${blocking.length} unreviewed blocking difference(s).`);
 }
