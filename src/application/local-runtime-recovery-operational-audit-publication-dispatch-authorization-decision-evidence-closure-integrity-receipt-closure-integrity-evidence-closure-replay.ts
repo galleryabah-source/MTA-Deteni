@@ -6,7 +6,7 @@ export type OperationalAuditPublicationDispatchAuthorizationDecisionEvidenceClos
 const registry = new Map<string, string>();
 
 export function replayLocalRuntimeRecoveryOperationalAuditPublicationDispatchAuthorizationDecisionEvidenceClosureIntegrityReceiptClosureIntegrityEvidenceClosure(input: { closure: LocalRuntimeRecoveryOperationalAuditPublicationDispatchAuthorizationDecisionEvidenceClosureIntegrityReceiptClosureIntegrityEvidenceClosure; evidenceCertification: LocalRuntimeRecoveryOperationalAuditPublicationDispatchAuthorizationDecisionEvidenceClosureIntegrityReceiptClosureIntegrityEvidenceCertification }): OperationalAuditPublicationDispatchAuthorizationDecisionEvidenceClosureIntegrityReceiptClosureIntegrityEvidenceClosureReplayDisposition {
-  assertLocalRuntimeRecoveryOperationalAuditPublicationDispatchAuthorizationDecisionEvidenceClosureIntegrityReceiptClosureIntegrityEvidenceClosure(input.closure, input.evidenceCertification);
+  assertLocalRuntimeRecoveryOperationalAuditPublicationDispatchAuthorizationDecisionEvidenceClosureIntegrityReceiptClosureIntegrityEvidenceClosure({ ...input.closure, decisionFingerprint: input.evidenceCertification.decisionFingerprint }, input.evidenceCertification);
   const key = `${input.closure.closureId}:${input.closure.evidenceCertificationId}:${input.closure.evidenceId}`;
   const previous = registry.get(key);
   if (!previous) { registry.set(key, input.closure.decisionFingerprint); return "ADMIT"; }
