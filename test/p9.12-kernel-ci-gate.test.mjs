@@ -1,0 +1,3 @@
+import {describe,it,expect} from 'vitest';import {evaluateCiGate} from '../src/infrastructure/testing/kernel-ci-gate.mjs';
+const b={'dependency-install':true,'test-harness':true,typecheck:true,'secret-boundary':true,secretsDetected:false};
+describe('P9.12 CI gate',()=>{it('accepts complete evidence',()=>expect(evaluateCiGate(b).status).toBe('CI_GATE_READY'));it('fails on missing gate',()=>expect(()=>evaluateCiGate({...b,typecheck:false})).toThrow('CI_GATE_NOT_READY:typecheck'));it('fails on secret detection',()=>expect(()=>evaluateCiGate({...b,secretsDetected:true})).toThrow('CI_GATE_SECRET_BOUNDARY_FAILED'));it('does not claim execution',()=>expect(evaluateCiGate(b).executionObserved).toBe(false))});
