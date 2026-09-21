@@ -28,7 +28,7 @@ test("P13.20161-20240: closure replay is deterministic and drift-safe", () => {
 
 test("P13.20241-20320: integrated closure certification remains review-only", () => {
   resetLocalRuntimeRecoveryOperationalAuditPublicationDispatchAuthorizationDecisionEvidenceClosureIntegrityReceiptClosureIntegrityEvidenceClosureReplayRegistry();
-  const certified = certifyLocalRuntimeRecoveryOperationalAuditPublicationDispatchAuthorizationDecisionEvidenceClosureIntegrityReceiptClosureIntegrityEvidenceClosure({ certificationId:"EC-C", evidenceCertification:evidence });
+  const certified = certifyLocalRuntimeRecoveryOperationalAuditPublicationDispatchAuthorizationDecisionEvidenceClosureIntegrityReceiptClosureIntegrityEvidenceClosure({ certificationId:"EC-C", closureId:"EC-CLOSURE", evidenceCertification:evidence });
   assert.equal(certified.certified, true);
   assert.equal(certified.replayDisposition, "ADMIT");
   assert.equal(certified.authorizationGranted, false);
