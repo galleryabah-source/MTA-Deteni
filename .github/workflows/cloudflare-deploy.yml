@@ -44,6 +44,7 @@ jobs:
           test -n "$CF_ACCOUNT_ID"
           case "$CF_ACCOUNT_ID" in *[!A-Za-z0-9_-]*) echo 'Cloudflare account id contains unsupported characters after whitespace normalization'; exit 1;; esac
           echo "Cloudflare target: $DEPLOY_WORKER_NAME"
+          CLOUDFLARE_ACCOUNT_ID="$CF_ACCOUNT_ID" CLOUDFLARE_API_TOKEN="$CF_API_TOKEN" wrangler whoami
 
       - name: Deploy all MTA DETENI modules
         env:
@@ -52,7 +53,7 @@ jobs:
         run: |
           CF_ACCOUNT_ID="$(printf '%s' "$CLOUDFLARE_ACCOUNT_ID" | tr -d '[:space:]')"
           CF_API_TOKEN="$(printf '%s' "$CLOUDFLARE_API_TOKEN" | sed 's/[[:space:]]*$//')"
-          CLOUDFLARE_ACCOUNT_ID="$CF_ACCOUNT_ID" CLOUDFLARE_API_TOKEN="$CF_API_TOKEN" wrangler deploy --name "$DEPLOY_WORKER_NAME"
+          CLOUDFLARE_ACCOUNT_ID="$CF_ACCOUNT_ID" CLOUDFLARE_API_TOKEN="$CF_API_TOKEN" wrangler deploy --config wrangler.toml --name "$DEPLOY_WORKER_NAME" --log-level debug
 
       - name: Verify deployment artifact contract
         run: |
