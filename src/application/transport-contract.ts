@@ -1,4 +1,5 @@
 import type { ActorContext, DomainResult } from "../domain/shared/contracts.js";
+import { DomainError } from "../domain/shared/errors.js";
 
 export type HttpMethod = "GET" | "POST" | "PATCH";
 
