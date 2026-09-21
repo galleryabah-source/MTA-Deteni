@@ -8,7 +8,7 @@ import type { LocalRuntimeRecoveryFinalClosureAuditEvidenceCertification } from 
 import { createLocalRuntimeRecoveryOperationalAuditPublicationRequest } from "../src/application/local-runtime-recovery-operational-audit-publication-request.js";
 import { replayLocalRuntimeRecoveryOperationalAuditPublicationRequest, resetLocalRuntimeRecoveryOperationalAuditPublicationRequestReplayRegistry } from "../src/application/local-runtime-recovery-operational-audit-publication-request-replay.js";
 
-function prepared(fingerprint = "FP-RQRP") {
+function prepared(fingerprint = "FP-RQRP", suffix = "BASE") {
   const evidence = { evidenceId: "AE-RQRP", auditCertificationId: "AUDCERT-RQRP", auditRecordId: "AUD-RQRP", closureCertificationId: "CERT-RQRP", closureEvidenceId: "CE-RQRP", continuityCertificationId: "CONT-RQRP", receiptId: "RCP-RQRP", closureId: "CLS-RQRP", executionId: "EXEC-RQRP", dispatchId: "DISP-RQRP", acknowledgementId: "ACK-RQRP", decisionFingerprint: fingerprint, complete: true, syntheticOnly: true } as const;
   const evidenceCertification = { certificationId: "AECERT-RQRP", evidenceId: "AE-RQRP", auditCertificationId: "AUDCERT-RQRP", auditRecordId: "AUD-RQRP", closureCertificationId: "CERT-RQRP", closureEvidenceId: "CE-RQRP", decisionFingerprint: fingerprint, replayDisposition: "ADMIT", certified: true, syntheticOnly: true } as LocalRuntimeRecoveryFinalClosureAuditEvidenceCertification;
   const projection = createLocalRuntimeRecoveryOperationalAuditProjection({ projectionId: "PROJ-RQRP", evidenceCertification, evidence });
