@@ -1,3 +1,5 @@
+import { createHash } from "node:crypto";
+
 export const PUBLICATION_ADMISSION_VERSION = "P13.16441-16560-v1";
 
 export type AdmissionDecision = "ADMIT" | "REPLAY" | "CONFLICT" | "REJECT";
@@ -48,9 +50,7 @@ const canonical = (value: unknown): string => {
 };
 
 export function fingerprintAdmission(input: Omit<PublicationAdmission, "admissionFingerprint">): string {
-  let hash = 0;
-  for (const ch of canonical(input)) hash = (hash * 31 + ch.charCodeAt(0)) >>> 0;
-  return hash.toString(16).padStart(8, "0");
+  return createHash("sha256").update(canonical(input), "utf8").digest("hex");
 }
 
 export function admitPublication(
@@ -95,8 +95,11 @@ export function admitPublication(
       prior.projectionId === request.projectionId &&
       prior.certificationId === request.certificationId &&
       prior.sourceFingerprint === request.sourceFingerprint;
-    if (sameIdentity && prior.admissionFingerprint === fingerprint) return { ...material, decision: "REPLAY", admissionFingerprint: fingerprint };
-    throw new Error("PUBLICATION_ADMISSION_CONFLICT");
+    if (sameIdentity && prior.admissionFingerprint === fingerprint) {
+      return { ...material, decision: "REPLAY", admissionFingerprint: fingerprint };
+    }
+    return { ...material, decision: "CONFLICT", admissionFingerprint: fingerprint };
   }
+
   return { ...material, admissionFingerprint: fingerprint };
 }
