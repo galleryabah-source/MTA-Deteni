@@ -9,12 +9,12 @@ export type IntegratedAcceptanceStage =
 
 export type IntegratedAcceptanceInput = Readonly<{
   journeyId: string;
-  syntheticOnly: true;
-  domainReady: true;
-  offlineReconnectReady: true;
-  qrReady: true;
-  reportReady: true;
-  auditOutboxReady: true;
+  syntheticOnly: boolean;
+  domainReady: boolean;
+  offlineReconnectReady: boolean;
+  qrReady: boolean;
+  reportReady: boolean;
+  auditOutboxReady: boolean;
   lifecycleJourneyId: string;
   offlineSessionId: string;
   reportSnapshotId: string;
