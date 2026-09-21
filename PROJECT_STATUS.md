@@ -3,7 +3,7 @@
 **Foundation:** v1.134+
 **Current Track:** Integrated synthetic runtime acceptance / offline-LAN continuity / reporting-QR readiness
 **Branch:** `main`
-**Latest implementation checkpoint:** Domain CI Run #1307 completed successfully on commit `9bf72b17fe6b2da4467c7846f0fc32735b938b0b`; P1 controlled-nonprod runtime evidence is OBSERVED_PASS; P13.260881–274880 is CLOSED; the active workstream is integrated synthetic runtime acceptance and resilience
+**Latest implementation checkpoint:** Domain CI Run #1310 completed successfully on commit `e228c9fbaa2dfe8be572d99a79f76034b1d6625a`; audit remediation documentation is synchronized; P1 controlled-nonprod runtime evidence is OBSERVED_PASS; P13.260881–274880 is CLOSED; the active workstream is integrated synthetic runtime acceptance and resilience
 
 ## P9 kernel implementation
 
@@ -41,6 +41,7 @@
 ## Latest CI observation boundary
 
 - Commit `d96429e13728a274943447d5770e3af434ca1ca8` completed GitHub Actions Domain CI Run #1301 (`35562575271`) successfully.
+- Subsequent documentation/remediation synchronization was validated by Domain CI Run #1310 on commit `e228c9fbaa2dfe8be572d99a79f76034b1d6625a`, which also completed successfully.
 - Static architecture gate, production typecheck, test typecheck, JavaScript regression, TypeScript domain tests, controlled execution evidence harness, evidence validation and artifact upload all completed successfully.
 - Execution evidence status was `OBSERVED_PASS` with exactly five canonical controls: BUILD-5801, BUILD-5802, BUILD-5803, REG-5804 and REG-5805.
 - Controlled execution artifact `10623155809` was successfully uploaded.
