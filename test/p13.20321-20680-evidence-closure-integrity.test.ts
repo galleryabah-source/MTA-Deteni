@@ -26,7 +26,7 @@ test("P13.20441-20560: integrity replay is deterministic", () => {
 
 test("P13.20561-20680: integrated integrity certification remains non-executable", () => {
   resetLocalRuntimeRecoveryOperationalAuditPublicationDispatchAuthorizationDecisionEvidenceClosureIntegrityReceiptClosureIntegrityEvidenceClosureIntegrityReplayRegistry();
-  const certified = certifyLocalRuntimeRecoveryOperationalAuditPublicationDispatchAuthorizationDecisionEvidenceClosureIntegrityReceiptClosureIntegrityEvidenceClosureIntegrity({ certificationId:"ECI-C", closureCertification:closure });
+  const certified = certifyLocalRuntimeRecoveryOperationalAuditPublicationDispatchAuthorizationDecisionEvidenceClosureIntegrityReceiptClosureIntegrityEvidenceClosureIntegrity({ certificationId:"ECI-C", integrityId:"ECI-C-INTEGRITY", closureCertification:closure });
   assert.equal(certified.certified, true);
   assert.equal(certified.replayDisposition, "ADMIT");
   assert.equal(certified.externalTransportRequested, false);
