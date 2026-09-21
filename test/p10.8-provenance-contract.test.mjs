@@ -1,0 +1,3 @@
+import assert from "node:assert/strict";import test from "node:test";import{validateProvenance}from "../src/domain/provenance/provenance-contract.js";
+test("P10.8 accepts synthetic provenance",()=>assert.deepEqual(validateProvenance({provenanceId:"PRV-1",sourceType:"DOMAIN_EVENT",sourceId:"EV-1",capturedAt:"2026-09-21T08:00:00Z",verified:false}),[]));
+test("P10.8 rejects invalid provenance",()=>assert.deepEqual(validateProvenance({provenanceId:"",sourceType:"BAD",sourceId:"",capturedAt:"bad",verified:"x"}),["INVALID_PROVENANCE_ID","INVALID_SOURCE_TYPE","INVALID_SOURCE_ID","INVALID_CAPTURED_AT","INVALID_VERIFICATION_STATE"]));

@@ -1,0 +1,4 @@
+export const PROVENANCE_CONTRACT_VERSION = "P10.8-INFERRED-v1";
+export type Provenance = { provenanceId:string; sourceType:"USER_ENTRY"|"DOMAIN_EVENT"|"DOCUMENT"|"IMPORT"; sourceId:string; capturedAt:string; verified:boolean };
+const ID=/^[A-Za-z0-9._-]{1,128}$/;
+export function validateProvenance(p:Provenance):string[]{const x:string[]=[];if(!ID.test(p.provenanceId))x.push("INVALID_PROVENANCE_ID");if(!["USER_ENTRY","DOMAIN_EVENT","DOCUMENT","IMPORT"].includes(p.sourceType))x.push("INVALID_SOURCE_TYPE");if(!ID.test(p.sourceId))x.push("INVALID_SOURCE_ID");if(Number.isNaN(Date.parse(p.capturedAt)))x.push("INVALID_CAPTURED_AT");if(typeof p.verified!=="boolean")x.push("INVALID_VERIFICATION_STATE");return x;}
