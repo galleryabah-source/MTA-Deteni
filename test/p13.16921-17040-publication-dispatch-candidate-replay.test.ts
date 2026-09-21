@@ -27,7 +27,7 @@ function prepared(fingerprint: string, suffix = "BASE") {
 test("P13.16921-17040: dispatch candidate replay is ADMIT/REPLAY/CONFLICT", () => {
   resetLocalRuntimeRecoveryOperationalAuditPublicationDispatchCandidateReplayRegistry();
   const first = prepared("FP-DCR");
-  const second = prepared("FP-CONFLICT");
+  const second = prepared("FP-CONFLICT", "CONFLICT");
   const args = { candidate: first.candidate, requestCertification: first.requestCertification };
   assert.equal(replayLocalRuntimeRecoveryOperationalAuditPublicationDispatchCandidate(args), "ADMIT");
   assert.equal(replayLocalRuntimeRecoveryOperationalAuditPublicationDispatchCandidate(args), "REPLAY");
