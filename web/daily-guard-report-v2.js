@@ -2,6 +2,24 @@
   'use strict';
   const TYPE='DAILY_GUARD_REPORT';
   const VERSION='DAILY-GUARD-v1.1';
+  const WORKFLOW=Object.freeze({
+    DRAFT:'DRAFT',
+    VALIDATED:'VALIDATED',
+    GENERATED:'GENERATED',
+    IN_REVIEW:'IN_REVIEW',
+    CHANGES_REQUESTED:'CHANGES_REQUESTED',
+    APPROVED:'APPROVED',
+    FINAL:'FINAL'
+  });
+  const TRANSITIONS=Object.freeze({
+    DRAFT:['VALIDATED'],
+    VALIDATED:['GENERATED'],
+    GENERATED:['IN_REVIEW'],
+    IN_REVIEW:['APPROVED','CHANGES_REQUESTED'],
+    CHANGES_REQUESTED:['DRAFT'],
+    APPROVED:['FINAL'],
+    FINAL:[]
+  });
   const PAGE_DEFS=Object.freeze([
     ['cover','Cover'],['addressee','Addressee'],['handover','Team Handover'],
     ['block_control','Detainee Block Checking / Control'],['guard_post','Guard-Post Readiness'],
@@ -20,6 +38,25 @@
     return Array.from(new Uint8Array(d),b=>b.toString(16).padStart(2,'0')).join('');
   }
   function required(v,code){const x=String(v??'').trim();if(!x)throw new Error(code);return x}
+  function canTransition(from,to){return Array.isArray(TRANSITIONS[from])&&TRANSITIONS[from].includes(to)}
+  function transitionStatus(r,to){
+    const from=r.status||WORKFLOW.DRAFT;
+    if(!canTransition(from,to))throw new Error('REPORT_INVALID_TRANSITION:'+from+'>'+to);
+    r.status=to;
+    return r;
+  }
+  function lifecycleAction(status){
+    const map={
+      DRAFT:{label:'Validate',next:WORKFLOW.VALIDATED},
+      VALIDATED:{label:'Generate',next:WORKFLOW.GENERATED},
+      GENERATED:{label:'Start Review',next:WORKFLOW.IN_REVIEW},
+      IN_REVIEW:{label:'Approve',next:WORKFLOW.APPROVED,alternate:{label:'Request Changes',next:WORKFLOW.CHANGES_REQUESTED}},
+      APPROVED:{label:'Finalize',next:WORKFLOW.FINAL},
+      CHANGES_REQUESTED:{label:'Revise',next:WORKFLOW.DRAFT},
+      FINAL:{label:'Final',next:null}
+    };
+    return map[status]||map.DRAFT;
+  }
   function validate(r){
     required(r.reportDate,'REPORT_DATE_REQUIRED');required(r.officeId,'REPORT_OFFICE_REQUIRED');
     required(r.reguId,'REPORT_REGU_REQUIRED');required(r.shiftId,'REPORT_SHIFT_REQUIRED');
@@ -86,5 +123,5 @@
     r.filename='Laporan_Harian_Regu_Jaga_'+r.reportDate+'_'+String(r.reguId).replace(/[^A-Za-z0-9_-]/g,'_')+'_'+String(r.shiftId).replace(/[^A-Za-z0-9_-]/g,'_')+'.pdf';
     return r;
   }
-  window.mtaDailyGuardReport=Object.freeze({TYPE,VERSION,PAGE_DEFS,canonicalize,sha256Hex,validate,prepare,render,ensureStyles});
+  window.mtaDailyGuardReport=Object.freeze({TYPE,VERSION,WORKFLOW,TRANSITIONS,PAGE_DEFS,canonicalize,sha256Hex,validate,canTransition,transitionStatus,lifecycleAction,prepare,render,ensureStyles});
 })();
