@@ -32,6 +32,6 @@ export function assertLocalRuntimeSafetyEnvelope(envelope: LocalRuntimeSafetyCer
   if (!envelope.certified || !envelope.syntheticOnly) throw new Error("Local runtime safety envelope is not certified synthetic-only.");
   if (!envelope.envelopeId.trim() || !envelope.journeyId.trim() || !envelope.certificationId.trim() || !envelope.evidenceId.trim() || !envelope.dispositionId.trim()) throw new Error("Local runtime safety envelope identity is required.");
   const expected = resolveLocalRuntimeRecoveryDisposition({ scenario: envelope.scenario, failureClass: envelope.operatorReviewRequired ? "EXECUTION_REJECTED" : envelope.safeToRetry ? (envelope.scenario === "MALFORMED_REQUEST" ? "REQUEST_REJECTED" : envelope.scenario === "EXPIRED_HANDSHAKE" ? "HANDSHAKE_REJECTED" : "SESSION_SCOPE_REJECTED") : "EXECUTION_REJECTED" });
-  if (envelope.disposition !== expected.disposition || envelope.safeToRetry !== expected.retryAllowed || envelope.operatorReviewRequired !== expected.requiresOperatorReview) throw new Error("Local runtime safety envelope policy drift.");
+  if (envelope.disposition !== expected.disposition || envelope.safeToRetry !== expected.retryAllowed || envelope.operatorReviewRequired !== expected.requiresOperatorReview) throw new Error("Local runtime safety envelope policy drift: automatic retry/operator review mismatch.");
   if (envelope.operatorReviewRequired && envelope.safeToRetry) throw new Error("Local runtime safety envelope cannot permit automatic retry when operator review is required.");
 }
