@@ -38,6 +38,13 @@
 - Optimistic concurrency execution contract provides deterministic ACCEPT/STALE_VERSION semantics.
 - P1 remains pending an actual executable repository run with observable evidence; contract-level tests alone do not establish runtime certification.
 
+## Latest CI observation boundary
+
+- The latest implementation commit `e56685922ffe4ebd19498426e7d7f34091871595` restores the canonical JavaScript regression command required by ARCH-5811: `node --test test/**/*.test.mjs`.
+- As of the latest repository inspection, no observable workflow run or commit status is associated with that commit through the available GitHub Actions status surfaces.
+- This absence is treated as **NOT_OBSERVED**, never as PASS or certification.
+- The next repository-triggered CI run remains the required evidence boundary before P1/P9/P13 certification can advance.
+
 ## CI evidence recovery and hardening
 
 - CI remains explicitly configured for `controlled-nonprod`, with deterministic typecheck/test stages and mandatory execution evidence validation plus artifact upload.
