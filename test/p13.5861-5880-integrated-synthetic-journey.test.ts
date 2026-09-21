@@ -22,7 +22,7 @@ test("P13.5861 integrated synthetic journey preserves domain ownership boundarie
       save: async (value) => { placements.set(value.detaineeId, value); if (value.active) beds.set(value.bedId, value.detaineeId); },
     },
     now: fixedNow,
-    canManage: (a) => a.domain === "KAMTIB",
+    canManage: (a) => a.domain === "KAMTIB" || a.domain === "HEAD_RUDENIM" || a.domain === "SUBBAG_TU",
   });
   const movement = new MovementService({
     repository: {
