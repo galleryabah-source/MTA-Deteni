@@ -21,7 +21,7 @@ assert.equal(c.filterReports(reports,{date:'2026-09-21',regu:'Bravo',shift:'Pagi
 assert.equal(c.filterReports(reports,{regu:'alpha'})[0].documentId,'R3');
 
 const history=c.buildRevisionHistory(reports,'R2');
-assert.deepEqual(history.map(x=>x.documentId),['R1','R2']);
+assert.deepEqual(Array.from(history, x=>x.documentId),['R1','R2']);
 assert.equal(c.latestRevisionMap(reports).get('R1').documentId,'R2');
 
 const manifest=c.createBulkManifest(reports,['R1','R2'],{date:'2026-09-21',regu:'Bravo',shift:'Pagi'});
