@@ -27,7 +27,7 @@ test("P13.20841-20960: evidence replay is deterministic and detects drift", () =
 
 test("P13.20961-21080: integrated evidence certification remains review-only", () => {
   resetLocalRuntimeRecoveryOperationalAuditPublicationDispatchAuthorizationDecisionEvidenceClosureIntegrityReceiptClosureIntegrityEvidenceClosureIntegrityEvidenceReplayRegistry();
-  const certified = certifyLocalRuntimeRecoveryOperationalAuditPublicationDispatchAuthorizationDecisionEvidenceClosureIntegrityReceiptClosureIntegrityEvidenceClosureIntegrityEvidence({ certificationId:"ECIE-C", integrityCertification:integrity });
+  const certified = certifyLocalRuntimeRecoveryOperationalAuditPublicationDispatchAuthorizationDecisionEvidenceClosureIntegrityReceiptClosureIntegrityEvidenceClosureIntegrityEvidence({ certificationId:"ECIE-C", evidenceId:"ECIE-C-EVIDENCE", integrityCertification:integrity });
   assert.equal(certified.certified, true);
   assert.equal(certified.replayDisposition, "ADMIT");
   assert.equal(certified.authorizationGranted, false);
