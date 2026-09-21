@@ -32,7 +32,7 @@ const requiredSections = ["IDENTITAS_LAPORAN", "PERSONEL_REGU", "KONDISI_DETENI"
 
 export function validateReportSnapshot(snapshot: ReportSnapshot): void {
   assertReportGovernance(snapshot);
-  if (!snapshot.snapshotId || !snapshot.sourceVersion || !snapshot.documentNumber || !snapshot.approvalBinding) throw new Error("Report snapshot identity/approval binding is incomplete.");
+  if (!snapshot.snapshotId.trim() || !snapshot.sourceVersion.trim() || !snapshot.documentNumber.trim() || !snapshot.approvalBinding.trim()) throw new Error("Report snapshot identity/approval binding is incomplete.");
   for (const section of requiredSections) if (!(snapshot.sections[section] ?? "").trim()) throw new Error(`Missing mandatory report section: ${section}`);
 }
 
