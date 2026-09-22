@@ -20,7 +20,7 @@ async function printQR(kind,id){
  const d=read(),map=kind==='room'?'room':kind==='leave'?'leave':'detainee',q=d.qr?.[map]?.[id];
  const x=kind==='room'?d.rooms?.find(v=>v.id===id):kind==='leave'?d.leaves?.find(v=>v.id===id):d.detainees?.find(v=>v.id===id);
  if(!q||!x){window.toast?.('QR belum siap untuk dicetak');return false}
- const payload='mta://'+kind+'/'+id+'/'+q.token;
+ const payload='mta://'+kind+'/'+id+'/'+String(q.token||'').replace(/[^A-Za-z0-9._-]+$/g,'');
  const label=kind==='room'?((x.block||'')+' / '+(x.room||x.name||id)):kind==='leave'?(x.destination||id):((x.code||id)+' · '+(x.name||''));
  return printPayload(kind,id,payload,label)
 }
@@ -30,7 +30,7 @@ function interceptQrPrintButtons(){
   const txt=String(b.textContent||'').trim();
   if(!/^(Cetak\s*\/\s*PDF|Cetak QR)$/i.test(txt))return;
   const root=b.closest('.modal,.dialog,[role="dialog"]')||document;
-  const raw=String(root.textContent||'').match(/mta:\/\/(detainee|room|leave)\/([^\s/]+)\/([^\s]+)/i);
+  const raw=String(root.textContent||'').match(/mta:\/\/(detainee|room|leave)\/([A-Za-z0-9._-]+)\/([A-Za-z0-9._-]+?)(?=Cetak|\s|$)/i);
   if(!raw)return;
   e.preventDefault();e.stopPropagation();e.stopImmediatePropagation();
   const kind=raw[1].toLowerCase(),id=raw[2],payload='mta://'+kind+'/'+id+'/'+raw[3];
