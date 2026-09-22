@@ -37,11 +37,12 @@
 - Runtime device/handoff executable evidence: Domain CI Run #1489 **PASS**; CLOUD/DESKTOP, LAN/TABLET, LOCAL/SMARTPHONE capability contracts, certified handoff with pending reconciliation, and responsive invariants were executed successfully.
 - Physical device acceptance remains separate from synthetic CI evidence.
 - Documentation now distinguishes contract completion from runtime evidence.
+- F4 Daily Guard Report implementation now aggregates operational runtime state into DGR-v1 metrics, validates consistency/provenance before rendering/export, records report validation/render/export/print audit events, and binds the controlled Integrated Acceptance runtime to the same aggregation path. CI execution for the latest F4 commits is still pending/awaiting observable GitHub Actions evidence.
 
 ## Still open before production activation
 
 1. Physical Offline/LAN execution on the intended PC/local runtime, including real local persistence, reconnect/reconciliation, and device/network handoff acceptance.
-2. Daily Guard Report + QR + desktop/tablet/smartphone acceptance.
+2. Daily Guard Report + QR + desktop/tablet/smartphone acceptance; F4 implementation is complete, but physical/runtime acceptance remains open.
 4. Cloudflare controlled-nonprod runtime validation.
 6. Backup/restore and disaster-recovery execution evidence against an actual recoverable runtime/storage target; synthetic backup-chain and recovery certification are now executable but do not substitute for restore testing.
 7. Canonical scope-authorization model before tightening domain SELECT RLS.
