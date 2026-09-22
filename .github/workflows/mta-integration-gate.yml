@@ -32,6 +32,11 @@ jobs:
           grep -q 'QUEUE_DERIVED_FROM_AUDIT' web/mta-unified-shell-v2.js
           grep -q 'SHARED_STATE_EVENT' web/mta-unified-shell-v2.js
           grep -q 'MONITOR_DERIVED_STATE' web/mta-unified-shell-v2.js
+grep -q 'buildOperationalQueue' web/mta-unified-shell-v2.js
+grep -q 'buildMonitorMetrics' web/mta-unified-shell-v2.js
+grep -q 'JOURNEY_AUDIT_TO_QUEUE' web/mta-unified-shell-v2.js
+grep -q 'JOURNEY_STATE_TO_MONITOR' web/mta-unified-shell-v2.js
+grep -q 'REPORT_SOURCE_SHARED_STATE' web/mta-unified-shell-v2.js
           grep -q 'LEAVE_STATE_MACHINE' web/mta-unified-shell-v2.js
           grep -q 'mtaUnifiedJourneyContractTest' web/mta-unified-shell-v2.js
           grep -q 'JOURNEY_ACTIVE_DETAINEE' web/mta-unified-shell-v2.js
