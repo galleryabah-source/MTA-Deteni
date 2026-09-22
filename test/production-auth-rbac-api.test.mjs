@@ -16,7 +16,11 @@ assert.match(rbac,/mta_audit_row_change/);
 assert.match(rbac,/security definer/);
 
 assert.match(edge,/supabase\.auth\.getUser\(\)/);
-assert.match(edge,/RBAC_WRITE_DENIED/);
+assert.match(edge,/RBAC_ACTION_DENIED/);
+assert.match(edge,/GET:new Set\(\["OWNER","ADMIN","EDITOR","REVIEWER","AUDITOR"\]\)/);
+assert.match(edge,/POST:new Set\(\["OWNER","ADMIN","EDITOR"\]\)/);
+assert.match(edge,/PATCH:new Set\(\["OWNER","ADMIN","EDITOR"\]\)/);
+assert.match(edge,/DELETE:new Set\(\["OWNER","ADMIN"\]\)/);
 assert.match(edge,/const TABLES=new Set\(\["detainees","placements","movements","leaves","documents"\]\)/);
 assert.equal(edge.includes('const table="mta_"+resource;'),true);
 assert.doesNotMatch(edge,/detail:error\.message/);
@@ -24,7 +28,7 @@ assert.doesNotMatch(edge,/detail:String\(error\)/);
 
 assert.match(client,/mtaProductionApi/);
 assert.match(auth,/signInWithPassword/);
-assert.match(auth,/signUp/);
+assert.doesNotMatch(auth,/signUp\(/);
 assert.match(auth,/onAuthStateChange/);
 assert.match(migration,/production activation/i);
 

@@ -232,4 +232,4 @@ document.getElementById('backupBtn').onclick=()=>{const blob=new Blob([JSON.stri
 document.getElementById('importBtn').onclick=()=>document.getElementById('importFile').click();
 document.getElementById('importFile').onchange=e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{try{const x=JSON.parse(r.result);if(!x.detainees||!x.audit)throw new Error('format');db=x;save();audit('BACKUP_RESTORE','BACKUP','synthetic');render();toast('Backup dipulihkan')}catch{toast('Backup tidak valid')}};r.readAsText(f)};
 setInterval(()=>document.getElementById('clock').textContent=new Date().toLocaleString('id-ID'),1000);render();
-</script></body></html>
+</script><script src="/mta-rbac-action-guard.js"></script></body></html>
