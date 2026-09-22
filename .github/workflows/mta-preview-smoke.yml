@@ -44,7 +44,14 @@ jobs:
           printf '%s\n' "$headers" | grep -qi '^x-frame-options: DENY'
           printf '%s\n' "$headers" | grep -qi '^x-content-type-options: nosniff'
           printf '%s\n' "$headers" | grep -qi '^x-robots-tag: noindex, nofollow'
-          grep -Fq 'Silakan login untuk masuk ke aplikasi.' /tmp/mta-preview.html
-          grep -Fq 'mta-authenticated' /tmp/mta-preview.html
-          ! grep -Fq 'Daftar Akun' /tmp/mta-preview.html
+          grep -Fq 'mta-auth-ui.js' /tmp/mta-preview.html
+          curl -L -sS --fail --max-time 15 "$PREVIEW_URL/mta-auth-ui.js" -o /tmp/mta-auth-ui.js
+          grep -Fq 'Silakan login untuk masuk ke aplikasi.' /tmp/mta-auth-ui.js
+          grep -Fq 'OWNER' /tmp/mta-auth-ui.js
+          grep -Fq 'ADMIN' /tmp/mta-auth-ui.js
+          grep -Fq 'Tambah Pengguna' /tmp/mta-auth-ui.js
+          if grep -Fq 'Daftar Akun' /tmp/mta-auth-ui.js; then
+            echo "Public account registration marker unexpectedly present"
+            exit 1
+          fi
           echo "Preview login/security smoke: PASS"
