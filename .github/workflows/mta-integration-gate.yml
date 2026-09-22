@@ -32,24 +32,28 @@ jobs:
           grep -q 'QUEUE_DERIVED_FROM_AUDIT' web/mta-unified-shell-v2.js
           grep -q 'SHARED_STATE_EVENT' web/mta-unified-shell-v2.js
           grep -q 'MONITOR_DERIVED_STATE' web/mta-unified-shell-v2.js
-grep -q 'buildOperationalQueue' web/mta-unified-shell-v2.js
-grep -q 'buildMonitorMetrics' web/mta-unified-shell-v2.js
-grep -q 'JOURNEY_AUDIT_TO_QUEUE' web/mta-unified-shell-v2.js
-grep -q 'JOURNEY_STATE_TO_MONITOR' web/mta-unified-shell-v2.js
-grep -q 'REPORT_SOURCE_SHARED_STATE' web/mta-unified-shell-v2.js
-grep -q 'REPORT_EVIDENCE_CONTRACT' web/mta-unified-shell-v2.js
-grep -q 'failureRecoveryContractTest' web/mta-unified-shell-v2.js
-grep -q 'FAILURE_RECOVERY_CONTRACT' web/mta-unified-shell-v2.js
-grep -q 'requestKey' web/movement-v9.js
-grep -q 'appendAudit(d' web/movement-v9.js
-grep -q 'appendLocalAudit' web/index.html
-grep -q 'lastMutationKey' web/index.html
-grep -q 'lastMutation' web/movement-v9.js
-grep -q 'buildReportEvidence' web/index.html
-grep -q 'validateReportEvidence' web/index.html
-grep -q 'REPORT_EVIDENCE_REQUIRED' web/index.html
-grep -q 'REPORT_SOURCE_MISSING' web/index.html
-grep -q 'evidence:buildReportEvidence' web/index.html
+          grep -q 'buildOperationalQueue' web/mta-unified-shell-v2.js
+          grep -q 'buildMonitorMetrics' web/mta-unified-shell-v2.js
+          grep -q 'JOURNEY_AUDIT_TO_QUEUE' web/mta-unified-shell-v2.js
+          grep -q 'JOURNEY_STATE_TO_MONITOR' web/mta-unified-shell-v2.js
+          grep -q 'REPORT_SOURCE_SHARED_STATE' web/mta-unified-shell-v2.js
+          grep -q 'REPORT_EVIDENCE_CONTRACT' web/mta-unified-shell-v2.js
+          grep -q 'failureRecoveryContractTest' web/mta-unified-shell-v2.js
+          grep -q 'mtaUnifiedStateConsistencyContractTest' web/mta-unified-shell-v2.js
+          grep -q 'STATE_ROOT_ARRAYS' web/mta-unified-shell-v2.js
+          grep -q 'AUDIT_MOVEMENT_REFERENTIAL_INTEGRITY' web/mta-unified-shell-v2.js
+          grep -q 'MOVEMENT_IDEMPOTENCY_KEYS_UNIQUE' web/mta-unified-shell-v2.js
+          grep -q 'FAILURE_RECOVERY_CONTRACT' web/mta-unified-shell-v2.js
+          grep -q 'requestKey' web/movement-v9.js
+          grep -q 'appendAudit(d' web/movement-v9.js
+          grep -q 'appendLocalAudit' web/index.html
+          grep -q 'lastMutationKey' web/index.html
+          grep -q 'lastMutation' web/movement-v9.js
+          grep -q 'buildReportEvidence' web/index.html
+          grep -q 'validateReportEvidence' web/index.html
+          grep -q 'REPORT_EVIDENCE_REQUIRED' web/index.html
+          grep -q 'REPORT_SOURCE_MISSING' web/index.html
+          grep -q 'evidence:buildReportEvidence' web/index.html
           grep -q 'LEAVE_STATE_MACHINE' web/mta-unified-shell-v2.js
           grep -q 'mtaUnifiedJourneyContractTest' web/mta-unified-shell-v2.js
           grep -q 'JOURNEY_ACTIVE_DETAINEE' web/mta-unified-shell-v2.js
