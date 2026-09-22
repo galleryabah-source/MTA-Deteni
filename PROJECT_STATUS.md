@@ -1,3 +1,26 @@
+# MTA DETENI - Current Audit Addendum (2026-09-22)
+
+## Latest remediation
+
+The latest audit found and repaired a runtime-governance inconsistency in the Cloudflare Worker health contract: the runtime previously reported migrationFreeze=false while the repository governance baseline requires Migration Freeze TRUE. The health contract now reports the governed synthetic-only state explicitly, including productionAccessAuthorized=false, livePostgresqlExecution=false, realDetaineeDataAllowed=false, externalTransportAllowed=false and durablePublicationAllowed=false.
+
+A dedicated executable test now protects these health invariants.
+
+The Cloudflare non-production workflow was also changed from credential-dependent deployment on every main push to a credential-free Wrangler dry-run preflight. This removes the known Cloudflare token/permission failure from the normal CI path. Actual preview deployment is now an explicit operation from a supported authenticated deployment station.
+
+Android Termux finding: Wrangler 4.132.0 currently cannot be installed in the Android ARM64 Termux environment because its workerd dependency reports "Unsupported platform: android arm64 LE". This is an environment limitation, not an MTA DETENI source-code defect. Termux remains suitable for repository control/SSH; Wrangler deployment should run from a supported Windows, macOS or Linux deployment station.
+
+**Important:** the governance fix is committed to GitHub source but is **not yet live on Cloudflare production** until a successful manual production deployment occurs.
+
+## Current verification boundary
+
+- Latest Domain CI: in progress for the remediation series; do not call the series CI-PASS until the run completes successfully.
+- Latest Cloudflare non-production preflight: in progress for the remediation series; it no longer requires Cloudflare deployment credentials.
+- P1 Runtime Observation Run #238: PASS for the preceding remediation commit.
+- Cloudflare production: last verified live deployment remains the earlier Run #66 boundary; the new governance health response requires a subsequent deployment before it can be considered live.
+
+---
+
 # MTA DETENI — Project Status
 
 **Foundation:** v1.134+
