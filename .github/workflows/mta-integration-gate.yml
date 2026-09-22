@@ -55,6 +55,14 @@ jobs:
           grep -q 'REPORT_EVIDENCE_REFERENCE' web/mta-unified-shell-v2.js
           grep -q 'AUDIT_RESOURCE_REFERENCE' web/mta-unified-shell-v2.js
           grep -q 'buildReferentialIntegrityReport' web/mta-unified-shell-v2.js
+          grep -q 'mtaUnifiedFinalIntegrityGate' web/mta-unified-shell-v2.js
+          grep -q 'SINGLE_SYNTHETIC_STATE' web/mta-unified-shell-v2.js
+          grep -q 'SINGLE_MUTATION_BOUNDARY' web/mta-unified-shell-v2.js
+          grep -q 'AUDIT_CHAIN_COMPLETE' web/mta-unified-shell-v2.js
+          grep -q 'AUDIT_TO_MONITOR' web/mta-unified-shell-v2.js
+          grep -q 'EVIDENCE_CHAIN_COMPLETE' web/mta-unified-shell-v2.js
+          grep -q 'ALL_EXISTING_CONTRACTS_PASS' web/mta-unified-shell-v2.js
+          grep -q 'MTA_DETENI_FINAL_INTEGRITY_GATE' web/mta-unified-shell-v2.js
           grep -q 'MOVEMENT_IDEMPOTENCY_KEYS_UNIQUE' web/mta-unified-shell-v2.js
           grep -q 'FAILURE_RECOVERY_CONTRACT' web/mta-unified-shell-v2.js
           grep -q 'requestKey' web/movement-v9.js
