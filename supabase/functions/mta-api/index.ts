@@ -1,8 +1,13 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const cors={"Access-Control-Allow-Origin":"*","Access-Control-Allow-Headers":"authorization, x-client-info, apikey, content-type","Access-Control-Allow-Methods":"GET,POST,PATCH,DELETE,OPTIONS","Content-Type":"application/json"};
-const TABLES=new Set(["detainees","placements","movements","leaves","documents"]);
-const WRITE_ROLES=new Set(["OWNER","ADMIN","EDITOR"]);
+const TABLES=new Set(["detainees","placements","movements","leaves","documents"]);\nconst CANONICAL_ROLES=new Set(["OWNER","ADMIN","EDITOR","REVIEWER","AUDITOR"]);
+const ACTION_ROLES=Object.freeze({
+  GET:new Set(["OWNER","ADMIN","EDITOR","REVIEWER","AUDITOR"]),
+  POST:new Set(["OWNER","ADMIN","EDITOR"]),
+  PATCH:new Set(["OWNER","ADMIN","EDITOR"]),
+  DELETE:new Set(["OWNER","ADMIN"])
+});
 const json=(body,status=200)=>new Response(JSON.stringify(body),{status,headers:cors});
 
 Deno.serve(async(req)=>{
@@ -14,13 +19,14 @@ Deno.serve(async(req)=>{
   if(userError||!user) return json({ok:false,error:"AUTH_INVALID"},401);
   const {data:profile,error:profileError}=await supabase.from("mta_profiles").select("id,role,display_name,active").eq("id",user.id).single();
   if(profileError||!profile?.active) return json({ok:false,error:"RBAC_PROFILE_MISSING_OR_INACTIVE"},403);
-  const role=profile.role;
+  const role=String(profile.role||"").toUpperCase();\n  if(!CANONICAL_ROLES.has(role)) return json({ok:false,error:"RBAC_ROLE_INVALID"},403);
   const url=new URL(req.url);
   const parts=url.pathname.replace(/^\/+/,"").split("/").filter(Boolean);
   const resource=parts[0],id=parts[1];
   if(resource==="me" && req.method==="GET") return json({ok:true,user:{id:user.id,email:user.email},profile,role});
   if(!TABLES.has(resource)) return json({ok:false,error:"RESOURCE_NOT_FOUND"},404);
-  if(["POST","PATCH","DELETE"].includes(req.method)&&!WRITE_ROLES.has(role)) return json({ok:false,error:"RBAC_WRITE_DENIED",role},403);
+  const allowedRoles=ACTION_ROLES[req.method as keyof typeof ACTION_ROLES];
+  if(allowedRoles && !allowedRoles.has(role)) return json({ok:false,error:"RBAC_ACTION_DENIED",action:req.method,resource,role},403);
   const table="mta_"+resource;
   try{
     if(req.method==="GET"){
