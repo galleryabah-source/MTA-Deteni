@@ -87,6 +87,9 @@ jobs:
       - name: Deployment parity auth/RBAC contract tests
         run: node test/deployment-parity-auth-rbac.test.mjs
 
+      - name: P13 evidence closure through receipt closure integration tests
+        run: npx tsx test/p13-publication-evidence-closure-integrity-receipt-chain.test.ts
+
       - name: TypeScript domain tests
         run: npm run test:unit
 
