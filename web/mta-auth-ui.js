@@ -109,17 +109,15 @@
       const go=wrap.querySelector('#mtaRegGo');
       status.style.display='block'; status.textContent='Mendaftarkan akun…'; go.disabled=true;
       try{
-        const adminSession=await window.mtaAuth.session();
-        const r=await window.mtaAuth.signUp(
-          wrap.querySelector('#mtaRegEmail').value.trim(),
-          wrap.querySelector('#mtaRegPassword').value,
-          {full_name:wrap.querySelector('#mtaRegName').value.trim(),created_by:adminSession?.data?.session?.user?.id||null}
-        );
+        
+        const r=await window.mtaAuth.adminRegister({
+          email:wrap.querySelector('#mtaRegEmail').value.trim(),
+          password:wrap.querySelector('#mtaRegPassword').value,
+          full_name:wrap.querySelector('#mtaRegName').value.trim()
+        });
         if(r.error)throw r.error;
-        if(adminSession?.data?.session?.refresh_token && window.mtaAuth.client){
-          await window.mtaAuth.client.auth.setSession(adminSession.data.session);
-        }
-        status.textContent=r.data?.session?'Akun berhasil dibuat. Sesi ADMIN/OWNER dipulihkan.':'Akun dibuat. Jika konfirmasi email aktif, pengguna harus mengonfirmasi email.';
+        
+        status.textContent="Akun berhasil dibuat. Pengguna baru harus melakukan login sendiri.";
         window.toast?.('Pengguna berhasil didaftarkan.');
         setTimeout(()=>closeModal(),900);
       }catch(err){status.textContent=err?.message||'Pendaftaran gagal.';go.disabled=false;}
