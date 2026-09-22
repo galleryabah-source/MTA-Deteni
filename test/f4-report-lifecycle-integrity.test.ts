@@ -99,6 +99,11 @@ assert.throws(() => transitionF4Report(report, F4_REPORT_STATUS.DRAFT, {
 
 assert.throws(() => validateF4ReportLifecycle({
   ...report,
+  events: report.events.map((e, i) => i === 1 ? { ...e, occurredAt: "not-a-date" } : e),
+}), /F4_EVENT_CONTEXT_REQUIRED/);
+
+assert.throws(() => validateF4ReportLifecycle({
+  ...report,
   status: F4_REPORT_STATUS.FINAL,
   events: report.events.filter((e) => e.action !== "FINALIZE"),
 }), /F4_EVENT_CHAIN_BROKEN|F4_STATUS_EVENT_MISMATCH|F4_FINALIZE_EVENT_REQUIRED/);
