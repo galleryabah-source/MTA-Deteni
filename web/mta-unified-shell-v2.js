@@ -226,8 +226,9 @@ function finalIntegrityGate(){
   const queue=buildOperationalQueue(probe),metrics=buildMonitorMetrics(probe);checks.push({name:'AUDIT_TO_MONITOR',ok:queue.some(a=>a.correlationId===correlationId)&&metrics.audit===state.audit.length+2});
   const report={id:'F5-FINAL-REPORT-PROBE',sourceRecordIds:[{type:'DETAINEE',id:active?.id},{type:'MOVEMENT',id:movementId},{type:'PLACEMENT',id:placementId}],evidence:null};
   report.evidence={capturedAt:new Date().toISOString(),sourceRecords:report.sourceRecordIds.map(x=>({...x,exists:true})),auditIds:movementAudit.map(a=>a.id),sourceRecordCount:3,auditEventCount:movementAudit.length};
-  const evidenceValid=report.evidence.sourceRecords.every(x=>x.exists)&&report.evidence.auditIds.every(id=>movementAudit.some(a=>a.id===id));
-  checks.push({name:'EVIDENCE_CHAIN_COMPLETE',ok:mutationOk&&evidenceValid&&report.evidence.auditEventCount===2});
+  let evidenceContractValid=report.evidence.sourceRecords.every(x=>x.exists)&&report.evidence.auditIds.every(id=>movementAudit.some(a=>a.id===id));
+  try{if(typeof validateReportEvidence==='function'&&mutationOk){const previousDb=typeof db!=='undefined'?db:undefined;db=probe;validateReportEvidence(report);if(previousDb!==undefined)db=previousDb;evidenceContractValid=true}}catch{evidenceContractValid=false}
+  checks.push({name:'EVIDENCE_CHAIN_COMPLETE',ok:mutationOk&&evidenceContractValid&&report.evidence.auditEventCount===2});
   const all=Object.values(contracts).flatMap(x=>Array.isArray(x)?x:(x?.checks||x?.results||[]));
   const contractFailures=all.filter(x=>x&&!x.ok);
   checks.push({name:'ALL_EXISTING_CONTRACTS_PASS',ok:contractFailures.length===0});
