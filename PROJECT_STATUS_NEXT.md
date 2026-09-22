@@ -1,7 +1,7 @@
 # MTA DETENI — Next Gate
 
 **Foundation:** v1.122+
-**Current:** F4 — Daily Guard Report lifecycle integrity hardening; F4 domain/runtime gates CI-verified on head `90f81cdb...`
+**Current:** Auth/RBAC login gate hardening — restore dedicated login boundary and role-based navigation; F4 remains functionally closed but PR #146 is still intentionally unmerged.
 
 ## Completed (through current gate)
 
@@ -38,6 +38,16 @@ Implemented without changing the database/migration boundary:
 ## Deployment observation
 
 Cloudflare deployment is still blocked at the credential/permission boundary. The latest controlled deploy reached Cloudflare API authentication and returned error code 10000; the account token is accepted as an account token but lacks the permission required to update the target Worker service. No production access was attempted.
+
+## Authentication / RBAC hardening
+
+- Restored a dedicated login gate before the application shell; unauthenticated users no longer receive the operational UI.
+- Login uses the existing Supabase Auth session and immediately resolves the authenticated user's role through the protected `/api/mta/me` path.
+- Accepted roles are explicitly constrained to OWNER, ADMIN, EDITOR, REVIEWER, and AUDITOR; an authenticated account without a valid RBAC role is rejected and signed out.
+- Navigation is projected from the role matrix; OWNER/ADMIN retain backup/restore controls, while reviewer/auditor roles are treated as read-only UI modes.
+- Public self-registration is removed from the visible application entry point; account provisioning remains an administrative responsibility.
+- Added an authentication/RBAC login gate contract test and dedicated Domain CI step.
+- This is still a synthetic/local UI contract; production authorization remains dependent on the protected API/RLS policy boundary and is not being bypassed.
 
 ## Functional next gate: F4 closure → next functional journey
 
