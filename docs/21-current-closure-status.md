@@ -117,6 +117,16 @@
 - **This checkpoint is still contract-level evidence.** It does not claim that two real authenticated Supabase identities have been provisioned and exercised against live RLS. That remains the next controlled non-production execution gate.
 
 
+## Authenticated multi-user isolation execution status — 2026-09-22
+
+- The live Supabase project initially had zero `mta_profiles`, scopes, memberships, detainees, and QR records. No real detainee data was introduced.
+- The authenticated API role was missing table privileges for the RLS-protected operational domain tables. This was corrected with `mta_authenticated_domain_table_grants`; RLS remains the authorization layer.
+- The QR resolver was hardened from SECURITY DEFINER to SECURITY INVOKER and the QR registry received authenticated SELECT through RLS. Supabase Security Advisor is now clean (`lints: []`).
+- A controlled database-session negative-path check was executed with the `authenticated` role and a synthetic JWT subject: visible domain rows remained zero under the deny-by-default state.
+- **Positive two-user runtime isolation is not yet certified.** There are currently no authenticated test profiles in the project, and this execution environment does not provision real Supabase Auth credentials. The remaining evidence requires two controlled non-production Auth identities plus synthetic scopes/detainees, then API-level tests for own-scope allow, cross-scope deny, QR cross-scope deny, and write isolation.
+- The checkpoint therefore advances the security/runtime contract and live authorization surface, but remains **OPEN for authenticated positive-path evidence**.
+
+
 ## Still open before production activation
 
 1. Controlled non-production identities/scopes and authenticated multi-user scope-isolation evidence.
