@@ -1,0 +1,81 @@
+name: MTA DETENI Cloudflare Staging Deploy
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  DEPLOY_WORKER_NAME: mta-deteni-staging
+  DEPLOY_URL: https://mta-deteni-staging.galleryabah.workers.dev
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+
+      - name: Install Wrangler
+        run: npm install --global wrangler@4.132.0
+
+      - name: Validate staging artifact and governance
+        run: |
+          set -euo pipefail
+          test "$DEPLOY_WORKER_NAME" = "mta-deteni-staging"
+          test -f wrangler.staging.toml
+          test -f worker-v11.js
+          test -d web
+          test -f web/index.html
+          test -f web/mta-production-api.js
+          test -f web/mta-auth.js
+          test -f web/mta-auth-ui.js
+          node --check worker-v11.js
+          node -e "const fs=require('fs'); const s=fs.readFileSync('worker-v11.js','utf8'); for (const x of ['dataMode:\'SYNTHETIC_ONLY\'','productionAccessAuthorized:false','livePostgresqlExecution:false','realDetaineeDataAllowed:false','migrationFreeze:true']) if(!s.includes(x)) throw new Error('Missing governance invariant: '+x);"
+          echo "Cloudflare staging artifact/governance contract: PASS"
+
+      - name: Verify Cloudflare credentials
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          set -euo pipefail
+          test -n "${CLOUDFLARE_API_TOKEN:-}"
+          test -n "${CLOUDFLARE_ACCOUNT_ID:-}"
+          CLOUDFLARE_API_TOKEN="$CLOUDFLARE_API_TOKEN" CLOUDFLARE_ACCOUNT_ID="$CLOUDFLARE_ACCOUNT_ID" wrangler whoami
+
+      - name: Deploy Cloudflare staging
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          set -euo pipefail
+          wrangler deploy --config wrangler.staging.toml --name "$DEPLOY_WORKER_NAME"
+
+      - name: Verify live staging health
+        run: |
+          set -euo pipefail
+          for i in $(seq 1 12); do
+            if curl --fail --silent --show-error --max-time 10 "$DEPLOY_URL/api/health" > health.json; then
+              node -e "const x=require('./health.json'); if(x.ok!==true || x.app!=='MTA DETENI' || x.dataMode!=='SYNTHETIC_ONLY' || x.productionAccessAuthorized!==false || x.livePostgresqlExecution!==false || x.realDetaineeDataAllowed!==false) process.exit(1); console.log('Cloudflare staging health PASS:',x.app,x.runtime,x.dataMode);"
+              exit 0
+            fi
+            sleep 5
+          done
+          cat health.json 2>/dev/null || true
+          exit 1
+
+      - name: Upload staging evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: mta-deteni-staging-evidence-${{ github.run_id }}
+          path: health.json
+          if-no-files-found: ignore
