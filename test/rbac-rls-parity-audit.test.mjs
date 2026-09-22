@@ -26,3 +26,7 @@ assert.match(rls,broadMovement);
 assert.match(rls,broadLeave);
 
 console.log('RBAC_RLS_PARITY_AUDIT PASS — known direct-DB DELETE drift is documented and migration remains frozen');
+
+const auth=fs.readFileSync('web/mta-auth.js','utf8');
+assert.doesNotMatch(auth,/client:supabase/);
+assert.doesNotMatch(auth,/window\\.mtaAuth\\.client/);
