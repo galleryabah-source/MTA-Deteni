@@ -60,6 +60,9 @@ jobs:
       - name: Integrated acceptance runtime evidence
         run: npx tsx scripts/mta-integrated-acceptance-runtime.ts
 
+      - name: Local runtime adapter evidence
+        run: npx tsx scripts/mta-local-runtime-adapter-evidence.ts
+
       - name: Controlled execution evidence harness
         run: node .github/scripts/mta-execution-harness.mjs
 
