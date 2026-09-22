@@ -34,7 +34,7 @@ assert.match(auth,/onAuthStateChange/);
 assert.match(migration,/production activation/i);
 
 assert.match(fs.readFileSync('web/mta-auth-ui.js','utf8'),/Login MTA DETENI/);
-assert.match(fs.readFileSync('web/mta-auth-ui.js','utf8'),/\.app\\{display:none!important\\}/);
+assert.match(fs.readFileSync('web/mta-auth-ui.js','utf8'),/\.app\{display:none!important\}/);
 assert.match(fs.readFileSync('web/mta-auth-ui.js','utf8'),/mta-authenticated/);
 assert.match(fs.readFileSync('web/mta-auth-ui.js','utf8'),/OWNER.*ADMIN/);
 assert.doesNotMatch(fs.readFileSync('web/mta-auth-ui.js','utf8'),/Daftar Akun/);
