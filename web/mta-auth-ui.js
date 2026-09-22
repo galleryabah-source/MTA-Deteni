@@ -2,6 +2,16 @@
   'use strict';
 
   const ROLES=Object.freeze(['OWNER','ADMIN','EDITOR','REVIEWER','AUDITOR']);
+  const ACTION_POLICY=Object.freeze({
+    READ:['OWNER','ADMIN','EDITOR','REVIEWER','AUDITOR'],
+    CREATE:['OWNER','ADMIN','EDITOR'],
+    UPDATE:['OWNER','ADMIN','EDITOR'],
+    DELETE:['OWNER','ADMIN'],
+    APPROVE:['OWNER','ADMIN','REVIEWER'],
+    FINALIZE:['OWNER','ADMIN'],
+    AUDIT:['OWNER','ADMIN','REVIEWER','AUDITOR']
+  });
+
   const RBAC=Object.freeze({
     OWNER:{label:'Owner',views:['dashboard','detainee','placement','movement','leave','documents','audit','p6rooms','p6leaveqr','p6camera','p6reports','p5monitor','p5qr','p5scan','p5ops'],readOnly:false},
     ADMIN:{label:'Administrator',views:['dashboard','detainee','placement','movement','leave','documents','audit','p6rooms','p6leaveqr','p6camera','p6reports','p5monitor','p5qr','p5scan','p5ops'],readOnly:false},
@@ -181,6 +191,7 @@
     matrix:RBAC,
     getState:()=>Object.freeze({...state}),
     canView:view=>!!state.role&&roleViews(state.role).includes(view),
+    canAction:(action)=>!!state.role&&!!ACTION_POLICY[String(action||'').toUpperCase()]&&ACTION_POLICY[String(action||'').toUpperCase()].includes(state.role),
     isReadOnly:()=>!!state.role&&!!RBAC[state.role]?.readOnly
   });
 
