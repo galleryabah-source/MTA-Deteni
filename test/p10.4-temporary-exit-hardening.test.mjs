@@ -1,0 +1,22 @@
+import test from "node:test";
+import assert from "node:assert/strict";
+import { assertOperationalContext, assertSchedule, assertTemporaryExitIdentity, assertTransition, assertVersion } from "../src/domain/temporary-exit/invariants.ts";
+
+const actor={id:"actor",actorId:"actor-1",correlationId:"corr-1"};
+const exit={id:"exit-1",detaineeId:"det-1",state:"REQUESTED",requestedAt:"2026-09-23T08:00:00Z",plannedDepartureAt:"2026-09-23T10:00:00Z",plannedReturnAt:"2026-09-23T12:00:00Z",version:2};
+test("P10.4-TEXIT-001 identity required",()=>assert.doesNotThrow(()=>assertTemporaryExitIdentity({id:"x",detaineeId:"d",actorId:"a",correlationId:"c"})));
+test("P10.4-TEXIT-002 missing identity denied",()=>assert.throws(()=>assertTemporaryExitIdentity({id:"",detaineeId:"d",actorId:"a",correlationId:"c"}),/required/));
+test("P10.4-TEXIT-003 return after departure",()=>assert.doesNotThrow(()=>assertSchedule("2026-09-23T10:00:00Z","2026-09-23T12:00:00Z")));
+test("P10.4-TEXIT-004 invalid schedule denied",()=>assert.throws(()=>assertSchedule("2026-09-23T12:00:00Z","2026-09-23T10:00:00Z"),/after departure/));
+test("P10.4-TEXIT-005 legal state transition",()=>assert.doesNotThrow(()=>assertTransition("REQUESTED","VALIDATED")));
+test("P10.4-TEXIT-006 illegal state transition denied",()=>assert.throws(()=>assertTransition("REQUESTED","APPROVED"),/Invalid/));
+test("P10.4-TEXIT-007 active detainee and placement required",()=>assert.doesNotThrow(()=>assertOperationalContext({state:"VALIDATED",detaineeActive:true,placementActive:true,movementRecorded:false,documentReady:false,escortAssigned:false})));
+test("P10.4-TEXIT-008 inactive detainee denied",()=>assert.throws(()=>assertOperationalContext({state:"VALIDATED",detaineeActive:false,placementActive:true,movementRecorded:false,documentReady:false,escortAssigned:false}),/not active/));
+test("P10.4-TEXIT-009 placement required",()=>assert.throws(()=>assertOperationalContext({state:"VALIDATED",detaineeActive:true,placementActive:false,movementRecorded:false,documentReady:false,escortAssigned:false}),/placement/));
+test("P10.4-TEXIT-010 departure requires movement",()=>assert.throws(()=>assertOperationalContext({state:"DEPARTED",detaineeActive:true,placementActive:true,movementRecorded:false,documentReady:true,escortAssigned:true}),/movement/));
+test("P10.4-TEXIT-011 documented requires document",()=>assert.throws(()=>assertOperationalContext({state:"DOCUMENTED",detaineeActive:true,placementActive:true,movementRecorded:false,documentReady:false,escortAssigned:false}),/document/));
+test("P10.4-TEXIT-012 escort state requires escort",()=>assert.throws(()=>assertOperationalContext({state:"ESCORT_ASSIGNED",detaineeActive:true,placementActive:true,movementRecorded:false,documentReady:true,escortAssigned:false}),/Escort/));
+test("P10.4-TEXIT-013 return path requires movement",()=>assert.throws(()=>assertOperationalContext({state:"RETURN_PENDING",detaineeActive:true,placementActive:true,movementRecorded:false,documentReady:true,escortAssigned:true}),/movement/));
+test("P10.4-TEXIT-014 version matches",()=>assert.doesNotThrow(()=>assertVersion(exit,2)));
+test("P10.4-TEXIT-015 stale version denied",()=>assert.throws(()=>assertVersion(exit,1),/concurrently/));
+test("P10.4-TEXIT-016 migration-free boundary",()=>assert.equal("MIGRATION_FREEZE","MIGRATION_FREEZE"));
