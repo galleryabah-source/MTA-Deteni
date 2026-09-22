@@ -78,6 +78,9 @@ jobs:
       - name: Integrated acceptance runtime evidence
         run: npx tsx scripts/mta-integrated-acceptance-runtime.ts
 
+      - name: F5.4 Direct Final Integrity Certification
+        run: node scripts/mta-final-integrity-certification.mjs
+
       - name: Local runtime adapter evidence
         run: npx tsx scripts/mta-local-runtime-adapter-evidence.ts
 
@@ -98,6 +101,21 @@ jobs:
         run: |
           test -s artifacts/mta-evidence/execution.json
           node .github/scripts/mta-evidence-validator.mjs artifacts/mta-evidence/execution.json
+
+      - name: Verify F5.4 certification evidence
+        if: always()
+        run: |
+          test -s artifacts/mta-evidence/f5-final-integrity-certification.json
+          node -e "const x=require('./artifacts/mta-evidence/f5-final-integrity-certification.json'); if(x.finalGate?.status!=='PASS'||x.finalGate?.ok!==true) process.exit(1); console.log('FINAL_INTEGRITY='+x.finalGate.status)"
+
+      - name: Upload F5.4 final integrity evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: mta-f5-final-integrity-${{ github.sha }}
+          path: artifacts/mta-evidence/f5-final-integrity-certification.json
+          if-no-files-found: error
+          retention-days: 14
 
       - name: Upload controlled execution evidence
         if: always()
