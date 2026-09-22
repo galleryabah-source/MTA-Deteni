@@ -24,6 +24,10 @@ jobs:
           grep -q 'mtaUnifiedScannerContractTest' web/mta-unified-shell-v2.js
           grep -q 'SYNTH-QR-' web/mta-unified-shell-v2.js
           grep -q 'MTA_DETENI_QR_PRINT_ENGINE' web/qr-print-clean-v3.js
+          grep -q 'mta:data-changed' web/index.html
+          grep -q 'mta:data-changed' web/movement-v9.js
+          grep -q 'mta:data-changed' web/room-ops-v9.js
+          grep -q 'mta:data-changed' web/admin-settings-v9.js
           test "$(grep -c 'function detected' web/qr-camera-v2.js)" -eq 1
           grep -q 'MTA_DETENI_INTEGRATION_SELF_TEST' web/mta-unified-shell-v2.js
           grep -q 'MTAQrContext' web/mta-unified-shell-v2.js
