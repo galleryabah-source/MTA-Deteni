@@ -24,14 +24,15 @@ export function detaineeToRow(input: Detainee & {
   return Object.freeze({
     id: input.id,
     code: input.code,
-    name: input.identityRef,
-    nationality: input.provenance.sourceType,
+    name: input.name,
+    nationality: input.nationality,
     status: input.status,
     placement: input.placement ?? null,
     source: input.provenance.sourceType,
     created_at: input.createdAt,
     updated_at: input.updatedAt,
     metadata: {
+      identityRef: input.identityRef,
       provenance: {
         sourceType: input.provenance.sourceType,
         capturedAt: input.provenance.capturedAt,
