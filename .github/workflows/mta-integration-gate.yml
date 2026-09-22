@@ -30,6 +30,9 @@ jobs:
           grep -q 'INACTIVE_ROOM_DENY' web/mta-unified-shell-v2.js
           grep -q 'INVALID_LEAVE_TRANSITION_DENY' web/mta-unified-shell-v2.js
           grep -q 'QUEUE_DERIVED_FROM_AUDIT' web/mta-unified-shell-v2.js
+          grep -q 'SHARED_STATE_EVENT' web/mta-unified-shell-v2.js
+          grep -q 'MONITOR_DERIVED_STATE' web/mta-unified-shell-v2.js
+          grep -q 'LEAVE_STATE_MACHINE' web/mta-unified-shell-v2.js
           grep -q 'LEAVE_DEPART_BLOCKED' web/index.html
           grep -q 'SYNTH-QR-' web/mta-unified-shell-v2.js
           grep -q 'MTA_DETENI_QR_PRINT_ENGINE' web/qr-print-clean-v3.js
