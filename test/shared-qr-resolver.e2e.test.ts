@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { createInMemorySharedQrResolver } from "../src/application/shared-qr-resolver-v2.ts";
+import { createInMemorySharedQrResolver, createSharedQrResolver } from "../src/application/shared-qr-resolver-v2.ts";
 import { createLocalLanSharedQrRegistry, createCloudSharedQrRegistry } from "../src/application/shared-qr-registry-adapters.ts";
 import { createProtectedQrProjection } from "../src/application/shared-qr-protected-projection.ts";
 
