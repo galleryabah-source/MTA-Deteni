@@ -1,6 +1,6 @@
 # MTA DETENI — Current Closure Status
 
-**Revision:** `1bee6844f7a0873007ed77a6d896aad161cc170d`  
+**Revision:** `31211615c927e005f6fe114022079c364b20957d`  
 **Date:** 2026-09-22
 
 ## Verified
@@ -34,6 +34,7 @@
   - audit/outbox correlation
 - Negative-path regression for stage incompleteness and audit/outbox correlation drift.
 - Backup/recovery continuity executable evidence: Domain CI Run #1484 **PASS**, including valid-chain READY, missing-predecessor BLOCKED, and committed recovery certification with canonical RETRY → SKIP_DUPLICATE evidence.
+- Runtime device/handoff executable gate added; physical device acceptance remains separate from synthetic CI evidence.
 - Documentation now distinguishes contract completion from runtime evidence.
 
 ## Still open before production activation
