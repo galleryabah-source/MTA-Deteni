@@ -1,0 +1,12 @@
+import test from "node:test"; import assert from "node:assert/strict";
+import {assertReportingSource,assertSnapshotIntegrity,assertSourceRevisionStable} from "../src/domain/reporting/invariants.ts";
+const snap={snapshotId:"snap-1",generatedAt:"2026-09-23T08:00:00Z",sourceRevision:"rev-1",rows:[{detainee:"det-1",status:"ACTIVE"}]};
+const canonical=JSON.stringify(snap);
+test("P10.10-REP-001 authorized source",()=>assert.doesNotThrow(()=>assertReportingSource({sourceRevision:"rev-1",authorized:true})));
+test("P10.10-REP-002 unauthorized denied",()=>assert.throws(()=>assertReportingSource({sourceRevision:"rev-1",authorized:false}),/authorized/));
+test("P10.10-REP-003 source revision required",()=>assert.throws(()=>assertReportingSource({sourceRevision:"",authorized:true}),/revision/));
+test("P10.10-REP-004 snapshot integrity",()=>assert.doesNotThrow(()=>assertSnapshotIntegrity(snap,canonical)));
+test("P10.10-REP-005 tampered snapshot denied",()=>assert.throws(()=>assertSnapshotIntegrity({...snap,rows:[{detainee:"det-1",status:"CLOSED"}]},canonical),/mismatch/));
+test("P10.10-REP-006 source revision stable",()=>assert.doesNotThrow(()=>assertSourceRevisionStable("rev-1","rev-1")));
+test("P10.10-REP-007 stale source denied",()=>assert.throws(()=>assertSourceRevisionStable("rev-1","rev-2"),/changed/));
+test("P10.10-REP-008 migration-free",()=>assert.equal("MIGRATION_FREEZE","MIGRATION_FREEZE"));
