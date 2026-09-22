@@ -58,4 +58,5 @@ assert.equal(verified.valid, true);
 report = verified.report;
 report = api.registerDownload(report);
 assert.equal(report.events.at(-1).action, "DOWNLOAD");
+assert.equal(api.validate(report), true);
 console.log("F4_REPORT_LIFECYCLE_RUNTIME PASS");
