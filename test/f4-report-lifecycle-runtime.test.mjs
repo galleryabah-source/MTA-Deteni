@@ -39,6 +39,7 @@ assert.ok(preview.includes("finalArtifactId"), "missing final artifact gate");
 assert.ok(preview.includes("integrity(l,entry.snapshot,l.finalArtifactId)"), "integrity must bind final artifact");
 assert.ok(preview.includes("entry.lifecycle=verified.report"), "verification event must persist");
 assert.ok(preview.includes("MTAF4Lifecycle.registerDownload"), "download lifecycle event must persist");
+assert.ok(preview.includes("entry.lifecycle=MTAF4Lifecycle.registerDownload(entry.lifecycle)"), "legacy CSV download must use the final lifecycle gate");
 assert.ok(preview.includes("prompt('Alasan perubahan/revisi:')"));
 
 const context = vm.createContext({ window: {}, crypto: webcrypto, TextEncoder, setTimeout });
