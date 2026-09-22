@@ -92,7 +92,7 @@ jobs:
           "JOURNEY_QR_NOT_FOUND|web/mta-unified-shell-v2.js"
           "EXPIRED|web/mta-unified-shell-v2.js"
           "FUTURE|web/mta-unified-shell-v2.js"
-          "LEAVE_DEPART_BLOCKED|web/index.html"
+          "DEPART_BEFORE_START|web/mta-unified-shell-v2.js"
           "PLACEMENT_ASSIGN_BLOCKED|web/index.html"
           "PLACEMENT_CAPACITY_BLOCKED|web/index.html"
           "MOVEMENT_CREATE_BLOCKED|web/index.html"
