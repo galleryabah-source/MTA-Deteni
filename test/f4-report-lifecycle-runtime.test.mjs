@@ -24,6 +24,8 @@ for (const marker of [
   "REV-001",
   "REV-",
   "SHA-256",
+  "verifyAndRecord",
+  "VERIFY_INTEGRITY",
 ]) assert.ok(adapter.includes(marker), "missing adapter marker: "+marker);
 
 assert.ok(preview.includes("DAILY_GUARD_REPORT_PRINT"), "missing print audit action");
