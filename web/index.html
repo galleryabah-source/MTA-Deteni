@@ -79,6 +79,27 @@ function documentStatusBadge(status){
   const cls=String(status||'DRAFT').toLowerCase().replace(/[^a-z_]/g,'-');
   return '<span class="mta-doc-status mta-doc-status-'+cls+'">'+esc(status||'DRAFT')+'</span>';
 }
+function buildReportEvidence(r){
+  const ids=Array.isArray(r.sourceRecordIds)?r.sourceRecordIds:[];
+  const collections=[['DETAINEE',db.detainees],['MOVEMENT',db.movements],['LEAVE',db.leaves],['PLACEMENT',db.placements],['ROOM',db.rooms]];
+  const sourceRecords=[];
+  ids.forEach(id=>collections.forEach(([type,arr])=>{
+    const x=(arr||[]).find(v=>v&&v.id===id);
+    if(x)sourceRecords.push({type,id:x.id,status:x.status||null,updatedAt:x.updatedAt||x.createdAt||null});
+  }));
+  const auditIds=(db.audit||[]).filter(a=>ids.includes(a.resourceId)||a.resourceId===r.documentId).map(a=>a.id).slice(0,200);
+  return {capturedAt:now(),sourceRecords,auditIds,sourceRecordCount:sourceRecords.length,auditEventCount:auditIds.length};
+}
+function validateReportEvidence(r){
+  const e=r&&r.evidence;
+  if(!e||!Array.isArray(e.sourceRecords)||!Array.isArray(e.auditIds))throw new Error('REPORT_EVIDENCE_REQUIRED');
+  for(const s of e.sourceRecords){
+    const arr={DETAINEE:db.detainees,MOVEMENT:db.movements,LEAVE:db.leaves,PLACEMENT:db.placements,ROOM:db.rooms}[s.type];
+    const x=(arr||[]).find(v=>v&&v.id===s.id);
+    if(!x)throw new Error('REPORT_SOURCE_MISSING:'+s.type+':'+s.id);
+  }
+  return true;
+}
 function documentById(id){return db.documents.find(x=>(x.documentId||x.id)===id)}
 function documentActionLabel(status){
   const a=window.mtaDailyGuardReport.lifecycleAction(status);
@@ -157,17 +178,17 @@ function documentWorkflowButtons(d){
 }
 function generateReport(){
   openModal(`<div class="dialoghead"><h2>Draft Laporan Harian Regu Jaga</h2><button class="x" onclick="closeModal()">×</button></div><form id="rForm" class="formgrid"><div class="field"><label>Tanggal</label><input name="date" type="date" value="${new Date().toISOString().slice(0,10)}" required></div><div class="field"><label>Regu</label><select name="regu"><option>Bravo</option><option>Alpha</option><option>Charlie</option><option>Delta</option></select></div><div class="field"><label>Shift</label><select name="shift"><option>Pagi</option><option>Siang</option><option>Malam</option></select></div><div class="field"><label>Waktu Mulai</label><input name="time" value="07.00–14.00 WIB" required></div><div class="field full"><label>Catatan handover</label><textarea name="note" rows="3" required>Seluruh data pada preview ini bersifat sintetis.</textarea></div><div class="actions full"><button type="button" class="btn" onclick="closeModal()">Batal</button><button class="btn primary">Buat Draft</button></div></form>`);
-  document.getElementById('rForm').onsubmit=e=>{e.preventDefault();const f=new FormData(e.target),documentId=uid('RPT');const r={documentId,documentType:window.mtaDailyGuardReport.TYPE,reportDate:f.get('date'),officeId:'MTA-SYNTHETIC-OFFICE',reguId:f.get('regu'),shiftId:f.get('shift'),startAt:f.get('time'),status:'DRAFT',templateVersion:window.mtaDailyGuardReport.VERSION,createdAt:now(),sourceRecordIds:[...db.detainees.map(x=>x.id),...db.movements.map(x=>x.id),...db.leaves.map(x=>x.id)],addressees:[{id:'SYN-ADD-01',label:'Pejabat/Pengawas Berwenang'}],handover:{incomingRegu:f.get('regu'),shift:f.get('shift'),attendanceStatus:'SYNTHETIC / VERIFIED FOR DEMO',note:f.get('note')},blockControl:[{id:'SYN-BLOCK-01'}],guardPost:[{id:'SYN-POST-01'}],detaineeActivity:[{id:'SYN-ACT-01'}],escortActivity:[{id:'SYN-ESCORT-01'}],mealDistribution:[{id:'SYN-MEAL-01'}],endHandover:{id:'SYN-END-01'},signatories:[{role:'Duty Commander',name:'SYNTHETIC OFFICER',identifier:'SYNTHETIC'}],photos:[],revision:1,sections:{cover:{},addressee:{text:'Kepada pejabat/pengawas yang berwenang sesuai matriks otorisasi.'},handover:{incomingRegu:f.get('regu'),shift:f.get('shift'),attendanceStatus:'SYNTHETIC / VERIFIED FOR DEMO',note:f.get('note')},block_control:{time:f.get('time'),headcount:db.detainees.filter(x=>x.status==='AKTIF').length,result:'Synthetic control check; does not represent operational conditions.'},guard_post:{activity:'Synthetic post/CCTV readiness verification.',result:'Synthetic only; operational condition not asserted.'},activity:{description:'Synthetic detainee activity supervision.',time:f.get('time'),location:'Synthetic location',result:'Structured activity placeholder awaiting verified source record.'},escort:{count:db.movements.filter(x=>x.type==='ESCORT').length,destination:'Synthetic destination',purpose:'Synthetic purpose',activity:'Synthetic escort activity.'},meal:{time:f.get('time'),result:'Synthetic scheduled-service check.',distributionStatus:'Synthetic only.'},end_handover:{time:f.get('time'),incomingRegu:'Next synthetic team',condition:'Synthetic handover condition.',outstandingIssues:'No operational issue asserted.'},closing:{statement:'This synthetic report is generated from controlled demo records and is not an operational report.'},closing_page:{}}};db.documents.unshift(r);audit('DOCUMENT_DRAFT_CREATE','DOCUMENT',documentId);save();closeModal();render();previewReport(documentId);toast('Draft dibuat — lakukan Validate untuk melanjutkan')};
+  document.getElementById('rForm').onsubmit=e=>{e.preventDefault();const f=new FormData(e.target),documentId=uid('RPT');const r={documentId,documentType:window.mtaDailyGuardReport.TYPE,reportDate:f.get('date'),officeId:'MTA-SYNTHETIC-OFFICE',reguId:f.get('regu'),shiftId:f.get('shift'),startAt:f.get('time'),status:'DRAFT',templateVersion:window.mtaDailyGuardReport.VERSION,createdAt:now(),sourceRecordIds:[...db.detainees.map(x=>x.id),...db.movements.map(x=>x.id),...db.leaves.map(x=>x.id)],evidence:null,addressees:[{id:'SYN-ADD-01',label:'Pejabat/Pengawas Berwenang'}],handover:{incomingRegu:f.get('regu'),shift:f.get('shift'),attendanceStatus:'SYNTHETIC / VERIFIED FOR DEMO',note:f.get('note')},blockControl:[{id:'SYN-BLOCK-01'}],guardPost:[{id:'SYN-POST-01'}],detaineeActivity:[{id:'SYN-ACT-01'}],escortActivity:[{id:'SYN-ESCORT-01'}],mealDistribution:[{id:'SYN-MEAL-01'}],endHandover:{id:'SYN-END-01'},signatories:[{role:'Duty Commander',name:'SYNTHETIC OFFICER',identifier:'SYNTHETIC'}],photos:[],revision:1,sections:{cover:{},addressee:{text:'Kepada pejabat/pengawas yang berwenang sesuai matriks otorisasi.'},handover:{incomingRegu:f.get('regu'),shift:f.get('shift'),attendanceStatus:'SYNTHETIC / VERIFIED FOR DEMO',note:f.get('note')},block_control:{time:f.get('time'),headcount:db.detainees.filter(x=>x.status==='AKTIF').length,result:'Synthetic control check; does not represent operational conditions.'},guard_post:{activity:'Synthetic post/CCTV readiness verification.',result:'Synthetic only; operational condition not asserted.'},activity:{description:'Synthetic detainee activity supervision.',time:f.get('time'),location:'Synthetic location',result:'Structured activity placeholder awaiting verified source record.'},escort:{count:db.movements.filter(x=>x.type==='ESCORT').length,destination:'Synthetic destination',purpose:'Synthetic purpose',activity:'Synthetic escort activity.'},meal:{time:f.get('time'),result:'Synthetic scheduled-service check.',distributionStatus:'Synthetic only.'},end_handover:{time:f.get('time'),incomingRegu:'Next synthetic team',condition:'Synthetic handover condition.',outstandingIssues:'No operational issue asserted.'},closing:{statement:'This synthetic report is generated from controlled demo records and is not an operational report.'},closing_page:{}}};r.evidence=buildReportEvidence(r);db.documents.unshift(r);audit('DOCUMENT_DRAFT_CREATE','DOCUMENT',documentId);save();closeModal();render();previewReport(documentId);toast('Draft dibuat — lakukan Validate untuk melanjutkan')};
 }
 function validateReport(id){
   const r=documentById(id);if(!r)return;
-  try{window.mtaDailyGuardReport.validate(r);window.mtaDailyGuardReport.transitionStatus(r,'VALIDATED');r.validatedAt=now();audit('DOCUMENT_VALIDATE','DOCUMENT',id);save();render();previewReport(id);toast('Validation PASS — dokumen VALIDATED')}catch(err){audit('DOCUMENT_VALIDATE_FAILED','DOCUMENT',id,'FAILED');toast('Validation gagal: '+err.message)}
+  try{window.mtaDailyGuardReport.validate(r);validateReportEvidence(r);window.mtaDailyGuardReport.transitionStatus(r,'VALIDATED');r.validatedAt=now();audit('DOCUMENT_VALIDATE','DOCUMENT',id);save();render();previewReport(id);toast('Validation PASS — dokumen VALIDATED')}catch(err){audit('DOCUMENT_VALIDATE_FAILED','DOCUMENT',id,'FAILED');toast('Validation gagal: '+err.message)}
 }
 async function generateValidatedReport(id){
   const r=documentById(id);if(!r)return;
   try{
     if(r.status!=='VALIDATED')throw new Error('REPORT_NOT_VALIDATED');
-    r.generatedAt=now();
+    validateReportEvidence(r);r.evidence.generatedAt=now();r.generatedAt=now();
     window.mtaDailyGuardReport.transitionStatus(r,'GENERATED');
     const prepared=await window.mtaDailyGuardReport.prepare(r);
     Object.assign(r,prepared);
@@ -220,7 +241,8 @@ function previewReport(id){
   const r=documentById(id);if(!r)return;
   window.mtaDailyGuardReport.ensureStyles();
   const finalOnly=r.status==='FINAL';
-  openModal(`<div class="dialoghead no-print"><h2>Preview 11 Halaman — ${esc(r.documentId||r.id)}</h2><button class="x" onclick="closeModal()">×</button></div><div class="toolbar no-print"><span class="notice">Status: ${documentStatusBadge(r.status)}</span><span class="notice">Revision: ${esc(r.revision||1)}</span><button class="btn primary" onclick="window.print()">Cetak / Simpan PDF</button>${finalOnly?'<button class="btn primary" onclick="downloadReport(\''+esc(r.documentId||r.id)+'\')">Download</button>':''}</div>${reportHtml(r)}`);
+  let evidenceNotice='';try{validateReportEvidence(r);evidenceNotice='<span class="notice">Evidence: '+esc(r.evidence.sourceRecordCount)+' source · '+esc(r.evidence.auditEventCount)+' audit</span>'}catch(err){evidenceNotice='<span class="notice">Evidence warning: '+esc(err.message)+'</span>'}
+  openModal(`<div class="dialoghead no-print"><h2>Preview 11 Halaman — ${esc(r.documentId||r.id)}</h2><button class="x" onclick="closeModal()">×</button></div><div class="toolbar no-print"><span class="notice">Status: ${documentStatusBadge(r.status)}</span><span class="notice">Revision: ${esc(r.revision||1)}</span>${evidenceNotice}<button class="btn primary" onclick="window.print()">Cetak / Simpan PDF</button>${finalOnly?'<button class="btn primary" onclick="downloadReport(\''+esc(r.documentId||r.id)+'\')">Download</button>':''}</div>${reportHtml(r)}`);
   audit('DOCUMENT_PREVIEW','DOCUMENT',r.documentId||r.id)
 }
 function auditView(v){const rows=db.audit.map(a=>`<div class="event"><b>${esc(a.action)}</b> · ${esc(a.result)} · ${esc(a.resourceType)} ${esc(a.resourceId)}<small>${new Date(a.occurredAt).toLocaleString('id-ID')} · actor ${esc(a.actor)} · request ${esc(a.requestId)}</small></div>`).join('');v.innerHTML=shell('Audit Trail','Evidence lokal sintetis untuk setiap tindakan material pada demo runtime.',`<div class="toolbar"><button class="btn" onclick="verifyAudit()">Verifikasi Chain</button><button class="btn" onclick="clearDemo()">Reset Demo</button></div><div class="timeline">${rows||'<div class="empty">Belum ada event audit</div>'}</div>`)}
