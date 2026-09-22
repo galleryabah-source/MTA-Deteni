@@ -35,7 +35,6 @@ const mutation: OfflineMutation = Object.freeze({
   syntheticOnly: true,
 });
 
-adapter.queueMutation(mutation);
 const first = adapter.admitMutation(mutation, "v1");
 if (first.status !== "APPLIED" || !first.effectApplied) throw new Error("Local runtime first admission did not APPLY.");
 
