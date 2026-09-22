@@ -13,7 +13,7 @@ for (const marker of [
 ]) assert.ok(preview.includes(marker), "missing runtime marker: "+marker);
 
 for (const marker of [
-  "F4_REPORT_LIFECYCLE-v1",
+  "F4-DGR-LIFECYCLE-v1",
   "DRAFT",
   "VALIDATED",
   "GENERATED",
