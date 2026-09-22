@@ -54,6 +54,9 @@ jobs:
       - name: JavaScript regression tests
         run: npm test
 
+      - name: QR scan verification tests
+        run: npx tsx test/qr-scan-result.test.ts
+
       - name: TypeScript domain tests
         run: npm run test:unit
 
