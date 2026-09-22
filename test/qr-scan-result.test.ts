@@ -1,5 +1,5 @@
 import { strict as assert } from "node:assert";
-import { verifyQrScan } from "../src/application/qr-scan-result";
+import { verifyQrScan } from "../src/application/qr-scan-result.js";
 
 const base={context:"DETAINEE" as const,detaineeId:"D-1",issuedAt:"2026-09-22T08:00:00.000Z",expiresAt:"2026-09-22T10:00:00.000Z"};
 const now="2026-09-22T09:00:00.000Z";
