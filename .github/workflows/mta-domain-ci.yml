@@ -66,6 +66,9 @@ jobs:
       - name: Local runtime recovery evidence
         run: npx tsx scripts/mta-local-runtime-recovery-evidence.ts
 
+      - name: Backup and recovery continuity evidence
+        run: npx tsx scripts/mta-backup-recovery-continuity-evidence.ts
+
       - name: Controlled execution evidence harness
         run: node .github/scripts/mta-execution-harness.mjs
 
