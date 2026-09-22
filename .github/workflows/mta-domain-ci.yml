@@ -84,6 +84,9 @@ jobs:
       - name: RBAC operational journey guard tests
         run: node test/rbac-operational-journey-guard.test.mjs
 
+      - name: Deployment parity auth/RBAC contract tests
+        run: node test/deployment-parity-auth-rbac.test.mjs
+
       - name: TypeScript domain tests
         run: npm run test:unit
 
