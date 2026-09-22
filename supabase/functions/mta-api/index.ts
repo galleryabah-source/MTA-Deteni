@@ -1,7 +1,7 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const cors={"Access-Control-Allow-Origin":"*","Access-Control-Allow-Headers":"authorization, x-client-info, apikey, content-type","Access-Control-Allow-Methods":"GET,POST,PATCH,DELETE,OPTIONS","Content-Type":"application/json","Vary":"Origin"};
-const TABLES=new Set(["detainees","placements","movements","leaves","documents","scopes"]);
+const TABLES=new Set(["detainees","placements","movements","leaves","documents","scopes","audit-events"]);
 const WRITE_ROLES=new Set(["OWNER","ADMIN","EDITOR"]);
 const json=(body,status=200)=>new Response(JSON.stringify(body),{status,headers:cors});
 
@@ -33,8 +33,9 @@ Deno.serve(async(req)=>{
     }});
   }
   if(!TABLES.has(resource)) return json({ok:false,error:"RESOURCE_NOT_FOUND"},404);
+  if(resource==="audit-events" && req.method!=="GET") return json({ok:false,error:"AUDIT_READ_ONLY",role},405);
   if(["POST","PATCH","DELETE"].includes(req.method)&&!WRITE_ROLES.has(role)) return json({ok:false,error:"RBAC_WRITE_DENIED",role},403);
-  const table="mta_"+resource;
+  const table=resource==="audit-events"?"mta_audit_events":"mta_"+resource;
   try{
     if(req.method==="GET"){
       let query=supabase.from(table).select("*");
