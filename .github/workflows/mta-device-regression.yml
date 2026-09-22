@@ -133,6 +133,12 @@ jobs:
               const collapsed=await page.locator('.side.mta-collapsed').count();
               if(collapsed!==1) throw new Error('desktop sidebar collapse contract failed');
             }
+            if(process.env.DEVICE==='phone'||process.env.DEVICE==='tablet'){
+              await page.evaluate(()=>{
+                window.__MTA_TEST_MODE__=true;
+                window.mtaQrCameraV2.simulateDecode?.('mta://detainee/TEST');
+              });
+            }
             if(errors.length) throw new Error(`page errors: ${errors.join('; ')}`);
             await browser.close();
           })();
