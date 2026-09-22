@@ -91,38 +91,39 @@
       window.toast?.('Hanya OWNER/ADMIN yang dapat mendaftarkan akun.');
       return;
     }
-    const wrap=document.createElement('div');
-    wrap.innerHTML=`
-      <div class="dialoghead"><h2>Tambah Pengguna</h2><button class="x" type="button">×</button></div>
-      <div class="notice">Registrasi ini hanya tersedia untuk OWNER/ADMIN. Akun baru tidak otomatis menjadi OWNER/ADMIN; role mengikuti policy backend.</div>
+    const html=`
+      <div class="dialoghead"><h2>Tambah Pengguna</h2><button class="x" id="mtaRegClose" type="button">×</button></div>
+      <div class="notice">Registrasi hanya tersedia untuk OWNER/ADMIN. Akun baru dibuat melalui endpoint backend terproteksi.</div>
       <div class="formgrid" style="margin-top:12px">
         <div class="field full"><label>Nama</label><input id="mtaRegName" type="text" autocomplete="name" required></div>
         <div class="field"><label>Email</label><input id="mtaRegEmail" type="email" autocomplete="email" required></div>
-        <div class="field"><label>Password sementara</label><input id="mtaRegPassword" type="password" autocomplete="new-password" required></div>
+        <div class="field"><label>Password sementara</label><input id="mtaRegPassword" type="password" autocomplete="new-password" minlength="12" required></div>
       </div>
       <div id="mtaRegStatus" class="notice" style="margin-top:12px;display:none"></div>
       <div class="actions"><button class="btn" id="mtaRegCancel" type="button">Batal</button><button class="btn primary" id="mtaRegGo" type="button">Daftarkan</button></div>`;
-    wrap.querySelector('.x').onclick=()=>closeModal();
-    wrap.querySelector('#mtaRegCancel').onclick=()=>closeModal();
-    wrap.querySelector('#mtaRegGo').onclick=async()=>{
-      const status=wrap.querySelector('#mtaRegStatus');
-      const go=wrap.querySelector('#mtaRegGo');
-      status.style.display='block'; status.textContent='Mendaftarkan akun…'; go.disabled=true;
+    openModal(html);
+    const dialog=document.getElementById('dialog');
+    dialog.querySelector('#mtaRegClose').onclick=()=>closeModal();
+    dialog.querySelector('#mtaRegCancel').onclick=()=>closeModal();
+    dialog.querySelector('#mtaRegGo').onclick=async()=>{
+      const status=dialog.querySelector('#mtaRegStatus');
+      const go=dialog.querySelector('#mtaRegGo');
+      status.style.display='block';status.textContent='Mendaftarkan akun…';go.disabled=true;
       try{
-        
         const r=await window.mtaAuth.adminRegister({
-          email:wrap.querySelector('#mtaRegEmail').value.trim(),
-          password:wrap.querySelector('#mtaRegPassword').value,
-          full_name:wrap.querySelector('#mtaRegName').value.trim()
+          email:dialog.querySelector('#mtaRegEmail').value.trim(),
+          password:dialog.querySelector('#mtaRegPassword').value,
+          full_name:dialog.querySelector('#mtaRegName').value.trim()
         });
         if(r.error)throw r.error;
-        
-        status.textContent="Akun berhasil dibuat. Pengguna baru harus melakukan login sendiri.";
+        status.textContent='Akun berhasil dibuat. Pengguna baru harus melakukan login sendiri.';
         window.toast?.('Pengguna berhasil didaftarkan.');
         setTimeout(()=>closeModal(),900);
-      }catch(err){status.textContent=err?.message||'Pendaftaran gagal.';go.disabled=false;}
+      }catch(err){
+        status.textContent=err?.message||'Pendaftaran gagal.';
+        go.disabled=false;
+      }
     };
-    openModal(wrap.outerHTML);
   }
 
   async function update(event){
