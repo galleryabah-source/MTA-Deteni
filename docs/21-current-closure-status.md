@@ -127,6 +127,16 @@
 - The checkpoint therefore advances the security/runtime contract and live authorization surface, but remains **OPEN for authenticated positive-path evidence**.
 
 
+## Controlled Auth Identity Provisioning + Positive Isolation Harness — 2026-09-22
+
+- Added `scripts/mta-authenticated-scope-isolation.mjs`, a controlled non-production runner that provisions two synthetic Supabase Auth users through the Admin Auth API, creates two synthetic scopes and detainees, assigns one scope per user, signs both users in, and exercises RLS through PostgREST.
+- The harness covers own-scope read allow, cross-scope read denial, own-scope insert allow, cross-scope insert denial, own QR resolution, and cross-scope QR denial for both users.
+- The harness cleans all synthetic QR, detainee, membership, profile, scope, and Auth-user fixtures in `finally`, so the execution leaves no controlled test identities behind.
+- Added manual GitHub workflow `.github/workflows/mta-authenticated-scope-isolation.yml`. It requires dedicated `MTA_NONPROD_*` GitHub secrets and explicitly asserts `MTA_EXECUTION_ENV=controlled-nonprod`.
+- **Live positive execution is not yet claimed as PASS in this chat session.** The available Supabase management tooling does not expose the Auth Admin create-user/sign-in operation directly, and the direct database mutation route for creating `auth.users` was blocked by the execution safety boundary. Therefore no synthetic Auth identities were left behind merely to manufacture evidence.
+- The repository now contains the deterministic execution mechanism needed for the next authenticated gate; its PASS evidence must come from an actual controlled workflow run with non-production Auth credentials.
+
+
 ## Still open before production activation
 
 1. Controlled non-production identities/scopes and authenticated multi-user scope-isolation evidence.
