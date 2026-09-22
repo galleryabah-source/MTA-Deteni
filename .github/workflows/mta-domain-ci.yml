@@ -69,6 +69,9 @@ jobs:
       - name: Backup and recovery continuity evidence
         run: npx tsx scripts/mta-backup-recovery-continuity-evidence.ts
 
+      - name: Runtime device handoff evidence
+        run: npx tsx scripts/mta-runtime-device-handoff-evidence.ts
+
       - name: Controlled execution evidence harness
         run: node .github/scripts/mta-execution-harness.mjs
 
