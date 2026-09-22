@@ -4,6 +4,7 @@ import { MovementService } from "../src/domain/movement/service.js";
 import { enqueueOfflineCommand, reconcileOfflineCommand } from "../src/application/offline-continuity.js";
 import { evaluateQrValidityWindow, isContextCompatible } from "../src/application/p11-449-544-qr-validity.js";
 import { buildDailyGuardReportJourney } from "../src/application/daily-guard-report-journey.js";
+import { aggregateDailyGuardReport, validateDailyGuardReportAggregation } from "../src/application/daily-guard-report-aggregation.js";
 import { validateAuditOutboxCorrelation, sameCorrelation } from "../src/application/p11-873-904-audit-outbox-correlation.js";
 import { certifyIntegratedAcceptance } from "../src/application/integrated-acceptance-journey.js";
 import type { ActorContext } from "../src/domain/shared/contracts.js";
@@ -81,14 +82,25 @@ const qr = evaluateQrValidityWindow({
 });
 if (qr !== "ACCEPTED" || !isContextCompatible("RUDENIM_STAY", "RUDENIM_STAY")) throw new Error("QR runtime acceptance failed.");
 
+const aggregation = aggregateDailyGuardReport({
+  reportDate: "2026-09-22",
+  generatedAt: now,
+  detainees: [{ id: detaineeId, status: "AKTIF" }],
+  rooms: [{ id: "SYN-ROOM-RUNTIME", block: "SYN-BLOCK-RUNTIME", room: "SYN-ROOM-RUNTIME", capacity: 1 }],
+  placements: [{ detaineeId, roomId: "SYN-ROOM-RUNTIME", active: true }],
+  movements: movements.map((event) => ({ id: event.id, detaineeId: event.detaineeId, type: event.type, occurredAt: now })),
+  leaves: [],
+  incidents: [],
+});
+validateDailyGuardReportAggregation(aggregation);
 const sections = Object.freeze({
-  IDENTITAS_LAPORAN: "Laporan Harian Regu Jaga — Synthetic Runtime",
+  IDENTITAS_LAPORAN: `Laporan Harian Regu Jaga — ${aggregation.reportDate}`,
   PERSONEL_REGU: "Regu Synthetic Runtime",
-  KONDISI_DETENI: "Kondisi synthetic normal",
-  KEGIATAN_JAGA: "Pemeriksaan synthetic runtime",
-  KEJADIAN_PENTING: "Tidak ada kejadian synthetic",
-  SERAH_TERIMA: "Serah terima synthetic tercatat",
-  PENGESAHAN: "Pengesahan synthetic runtime",
+  KONDISI_DETENI: `Deteni aktif: ${aggregation.totals.detaineesActive}; penempatan aktif: ${aggregation.totals.placementsActive}`,
+  KEGIATAN_JAGA: `Pergerakan hari ini: ${aggregation.totals.movementsToday} (IN ${aggregation.totals.movementsIn}, OUT ${aggregation.totals.movementsOut})`,
+  KEJADIAN_PENTING: `Kejadian hari ini: ${aggregation.totals.incidentsToday}; terbuka: ${aggregation.totals.incidentsOpen}`,
+  SERAH_TERIMA: `Kamar terisi: ${aggregation.totals.roomsOccupied}/${aggregation.totals.roomsTotal}`,
+  PENGESAHAN: "Pengesahan synthetic runtime — agregasi tervalidasi",
 });
 const sectionOrder = Object.keys(sections);
 const snapshot: ReportSnapshot = Object.freeze({
@@ -150,7 +162,7 @@ await writeFile(
       domain: { placementActive: placements.get(detaineeId)?.active === true, movementCount: movements.length },
       offlineReconnect: { firstDecision: offlineDecision, replayDecision },
       qr: { outcome: qr, contextCompatible: true },
-      dailyGuardReport: { snapshotId: snapshot.snapshotId, documentNumber: report.download.documentNumber },
+      dailyGuardReport: { snapshotId: snapshot.snapshotId, documentNumber: report.download.documentNumber, aggregationVersion: aggregation.version, totals: aggregation.totals, validated: true },
       auditOutbox: { correlationId, validation: "READY" },
     },
   }, null, 2) + "\n",
