@@ -36,13 +36,13 @@ test("canonical scope model enforces explicit detainee scope and scoped child-ta
 test("canonical role/scope matrix is deny-by-default for scoped operators", () => {
   const sql = read("supabase/migrations/20260922140000_mta_canonical_scope_and_qr_registry.sql");
 
-  assert.match(sql, /mta_detainees_select_scope[\\s\\S]*OWNER','ADMIN','AUDITOR/);
-  assert.match(sql, /mta_detainees_insert_scope[\\s\\S]*OWNER','ADMIN','EDITOR/);
-  assert.match(sql, /mta_detainees_update_scope[\\s\\S]*OWNER','ADMIN','EDITOR/);
-  assert.match(sql, /mta_detainees_delete_scope[\\s\\S]*OWNER','ADMIN/);
+  assert.match(sql, /mta_detainees_select_scope[\s\S]*OWNER','ADMIN','AUDITOR/);
+  assert.match(sql, /mta_detainees_insert_scope[\s\S]*OWNER','ADMIN','EDITOR/);
+  assert.match(sql, /mta_detainees_update_scope[\s\S]*OWNER','ADMIN','EDITOR/);
+  assert.match(sql, /mta_detainees_delete_scope[\s\S]*OWNER','ADMIN/);
 
   // EDITOR must prove active membership for the detainee's scope.
-  assert.match(sql, /private\.mta_current_role\(\) in \('OWNER','ADMIN'\)[\\s\\S]*mta_profile_scopes ps/);
+  assert.match(sql, /private\.mta_current_role\(\) in \('OWNER','ADMIN'\)[\s\S]*mta_profile_scopes ps/);
   assert.match(sql, /ps\.profile_id = \(select auth\.uid\(\)\)/);
   assert.match(sql, /ps\.active = true/);
 });
