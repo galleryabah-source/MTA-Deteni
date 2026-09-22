@@ -54,27 +54,42 @@ function scopeOptions(selected){return cloudScopes.map(s=>'<option value="'+esc(
 async function syncCloudScopeContext(){if(!window.MTADeteniSharedDomain?.cloud()){cloudScopes=[];return []}cloudScopes=await window.MTADeteniSharedDomain.listScopes();const current=activeScopeId();if(current&&!cloudScopes.some(s=>s.id===current))setActiveScopeId('');return cloudScopes}
 const seed={meta:{version:2,createdAt:new Date().toISOString()},detainees:[{id:'DET-001',code:'DET-2026-001',name:'SYNTHETIC A',nationality:'Contoh',status:'AKTIF',placement:'Blok A / Kamar 01',createdAt:'2026-09-16T07:00:00Z'},{id:'DET-002',code:'DET-2026-002',name:'SYNTHETIC B',nationality:'Contoh',status:'AKTIF',placement:'Blok B / Kamar 02',createdAt:'2026-09-16T07:10:00Z'}],placements:[{id:'PLC-001',detaineeId:'DET-001',block:'Blok A',room:'Kamar 01',since:'2026-09-16T07:20:00Z'},{id:'PLC-002',detaineeId:'DET-002',block:'Blok B',room:'Kamar 02',since:'2026-09-16T07:25:00Z'}],movements:[],leaves:[],documents:[],audit:[]};
 let db=load(); let current='dashboard';
-function load(){try{const x=JSON.parse(localStorage.getItem(KEY));return x&&x.detainees?x:structuredClone(seed)}catch{return structuredClone(seed)}}
-function save(){localStorage.setItem(KEY,JSON.stringify(db))}
+function isCloudRuntime(){return window.MTADeteniSharedDomain?.cloud?.()===true}
+function emptyDb(){return {meta:{version:3,createdAt:now()},detainees:[],placements:[],movements:[],leaves:[],documents:[],audit:[]}}
+function load(){if(isCloudRuntime())return emptyDb();try{const x=JSON.parse(localStorage.getItem(KEY));return x&&x.detainees?x:structuredClone(seed)}catch{return structuredClone(seed)}}
+function save(){if(isCloudRuntime())return;localStorage.setItem(KEY,JSON.stringify(db))}
 function uid(prefix){return prefix+'-'+Math.random().toString(36).slice(2,8).toUpperCase()}
+function entityId(){return isCloudRuntime()&&crypto?.randomUUID?crypto.randomUUID():uid('ID')}
 function now(){return new Date().toISOString()}
 function esc(v=''){return String(v).replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]))}
 function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2200)}
-function audit(action,resourceType,resourceId,result='SUCCESS'){db.audit.unshift({id:uid('AUD'),action,resourceType,resourceId:resourceId||'',result,occurredAt:now(),actor:'DEMO-OPERATOR',requestId:uid('REQ'),correlationId:uid('COR'),policyVersion:'AUTHZ-1.0'});save()}
+function audit(action,resourceType,resourceId,result='SUCCESS'){if(isCloudRuntime())return;db.audit.unshift({id:uid('AUD'),action,resourceType,resourceId:resourceId||'',result,occurredAt:now(),actor:'DEMO-OPERATOR',requestId:uid('REQ'),correlationId:uid('COR'),policyVersion:'AUTHZ-1.0'});save()}
 function openModal(html){document.getElementById('dialog').innerHTML=html;document.getElementById('modal').classList.add('open')}
 function closeModal(){document.getElementById('modal').classList.remove('open')}
 document.getElementById('modal').addEventListener('click',e=>{if(e.target.id==='modal')closeModal()});
-async function syncSharedDetaineeDomain(){
-  if(!window.MTADeteniSharedDomain?.cloud())return false;
+async function syncCloudDomain(){
+  if(!isCloudRuntime())return false;
   try{
     await syncCloudScopeContext();
-    const rows=await window.MTADeteniSharedDomain.listDetainees();
-    db.detainees=rows.map(x=>({id:x.id,code:x.code||x.detainee_code||'',name:x.name||x.full_name||'',nationality:x.nationality||'',status:x.status||'AKTIF',placement:x.placement||'',createdAt:x.created_at||x.createdAt||now()}));
-    save();render();toast('Detainee synchronized from shared persistence');
+    const [d,p,m,l,docs,auditRows]=await Promise.all([
+      window.MTADeteniSharedDomain.listDetainees(),
+      window.MTADeteniSharedDomain.listPlacements(),
+      window.MTADeteniSharedDomain.listMovements(),
+      window.MTADeteniSharedDomain.listLeaves(),
+      window.MTADeteniSharedDomain.listDocuments(),
+      window.MTADeteniSharedDomain.listAuditEvents().catch(()=>[])
+    ]);
+    db.detainees=d.map(x=>({id:x.id,code:x.code||'',name:x.name||'',nationality:x.nationality||'',status:x.status||'AKTIF',placement:x.placement||'',scope_id:x.scope_id,createdAt:x.created_at||now()}));
+    db.placements=p.map(x=>({id:x.id,detaineeId:x.detainee_id,block:x.block||'',room:x.room||'',since:x.since||x.created_at||now()}));
+    db.movements=m.map(x=>({id:x.id,detaineeId:x.detainee_id,type:x.movement_type||'',location:x.destination||'',note:x.purpose||'',at:x.occurred_at||x.created_at||now()}));
+    db.leaves=l.map(x=>({id:x.id,detaineeId:x.detainee_id,destination:x.destination||'',purpose:x.purpose||'',startAt:x.start_at||x.created_at||now(),status:x.status||'DRAFT',updatedAt:x.updated_at||x.created_at||now()}));
+    db.documents=docs.map(x=>Object.assign({id:x.id,documentId:x.document_id,documentType:x.document_type,reportDate:x.report_date,reguId:x.regu_id,shiftId:x.shift_id,status:x.status,revision:x.revision,templateVersion:x.template_version,createdAt:x.created_at},x.payload||{}));
+    db.audit=auditRows.map(x=>({id:x.id,action:x.action,resourceType:x.resource_type,resourceId:x.resource_id,result:x.result,actor:x.actor_user_id||'SYSTEM',requestId:x.request_id||'',correlationId:x.correlation_id||'',occurredAt:x.occurred_at||now()}));
     return true;
-  }catch(e){console.warn('MTA_SHARED_DETAINEE_SYNC',e);toast('Shared persistence belum tersedia');return false}
+  }catch(e){console.warn('MTA_SHARED_DOMAIN_SYNC',e);toast('Shared persistence belum tersedia');return false}
 }
-window.addEventListener('mta-auth-state',()=>{if(window.MTADeteniSharedDomain?.cloud())syncSharedDetaineeDomain()});
+async function syncSharedDetaineeDomain(){return syncCloudDomain()}
+window.addEventListener('mta-auth-state',async()=>{if(isCloudRuntime()){await syncCloudDomain();render()}});
 function statCards(){return `<section class="grid stats"><div class="card"><div class="label">Deteni Aktif</div><div class="value">${db.detainees.filter(x=>x.status==='AKTIF').length}</div><span class="status">Operational</span></div><div class="card"><div class="label">Penempatan</div><div class="value">${db.placements.length}</div><span class="status">Tracked</span></div><div class="card"><div class="label">Pergerakan</div><div class="value">${db.movements.length}</div><span class="status">Logged</span></div><div class="card"><div class="label">Izin</div><div class="value">${db.leaves.length}</div><span class="status">Workflow</span></div><div class="card"><div class="label">Audit Event</div><div class="value">${db.audit.length}</div><span class="status">Evidence</span></div></section>`}
 function render(){const v=document.getElementById('appView'); if(current==='dashboard')return dashboard(v);if(current==='detainee')return detainee(v);if(current==='placement')return placement(v);if(current==='movement')return movement(v);if(current==='leave')return leave(v);if(current==='documents')return documents(v);if(current==='audit')return auditView(v)}
 function shell(title,desc,body){return `<section class="hero"><h1>${title}</h1><p class="sub">${desc}</p></section>${body}`}
