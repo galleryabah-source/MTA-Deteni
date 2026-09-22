@@ -92,22 +92,25 @@
 - Canonical `mta_qr_registry` was created with RLS enabled and no anonymous/authenticated direct table grants.
 - QR registry stores `token_hash`, not raw QR tokens.
 - `mta_resolve_qr(resource_id, token, context)` is a SECURITY DEFINER resolver with explicit authentication, active-profile, role, and scope checks.
+- The resolver was hardened again with `mta_qr_resolver_active_expiry_hardening`: empty tokens are rejected, only `ACTIVE` records resolve, and expired records are excluded at the database boundary.
 - The Cloud MTA API now exposes the authenticated QR resolution path at `qr-registry/resolve`, backed by the canonical database function.
+- The Cloud Detainee flow now requires an explicit operational `scope_id`; the UI loads authorized scopes through the authenticated API and persists only the selected scope identifier locally as runtime context.
+- Runtime shell cache was bumped to v8 so the scope-aware Detainee flow is not served from the previous service-worker shell cache.
 - Local PostgreSQL and Supabase adapters therefore now target the same runtime-neutral resolver contract.
 - Supabase migrations applied successfully:
   - `mta_canonical_scope_and_qr_registry`
   - `mta_scope_policy_hardening`
   - `mta_scope_policy_legacy_cleanup`
-- **Remaining gate:** populate/assign real operational scopes and profile memberships, then execute authenticated multi-user scope isolation tests. No real detainee data has been introduced.
+- **Remaining gate:** populate/assign operational test scopes and profile memberships in a controlled non-production identity set, then execute authenticated multi-user scope-isolation tests. No real detainee data has been introduced.
 
 ## Still open before production activation
 
-1. Physical Offline/LAN execution on the intended PC/local runtime, including real local persistence, reconnect/reconciliation, and device/network handoff acceptance.
-2. Daily Guard Report + QR + desktop/tablet/smartphone acceptance; F4 implementation is complete, but physical/runtime acceptance remains open.
+1. Controlled non-production identities/scopes and authenticated multi-user scope-isolation evidence.
+2. Physical Offline/LAN execution on the intended PC/local runtime, including real local persistence, reconnect/reconciliation, and device/network handoff acceptance.
+3. Daily Guard Report + QR + desktop/tablet/smartphone acceptance; contract implementation is complete, but physical/runtime acceptance remains open.
 4. Cloudflare controlled-nonprod runtime validation.
-6. Backup/restore and disaster-recovery execution evidence against an actual recoverable runtime/storage target; synthetic backup-chain and recovery certification are now executable but do not substitute for restore testing.
-7. Canonical scope-authorization model before tightening domain SELECT RLS.
-8. Final production-readiness review.
+5. Backup/restore and disaster-recovery execution evidence against an actual recoverable runtime/storage target; synthetic backup-chain and recovery certification do not substitute for restore testing.
+6. Final production-readiness review.
 
 ## Deployment hardening
 
@@ -125,4 +128,4 @@
 
 ## Decision
 
-The repository/domain baseline is now **CI-green and contract-complete for the integrated acceptance composition**, but the application is **not yet declared production-ready**. The remaining work is runtime/environmental validation, recovery evidence, scope authorization, and final operational acceptance.
+The application remains **not production-ready**. The canonical scope/RLS and QR persistence foundation is now implemented and applied to the Supabase project, while the remaining work is authenticated multi-user isolation evidence, physical/local runtime acceptance, controlled Cloudflare validation, actual restore/DR evidence, and final operational review. CI status must be taken from the latest observable workflow run rather than inferred from the contract implementation.
