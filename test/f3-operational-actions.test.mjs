@@ -1,0 +1,11 @@
+import { strict as assert } from "node:assert";
+import fs from "node:fs";
+const preview=fs.readFileSync("web/preview-v5.js","utf8");
+const movement=fs.readFileSync("web/movement-v9.js","utf8");
+assert.match(preview,/window\.p5openMovement=id=>\{show\('movement'\)/);
+assert.match(preview,/p9moveForm select\[name="detaineeId"\]/);
+assert.match(movement,/id="p9moveForm"/);
+assert.match(movement,/MOVEMENT_CREATE/);
+assert.match(movement,/PLACEMENT_ASSIGN/);
+assert.match(movement,/Kamar tujuan sudah penuh/);
+console.log("F3_MOVEMENT_ACTION_CONTRACT PASS");
