@@ -1,5 +1,7 @@
 import assert from "node:assert/strict";
 import fs from "node:fs";
+import vm from "node:vm";
+import { webcrypto } from "node:crypto";
 
 const preview = fs.readFileSync("web/preview-v6.js","utf8");
 const adapter = fs.readFileSync("web/f4-report-lifecycle-runtime.js","utf8");
@@ -39,4 +41,21 @@ assert.ok(preview.includes("entry.lifecycle=verified.report"), "verification eve
 assert.ok(preview.includes("MTAF4Lifecycle.registerDownload"), "download lifecycle event must persist");
 assert.ok(preview.includes("prompt('Alasan perubahan/revisi:')"));
 
+const context = vm.createContext({ window: {}, crypto: webcrypto, TextEncoder, setTimeout });
+vm.runInContext(adapter, context);
+const api = context.window.MTAF4Lifecycle;
+assert.equal(api.VERSION, "F4-DGR-LIFECYCLE-v1");
+let report = api.create("DGR-RUNTIME-001");
+for (const target of ["VALIDATED","GENERATED","IN_REVIEW","APPROVED"]) report = api.transition(report, target);
+const artifactId = "ART-DGR-RUNTIME-001";
+report = { ...report, finalArtifactId: artifactId };
+report = { ...report, integrityHash: await api.integrity(report, { reportDate: "2026-09-22" }, artifactId) };
+report = api.transition(report, "FINAL");
+const observed = await api.integrity(report, { reportDate: "2026-09-22" }, artifactId);
+assert.equal(observed, report.integrityHash, "artifact-bound integrity must verify after FINAL transition");
+const verified = api.verifyAndRecord(report, observed);
+assert.equal(verified.valid, true);
+report = verified.report;
+report = api.registerDownload(report);
+assert.equal(report.events.at(-1).action, "DOWNLOAD");
 console.log("F4_REPORT_LIFECYCLE_RUNTIME PASS");
