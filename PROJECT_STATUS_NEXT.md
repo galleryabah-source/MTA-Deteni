@@ -1,7 +1,7 @@
 # MTA DETENI — Next Gate
 
 **Foundation:** v1.122+  
-**Current:** P13.16441–18240 — publication request admission through authorization-decision evidence implemented and CI-verified on the current branch
+**Current:** P13.18241–19360 — evidence closure through terminal integrity receipt closure integrated and under CI verification on the current branch
 
 ## Completed through current audited gate
 
@@ -24,6 +24,10 @@
 - P13.17161–17520: review-only dispatch authorization and certification.
 - P13.17521–17880: non-granting authorization decision and certification.
 - P13.17881–18240: authorization-decision evidence and certification.
+- P13.18241–18400: authorization-decision evidence closure, review-only and replay-safe.
+- P13.18641–18800: closure integrity certification with exact decision identity/fingerprint continuity.
+- P13.18801–18960: terminal integrity receipt and replay-safe receipt certification.
+- P13.18961–19360: terminal integrity receipt closure and certification.
 
 ## Integrated publication-chain gate
 
@@ -50,10 +54,13 @@ Dedicated login gate, protected `/api/mta/me` role resolution, canonical OWNER/A
 
 ## CI evidence
 
-Current head: `5dbecdcbf3b010898f151a3200d2621349ac0640`
+Current audited base head: `1762b99495dd766508586f418ab17df9508e8be3`
 
-- Domain CI #1690: **SUCCESS**
-- P1 Runtime Observation #393: **SUCCESS**
+Current integration branch: `phase-p13-evidence-closure-integrity-receipt-chain`
+
+- Domain CI #1691: **SUCCESS** on P13 admission-chain base head
+- P1 Runtime Observation #394: **SUCCESS** on P13 admission-chain base head
+- New P13 evidence-closure → integrity → receipt → receipt-closure integration gate: added on current branch; awaiting CI result
 - Deployment parity auth/RBAC contract: **SUCCESS**
 - TypeScript domain tests: **SUCCESS**
 - Integrated acceptance/runtime/recovery/device-handoff/evidence gates: **SUCCESS**
@@ -64,4 +71,4 @@ Migration Freeze TRUE. AI OFF. Repository SYNTHETIC ONLY. Production access NOT 
 
 ## Next gate
 
-P13.18241–19080 — continue authorization-decision evidence → closure → integrity → receipt continuity, preserving the same identity/fingerprint chain and zero external publication side effect.
+P13.19361–20080 — continue receipt-closure → closure-integrity → closure-integrity-evidence continuity, preserving exact identity/fingerprint lineage and zero external publication side effect.
