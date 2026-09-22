@@ -1,5 +1,6 @@
 import type { ActorContext } from "../shared/contracts.js";
 import { DomainError } from "../shared/errors.js";
+import { assertDocumentIdentity, assertPrivateStorageBinding, assertRevision, assertSha256 } from "./invariants.js";
 
 export type DocumentArtifact = Readonly<{
   id: string;
