@@ -1,7 +1,7 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const cors={"Access-Control-Allow-Origin":"*","Access-Control-Allow-Headers":"authorization, x-client-info, apikey, content-type","Access-Control-Allow-Methods":"GET,POST,PATCH,DELETE,OPTIONS","Content-Type":"application/json"};
-const TABLES=new Set(["detainees","placements","movements","leaves","documents"]);
+const TABLES=new Set(["detainees","placements","movements","leaves","documents"]);\nconst CANONICAL_ROLES=new Set(["OWNER","ADMIN","EDITOR","REVIEWER","AUDITOR"]);
 const ACTION_ROLES=Object.freeze({
   GET:new Set(["OWNER","ADMIN","EDITOR","REVIEWER","AUDITOR"]),
   POST:new Set(["OWNER","ADMIN","EDITOR"]),
@@ -19,7 +19,7 @@ Deno.serve(async(req)=>{
   if(userError||!user) return json({ok:false,error:"AUTH_INVALID"},401);
   const {data:profile,error:profileError}=await supabase.from("mta_profiles").select("id,role,display_name,active").eq("id",user.id).single();
   if(profileError||!profile?.active) return json({ok:false,error:"RBAC_PROFILE_MISSING_OR_INACTIVE"},403);
-  const role=profile.role;
+  const role=String(profile.role||"").toUpperCase();\n  if(!CANONICAL_ROLES.has(role)) return json({ok:false,error:"RBAC_ROLE_INVALID"},403);
   const url=new URL(req.url);
   const parts=url.pathname.replace(/^\/+/,"").split("/").filter(Boolean);
   const resource=parts[0],id=parts[1];
