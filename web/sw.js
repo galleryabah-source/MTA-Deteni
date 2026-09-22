@@ -1,5 +1,5 @@
-const CACHE='mta-deteni-shell-v6';
-const SHELL=['/','/index.html','/responsive-v11.css','/desktop-shell-v2.css','/desktop-shell-v2.js','/preview-v5.js','/preview-v6.js','/qr-print-clean-v3.js','/room-ops-v9.js','/movement-v9.js','/admin-settings-v9.js','/master-room-guard-v10.js','/preview-v10.js','/mobile-shell-v1.js','/offline-v1.js','/offline-queue-v1.js','/qr-camera-v2.js','/qr-context-v1.js','/qr-camera-v2.css'];
+const CACHE='mta-deteni-shell-v9';
+const SHELL=['/','/index.html','/responsive-v11.css','/desktop-shell-v2.css','/desktop-shell-v2.js','/preview-v5.js','/preview-v6.js','/qr-print-clean-v3.js','/room-ops-v9.js','/movement-v9.js','/admin-settings-v9.js','/master-room-guard-v10.js','/preview-v10.js','/mobile-shell-v1.js','/offline-v1.js','/runtime-adapter-v1.js','/shared-domain-gateway-v1.js','/offline-queue-v1.js','/qr-camera-v2.js','/qr-context-v1.js','/qr-camera-v2.css'];
 const QR='https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.js';
 const SCANNER='https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js';
 self.addEventListener('install',event=>{event.waitUntil((async()=>{const c=await caches.open(CACHE);await Promise.all(SHELL.map(async u=>{try{const r=await fetch(u,{cache:'no-cache'});if(r.ok)await c.put(u,r)}catch{}}));await Promise.all([QR,SCANNER].map(async u=>{try{const r=await fetch(u,{mode:'no-cors',cache:'no-cache'});await c.put(u,r)}catch{}}));await self.skipWaiting()})())});

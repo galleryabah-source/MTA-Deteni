@@ -1,7 +1,7 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
-const cors={"Access-Control-Allow-Origin":"*","Access-Control-Allow-Headers":"authorization, x-client-info, apikey, content-type","Access-Control-Allow-Methods":"GET,POST,PATCH,DELETE,OPTIONS","Content-Type":"application/json"};
-const TABLES=new Set(["detainees","placements","movements","leaves","documents"]);
+const cors={"Access-Control-Allow-Origin":"*","Access-Control-Allow-Headers":"authorization, x-client-info, apikey, content-type","Access-Control-Allow-Methods":"GET,POST,PATCH,DELETE,OPTIONS","Content-Type":"application/json","Vary":"Origin"};
+const TABLES=new Set(["detainees","placements","movements","leaves","documents","scopes","audit-events"]);
 const WRITE_ROLES=new Set(["OWNER","ADMIN","EDITOR"]);
 const json=(body,status=200)=>new Response(JSON.stringify(body),{status,headers:cors});
 
@@ -19,9 +19,23 @@ Deno.serve(async(req)=>{
   const parts=url.pathname.replace(/^\/+/,"").split("/").filter(Boolean);
   const resource=parts[0],id=parts[1];
   if(resource==="me" && req.method==="GET") return json({ok:true,user:{id:user.id,email:user.email},profile,role});
+  if(resource==="qr-registry" && parts[1]==="resolve" && req.method==="POST"){
+    if(!["OWNER","ADMIN","EDITOR","REVIEWER","AUDITOR","VIEWER"].includes(role)) return json({ok:false,error:"RBAC_QR_DENIED"},403);
+    const body=await req.json();
+    if(!body?.resourceId||!body?.token) return json({ok:false,error:"QR_INPUT_REQUIRED"},400);
+    const {data,error}=await supabase.rpc("mta_resolve_qr",{p_resource_id:body.resourceId,p_token:body.token,p_expected_context:body.context||"RUDENIM_STAY"});
+    if(error) return json({ok:false,error:error.message==="QR_SCOPE_DENIED"?"QR_SCOPE_DENIED":"QR_RESOLVE_FAILED"},error.message==="QR_SCOPE_DENIED"?403:400);
+    const row=Array.isArray(data)?data[0]:null;
+    if(!row) return json({ok:false,error:"QR_NOT_FOUND"},404);
+    return json({ok:true,resource:"qr-registry",role,data:{
+      resourceId:row.resource_id,resourceType:row.resource_type,token:body.token,
+      status:row.status,context:row.context,issuedAt:row.issued_at,expiresAt:row.expires_at||undefined
+    }});
+  }
   if(!TABLES.has(resource)) return json({ok:false,error:"RESOURCE_NOT_FOUND"},404);
+  if(resource==="audit-events" && req.method!=="GET") return json({ok:false,error:"AUDIT_READ_ONLY",role},405);
   if(["POST","PATCH","DELETE"].includes(req.method)&&!WRITE_ROLES.has(role)) return json({ok:false,error:"RBAC_WRITE_DENIED",role},403);
-  const table="mta_"+resource;
+  const table=resource==="audit-events"?"mta_audit_events":"mta_"+resource;
   try{
     if(req.method==="GET"){
       let query=supabase.from(table).select("*");
