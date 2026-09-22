@@ -75,6 +75,9 @@ jobs:
       - name: F4 report lifecycle integrity tests
         run: npx tsx test/f4-report-lifecycle-integrity.test.ts
 
+      - name: F4 report lifecycle runtime contract tests
+        run: node test/f4-report-lifecycle-runtime.test.mjs
+
       - name: TypeScript domain tests
         run: npm run test:unit
 
