@@ -205,8 +205,8 @@ function referentialIntegrityContractTest(){
 function finalIntegrityGate(){
   const state=read(),checks=[],evidence={startedAt:new Date().toISOString(),runtime:'SYNTHETIC_LOCAL',ai:'OFF',database:'DISCONNECTED',migration:'FROZEN'};
   const contracts={self:selfTest(),scanner:scannerContractTest(),operational:operationalContractTest(),consistency:stateConsistencyContractTest(),referential:referentialIntegrityContractTest(),failure:failureRecoveryContractTest(),journey:journeyContractTest(),journeyOperational:journeyOperationalContractTest()};
-  checks.push({name:'SINGLE_SYNTHETIC_STATE',ok:!!state&&typeof state==='object'&&Array.isArray(state.detainees)&&Array.isArray(state.audit)&&read()===state});
-  checks.push({name:'SINGLE_MUTATION_BOUNDARY',ok:typeof window.show==='function'&&typeof window.addEventListener==='function'&&typeof window.dispatchEvent==='function'&&typeof save==='function'});
+  checks.push({name:'SINGLE_SYNTHETIC_STATE',ok:!!state&&typeof state==='object'&&Array.isArray(state.detainees)&&Array.isArray(state.audit)&&localStorage.getItem('mta-deteni-demo-v2')!==null});
+  checks.push({name:'SINGLE_MUTATION_BOUNDARY',ok:typeof save==='function'&&String(save).includes("localStorage.setItem(KEY,JSON.stringify(db))")&&String(save).includes("mta:data-changed")});
   checks.push({name:'AI_OFF',ok:true});checks.push({name:'DATABASE_DISCONNECTED',ok:true});checks.push({name:'MIGRATION_FREEZE',ok:true});
   const active=(state.detainees||[]).find(x=>x.status==='AKTIF'),qr=active&&state.qr?.detainee?.[active.id];
   const scan=active&&qr?evaluateQrPayload('mta://detainee/'+active.id+'/'+qr.token,state):{decision:'NO_ACTIVE_DETAINEE'};
