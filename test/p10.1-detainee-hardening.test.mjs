@@ -34,6 +34,9 @@ test("P10.1-DETAINEE-006 database mapping preserves domain provenance",()=>{
   });
   assert.equal(row.id,"det-1");
   assert.equal(row.status,"ACTIVE");
+  assert.equal(row.name,"Abah");
+  assert.equal(row.nationality,"ID");
+  assert.equal(row.metadata.identityRef,"identity-1");
   assert.equal(row.metadata.domainVersion,2);
   assert.equal(row.metadata.provenance.verified,true);
   assert.equal(row.scope_id,"scope-1");
