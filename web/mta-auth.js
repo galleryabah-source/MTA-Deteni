@@ -17,7 +17,7 @@ await syncSession(initial.data.session);
 window.mtaAuth=Object.freeze({
   client:supabase,
   async signIn(email,password){return supabase.auth.signInWithPassword({email,password})},
-  async signUp(email,password,metadata={}){return supabase.auth.signUp({email,password,options:{data:metadata}})},
+  async adminRegister(payload){const r=await window.mtaProductionApi.create("admin-register",payload);return {data:r,error:null}},
   async signOut(){return supabase.auth.signOut()},
   async session(){return supabase.auth.getSession()},
   async user(){const r=await supabase.auth.getUser();return r.data.user||null}
