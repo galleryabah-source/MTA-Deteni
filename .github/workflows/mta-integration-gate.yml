@@ -106,7 +106,7 @@ jobs:
           grep -q 'MTA_DETENI_INTEGRATION_SELF_TEST' web/mta-unified-shell-v2.js
           grep -q 'MTAQrContext' web/mta-unified-shell-v2.js
           grep -q 'MTADeteniOfflineQueue' web/mta-unified-shell-v2.js
-          grep -q 'p6printQR' web/mta-unified-shell-v2.js
+          grep -q 'mtaUnifiedPrintQR' web/mta-unified-shell-v2.js
       - name: Enforce runtime boundaries
         shell: bash
         run: |
