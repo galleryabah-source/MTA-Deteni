@@ -2,7 +2,12 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const cors={"Access-Control-Allow-Origin":"*","Access-Control-Allow-Headers":"authorization, x-client-info, apikey, content-type","Access-Control-Allow-Methods":"GET,POST,PATCH,DELETE,OPTIONS","Content-Type":"application/json"};
 const TABLES=new Set(["detainees","placements","movements","leaves","documents"]);
-const WRITE_ROLES=new Set(["OWNER","ADMIN","EDITOR"]);
+const ACTION_ROLES=Object.freeze({
+  GET:new Set(["OWNER","ADMIN","EDITOR","REVIEWER","AUDITOR"]),
+  POST:new Set(["OWNER","ADMIN","EDITOR"]),
+  PATCH:new Set(["OWNER","ADMIN","EDITOR"]),
+  DELETE:new Set(["OWNER","ADMIN"])
+});
 const json=(body,status=200)=>new Response(JSON.stringify(body),{status,headers:cors});
 
 Deno.serve(async(req)=>{
@@ -20,7 +25,8 @@ Deno.serve(async(req)=>{
   const resource=parts[0],id=parts[1];
   if(resource==="me" && req.method==="GET") return json({ok:true,user:{id:user.id,email:user.email},profile,role});
   if(!TABLES.has(resource)) return json({ok:false,error:"RESOURCE_NOT_FOUND"},404);
-  if(["POST","PATCH","DELETE"].includes(req.method)&&!WRITE_ROLES.has(role)) return json({ok:false,error:"RBAC_WRITE_DENIED",role},403);
+  const allowedRoles=ACTION_ROLES[req.method as keyof typeof ACTION_ROLES];
+  if(allowedRoles && !allowedRoles.has(role)) return json({ok:false,error:"RBAC_ACTION_DENIED",action:req.method,resource,role},403);
   const table="mta_"+resource;
   try{
     if(req.method==="GET"){
