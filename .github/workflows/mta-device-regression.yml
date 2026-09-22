@@ -137,8 +137,12 @@ jobs:
             if(process.env.DEVICE==='phone'||process.env.DEVICE==='tablet'){
               await page.evaluate(()=>{
                 window.__MTA_TEST_MODE__=true;
-                const token=JSON.parse(localStorage.getItem('mta-deteni-demo-v2')||'{}').qr?.detainee&&Object.values(JSON.parse(localStorage.getItem('mta-deteni-demo-v2')||'{}').qr.detainee)[0]?.token;
-                if(!token) throw new Error('synthetic detainee QR token unavailable');
+                let demo=JSON.parse(localStorage.getItem('mta-deteni-demo-v2')||'{}');
+                demo.detainees=demo.detainees||[{id:'D-QR-TEST',code:'DET-QR-TEST',name:'QR Test',nationality:'ID',status:'AKTIF',placement:'Blok A / Kamar 01'}];
+                demo.qr=demo.qr||{detainee:{},room:{},leave:{}};
+                demo.qr.detainee['D-QR-TEST']={token:'DTQR-TEST',status:'ACTIVE'};
+                localStorage.setItem('mta-deteni-demo-v2',JSON.stringify(demo));
+                const token='DTQR-TEST';
                 window.show('p5scan');
                 window.mtaQrCameraV2.simulateDecode?.('mta://detainee/'+token);
               });
