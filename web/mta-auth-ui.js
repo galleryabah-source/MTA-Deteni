@@ -9,14 +9,14 @@
     DELETE:['OWNER','ADMIN'],
     APPROVE:['OWNER','ADMIN','REVIEWER'],
     FINALIZE:['OWNER','ADMIN'],
-    AUDIT:['OWNER','ADMIN','REVIEWER','AUDITOR']
+    AUDIT:['OWNER','ADMIN','AUDITOR']
   });
 
   const RBAC=Object.freeze({
     OWNER:{label:'Owner',views:['dashboard','detainee','placement','movement','leave','documents','audit','p6rooms','p6leaveqr','p6camera','p6reports','p5monitor','p5qr','p5scan','p5ops'],readOnly:false},
     ADMIN:{label:'Administrator',views:['dashboard','detainee','placement','movement','leave','documents','audit','p6rooms','p6leaveqr','p6camera','p6reports','p5monitor','p5qr','p5scan','p5ops'],readOnly:false},
     EDITOR:{label:'Operator / Editor',views:['dashboard','detainee','placement','movement','leave','documents','p6rooms','p6leaveqr','p6camera','p6reports','p5monitor','p5qr','p5scan','p5ops'],readOnly:false},
-    REVIEWER:{label:'Reviewer',views:['dashboard','detainee','placement','movement','leave','documents','audit','p6camera','p6reports','p5monitor','p5qr','p5scan','p5ops'],readOnly:true},
+    REVIEWER:{label:'Reviewer',views:['dashboard','detainee','placement','movement','leave','documents','p6camera','p6reports','p5monitor','p5qr','p5scan','p5ops'],readOnly:true},
     AUDITOR:{label:'Auditor',views:['dashboard','documents','audit','p6reports','p5monitor','p5qr','p5scan'],readOnly:true}
   });
 
