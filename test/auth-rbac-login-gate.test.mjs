@@ -10,7 +10,8 @@ for(const marker of [
   "OWNER","ADMIN","EDITOR","REVIEWER","AUDITOR",
   "RBAC_ROLE_NOT_ASSIGNED","mtaProductionApi.get('me')",
   "mta-rbac-ready","mtaRbacLogout",
-  "Akses publik dan pendaftaran mandiri dinonaktifkan"
+  "Akses publik dan pendaftaran mandiri dinonaktifkan",
+  "ACTION_POLICY","canAction","APPROVE","FINALIZE","AUDIT"
 ]) assert.ok(ui.includes(marker),"missing RBAC login marker: "+marker);
 
 assert.equal(html.includes("mta-auth-ui.js"),true,"login UI must be loaded");
