@@ -187,11 +187,14 @@ function documentWorkflowButtons(d){
   if(status==='FINAL')out.push('<button class="btn small primary" onclick="downloadReport(\''+esc(id)+'\')">Download PDF</button>');
   return out.join(' ');
 }
-function generateReport(){
+function documentCloudPayload(r){return {id:r.id&&String(r.id).match(/^[0-9a-f-]{36}$/i)?r.id:entityId(),document_id:r.documentId||r.id,document_type:r.documentType||'DAILY_GUARD_REPORT',report_date:r.reportDate||null,regu_id:r.reguId||null,shift_id:r.shiftId||null,status:r.status||'DRAFT',revision:Number(r.revision||1),revision_of:r.revisionOf&&String(r.revisionOf).match(/^[0-9a-f-]{36}$/i)?r.revisionOf:null,template_version:r.templateVersion||null,integrity_hash:r.integrityHash||null,filename:r.filename||null,payload:r,validated_at:r.validatedAt||null,generated_at:r.generatedAt||null,review_started_at:r.reviewStartedAt||null,approved_at:r.approvedAt||null,finalized_at:r.finalizedAt||null,updated_at:now()}}
+async function persistDocumentCloud(r){if(!isCloudRuntime())return r;const payload=documentCloudPayload(r);if(!r.id||!String(r.id).match(/^[0-9a-f-]{36}$/i))r.id=payload.id;const result=await window.MTADeteniSharedDomain.create('documents',payload);if(result?.data?.id)r.id=result.data.id;return r}
+async function updateDocumentCloud(r){if(!isCloudRuntime())return r;const payload=documentCloudPayload(r);await window.MTADeteniSharedDomain.update(r.id,payload);return r}
+async function generateReport(){
   openModal(`<div class="dialoghead"><h2>Draft Laporan Harian Regu Jaga</h2><button class="x" onclick="closeModal()">×</button></div><form id="rForm" class="formgrid"><div class="field"><label>Tanggal</label><input name="date" type="date" value="${new Date().toISOString().slice(0,10)}" required></div><div class="field"><label>Regu</label><select name="regu"><option>Bravo</option><option>Alpha</option><option>Charlie</option><option>Delta</option></select></div><div class="field"><label>Shift</label><select name="shift"><option>Pagi</option><option>Siang</option><option>Malam</option></select></div><div class="field"><label>Waktu Mulai</label><input name="time" value="07.00–14.00 WIB" required></div><div class="field full"><label>Catatan handover</label><textarea name="note" rows="3" required>Seluruh data pada preview ini bersifat sintetis.</textarea></div><div class="actions full"><button type="button" class="btn" onclick="closeModal()">Batal</button><button class="btn primary">Buat Draft</button></div></form>`);
   document.getElementById('rForm').onsubmit=e=>{e.preventDefault();const f=new FormData(e.target),documentId=uid('RPT');const r={documentId,documentType:window.mtaDailyGuardReport.TYPE,reportDate:f.get('date'),officeId:'MTA-SYNTHETIC-OFFICE',reguId:f.get('regu'),shiftId:f.get('shift'),startAt:f.get('time'),status:'DRAFT',templateVersion:window.mtaDailyGuardReport.VERSION,createdAt:now(),sourceRecordIds:[...db.detainees.map(x=>x.id),...db.movements.map(x=>x.id),...db.leaves.map(x=>x.id)],addressees:[{id:'SYN-ADD-01',label:'Pejabat/Pengawas Berwenang'}],handover:{incomingRegu:f.get('regu'),shift:f.get('shift'),attendanceStatus:'SYNTHETIC / VERIFIED FOR DEMO',note:f.get('note')},blockControl:[{id:'SYN-BLOCK-01'}],guardPost:[{id:'SYN-POST-01'}],detaineeActivity:[{id:'SYN-ACT-01'}],escortActivity:[{id:'SYN-ESCORT-01'}],mealDistribution:[{id:'SYN-MEAL-01'}],endHandover:{id:'SYN-END-01'},signatories:[{role:'Duty Commander',name:'SYNTHETIC OFFICER',identifier:'SYNTHETIC'}],photos:[],revision:1,sections:{cover:{},addressee:{text:'Kepada pejabat/pengawas yang berwenang sesuai matriks otorisasi.'},handover:{incomingRegu:f.get('regu'),shift:f.get('shift'),attendanceStatus:'SYNTHETIC / VERIFIED FOR DEMO',note:f.get('note')},block_control:{time:f.get('time'),headcount:db.detainees.filter(x=>x.status==='AKTIF').length,result:'Synthetic control check; does not represent operational conditions.'},guard_post:{activity:'Synthetic post/CCTV readiness verification.',result:'Synthetic only; operational condition not asserted.'},activity:{description:'Synthetic detainee activity supervision.',time:f.get('time'),location:'Synthetic location',result:'Structured activity placeholder awaiting verified source record.'},escort:{count:db.movements.filter(x=>x.type==='ESCORT').length,destination:'Synthetic destination',purpose:'Synthetic purpose',activity:'Synthetic escort activity.'},meal:{time:f.get('time'),result:'Synthetic scheduled-service check.',distributionStatus:'Synthetic only.'},end_handover:{time:f.get('time'),incomingRegu:'Next synthetic team',condition:'Synthetic handover condition.',outstandingIssues:'No operational issue asserted.'},closing:{statement:'This synthetic report is generated from controlled demo records and is not an operational report.'},closing_page:{}}};db.documents.unshift(r);audit('DOCUMENT_DRAFT_CREATE','DOCUMENT',documentId);save();closeModal();render();previewReport(documentId);toast('Draft dibuat — lakukan Validate untuk melanjutkan')};
 }
-function validateReport(id){
+async function validateReport(id){
   const r=documentById(id);if(!r)return;
   try{window.mtaDailyGuardReport.validate(r);window.mtaDailyGuardReport.transitionStatus(r,'VALIDATED');r.validatedAt=now();audit('DOCUMENT_VALIDATE','DOCUMENT',id);save();render();previewReport(id);toast('Validation PASS — dokumen VALIDATED')}catch(err){audit('DOCUMENT_VALIDATE_FAILED','DOCUMENT',id,'FAILED');toast('Validation gagal: '+err.message)}
 }
@@ -213,19 +216,19 @@ function workflowNote(title,submitLabel,callback){
   openModal(`<div class="dialoghead"><h2>${esc(title)}</h2><button class="x" onclick="closeModal()">×</button></div><form id="workflowNoteForm"><div class="field"><label>Catatan</label><textarea name="note" rows="5" required></textarea></div><div class="actions"><button type="button" class="btn" onclick="closeModal()">Batal</button><button class="btn primary">${esc(submitLabel)}</button></div></form>`);
   document.getElementById('workflowNoteForm').onsubmit=e=>{e.preventDefault();const note=new FormData(e.target).get('note');callback(String(note||'').trim())};
 }
-function startReview(id){
+async function startReview(id){
   const r=documentById(id);if(!r)return;
   workflowNote('Mulai Review','Masuk Review',note=>{try{window.mtaDailyGuardReport.transitionStatus(r,'IN_REVIEW');r.reviewStartedAt=now();r.reviewerNote=note;audit('DOCUMENT_REVIEW_START','DOCUMENT',id);save();closeModal();render();previewReport(id);toast('Dokumen masuk IN_REVIEW')}catch(err){toast('Review gagal: '+err.message)}});
 }
-function approveReport(id){
+async function approveReport(id){
   const r=documentById(id);if(!r)return;
   workflowNote('Approve Laporan','Approve',note=>{try{window.mtaDailyGuardReport.transitionStatus(r,'APPROVED');r.approvedAt=now();r.approvalNote=note;audit('DOCUMENT_APPROVE','DOCUMENT',id);save();closeModal();render();previewReport(id);toast('Dokumen APPROVED — siap Finalize')}catch(err){toast('Approve gagal: '+err.message)}});
 }
-function requestReportChanges(id){
+async function requestReportChanges(id){
   const r=documentById(id);if(!r)return;
   workflowNote('Request Changes','Minta Perubahan',note=>{try{window.mtaDailyGuardReport.transitionStatus(r,'CHANGES_REQUESTED');r.changesRequestedAt=now();r.changeRequestNote=note;audit('DOCUMENT_CHANGES_REQUESTED','DOCUMENT',id);save();closeModal();render();toast('Perubahan diminta — buat revision baru')}catch(err){toast('Request Changes gagal: '+err.message)}});
 }
-function reviseReport(id){
+async function reviseReport(id){
   const source=documentById(id);if(!source)return;
   try{
     if(source.status!=='CHANGES_REQUESTED')throw new Error('REPORT_NOT_IN_CHANGES_REQUESTED');
@@ -235,7 +238,7 @@ function reviseReport(id){
     db.documents.unshift(revision);audit('DOCUMENT_REVISION_CREATE','DOCUMENT',newId);save();render();previewReport(newId);toast('Revision '+revision.revision+' dibuat sebagai DRAFT');
   }catch(err){toast('Revision gagal: '+err.message)}
 }
-function finalizeReport(id){
+async function finalizeReport(id){
   const r=documentById(id);if(!r)return;
   try{window.mtaDailyGuardReport.transitionStatus(r,'FINAL');r.finalizedAt=now();audit('DOCUMENT_FINALIZE','DOCUMENT',id);save();render();toast('Dokumen FINAL dan immutable')}catch(err){toast('Finalize gagal: '+err.message)}
 }
