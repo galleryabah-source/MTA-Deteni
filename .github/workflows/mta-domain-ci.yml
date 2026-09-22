@@ -66,6 +66,9 @@ jobs:
       - name: F3 leave return action contract tests
         run: node test/f3-leave-return.test.mjs
 
+      - name: F3 leave return state-event-audit continuity tests
+        run: node test/f3-leave-return-state-event-audit.test.mjs
+
       - name: F4 Daily Guard Report aggregation tests
         run: npx tsx test/f4-daily-guard-report.test.ts
 
