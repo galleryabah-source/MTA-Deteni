@@ -22,8 +22,9 @@ export interface SharedQrResolver {
 
 export function createInMemorySharedQrResolver(seed: SharedQrRecord[] = []): SharedQrResolver {
   const registry = new Map(seed.map(record => [record.resourceId, record]));
+  type ResolveInput = Parameters<SharedQrResolver["resolve"]>[0];
   return Object.freeze({
-    async resolve(input) {
+    async resolve(input: ResolveInput): Promise<SharedQrResolution> {
       const record = registry.get(input.resourceId);
       if (!record || record.token !== input.token) return { outcome: "DENIED", resourceId: input.resourceId, resourceType: "DETAINEE", reason: "TOKEN_NOT_FOUND" };
       if (record.status === "REVOKED" || record.status === "SUSPENDED") return { outcome: "REVOKED", resourceId: input.resourceId, resourceType: "DETAINEE", reason: "QR_NOT_ACTIVE", record };
