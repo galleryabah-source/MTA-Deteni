@@ -2,7 +2,7 @@ name: MTA DETENI Domain CI
 
 on:
   push:
-    branches: [main]
+    branches: [main, fix/runtime-functional-audit-2026-09-22]
   pull_request:
     branches: [main]
   workflow_dispatch:
