@@ -137,6 +137,22 @@
 - The repository now contains the deterministic execution mechanism needed for the next authenticated gate; its PASS evidence must come from an actual controlled workflow run with non-production Auth credentials.
 
 
+## Application Solidification Pass — 2026-09-22
+
+The runtime integration was tightened as a single-application boundary rather than allowing partially connected persistence paths:
+
+- The shared domain gateway now exposes one generic authenticated Cloud persistence surface for detainees, placements, movements, leaves, documents, scopes, and read-only audit events.
+- Cloud runtime state now hydrates the operational domain from the shared persistence source instead of retaining independent local copies for each vertical.
+- Placement, movement, leave, and Daily Guard Report creation/lifecycle mutations now persist through the same Cloud runtime adapter when CLOUD mode is active.
+- Browser localStorage remains the LOCAL synthetic runtime only; save() is fail-closed/no-op in CLOUD mode so an accidental local write cannot masquerade as Cloud persistence.
+- Runtime mode is surfaced in the UI (LOCAL SYNTHETIC, LAN LOCAL, or CLOUD AUTHENTICATED) and a mode change rehydrates the appropriate state boundary.
+- Audit events in CLOUD mode are read from the backend audit surface; the browser synthetic audit ledger is not used as a substitute for database audit events.
+- The Cloud API exposes audit-events as read-only; domain writes remain governed by RLS and role checks.
+- Service-worker/cache versioning was bumped so the new shared gateway cannot remain hidden behind the previous shell cache.
+- Domain CI and P1 observation are configured to execute on the audit branch as well as main, improving evidence visibility before merge.
+
+This pass deliberately does not claim production readiness. Actual authenticated two-user isolation, physical LAN/local persistence, physical multi-device QR/offline acceptance, Cloudflare controlled-nonprod runtime, and actual restore/DR evidence remain separate gates.
+
 ## Still open before production activation
 
 1. Controlled non-production identities/scopes and authenticated multi-user scope-isolation evidence.
