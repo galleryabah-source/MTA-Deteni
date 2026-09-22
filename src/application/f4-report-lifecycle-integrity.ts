@@ -150,6 +150,7 @@ export function transitionF4Report(
   const correlationId = requireText(input.correlationId, "F4_CORRELATION_ID_REQUIRED");
   const requestId = requireText(input.requestId, "F4_REQUEST_ID_REQUIRED");
   const action = ACTIONS[`${report.status}>${to}`];
+  if (!action) throw new Error("F4_ACTION_MAPPING_MISSING");
 
   const event: F4ReportEvent = Object.freeze({
     id: eventId(report.reportId, action, requestId),
@@ -238,15 +239,17 @@ export function validateF4ReportLifecycle(report: F4ReportLifecycle): void {
   if (report.version !== F4_REPORT_LIFECYCLE_VERSION) throw new Error("F4_LIFECYCLE_VERSION_INVALID");
   requireText(report.reportId, "F4_REPORT_ID_REQUIRED");
   if (!report.revision.revisionId) throw new Error("F4_REVISION_ID_REQUIRED");
-  if (!report.events.length || report.events[0].action !== "CREATE") throw new Error("F4_CREATE_EVENT_REQUIRED");
 
-  for (let i = 1; i < report.events.length; i += 1) {
-    const previous = report.events[i - 1];
-    const current = report.events[i];
+  const [first, ...rest] = report.events;
+  if (!first || first.action !== "CREATE") throw new Error("F4_CREATE_EVENT_REQUIRED");
+
+  let previous = first;
+  for (const current of rest) {
     if (current.from !== previous.to) throw new Error("F4_EVENT_CHAIN_BROKEN");
     if (current.correlationId.trim() === "" || current.requestId.trim() === "") {
       throw new Error("F4_EVENT_CONTEXT_REQUIRED");
     }
+    previous = current;
   }
 
   if (report.status === F4_REPORT_STATUS.FINAL && (!report.integrityHash || !report.finalArtifactId)) {
