@@ -98,6 +98,8 @@ jobs:
 
       - name: P13 evidence closure integrity continuity tests
         run: npx tsx test/p13.20321-20680-evidence-closure-integrity.test.ts
+      - name: P13 evidence boundary continuity tests
+        run: npx tsx test/p13.20681-21080-evidence-boundary.test.ts
 
       - name: TypeScript domain tests
         run: npm run test:unit
