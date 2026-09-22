@@ -9,6 +9,10 @@ export default {
     }
     if (url.pathname === '/api/health') return Response.json({
       ok:true, app:'MTA DETENI', runtime:'cloudflare-static-adapter', preview:'operational-v16',
+      deploymentContract:'DEPLOYMENT_PARITY_CONTRACT_V1',
+      authBoundary:'DEDICATED_LOGIN_REQUIRED',
+      rbacContract:'CANONICAL_5_ROLE_RBAC',
+      actionGuard:'ACTION_GUARD_ENABLED',
       dataMode:'SYNTHETIC_ONLY', database:'SUPABASE_PRODUCTION_SCHEMA_READY_RLS_DENY_DEFAULT',
       storage:'PRIVATE_BUCKET_READY', ai:'OFF', migrationFreeze:true,
       productionAccessAuthorized:false, livePostgresqlExecution:false, realDetaineeDataAllowed:false,
@@ -19,6 +23,10 @@ export default {
     if (url.pathname === '/api/runtime') return Response.json({
       mode:'SYNTHETIC_RUNTIME_DIAGNOSTIC', persistence:'BROWSER_LOCAL_STORAGE+INDEXED_DB_QUEUE',
       nextAdapter:'SUPABASE_PRODUCTION_AUTH_RBAC', authorization:'BLOCKED_UNTIL_AUTH_RBAC',
+      deploymentContract:'DEPLOYMENT_PARITY_CONTRACT_V1',
+      authBoundary:'DEDICATED_LOGIN_REQUIRED',
+      rbacContract:'CANONICAL_5_ROLE_RBAC',
+      actionGuard:'ACTION_GUARD_ENABLED',
       productionDatabase:'SCHEMA_READY_RLS_DENY_DEFAULT', productionStorage:'PRIVATE_BUCKET_READY', ai:'OFF',
       audit:'SYNTHETIC_EVENT_LEDGER', migrationFreeze:true, productionAccessAuthorized:false,
       livePostgresqlExecution:false, previewVersion:'v16', masterRoomContract:'v10',
