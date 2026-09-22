@@ -1,0 +1,11 @@
+import test from "node:test";import assert from "node:assert/strict";import {createQrPayload} from "../src/domain/qr/contracts.ts";import {resolveQrForRuntime} from "../src/application/qr-runtime-resolution.ts";import {assertRuntimeEnvelope,assertStageTransition,buildFinalEvidence} from "../src/application/runtime-functional-journey.ts";
+const qr=createQrPayload({context:"DETAINEE",subjectId:"det-syn-001",detaineeId:"det-syn-001",issuedAt:"2026-09-23T00:00:00Z"});
+test("P11-QR-001 scan resolves",()=>{const r=resolveQrForRuntime(qr,()=>true);assert.equal(r.resourceType,"DETAINEE");assert.equal(r.authorized,true)});
+test("P11-QR-002 deny",()=>assert.equal(resolveQrForRuntime(qr,()=>false).authorized,false));
+test("P11-INT-001 envelope",()=>assert.doesNotThrow(()=>assertRuntimeEnvelope({journeyId:"J1",stage:"SCAN",requestId:"req",correlationId:"corr",actorId:"actor",resourceType:"DETAINEE",resourceId:"det",idempotencyKey:"idem",status:"SUCCESS"})));
+test("P11-INT-002 order",()=>{assert.doesNotThrow(()=>assertStageTransition(null,"SCAN"));assert.doesNotThrow(()=>assertStageTransition("SCAN","RESOLVE"));assert.throws(()=>assertStageTransition("SCAN","DATA"),/STAGE_ORDER/)});
+const stages=["SCAN","RESOLVE","DATA","ACTION","MUTATION","AUDIT","MONITOR","REPORT","EVIDENCE"];
+test("P11-INT-003 final evidence",()=>assert.doesNotThrow(()=>buildFinalEvidence({journeyId:"J1",correlationId:"corr",stages,auditEventIds:["a1","a2"],outboxEventIds:["o1","o2"],reportId:"R1"})));
+test("P11-INT-004 incomplete",()=>assert.throws(()=>buildFinalEvidence({journeyId:"J1",correlationId:"corr",stages:["SCAN"],auditEventIds:["a1"],outboxEventIds:["o1"],reportId:"R1"}),/INCOMPLETE/));
+test("P11-INT-005 duplicate audit",()=>assert.throws(()=>buildFinalEvidence({journeyId:"J1",correlationId:"corr",stages,auditEventIds:["a1","a1"],outboxEventIds:["o1"],reportId:"R1"}),/AUDIT_DUPLICATE/));
+test("P11-INT-006 duplicate outbox",()=>assert.throws(()=>buildFinalEvidence({journeyId:"J1",correlationId:"corr",stages,auditEventIds:["a1"],outboxEventIds:["o1","o1"],reportId:"R1"}),/OUTBOX_DUPLICATE/));
