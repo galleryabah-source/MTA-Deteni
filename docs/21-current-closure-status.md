@@ -103,6 +103,20 @@
   - `mta_scope_policy_legacy_cleanup`
 - **Remaining gate:** populate/assign operational test scopes and profile memberships in a controlled non-production identity set, then execute authenticated multi-user scope-isolation tests. No real detainee data has been introduced.
 
+## Next checkpoint — Canonical scope isolation contract — 2026-09-22
+
+- Added executable repository contract coverage for the canonical scope model.
+- Verified the intended scoped operator matrix:
+  - EDITOR/REVIEWER/VIEWER require active membership in the detainee scope.
+  - OWNER/ADMIN/AUDITOR retain the explicitly defined cross-scope administrative/read authority.
+  - EDITOR write operations remain constrained by active scope membership.
+- Added explicit two-user/two-scope negative-path coverage: USER-A cannot access SCOPE-B and USER-B cannot access SCOPE-A.
+- Added regression coverage ensuring Cloud detainee creation cannot cross the persistence boundary without an explicit operational scope_id.
+- Added regression coverage that the legacy broad child-table policies are removed and scope inheritance remains tied to mta_detainees.scope_id.
+- QR database resolution remains constrained by the same detainee scope and now resolves only ACTIVE, non-expired records.
+- **This checkpoint is still contract-level evidence.** It does not claim that two real authenticated Supabase identities have been provisioned and exercised against live RLS. That remains the next controlled non-production execution gate.
+
+
 ## Still open before production activation
 
 1. Controlled non-production identities/scopes and authenticated multi-user scope-isolation evidence.
