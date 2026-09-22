@@ -23,6 +23,7 @@
 
 - Integrated Acceptance Journey contract `IAJ-v1`
 - Controlled-nonprod executable Integrated Acceptance runtime evidence: Domain CI Run #1470; artifact `10673903431`; all five mandatory stages observed PASS.
+- Local Runtime Adapter executable evidence is now added to Domain CI; it validates the governed adapter, offline mutation admission and deterministic sync engine. This remains adapter-level evidence; physical PC/LAN deployment remains an external acceptance gate.
 - Cross-stage binding for:
   - domain journey
   - offline/reconnect
