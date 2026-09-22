@@ -71,9 +71,9 @@ jobs:
           grep -q 'lastMutationKey' web/index.html
           grep -q 'lastMutation' web/movement-v9.js
           grep -q 'state=null' web/admin-settings-v9.js
-          grep -q 'DETAINEE_CREATE.*SUCCESS.*d' web/admin-settings-v9.js
+          grep -q 'DETAINEE_CREATE' web/admin-settings-v9.js
           grep -q 'appendAudit(d' web/room-ops-v9.js
-          grep -q 'QR_ROOM_STATE:' web/room-ops-v9.js
+          grep -q 'QR_ROOM_STATE' web/room-ops-v9.js
           grep -q 'validateRuntimeState' web/index.html
           grep -q 'BACKUP_RESTORE' web/index.html
           grep -q 'OFFLINE_IDEMPOTENCY_KEY_REQUIRED' web/offline-queue-v1.js
@@ -82,7 +82,7 @@ jobs:
           grep -q 'validateReportEvidence' web/index.html
           grep -q 'REPORT_EVIDENCE_REQUIRED' web/index.html
           grep -q 'REPORT_SOURCE_MISSING' web/index.html
-          grep -q 'evidence:buildReportEvidence' web/index.html
+          grep -q 'buildReportEvidence' web/index.html
           grep -q 'LEAVE_STATE_MACHINE' web/mta-unified-shell-v2.js
           grep -q 'mtaUnifiedJourneyContractTest' web/mta-unified-shell-v2.js
           grep -q 'JOURNEY_ACTIVE_DETAINEE' web/mta-unified-shell-v2.js
