@@ -1,27 +1,39 @@
+export type OutboxStatus = "PENDING" | "PROCESSING" | "PUBLISHED" | "FAILED";
+
 export type OutboxEvent = Readonly<{
   eventId: string;
-  aggregateType: string;
-  aggregateId: string;
   eventType: string;
-  payload: string;
-  payloadFingerprint: string;
+  aggregateType: string;
+  aggregateId?: string;
+  payload: Readonly<Record<string, unknown>>;
+  idempotencyKey: string;
   occurredAt: string;
-  status: "PENDING" | "PUBLISHED" | "FAILED";
-  attemptCount: number;
+  status: OutboxStatus;
+  attempts: number;
+  availableAt: string;
+  lockedAt?: string;
+  publishedAt?: string;
+  lastError?: string;
+  createdAt: string;
 }>;
 
-export function createOutboxEvent(input: OutboxEvent): OutboxEvent {
-  if (!input.eventId.trim() || !input.aggregateType.trim() || !input.aggregateId.trim() || !input.eventType.trim()) throw new Error("Outbox event identity is incomplete.");
-  if (!input.payloadFingerprint.trim() || !input.occurredAt.trim()) throw new Error("Outbox event evidence is incomplete.");
-  if (!Number.isInteger(input.attemptCount) || input.attemptCount < 0) throw new Error("Outbox attempt count is invalid.");
-  return Object.freeze({ ...input });
-}
+export type OutboxEnqueueCommand = Readonly<{
+  eventId: string;
+  eventType: string;
+  aggregateType: string;
+  aggregateId?: string;
+  payload: Readonly<Record<string, unknown>>;
+  idempotencyKey: string;
+  occurredAt: string;
+}>;
 
-export function assertOutboxReplaySafe(existing: OutboxEvent, candidate: OutboxEvent): void {
-  if (existing.eventId !== candidate.eventId) throw new Error("Outbox event identity mismatch.");
-  if (existing.payloadFingerprint !== candidate.payloadFingerprint) throw new Error("OUTBOX_EVENT_PAYLOAD_DRIFT: payload drift detected.");
-}
-
-export function nextOutboxAttempt(event: OutboxEvent, status: OutboxEvent["status"]): OutboxEvent {
-  return createOutboxEvent({ ...event, status, attemptCount: event.attemptCount + 1 });
+export function validateOutboxEnqueue(command: OutboxEnqueueCommand): void {
+  if (!command.eventId.trim()) throw new Error("OUTBOX_EVENT_ID_REQUIRED");
+  if (!command.eventType.trim()) throw new Error("OUTBOX_EVENT_TYPE_REQUIRED");
+  if (!command.aggregateType.trim()) throw new Error("OUTBOX_AGGREGATE_TYPE_REQUIRED");
+  if (!command.idempotencyKey.trim()) throw new Error("OUTBOX_IDEMPOTENCY_KEY_REQUIRED");
+  if (!command.occurredAt.trim()) throw new Error("OUTBOX_OCCURRED_AT_REQUIRED");
+  if (!command.payload || typeof command.payload !== "object" || Array.isArray(command.payload)) {
+    throw new Error("OUTBOX_PAYLOAD_OBJECT_REQUIRED");
+  }
 }
