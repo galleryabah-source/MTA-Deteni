@@ -1,0 +1,60 @@
+name: MTA DETENI CI
+
+on:
+  push:
+    branches:
+      - fix/runtime-functional-audit-2026-09-22
+      - main
+  pull_request:
+    branches:
+      - fix/runtime-functional-audit-2026-09-22
+      - main
+
+permissions:
+  contents: read
+
+concurrency:
+  group: mta-deteni-ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test-harness:
+    name: Test Harness
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - name: Contract tests
+        run: npm test
+      - name: Typecheck
+        run: npm run typecheck
+      - name: Test TypeScript
+        run: npm run test:unit
+
+  p9-kernel-contracts:
+    name: P9 Kernel Contracts
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    needs: test-harness
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - name: Verify P9.7-P9.11 contract coverage
+        run: |
+          test -f src/application/transaction-idempotency-boundary.ts
+          test -f src/application/outbox-contract.ts
+          test -f src/application/observability-contract.ts
+          test -f test/p9.9-private-storage-runtime-boundary.test.mjs
+          test -f test/p9.11-test-harness.test.mjs
+          echo "P9 kernel contract files present"
+      - name: Run kernel regression
+        run: npm test
