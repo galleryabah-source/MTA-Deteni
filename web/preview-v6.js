@@ -68,18 +68,20 @@ async function f4Action(d,date,action,reason){
  try{
   if(action==='VERIFY_INTEGRITY'){
    if(l.status!=='FINAL'||!l.integrityHash)throw new Error('F4_VERIFY_REQUIRES_FINAL');
-   const observed=await MTAF4Lifecycle.integrity(l,entry.snapshot),ok=observed===l.integrityHash;
-   audit('DAILY_GUARD_REPORT_VERIFY_INTEGRITY','REPORT',key,ok?'SUCCESS':'FAILED');toast(ok?'Integrity VALID':'Integrity FAILED');render('p6reports');return;
+   const observed=await MTAF4Lifecycle.integrity(l,entry.snapshot,l.finalArtifactId),ok=observed===l.integrityHash;
+   const verified=MTAF4Lifecycle.verifyAndRecord(l,observed);entry.lifecycle=verified.report;f4SaveReport(d,key,entry);audit('DAILY_GUARD_REPORT_VERIFY_INTEGRITY','REPORT',key,ok?'SUCCESS':'FAILED');toast(ok?'Integrity VALID':'Integrity FAILED');render('p6reports');return;
   }
   if(action==='DOWNLOAD'){
    if(l.status!=='FINAL'||!l.finalArtifactId)throw new Error('F4_DOWNLOAD_REQUIRES_FINAL');
-   audit('DAILY_GUARD_REPORT_DOWNLOAD','REPORT',key);return window.p6printReport();
+   entry.lifecycle=MTAF4Lifecycle.registerDownload(l);f4SaveReport(d,key,entry);audit('DAILY_GUARD_REPORT_DOWNLOAD','REPORT',key);return window.p6printReport();
   }
   if(action==='FINALIZE'){
    if(l.status!=='APPROVED')throw new Error('F4_FINALIZE_REQUIRES_APPROVAL');
-   l={...l,integrityHash:await MTAF4Lifecycle.integrity(l,entry.snapshot)};
+   const artifactId='ART-'+key;
+   l={...l,finalArtifactId:artifactId};
+   l={...l,integrityHash:await MTAF4Lifecycle.integrity(l,entry.snapshot,artifactId)};
    l=MTAF4Lifecycle.transition(l,'FINAL');
-   l={...l,finalArtifactId:'ART-'+key};entry.artifact={artifactId:l.finalArtifactId,hash:l.integrityHash,createdAt:new Date().toISOString()};
+   entry.artifact={artifactId,hash:l.integrityHash,createdAt:new Date().toISOString()};
   }else{
    const map={VALIDATE:'VALIDATED',GENERATE:'GENERATED',START_REVIEW:'IN_REVIEW',APPROVE:'APPROVED',REQUEST_CHANGES:'CHANGES_REQUESTED',REVISE:'DRAFT'};
    l=MTAF4Lifecycle.transition(l,map[action],reason);
