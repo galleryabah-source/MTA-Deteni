@@ -2,6 +2,9 @@ name: MTA DETENI Authenticated Scope Isolation
 
 on:
   workflow_dispatch:
+  push:
+    branches:
+      - fix/runtime-functional-audit-2026-09-22
 
 permissions:
   contents: read
