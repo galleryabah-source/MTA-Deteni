@@ -96,8 +96,8 @@ jobs:
       - name: P13 terminal evidence closure chain integration tests
         run: npx tsx test/p13-terminal-evidence-closure-chain.test.ts
 
-      - name: P13 evidence closure replay certification integration tests
-        run: npx tsx test/p13-evidence-closure-replay-certification-chain.test.ts
+      - name: P13 evidence closure integrity continuity tests
+        run: npx tsx test/p13.20321-20680-evidence-closure-integrity.test.ts
 
       - name: TypeScript domain tests
         run: npm run test:unit
