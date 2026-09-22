@@ -67,6 +67,22 @@
 - **Important limitation:** the shared QR resolver is currently an executable in-memory controlled-nonprod contract. It is not yet a LAN persistent registry or production PostgreSQL-backed resolver. Therefore physical cross-device QR acceptance remains OPEN.
 - Domain CI #1554 was observed pending at the time of this audit continuation; its final conclusion must be verified before treating the latest branch as CI-green.
 
+## Canonical QR Persistence Audit — 2026-09-22
+
+- Live Supabase schema audit completed against project `tmmhxqgzelgrsrxbbfzh`.
+- Existing domain tables: `mta_detainees`, `mta_placements`, `mta_movements`, `mta_leaves`, `mta_documents`, `mta_audit_events`, `mta_profiles`, plus storage/AI support tables.
+- All inspected MTA tables have RLS enabled.
+- Live `pg_policies` inspection returned no public table policies. This preserves deny-by-default and confirms that a QR table must not receive permissive access just to make the feature work.
+- `mta_profiles` roles are OWNER/ADMIN/EDITOR/REVIEWER/AUDITOR/VIEWER. The current API authenticates the bearer token and checks an active profile; write roles are OWNER/ADMIN/EDITOR.
+- No canonical organizational scope/ownership dimension was found in the inspected domain schema. Scope authorization therefore remains an explicit gate and was not invented for QR.
+- Canonical QR registry design documented in `docs/22-qr-registry-schema-authorization-audit.md`.
+- Proposed registry uses a token verifier/hash rather than persisting the raw QR token in normal reads and references `mta_detainees`.
+- Runtime-neutral persistence adapters are now implemented:
+  - `src/application/local-postgres-qr-registry.ts`
+  - `src/application/supabase-qr-registry.ts`
+- Adapter parity tests added in `test/shared-qr-persistence-adapters.test.ts`.
+- **No QR migration has been applied to Supabase.** The adapters are concrete and migration-ready, but the physical table and RLS policy remain intentionally uncreated until canonical scope authorization is settled.
+
 ## Still open before production activation
 
 1. Physical Offline/LAN execution on the intended PC/local runtime, including real local persistence, reconnect/reconciliation, and device/network handoff acceptance.
