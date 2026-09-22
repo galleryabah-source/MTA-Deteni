@@ -41,6 +41,16 @@ Define a deterministic, synthetic-only publication request admission contract ov
 
 ## Authentication / RBAC login gate
 
+- Dedicated login boundary restored before the application shell; unauthenticated users do not receive operational UI.
+- Supabase session authentication resolves the account through the protected `/api/mta/me` endpoint before RBAC access is granted.
+- Accepted roles: OWNER, ADMIN, EDITOR, REVIEWER, AUDITOR.
+- Client RBAC now includes an explicit action policy for READ, CREATE, UPDATE, DELETE, APPROVE, FINALIZE, and AUDIT.
+- Production MTA API now enforces role-by-action policy: READ all roles; CREATE/UPDATE OWNER/ADMIN/EDITOR; DELETE OWNER/ADMIN. Denials are fail-closed with `RBAC_ACTION_DENIED`.
+- Public self-registration has been removed from the browser authentication adapter; account provisioning remains administrative.
+- Authentication/RBAC contract tests and production API RBAC contract tests cover the boundary.
+- No schema/migration/production-data changes were made.
+
+
 - Dedicated login boundary is restored before the application shell; unauthenticated users do not receive the operational UI.
 - Existing Supabase Auth session is used for login; the authenticated role is resolved through the protected `/api/mta/me` path.
 - Accepted roles are explicitly constrained to OWNER, ADMIN, EDITOR, REVIEWER, and AUDITOR.
