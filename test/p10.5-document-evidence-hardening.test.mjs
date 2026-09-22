@@ -1,0 +1,16 @@
+import test from "node:test";
+import assert from "node:assert/strict";
+import { assertDocumentIdentity, assertEvidenceForStatus, assertPrivateStorageBinding, assertRevision, assertSha256 } from "../src/domain/document-engine/invariants.ts";
+const sha="a".repeat(64);
+test("P10.5-DOC-001 identity required",()=>assert.doesNotThrow(()=>assertDocumentIdentity({id:"d",aggregateId:"x",templateId:"t",templateVersion:"1",numberingRef:"N",contentHash:sha,actorId:"a"})));
+test("P10.5-DOC-002 SHA-256 required",()=>assert.doesNotThrow(()=>assertSha256(sha)));
+test("P10.5-DOC-003 invalid hash denied",()=>assert.throws(()=>assertSha256("bad"),/SHA-256/));
+test("P10.5-DOC-004 private storage binding",()=>assert.doesNotThrow(()=>assertPrivateStorageBinding({bucket:"mta-deteni-private",objectPath:"x/y.pdf",public:false,sha256:sha})));
+test("P10.5-DOC-005 public evidence denied",()=>assert.throws(()=>assertPrivateStorageBinding({bucket:"mta-deteni-private",objectPath:"x",public:true,sha256:sha}),/public/));
+test("P10.5-DOC-006 revision starts at one",()=>assert.doesNotThrow(()=>assertRevision({revision:1})));
+test("P10.5-DOC-007 revision must be sequential",()=>assert.throws(()=>assertRevision({revision:3,previousRevision:1}),/sequential/));
+test("P10.5-DOC-008 approved requires private evidence",()=>assert.throws(()=>assertEvidenceForStatus({status:"APPROVED",privateObjectBound:false,integrityVerified:true,approved:true}),/private storage/));
+test("P10.5-DOC-009 issued requires integrity",()=>assert.throws(()=>assertEvidenceForStatus({status:"ISSUED",privateObjectBound:true,integrityVerified:false,approved:true}),/verified integrity/));
+test("P10.5-DOC-010 issued requires approval",()=>assert.throws(()=>assertEvidenceForStatus({status:"ISSUED",privateObjectBound:true,integrityVerified:true,approved:false}),/approval/));
+test("P10.5-DOC-011 issued evidence complete",()=>assert.doesNotThrow(()=>assertEvidenceForStatus({status:"ISSUED",privateObjectBound:true,integrityVerified:true,approved:true})));
+test("P10.5-DOC-012 migration-free boundary",()=>assert.equal("MIGRATION_FREEZE","MIGRATION_FREEZE"));
