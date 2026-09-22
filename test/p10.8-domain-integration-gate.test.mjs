@@ -1,0 +1,26 @@
+import test from "node:test";
+import assert from "node:assert/strict";
+import { assertGoldenJourney, assertNoDuplicateEvidence } from "../src/application/p10.8-domain-integration-contract.ts";
+import { assertDetaineeRegistration, assertDetaineeStatusTransition } from "../src/domain/core-administration/invariants.ts";
+import { assertPlacementIdentity, assertNoActivePlacement } from "../src/domain/placement/invariants.ts";
+import { assertMovementIdentity, assertMovementReferences } from "../src/domain/movement/invariants.ts";
+import { assertSchedule, assertTransition, assertOperationalContext } from "../src/domain/temporary-exit/invariants.ts";
+import { assertDocumentIdentity, assertPrivateStorageBinding, assertEvidenceForStatus } from "../src/domain/document-engine/invariants.ts";
+import { assertApprovalIdentity, assertApprovalScope, assertSeparationOfDuties } from "../src/domain/approval-leadership/invariants.ts";
+import { assertEscortIdentity, assertOfficerRoster, assertExitBinding } from "../src/domain/escort/invariants.ts";
+
+const provenance={sourceType:"MANUAL",capturedAt:"2026-09-23T00:00:00Z",verified:true,verifiedBy:"officer-1"};
+const sha="a".repeat(64);
+const actor={actorId:"officer-1",correlationId:"corr-golden",role:"ADMIN",domain:"KAMTIB",scope:"scope-1"};
+test("P10.8-INT-001 detainee registration → active",()=>{assert.doesNotThrow(()=>assertDetaineeRegistration({id:"det-syn-001",identityRef:"identity-syn-001",provenance}));assert.doesNotThrow(()=>assertDetaineeStatusTransition("ACTIVE","DEPARTED"));});
+test("P10.8-INT-002 placement identity and uniqueness",()=>{assert.doesNotThrow(()=>assertPlacementIdentity({detaineeId:"det-syn-001",blockId:"B1",roomId:"R1",bedId:"BED1"}));assert.doesNotThrow(()=>assertNoActivePlacement(null));});
+test("P10.8-INT-003 movement transfer/departure contract",()=>{assert.doesNotThrow(()=>assertMovementIdentity({id:"mv-dep",detaineeId:"det-syn-001",actorId:actor.actorId,correlationId:actor.correlationId}));assert.doesNotThrow(()=>assertMovementReferences({type:"TEMPORARY_EXIT_DEPARTURE"}));});
+test("P10.8-INT-004 leave schedule/state",()=>{assert.doesNotThrow(()=>assertSchedule("2026-09-23T10:00:00Z","2026-09-23T12:00:00Z"));assert.doesNotThrow(()=>assertTransition("REQUESTED","VALIDATED"));assert.doesNotThrow(()=>assertTransition("VALIDATED","APPROVED"));assert.doesNotThrow(()=>assertTransition("APPROVED","DOCUMENTED"));});
+test("P10.8-INT-005 document private evidence",()=>{assert.doesNotThrow(()=>assertDocumentIdentity({id:"doc-1",aggregateId:"exit-1",templateId:"TPL",templateVersion:"1",numberingRef:"N-1",contentHash:sha,actorId:actor.actorId}));assert.doesNotThrow(()=>assertPrivateStorageBinding({bucket:"mta-deteni-private",objectPath:"exit-1/doc.pdf",public:false,sha256:sha}));assert.doesNotThrow(()=>assertEvidenceForStatus({status:"ISSUED",privateObjectBound:true,integrityVerified:true,approved:true}));});
+test("P10.8-INT-006 approval authority and separation",()=>{assert.doesNotThrow(()=>assertApprovalIdentity({id:"app-1",subjectType:"TEMPORARY_EXIT",subjectId:"exit-1",actorId:actor.actorId,correlationId:actor.correlationId,reason:"Operational approval"}));assert.doesNotThrow(()=>assertApprovalScope({authorized:true,scopeValid:true}));assert.doesNotThrow(()=>assertSeparationOfDuties("leader-2","leader-1"));});
+test("P10.8-INT-007 escort binding",()=>{assert.doesNotThrow(()=>assertEscortIdentity({id:"esc-1",temporaryExitId:"exit-1",actorId:actor.actorId,correlationId:actor.correlationId}));assert.doesNotThrow(()=>assertOfficerRoster(["officer-2"]));assert.doesNotThrow(()=>assertExitBinding({temporaryExitId:"exit-1",exitState:"DOCUMENTED"}));});
+test("P10.8-INT-008 departure → return evidence",()=>{assert.doesNotThrow(()=>assertOperationalContext({state:"DEPARTED",detaineeActive:true,placementActive:true,movementRecorded:true,documentReady:true,escortAssigned:true}));assert.doesNotThrow(()=>assertOperationalContext({state:"RETURNED",detaineeActive:true,placementActive:true,movementRecorded:true,documentReady:true,escortAssigned:true}));});
+test("P10.8-INT-009 golden journey evidence",()=>assert.doesNotThrow(()=>assertGoldenJourney({journeyId:"P10.8-GOLDEN-001",detaineeRegistered:true,placementActive:true,leaveApproved:true,documentBound:true,escortAssigned:true,departureMovement:true,returnMovement:true,completed:true,auditEvents:8,outboxEvents:8,replayed:true})));
+test("P10.8-INT-010 duplicate evidence rejected",()=>assert.throws(()=>assertNoDuplicateEvidence({auditEventIds:["a1","a1"],outboxEventIds:["o1"]}),/DUPLICATE_AUDIT/));
+test("P10.8-INT-011 evidence uniqueness accepted",()=>assert.doesNotThrow(()=>assertNoDuplicateEvidence({auditEventIds:["a1","a2"],outboxEventIds:["o1","o2"]})));
+test("P10.8-INT-012 incomplete journey rejected",()=>assert.throws(()=>assertGoldenJourney({journeyId:"P10.8-GOLDEN-002",detaineeRegistered:true,placementActive:true,leaveApproved:false,documentBound:true,escortAssigned:true,departureMovement:true,returnMovement:true,completed:true,auditEvents:8,outboxEvents:8,replayed:true}),/INCOMPLETE/));
