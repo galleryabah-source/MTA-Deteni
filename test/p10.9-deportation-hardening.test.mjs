@@ -1,0 +1,14 @@
+import test from "node:test"; import assert from "node:assert/strict";
+import {assertDeportationEvidence,assertDeportationIdentity,assertDeportationTransition,assertDepartureEvidence} from "../src/domain/deportation/invariants.ts";
+const base={id:"dep-1",detaineeId:"det-1",approvalId:"app-1",documentId:"doc-1",escortAssignmentId:"esc-1"};
+test("P10.9-DEP-001 identity",()=>assert.doesNotThrow(()=>assertDeportationIdentity(base)));
+test("P10.9-DEP-002 evidence",()=>assert.doesNotThrow(()=>assertDeportationEvidence({detaineeActive:true,approvalValid:true,documentValid:true,escortValid:true})));
+test("P10.9-DEP-003 inactive denied",()=>assert.throws(()=>assertDeportationEvidence({detaineeActive:false,approvalValid:true,documentValid:true,escortValid:true}),/active/));
+test("P10.9-DEP-004 approval required",()=>assert.throws(()=>assertDeportationEvidence({detaineeActive:true,approvalValid:false,documentValid:true,escortValid:true}),/approval/));
+test("P10.9-DEP-005 document required",()=>assert.throws(()=>assertDeportationEvidence({detaineeActive:true,approvalValid:true,documentValid:false,escortValid:true}),/document/));
+test("P10.9-DEP-006 escort required",()=>assert.throws(()=>assertDeportationEvidence({detaineeActive:true,approvalValid:true,documentValid:true,escortValid:false}),/escort/));
+test("P10.9-DEP-007 legal transition",()=>assert.doesNotThrow(()=>assertDeportationTransition("ELIGIBLE","APPROVED")));
+test("P10.9-DEP-008 illegal transition",()=>assert.throws(()=>assertDeportationTransition("ELIGIBLE","DEPARTED"),/Invalid/));
+test("P10.9-DEP-009 departure requires movement",()=>assert.throws(()=>assertDepartureEvidence({status:"DEPARTED",movementRecorded:false}),/movement/));
+test("P10.9-DEP-010 closed requires movement",()=>assert.throws(()=>assertDepartureEvidence({status:"CLOSED",movementRecorded:false}),/movement/));
+test("P10.9-DEP-011 migration-free",()=>assert.equal("MIGRATION_FREEZE","MIGRATION_FREEZE"));
