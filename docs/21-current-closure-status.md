@@ -97,6 +97,7 @@
 - Supabase migrations applied successfully:
   - `mta_canonical_scope_and_qr_registry`
   - `mta_scope_policy_hardening`
+  - `mta_scope_policy_legacy_cleanup`
 - **Remaining gate:** populate/assign real operational scopes and profile memberships, then execute authenticated multi-user scope isolation tests. No real detainee data has been introduced.
 
 ## Still open before production activation
