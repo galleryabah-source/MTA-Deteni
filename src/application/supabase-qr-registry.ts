@@ -27,7 +27,7 @@ export function createSupabaseQrRegistryHttp(baseUrl: string, fetchImpl: typeof 
       if (response.status === 404) return null;
       if (!response.ok) throw new Error("Cloud QR registry lookup failed: HTTP " + response.status);
       const body = await response.json() as { ok?: boolean; data?: SharedQrRecord | null };
-      return body.ok && body.data ? body.data : null;
+      return body.ok && body.data ? { ...body.data, token: input.token } : null;
     }
   });
 }
