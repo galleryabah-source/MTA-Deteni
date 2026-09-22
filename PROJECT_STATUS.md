@@ -1,3 +1,37 @@
+# MTA DETENI — P9.8 Official Progression Addendum (2026-09-23)
+
+## P9.8 — Transactional Outbox
+
+**Status: IMPLEMENTED / DATABASE-VERIFIED / APPLICATION E2E PENDING**
+
+P9.8 has officially started after the P9.7 durable PostgreSQL transaction/idempotency boundary.
+
+Production database objects:
+- `mta_internal.outbox_events`
+- transactional outbox admission is bound to the P9.7 mutation transaction
+- domain mutation + audit + outbox + idempotency completion commit atomically
+- replay returns the stored response and does not create a duplicate outbox event
+- conflicting request hashes are rejected
+- failed mutation rolls back mutation, audit, outbox and idempotency claim
+- `anon` and `authenticated` have no table access; `service_role` is explicitly granted
+- RLS is enabled
+
+Verified synthetic production-database evidence:
+- OUTBOX-001 event creation — PASS
+- OUTBOX-002 event identity consistency — PASS
+- OUTBOX-003 atomic mutation + audit + outbox — PASS
+- OUTBOX-004 rollback removes outbox — PASS
+- OUTBOX-005 replay does not duplicate outbox — PASS
+- OUTBOX-006 conflict does not create outbox — PASS
+- OUTBOX-007 private access control — PASS
+- OUTBOX-008 deterministic payload contract — PASS
+
+**P9.8 is not yet fully certified.** Application HTTP E2E and the dispatcher/consumer delivery boundary remain outstanding. No external publication is claimed.
+
+The implementation was merged through PR #171, and the P9.7/P9.8 foundation was promoted to the runtime branch through PR #172.
+
+---
+
 # MTA DETENI - Current Audit Addendum (2026-09-22)
 
 ## Latest remediation
