@@ -12,7 +12,50 @@ window.p6printQR=(kind,id)=>{const d=ensure(),map=kind==='room'?'room':kind==='l
 let stream=null;async function camera(r){r.innerHTML=`<section class="hero"><h1>Camera Scan</h1><p class="sub">Scanner QR berbasis kamera perangkat bila browser mendukung BarcodeDetector. Fallback tetap tersedia melalui input manual.</p></section><div class="p6grid"><div class="p6card"><video id="p6video" class="p6video" autoplay playsinline></video><div class="p6row" style="margin-top:10px"><button class="btn primary" onclick="window.p6startCamera()">Start Camera</button><button class="btn" onclick="window.p6stopCamera()">Stop</button></div><p id="p6cammsg" class="p6mini">Camera belum aktif.</p></div><div class="p6card"><h2>Manual fallback</h2><input id="p6manual" class="p6input" placeholder="mta://room/TOKEN"><button class="btn primary" style="margin-top:8px" onclick="window.p6manualScan()">Resolve</button><div id="p6scanout" style="margin-top:12px"></div></div></div>`}
 window.p6startCamera=async()=>{const msg=document.querySelector('#p6cammsg');try{if(!('BarcodeDetector'in window)){msg.textContent='BarcodeDetector tidak tersedia. Gunakan manual fallback.';return}stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:'environment'}}});const v=document.querySelector('#p6video');v.srcObject=stream;const detector=new BarcodeDetector({formats:['qr_code']});msg.textContent='Camera aktif — arahkan ke QR.';const loop=async()=>{if(!stream)return;try{const hits=await detector.detect(v);if(hits[0]?.rawValue){document.querySelector('#p6manual').value=hits[0].rawValue;window.p6manualScan();window.p6stopCamera();return}}catch{}requestAnimationFrame(loop)};requestAnimationFrame(loop)}catch(e){msg.textContent='Camera ditolak/tidak tersedia. Gunakan manual fallback.'}};window.p6stopCamera=()=>{if(stream){stream.getTracks().forEach(t=>t.stop());stream=null}const v=document.querySelector('#p6video');if(v)v.srcObject=null};
 window.p6manualScan=()=>{const raw=(document.querySelector('#p6manual')?.value||'').trim(),d=ensure();let hit=null,type='';if(raw.startsWith('mta://detainee/')){type='DETAINEE';hit=Object.entries(d.qr.detainee).find(([,q])=>q.token===raw.split('/').pop())}else if(raw.startsWith('mta://room/')){type='ROOM';hit=Object.entries(d.qr.room).find(([,q])=>q.token===raw.split('/').pop())}else if(raw.startsWith('mta://leave/')){type='LEAVE';hit=Object.entries(d.qr.leave).find(([,q])=>q.token===raw.split('/').pop())}const o=document.querySelector('#p6scanout');if(!hit){o.innerHTML='<div class="notice p6danger">DENIED · token tidak valid.</div>';audit('CAMERA_SCAN_RESOLVE','QR_SCAN',raw,'FAILED');return}o.innerHTML=`<div class="notice"><b>${type}</b> · ${E(hit[1].status)}<br>Resource: ${E(hit[0])}<br><span class="p6mini">Protected projection tetap membutuhkan authentication + RBAC.</span></div>`;audit('CAMERA_SCAN_RESOLVE','QR_SCAN',raw)};
-function reports(r,d){const active=d.detainees.filter(x=>x.status==='AKTIF').length;const rows=[['Deteni aktif',active],['Kamar',d.rooms.length],['Penempatan',d.placements.length],['Movement',d.movements.length],['Izin',d.leaves.length],['Audit',d.audit.length]];r.innerHTML=`<section class="hero"><h1>Operational Reports</h1><p class="sub">Ringkasan sintetis yang dapat diekspor untuk pengujian downstream renderer.</p></section><div class="p6card"><div class="tablewrap"><table class="table"><thead><tr><th>Indikator</th><th>Nilai</th></tr></thead><tbody>${rows.map(x=>`<tr><td>${E(x[0])}</td><td><b>${x[1]}</b></td></tr>`).join('')}</tbody></table></div><div class="p6row" style="margin-top:12px"><button class="btn primary" onclick="window.p6csv()">Export CSV</button><button class="btn" onclick="window.print()">Print / PDF</button></div></div>`}
-window.p6csv=()=>{const d=ensure(),rows=[['MTA DETENI SYNTHETIC REPORT',''],['Generated',new Date().toISOString()],['Deteni Aktif',d.detainees.filter(x=>x.status==='AKTIF').length],['Kamar',d.rooms.length],['Penempatan',d.placements.length],['Pergerakan',d.movements.length],['Izin',d.leaves.length],['Audit',d.audit.length]];const csv=rows.map(x=>x.map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(',')).join('\n');const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));a.download='mta-deteni-synthetic-report.csv';a.click();audit('REPORT_EXPORT','REPORT','synthetic');toast('CSV synthetic dibuat')};
+function p6dailyGuardSnapshot(d,date){
+  const day=s=>s&&String(s).slice(0,10)===date;
+  const activePlacements=d.placements.filter(x=>x.active);
+  const occupied=new Set(activePlacements.map(x=>x.roomId||((x.block||'')+'/'+(x.room||''))).filter(Boolean));
+  const movements=d.movements.filter(x=>day(x.occurredAt||x.createdAt));
+  const leaves=d.leaves.filter(x=>day(x.occurredAt)||day(x.returnedAt));
+  const incidents=(d.incidents||[]).filter(x=>day(x.occurredAt||x.createdAt));
+  const totals={
+    detaineesActive:d.detainees.filter(x=>x.status==='AKTIF').length,
+    detaineesTotal:d.detainees.length,
+    roomsTotal:d.rooms.length,
+    roomsOccupied:occupied.size,
+    placementsActive:activePlacements.length,
+    movementsToday:movements.length,
+    movementsIn:movements.filter(x=>x.type==='IN').length,
+    movementsOut:movements.filter(x=>x.type==='OUT').length,
+    leavesToday:leaves.length,
+    leavesApproved:d.leaves.filter(x=>x.status==='APPROVED'&&day(x.occurredAt)).length,
+    leavesReturned:d.leaves.filter(x=>x.status==='RETURNED'&&day(x.returnedAt||x.occurredAt)).length,
+    incidentsToday:incidents.length,
+    incidentsOpen:incidents.filter(x=>x.status!=='CLOSED').length
+  };
+  const invalid=Object.values(totals).some(x=>!Number.isInteger(x)||x<0)||totals.roomsOccupied>totals.roomsTotal||totals.placementsActive>totals.detaineesTotal||totals.movementsIn+totals.movementsOut>totals.movementsToday;
+  if(invalid) throw new Error('DAILY_GUARD_REPORT_VALIDATION_FAILED');
+  return {version:'DGR-v1',reportDate:date,generatedAt:new Date().toISOString(),totals,provenance:'synthetic-operational-runtime'};
+}
+function reports(r,d){
+  const date=new Date().toISOString().slice(0,10);
+  let snapshot;
+  try{snapshot=p6dailyGuardSnapshot(d,date)}catch(e){r.innerHTML='<div class="notice p6danger">Laporan ditolak: validasi agregasi gagal.</div>';audit('DAILY_GUARD_REPORT_VALIDATE','REPORT','daily','FAILED');return}
+  const t=snapshot.totals;
+  const rows=[['Deteni aktif',t.detaineesActive],['Deteni total',t.detaineesTotal],['Kamar',t.roomsTotal],['Kamar terisi',t.roomsOccupied],['Penempatan aktif',t.placementsActive],['Pergerakan hari ini',t.movementsToday],['Movement IN',t.movementsIn],['Movement OUT',t.movementsOut],['Izin hari ini',t.leavesToday],['Izin disetujui',t.leavesApproved],['Izin kembali',t.leavesReturned],['Kejadian hari ini',t.incidentsToday],['Kejadian terbuka',t.incidentsOpen]];
+  r.innerHTML=\`<section class="hero"><h1>Daily Guard Report</h1><p class="sub">Agregasi data operasional → validasi → laporan. Synthetic runtime; bukan data operasional nyata.</p></section><div class="p6card"><div class="p6row"><b>Tanggal:</b> \${E(snapshot.reportDate)} <span class="p6tag">DGR-v1</span><span class="p6tag">VALIDATED</span></div><div class="tablewrap" style="margin-top:12px"><table class="table"><thead><tr><th>Indikator</th><th>Nilai</th></tr></thead><tbody>\${rows.map(x=>\`<tr><td>\${E(x[0])}</td><td><b>\${x[1]}</b></td></tr>\`).join('')}</tbody></table></div><div class="p6row" style="margin-top:12px"><button class="btn primary" onclick="window.p6csv()">Export CSV</button><button class="btn" onclick="window.p6printReport()">Print / PDF</button></div></div>\`;
+  audit('DAILY_GUARD_REPORT_VALIDATE','REPORT',snapshot.reportDate);
+  audit('DAILY_GUARD_REPORT_RENDER','REPORT',snapshot.reportDate);
+}
+window.p6csv=()=>{
+  const d=ensure(),date=new Date().toISOString().slice(0,10);let s;
+  try{s=p6dailyGuardSnapshot(d,date)}catch(e){audit('DAILY_GUARD_REPORT_EXPORT','REPORT',date,'DENIED');toast('Export ditolak: validasi gagal');return}
+  const t=s.totals,rows=[['MTA DETENI','DAILY GUARD REPORT'],['Report Date',s.reportDate],['Generated',s.generatedAt],...Object.entries(t)];
+  const csv=rows.map(x=>x.map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(',')).join('\\n');
+  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));a.download='mta-deteni-daily-guard-report-'+date+'.csv';a.click();
+  audit('DAILY_GUARD_REPORT_EXPORT','REPORT',date);toast('Daily Guard Report CSV dibuat');
+};
+window.p6printReport=()=>{const d=ensure(),date=new Date().toISOString().slice(0,10);try{const s=p6dailyGuardSnapshot(d,date);audit('DAILY_GUARD_REPORT_PRINT','REPORT',date);const t=s.totals;const w=window.open('','_blank','width=800,height=900');if(!w){toast('Popup diblokir browser.');return}w.document.write('<!doctype html><html><head><title>MTA DETENI Daily Guard Report</title><style>body{font-family:Segoe UI,Arial;padding:28px}h1{margin-bottom:4px}table{border-collapse:collapse;width:100%;margin-top:20px}td,th{border:1px solid #ccc;padding:8px;text-align:left}</style></head><body><h1>MTA DETENI — Daily Guard Report</h1><div>Tanggal: '+E(s.reportDate)+' · '+E(s.version)+'</div><table><tbody>'+Object.entries(t).map(([k,v])=>'<tr><td>'+E(k)+'</td><td><b>'+v+'</b></td></tr>').join('')+'</tbody></table><p>Provenance: synthetic-operational-runtime</p><script>window.onload=()=>setTimeout(()=>window.print(),250)</script></body></html>');w.document.close()}catch(e){audit('DAILY_GUARD_REPORT_PRINT','REPORT',date,'DENIED');toast('Print ditolak: validasi gagal')}};
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot);else boot();
 })();
