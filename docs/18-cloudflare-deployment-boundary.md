@@ -42,3 +42,17 @@ Runtime health must report:
 - durablePublicationAllowed = false
 
 These fields are executable guard evidence, not permission to bypass governance.
+
+## Windows deployment station
+
+A controlled PowerShell entry point is available at `scripts/cloudflare-deploy-station.ps1`.
+
+Preview:
+
+`powershell -ExecutionPolicy Bypass -File .\\scripts\\cloudflare-deploy-station.ps1 -Target preview`
+
+Production requires an explicit confirmation phrase and performs a live health read after deployment:
+
+`powershell -ExecutionPolicy Bypass -File .\\scripts\\cloudflare-deploy-station.ps1 -Target production`
+
+The script uses Wrangler OAuth credentials already established on the deployment station; no Cloudflare API token is stored in the repository.
