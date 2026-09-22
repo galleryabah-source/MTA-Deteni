@@ -81,6 +81,9 @@ jobs:
       - name: RBAC end-to-end privilege contract tests
         run: node test/rbac-e2e-privilege-contract.test.mjs
 
+      - name: RBAC operational journey guard tests
+        run: node test/rbac-operational-journey-guard.test.mjs
+
       - name: TypeScript domain tests
         run: npm run test:unit
 
