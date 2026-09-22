@@ -6,7 +6,7 @@ export type LocalLanQrRegistryTransport = Readonly<{
 
 export function createLocalLanSharedQrRegistry(transport: LocalLanQrRegistryTransport): SharedQrRegistry {
   return Object.freeze({
-    find(input) {
+    find(input: SharedQrLookup) {
       return transport.lookup(input);
     }
   });
