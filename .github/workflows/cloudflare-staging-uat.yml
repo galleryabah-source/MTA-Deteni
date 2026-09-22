@@ -1,0 +1,92 @@
+name: MTA DETENI Cloudflare Staging UAT Smoke
+
+on:
+  workflow_dispatch:
+    inputs:
+      base_url:
+        description: "Cloudflare staging URL"
+        required: true
+        default: "https://mta-deteni-staging.galleryabah.workers.dev"
+
+permissions:
+  contents: read
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+
+      - name: Install Playwright
+        run: |
+          npm init -y
+          npm install --no-save playwright@1.55.0
+          npx playwright install --with-deps chromium
+
+      - name: Verify staging health
+        env:
+          BASE_URL: ${{ inputs.base_url }}
+        run: |
+          set -euo pipefail
+          curl --fail --silent --show-error --max-time 15 "$BASE_URL/api/health" > health.json
+          node - <<'NODE'
+          const fs=require('fs');
+          const x=JSON.parse(fs.readFileSync('health.json','utf8'));
+          const required={
+            ok:true,
+            app:'MTA DETENI',
+            dataMode:'SYNTHETIC_ONLY',
+            productionAccessAuthorized:false,
+            livePostgresqlExecution:false,
+            realDetaineeDataAllowed:false,
+            migrationFreeze:true
+          };
+          for(const [k,v] of Object.entries(required)){
+            if(x[k]!==v) throw new Error(`Health invariant failed: ${k}=${JSON.stringify(x[k])}, expected ${JSON.stringify(v)}`);
+          }
+          console.log("STAGING HEALTH: PASS");
+          NODE
+
+      - name: Browser smoke — shell, navigation and core surfaces
+        env:
+          BASE_URL: ${{ inputs.base_url }}
+        run: |
+          cat > smoke.mjs <<'NODE'
+          import { chromium } from 'playwright';
+          const base=process.env.BASE_URL;
+          const browser=await chromium.launch({headless:true});
+          const page=await browser.newPage({viewport:{width:1440,height:900}});
+          const errors=[];
+          page.on('console',m=>{if(m.type()==='error') errors.push('console:'+m.text())});
+          page.on('pageerror',e=>errors.push('pageerror:'+e.message));
+          await page.goto(base,{waitUntil:'networkidle',timeout:30000});
+          await page.screenshot({path:'staging-home.png',fullPage:true});
+          const title=await page.title();
+          if(!title) throw new Error('Missing document title');
+          const text=(await page.locator('body').innerText()).trim();
+          if(!text) throw new Error('Empty application shell');
+          const probes=['Dashboard','Dokumen','QR','Scan'];
+          const found=probes.filter(x=>text.toLowerCase().includes(x.toLowerCase()));
+          if(found.length<2) throw new Error('Core application surfaces not visible: '+found.join(','));
+          if(errors.length) throw new Error(errors.join('\n'));
+          await browser.close();
+          console.log('BROWSER SMOKE: PASS');
+          NODE
+          node smoke.mjs
+
+      - name: Upload UAT evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: mta-deteni-staging-uat-${{ github.run_id }}
+          path: |
+            health.json
+            staging-home.png
+          if-no-files-found: ignore
