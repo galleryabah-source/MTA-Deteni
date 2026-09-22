@@ -1,7 +1,7 @@
 # MTA DETENI — Next Gate
 
 **Foundation:** v1.122+  
-**Current:** P13.20081–20320 — terminal evidence through evidence closure continuity integrated and under CI verification on the current branch
+**Current:** P13.20321–20640 — evidence-closure replay and certification continuity integrated and under CI verification on the current branch
 
 ## Completed through current audited gate
 
@@ -33,6 +33,8 @@
 - P13.20081–20160: terminal evidence closure preserves complete identity/integrity/receipt lineage.
 - P13.20161–20240: terminal evidence closure replay is deterministic and rejects identity/fingerprint drift.
 - P13.20241–20320: terminal evidence closure certification remains review-only and non-executable.
+- P13.20321–20480: evidence-closure replay is deterministic with ADMIT/REPLAY semantics and identity/fingerprint drift rejection.
+- P13.20481–20640: evidence-closure certification preserves replay disposition, identity lineage, and review-only non-executable invariants.
 
 ## Integrated publication-chain gate
 
@@ -78,4 +80,4 @@ Migration Freeze TRUE. AI OFF. Repository SYNTHETIC ONLY. Production access NOT 
 
 ## Next gate
 
-P13.20321–20640 — continue evidence-closure replay/certification continuity, preserving exact identity/fingerprint lineage and zero external publication side effect.
+P13.20641–20960 — continue certified evidence-closure continuity toward the next terminal review boundary, preserving exact identity/fingerprint lineage and zero external publication side effect.
