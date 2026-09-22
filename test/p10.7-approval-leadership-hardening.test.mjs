@@ -1,0 +1,18 @@
+import test from "node:test";
+import assert from "node:assert/strict";
+import { assertApprovalIdentity, assertApprovalImmutable, assertApprovalScope, assertRevision, assertSecondApproval, assertSeparationOfDuties } from "../src/domain/approval-leadership/invariants.ts";
+const approval={id:"a1",subjectType:"TEMPORARY_EXIT",subjectId:"x1",decision:"APPROVED",reason:"approved",actorId:"leader-1",correlationId:"c1",decidedAt:"2026-09-23T08:00:00Z",secondApprovalRequired:true,revision:1};
+const actor={actorId:"leader-2",correlationId:"c2",role:"ADMIN",domain:"HEAD_RUDENIM",scope:"S1"};
+test("P10.7-APPROVAL-001 identity",()=>assert.doesNotThrow(()=>assertApprovalIdentity({id:"a",subjectType:"X",subjectId:"s",actorId:"u",correlationId:"c",reason:"r"})));
+test("P10.7-APPROVAL-002 missing reason denied",()=>assert.throws(()=>assertApprovalIdentity({id:"a",subjectType:"X",subjectId:"s",actorId:"u",correlationId:"c",reason:""}),/required/));
+test("P10.7-APPROVAL-003 authority and scope",()=>assert.doesNotThrow(()=>assertApprovalScope({authorized:true,scopeValid:true})));
+test("P10.7-APPROVAL-004 scope denied",()=>assert.throws(()=>assertApprovalScope({authorized:true,scopeValid:false}),/insufficient/));
+test("P10.7-APPROVAL-005 self approval denied",()=>assert.throws(()=>assertSeparationOfDuties("leader-1","leader-1"),/self/));
+test("P10.7-APPROVAL-006 second approval valid",()=>assert.doesNotThrow(()=>assertSecondApproval(approval,actor)));
+test("P10.7-APPROVAL-007 second approval not required denied",()=>assert.throws(()=>assertSecondApproval({...approval,secondApprovalRequired:false},actor),/not required/));
+test("P10.7-APPROVAL-008 duplicate second approval denied",()=>assert.throws(()=>assertSecondApproval({...approval,secondApprovedBy:"leader-2"},actor),/already/));
+test("P10.7-APPROVAL-009 immutable evidence",()=>assert.throws(()=>assertApprovalImmutable(approval,{subjectType:"TEMPORARY_EXIT",subjectId:"x1",decision:"REJECTED",reason:"changed"}),/immutable/));
+test("P10.7-APPROVAL-010 identical duplicate denied",()=>assert.throws(()=>assertApprovalImmutable(approval,{subjectType:"TEMPORARY_EXIT",subjectId:"x1",decision:"APPROVED",reason:"approved"}),/already/));
+test("P10.7-APPROVAL-011 revision sequence",()=>assert.doesNotThrow(()=>assertRevision(2,1)));
+test("P10.7-APPROVAL-012 revision jump denied",()=>assert.throws(()=>assertRevision(3,1),/sequential/));
+test("P10.7-APPROVAL-013 migration-free boundary",()=>assert.equal("MIGRATION_FREEZE","MIGRATION_FREEZE"));
