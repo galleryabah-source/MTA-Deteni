@@ -28,3 +28,6 @@ assert.ok(ui.includes("backup.hidden=!['OWNER','ADMIN'].includes(role)"),"backup
 assert.ok(ui.includes("restore.hidden=!['OWNER','ADMIN'].includes(role)"),"restore must be role-gated");
 
 console.log("AUTH_RBAC_LOGIN_GATE PASS");
+
+assert.ok(ui.includes("AUDIT:['OWNER','ADMIN','AUDITOR']"),"audit action must match current RLS authorization");
+assert.match(ui,/REVIEWER:\{label:'Reviewer',views:\['dashboard','detainee','placement','movement','leave','documents','p6camera'/,"reviewer must not expose audit UI without matching RLS");
