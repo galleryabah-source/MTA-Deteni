@@ -1,3 +1,14 @@
+## 2026-09-22 — Audit Remediation: Governance and Cloudflare Deployment Boundary
+
+- Corrected the Cloudflare runtime health contract so migration freeze and all production/AI/data governance locks are explicitly represented as executable runtime state.
+- Added a regression test for the Cloudflare health governance contract.
+- Changed Cloudflare non-production CI from credential-dependent deployment to credential-free Wrangler dry-run preflight.
+- Added a supported deployment-station PowerShell entry point using Wrangler OAuth authentication, with explicit production confirmation and live health verification.
+- Documented the Android/Termux Wrangler limitation and separated repository control from Cloudflare deployment execution.
+- Confirmed Domain CI Run #1465 PASS and Cloudflare non-production preflight Run #50 PASS for the remediation series.
+- No schema migration, live PostgreSQL execution, production access authorization, AI activation, real detainee data, external transport or durable publication was introduced.
+- Cloudflare production still requires a subsequent manual deployment before the corrected runtime health contract is considered live.
+
 ## 2026-09-21 — D5 Workflow Lifecycle v1.2
 
 - Added deny-by-default Daily Guard Report lifecycle state machine.
@@ -30,7 +41,7 @@
 - P1 runtime evidence artifact `10622772279` was successfully uploaded.
 - This is executable controlled-nonprod evidence and does not authorize production access, migration, AI activation, external transport or durable publication.
 
-undefined## 2026-09-17 — Integrated Audit Reconciliation
+## 2026-09-17 — Integrated Audit Reconciliation
 
 - Completed a repository-level integrated audit across governance, master blueprint, domain architecture, P9/P1 runtime contracts, QR, reporting/document, offline/local continuity, CI and Cloudflare deployment boundaries.
 - Confirmed that the current architecture is coherent and does not require a rebuild from the beginning; the active priority is runtime integration proof and observable evidence rather than additional checkpoint expansion.
