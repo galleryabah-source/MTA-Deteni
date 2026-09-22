@@ -47,7 +47,7 @@ export function createObservabilityEvent(input: Readonly<Record<string, unknown>
 
 export function sanitizeObservabilityError(error: unknown): string {
   const raw=error instanceof Error?error.message:String(error??"UNKNOWN_ERROR");
-  return raw.replace(/Bearer\\s+[A-Za-z0-9._~-]+/gi,"Bearer [REDACTED]").replace(/(?:api[_-]?key|token|secret|password)\\s*[:=]\\s*[^\\s,;]+/gi,"$1=[REDACTED]").slice(0,240);
+  return raw.replace(/Bearer\s+[A-Za-z0-9._~-]+/gi,"Bearer [REDACTED]").replace(/(?:api[_-]?key|token|secret|password)\s*[:=]\s*[^\s,;]+/gi,"$1=[REDACTED]").slice(0,240);
 }
 
 export function serializeObservabilityEvent(event: Readonly<Record<string, unknown>>): string { return JSON.stringify(event); }
