@@ -56,12 +56,10 @@ const mutation: OfflineMutation = Object.freeze({
   createdAt: "2026-09-22T02:00:00.000Z",
   syntheticOnly: true,
 });
-lan.queueMutation(mutation);
 const admitted = lan.admitMutation(mutation, "v1");
 if (admitted.status !== "APPLIED") throw new Error(`Local LAN mutation admission failed: ${admitted.status}`);
 
 const sync = new LocalRuntimeDeterministicSyncEngine();
-sync.enqueue(mutation);
 const batch = Object.freeze({
   syncId: "SYNC-LOCAL-RUNTIME-0001",
   deviceId: device.deviceId,
