@@ -1,6 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { createInMemorySharedQrResolver } from "../src/application/shared-qr-resolver.ts";
+import { createProtectedQrProjection } from "../src/application/shared-qr-protected-projection.ts";
 
 test("multi-device QR E2E resolves through one shared registry and preserves protected projection boundary", async()=>{
   const issuedAt="2026-09-22T08:00:00.000Z";
@@ -30,6 +31,10 @@ test("multi-device QR E2E resolves through one shared registry and preserves pro
     ? {allowed:true,resourceId:resolved.resourceId,requiresRbac:true}
     : {allowed:false};
   assert.deepEqual(projection,{allowed:true,resourceId:"DET-001",requiresRbac:true});
+  const correlated=createProtectedQrProjection({resolution:resolved,actorId:"OPERATOR-B",authenticated:true,authorized:true,correlationId:"COR-QR-001"});
+  assert.equal(correlated.projection.allowed,true);
+  assert.equal(correlated.audit.length,2);
+  assert.ok(correlated.audit.every(event=>event.correlationId==="COR-QR-001"));
 });
 
 test("shared QR resolver rejects wrong token, revoked state, expired token and context mismatch",async()=>{
