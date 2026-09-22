@@ -21,7 +21,7 @@ env:
 jobs:
   domain-ci:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 45
     steps:
       - name: Checkout
         uses: actions/checkout@v7
@@ -100,6 +100,9 @@ jobs:
         run: npx tsx test/p13.20321-20680-evidence-closure-integrity.test.ts
       - name: P13 evidence boundary continuity tests
         run: npx tsx test/p13.20681-21080-evidence-boundary.test.ts
+
+      - name: P13 full one-shot contract suite
+        run: node scripts/p13-full-suite.mjs
 
       - name: TypeScript domain tests
         run: npm run test:unit
