@@ -10,10 +10,10 @@ for (const marker of [
   "window.p6f4Action",
   "DAILY_GUARD_REPORT_VERIFY_INTEGRITY",
   "DAILY_GUARD_REPORT_DOWNLOAD",
-  "F4_REPORT_LIFECYCLE-v1",
 ]) assert.ok(preview.includes(marker), "missing runtime marker: "+marker);
 
 for (const marker of [
+  "F4_REPORT_LIFECYCLE-v1",
   "DRAFT",
   "VALIDATED",
   "GENERATED",
