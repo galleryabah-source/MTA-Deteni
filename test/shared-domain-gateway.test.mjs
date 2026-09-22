@@ -35,3 +35,17 @@ test("application shell actually loads and wires shared persistence gateway",asy
   assert.match(html,/window\.MTADeteniSharedDomain\.updateDetainee/);
   assert.match(html,/window\.MTADeteniSharedDomain\.archiveDetainee/);
 });
+
+
+test("cloud detainee creation rejects missing operational scope before transport", async()=>{
+  const code=await read("shared-domain-gateway-v1.js");
+  const context={window:{MTADeteniRuntimeAdapter:{
+    getMode:()=> "CLOUD",
+    create:async()=>{throw new Error("TRANSPORT_SHOULD_NOT_RUN")}
+  }},console};
+  vm.runInNewContext(code,context);
+  await assert.rejects(
+    context.window.MTADeteniSharedDomain.createDetainee({code:"DET-X",name:"X"}),
+    err=>err?.code==="ACTIVE_SCOPE_REQUIRED"
+  );
+});
