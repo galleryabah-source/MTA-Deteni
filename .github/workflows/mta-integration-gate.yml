@@ -33,6 +33,13 @@ jobs:
           grep -q 'SHARED_STATE_EVENT' web/mta-unified-shell-v2.js
           grep -q 'MONITOR_DERIVED_STATE' web/mta-unified-shell-v2.js
           grep -q 'LEAVE_STATE_MACHINE' web/mta-unified-shell-v2.js
+          grep -q 'mtaUnifiedJourneyContractTest' web/mta-unified-shell-v2.js
+          grep -q 'JOURNEY_ACTIVE_DETAINEE' web/mta-unified-shell-v2.js
+          grep -q 'JOURNEY_QR_ACCEPT' web/mta-unified-shell-v2.js
+          grep -q 'JOURNEY_QR_TOKEN_DENY' web/mta-unified-shell-v2.js
+          grep -q 'JOURNEY_QR_NOT_FOUND' web/mta-unified-shell-v2.js
+          grep -q 'EXPIRED' web/mta-unified-shell-v2.js
+          grep -q 'FUTURE' web/mta-unified-shell-v2.js
           grep -q 'LEAVE_DEPART_BLOCKED' web/index.html
           grep -q 'PLACEMENT_ASSIGN_BLOCKED' web/index.html
           grep -q 'PLACEMENT_CAPACITY_BLOCKED' web/index.html
