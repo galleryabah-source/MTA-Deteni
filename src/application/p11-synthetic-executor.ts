@@ -1,0 +1,2 @@
+import {GOLDEN_STAGES} from "./p11-runtime-golden-journey.ts";
+export function runSyntheticGoldenJourney(input:{journeyId:string;resourceId:string;requestId:string;correlationId:string;actorId:string;idempotencyKey:string}){return GOLDEN_STAGES.map(stage=>({stage,journeyId:input.journeyId,requestId:input.requestId,correlationId:input.correlationId,actorId:input.actorId,resourceId:input.resourceId,idempotencyKey:input.idempotencyKey,status:"SUCCESS" as const}));}
