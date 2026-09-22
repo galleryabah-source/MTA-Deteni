@@ -40,5 +40,7 @@ assert.match(fs.readFileSync('web/mta-auth-ui.js','utf8'),/OWNER.*ADMIN/);
 assert.doesNotMatch(fs.readFileSync('web/mta-auth-ui.js','utf8'),/Daftar Akun/);
 assert.match(fs.readFileSync('worker-v11.js','utf8'),/X-Frame-Options/);
 assert.match(fs.readFileSync('worker-v11.js','utf8'),/AUTH_REQUIRED/);
+assert.match(fs.readFileSync('worker-v11.js','utf8'),/request\.method===\"OPTIONS\"/);
+assert.match(fs.readFileSync('worker-v11.js','utf8'),/Access-Control-Allow-Origin/);
 assert.match(fs.readFileSync('worker-v11.js','utf8'),/Content-Security-Policy-Report-Only/);
 console.log('Production Auth/RBAC API contract PASS');
