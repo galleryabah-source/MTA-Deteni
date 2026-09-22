@@ -94,7 +94,7 @@ test("P13.19361-20080 composes receipt closure through closure integrity evidenc
   assert.throws(
     () => createLocalRuntimeRecoveryOperationalAuditPublicationDispatchAuthorizationDecisionEvidenceClosureIntegrityReceiptClosureIntegrityEvidence({
       evidenceId: "TERMINAL-INVALID",
-      integrityCertification: { ...closureIntegrity2Certification, certified: false } as typeof closureIntegrity2Certification,
+      integrityCertification: { ...closureIntegrity2Certification, certified: false } as unknown as typeof closureIntegrity2Certification,
     }),
     /not admissible/i,
   );
