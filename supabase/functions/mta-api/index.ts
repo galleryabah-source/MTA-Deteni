@@ -1,6 +1,6 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
-const cors={"Access-Control-Allow-Origin":"*","Access-Control-Allow-Headers":"authorization, x-client-info, apikey, content-type","Access-Control-Allow-Methods":"GET,POST,PATCH,DELETE,OPTIONS","Content-Type":"application/json"};
+const cors={"Access-Control-Allow-Origin":"*","Access-Control-Allow-Headers":"authorization, x-client-info, apikey, content-type","Access-Control-Allow-Methods":"GET,POST,PATCH,DELETE,OPTIONS","Content-Type":"application/json","Vary":"Origin"};
 const TABLES=new Set(["detainees","placements","movements","leaves","documents"]);
 const WRITE_ROLES=new Set(["OWNER","ADMIN","EDITOR"]);
 const json=(body,status=200)=>new Response(JSON.stringify(body),{status,headers:cors});
