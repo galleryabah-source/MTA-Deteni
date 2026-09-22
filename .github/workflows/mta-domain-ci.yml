@@ -63,6 +63,9 @@ jobs:
       - name: Local runtime adapter evidence
         run: npx tsx scripts/mta-local-runtime-adapter-evidence.ts
 
+      - name: Local runtime recovery evidence
+        run: npx tsx scripts/mta-local-runtime-recovery-evidence.ts
+
       - name: Controlled execution evidence harness
         run: node .github/scripts/mta-execution-harness.mjs
 
