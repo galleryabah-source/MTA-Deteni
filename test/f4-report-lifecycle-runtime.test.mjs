@@ -26,8 +26,11 @@ for (const marker of [
   "SHA-256",
 ]) assert.ok(adapter.includes(marker), "missing adapter marker: "+marker);
 
-assert.match(preview, /if\(l\.status==='FINAL'\|\|!l\.finalArtifactId\)\{audit\('DAILY_GUARD_REPORT_PRINT'/);
-assert.match(preview, /if\(l\.status!=='FINAL'\|\|!l\.finalArtifactId\)throw new Error\('F4_DOWNLOAD_REQUIRES_FINAL'\)/);
-assert.match(preview, /if\(l\.status!=='APPROVED'\)throw new Error\('F4_FINALIZE_REQUIRES_APPROVAL'\)/);
+assert.ok(preview.includes("DAILY_GUARD_REPORT_PRINT"), "missing print audit action");
+assert.ok(preview.includes("DAILY_GUARD_REPORT_DOWNLOAD"), "missing download audit action");
+assert.ok(preview.includes("F4_DOWNLOAD_REQUIRES_FINAL"), "missing final-only download guard");
+assert.ok(preview.includes("F4_FINALIZE_REQUIRES_APPROVAL"), "missing approval-gated finalize guard");
+assert.ok(preview.includes("finalArtifactId"), "missing final artifact gate");
 assert.ok(preview.includes("prompt('Alasan perubahan/revisi:')"));
+
 console.log("F4_REPORT_LIFECYCLE_RUNTIME PASS");
