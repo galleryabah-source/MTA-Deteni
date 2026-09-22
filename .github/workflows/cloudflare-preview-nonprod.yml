@@ -1,4 +1,4 @@
-name: MTA DETENI Cloudflare Non-Production Preview
+name: MTA DETENI Cloudflare Non-Production Preflight
 
 on:
   workflow_dispatch:
@@ -19,56 +19,34 @@ env:
   DEPLOY_WORKER_NAME: mta-deteni-preview
 
 jobs:
-  deploy:
+  preflight:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '24'
-
       - name: Install Wrangler
         run: npm install --global wrangler@4.132.0
-
-      - name: Preview artifact and syntax preflight
+      - name: Validate non-production artifact
         run: |
+          set -euo pipefail
+          test "$DEPLOY_WORKER_NAME" = "mta-deteni-preview"
           test -f wrangler.preview.toml
           test -f worker-v11.js
           test -f web/index.html
           test -f web/admin-settings-v9.js
+          node --check worker-v11.js
           node --check web/admin-settings-v9.js
-          cp web/mta-auth.js /tmp/mta-auth-preview-check.mjs
-          node --check /tmp/mta-auth-preview-check.mjs
-          rm -f /tmp/mta-auth-preview-check.mjs
-
-      - name: Verify non-production target
-        env:
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          cp web/mta-auth.js mta-auth-preview-check.mjs
+          node --check mta-auth-preview-check.mjs
+          rm -f mta-auth-preview-check.mjs
+      - name: Validate Wrangler bundle without Cloudflare credentials
         run: |
-          test "$DEPLOY_WORKER_NAME" = "mta-deteni-preview"
-          test -f wrangler.preview.toml
-          test -n "${CLOUDFLARE_API_TOKEN:-}"
-          CF_ACCOUNT_ID="$(printf '%s' "$CLOUDFLARE_ACCOUNT_ID" | tr -d '[:space:]')"
-          test -n "$CF_ACCOUNT_ID"
-          case "$CF_ACCOUNT_ID" in *[!A-Za-z0-9_-]*) echo 'Cloudflare account id contains unsupported characters after whitespace normalization'; exit 1;; esac
-          echo "Cloudflare target: $DEPLOY_WORKER_NAME"
-          CLOUDFLARE_ACCOUNT_ID="$CF_ACCOUNT_ID" CLOUDFLARE_API_TOKEN="$CLOUDFLARE_API_TOKEN" wrangler whoami
-
-      - name: Deploy controlled non-production preview
-        env:
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-        run: |
-          CF_ACCOUNT_ID="$(printf '%s' "$CLOUDFLARE_ACCOUNT_ID" | tr -d '[:space:]')"
-          CF_API_TOKEN="$(printf '%s' "$CLOUDFLARE_API_TOKEN" | sed 's/[[:space:]]*$//')"
-          CLOUDFLARE_ACCOUNT_ID="$CF_ACCOUNT_ID" CLOUDFLARE_API_TOKEN="$CF_API_TOKEN" wrangler deploy --config wrangler.preview.toml --name "$DEPLOY_WORKER_NAME"
-
-      - name: Record deployment verification boundary
-        run: |
-          echo "Deployment step completed for controlled non-production target."
-          echo "Independent /api/health verification remains a separate controlled check until the preview hostname is fixed in deployment configuration."
+          set -euo pipefail
+          wrangler deploy --config wrangler.preview.toml --name "$DEPLOY_WORKER_NAME" --dry-run
+          echo "Cloudflare non-production bundle preflight: PASS"
+          echo "Actual preview deployment is intentionally manual from an authenticated deployment station."
