@@ -1,5 +1,5 @@
 (()=>{'use strict';
-const LIB='/vendor/html5-qrcode.min.js';
+const LIB='https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js';
 const CSS='/qr-camera-v2.css?v=2';
 let active=null,ready=null;
 function ensureCss(){if(document.querySelector('link[data-mta-qr-css]'))return;const l=document.createElement('link');l.rel='stylesheet';l.href=CSS;l.dataset.mtaQrCss='1';document.head.appendChild(l)}
