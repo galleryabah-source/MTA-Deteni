@@ -1,7 +1,7 @@
 # MTA DETENI — Next Gate
 
 **Foundation:** v1.122+
-**Current:** P13.16321–16440 — integrated operational audit publication certification implemented; CI observation blocker remains
+**Current:** F4 — Daily Guard Report lifecycle integrity hardening; F4 domain/runtime gates CI-verified on head `90f81cdb...`
 
 ## Completed (through current gate)
 
@@ -16,6 +16,10 @@
 - P13.16081–16200: deterministic operational audit publication envelope with explicit READY_FOR_PUBLICATION state and no external publication.
 - P13.16201–16320: deterministic publication replay guard with ADMIT/REPLAY/CONFLICT semantics and no external side effect.
 - P13.16321–16440: integrated publication certification composes readiness and replay boundaries and preserves exact identity/fingerprint continuity.
+- F3: operational actions closure — movement/placement/leave/QR state actions, token-resource binding, return lifecycle, audit/event continuity; CI-verified.
+- F4: Daily Guard Report lifecycle — DRAFT → VALIDATED → GENERATED → IN_REVIEW → APPROVED / CHANGES_REQUESTED → REVISION → FINAL → VERIFY_INTEGRITY → DOWNLOAD; revision lineage, actor/context metadata, final artifact binding, SHA-256 integrity, final immutability, and audit events implemented.
+- F4 runtime coverage: full browser adapter execution plus lifecycle validation after VERIFY_INTEGRITY and DOWNLOAD events; failed integrity verification is retained as an auditable event.
+- F4 latest Domain CI run #1662: SUCCESS; P1 Runtime Observation run #365: SUCCESS.
 
 ## Parallel UI hardening — smartphone & tablet
 
@@ -34,6 +38,10 @@ Implemented without changing the database/migration boundary:
 ## Deployment observation
 
 Cloudflare deployment is still blocked at the credential/permission boundary. The latest controlled deploy reached Cloudflare API authentication and returned error code 10000; the account token is accepted as an account token but lacks the permission required to update the target Worker service. No production access was attempted.
+
+## Functional next gate: F4 closure → next functional journey
+
+F4 is functionally and CI verified on the current head. PR #146 remains open and intentionally unmerged. Before merge, retain synthetic-only governance and perform final PR review.
 
 ## Next gate: P13.16441–16560
 

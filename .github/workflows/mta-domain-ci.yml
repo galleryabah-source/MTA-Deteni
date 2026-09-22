@@ -72,6 +72,12 @@ jobs:
       - name: F4 Daily Guard Report browser contract tests
         run: node test/f4-daily-guard-report-browser.test.mjs
 
+      - name: F4 report lifecycle integrity tests
+        run: npx tsx test/f4-report-lifecycle-integrity.test.ts
+
+      - name: F4 report lifecycle runtime contract tests
+        run: node test/f4-report-lifecycle-runtime.test.mjs
+
       - name: TypeScript domain tests
         run: npm run test:unit
 
