@@ -4,6 +4,7 @@ import type { BackupManifest } from "../src/application/runtime-adapters.js";
 import { certifyRecoveryJourney } from "../src/application/recovery-certification.js";
 import type { RecoveryEvidence } from "../src/application/recovery-evidence.js";
 import type { RecoveryRetryRecord } from "../src/application/recovery-retry.js";
+import { createRecoveryRetryKey } from "../src/application/recovery-retry.js";
 
 const previous: BackupManifest = Object.freeze({
   schemaVersion: 1,
@@ -39,11 +40,11 @@ const evidence: RecoveryEvidence = Object.freeze({
   mutationCommitted: true,
   syntheticOnly: true,
 });
-const retryKey = "RETRY-SYN-0001";
 const fingerprint = "FP-REC-SYN-0001";
+const retryKey = createRecoveryRetryKey(evidence.commandId, fingerprint);
 const retries: RecoveryRetryRecord[] = [
-  Object.freeze({ retryKey, commandId: evidence.commandId, sourceFingerprint: fingerprint, decision: "RETRY", syntheticOnly: true }),
-  Object.freeze({ retryKey, commandId: evidence.commandId, sourceFingerprint: fingerprint, decision: "SKIP_DUPLICATE", syntheticOnly: true }),
+  Object.freeze({ retryKey, targetId: "OUTBOX-SYN-0001", attempt: 1, sourceFingerprint: fingerprint, decision: "RETRY", syntheticOnly: true }),
+  Object.freeze({ retryKey, targetId: "OUTBOX-SYN-0001", attempt: 2, sourceFingerprint: fingerprint, decision: "SKIP_DUPLICATE", syntheticOnly: true }),
 ];
 
 const recovery = certifyRecoveryJourney({
