@@ -38,3 +38,16 @@ export async function emitObservabilityEvent(sink: ObservabilitySink, event: Obs
   validateObservabilityEvent(event);
   await sink.emit(Object.freeze({ ...event }));
 }
+
+export function createObservabilityEvent(input: Readonly<Record<string, unknown>>): Readonly<Record<string, unknown>> {
+  const required=["service","event","requestId","correlationId"];
+  for(const key of required){if(!String(input[key]??"").trim()) throw new Error(`OBS_${String(key).replace(/[A-Z]/g,m=>`_${m}`).toUpperCase()}_REQUIRED`);}
+  return Object.freeze({timestamp:new Date().toISOString(),...input});
+}
+
+export function sanitizeObservabilityError(error: unknown): string {
+  const raw=error instanceof Error?error.message:String(error??"UNKNOWN_ERROR");
+  return raw.replace(/Bearer\\s+[A-Za-z0-9._~-]+/gi,"Bearer [REDACTED]").replace(/(?:api[_-]?key|token|secret|password)\\s*[:=]\\s*[^\\s,;]+/gi,"$1=[REDACTED]").slice(0,240);
+}
+
+export function serializeObservabilityEvent(event: Readonly<Record<string, unknown>>): string { return JSON.stringify(event); }
