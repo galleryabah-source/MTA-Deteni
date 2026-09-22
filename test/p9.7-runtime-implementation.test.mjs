@@ -8,11 +8,11 @@ import {
 } from "../src/infrastructure/database/transaction-idempotency.mjs";
 
 test("P9.7 implementation exposes the canonical version and rejects missing adapter/work", async () => {
-  assert.equal(TRANSACTION_IDEMPOTENCY_VERSION, "P9.7-IMPLEMENTATION-v1");
+  assert.equal(TRANSACTION_IDEMPOTENCY_VERSION, "P9.7-IMPLEMENTATION-v2");
   assert.throws(() => createTransactionRunner(), (error) =>
     error instanceof TransactionError && error.code === "ADAPTER_REQUIRED"
   );
-  const adapter = { query: async () => ({ rows: [] }) };
+  const adapter = { execute: async () => ({ rows: [], rowCount: 0 }) };
   const runner = createTransactionRunner(adapter);
   await assert.rejects(
     () => runner.transaction(),
@@ -23,9 +23,9 @@ test("P9.7 implementation exposes the canonical version and rejects missing adap
 test("P9.7 implementation commits after successful work and rolls back on failure", async () => {
   const calls = [];
   const adapter = {
-    query: async ({ text }) => {
-      calls.push(text);
-      return { rows: [] };
+    execute: async ({ text, parameters }) => {
+      calls.push({ text, parameters });
+      return { rows: [], rowCount: 0 };
     },
   };
   const runner = createTransactionRunner(adapter);
@@ -36,14 +36,15 @@ test("P9.7 implementation commits after successful work and rolls back on failur
   });
 
   assert.equal(result, "OK");
-  assert.deepEqual(calls, ["BEGIN", "COMMIT"]);
+  assert.deepEqual(calls.map((x) => x.text), ["BEGIN", "COMMIT"]);
+  assert.deepEqual(calls[0].parameters, []);
 
   calls.length = 0;
   await assert.rejects(
     () => runner.transaction(async () => { throw new Error("DOMAIN_FAILURE"); }),
     /DOMAIN_FAILURE/
   );
-  assert.deepEqual(calls, ["BEGIN", "ROLLBACK"]);
+  assert.deepEqual(calls.map((x) => x.text), ["BEGIN", "ROLLBACK"]);
 });
 
 test("P9.7 idempotency implementation is deterministic for execute, replay and conflict", () => {
