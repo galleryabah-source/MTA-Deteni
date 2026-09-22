@@ -14,7 +14,6 @@ const SCRIPTS=[
   '/qr-print-clean-v3.js?v=3',
   '/movement-v9.js?v=9',
   '/room-ops-v9.js?v=9',
-  '/admin-settings-v9.js?v=9',
   '/master-room-guard-v10.js?v=10',
   '/desktop-shell-v2.js?v=2',
   '/preview-v10.js?v=10',
