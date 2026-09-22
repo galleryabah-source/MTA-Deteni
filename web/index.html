@@ -39,7 +39,7 @@ body.mta-desktop-enhanced .detainee-pagination .page-current{background:#0b63ce;
 </head>
 <body>
 <div class="app">
-<header class="top"><div class="brand"><div class="logo">M</div><div><strong>MTA DETENI Digital</strong><small>Manajemen Terpadu Administrasi Deteni</small></div></div><div class="topright"><span class="pill">● Local synthetic runtime</span><button class="btn small" id="backupBtn">Backup</button><button class="btn small" id="importBtn">Restore</button><input id="importFile" type="file" accept="application/json" hidden></div></header>
+<header class="top"><div class="brand"><div class="logo">M</div><div><strong>MTA DETENI Digital</strong><small>Manajemen Terpadu Administrasi Deteni</small></div></div><div class="topright"><span class="pill" id="runtimePill">● LOCAL SYNTHETIC</span><button class="btn small" id="backupBtn">Backup</button><button class="btn small" id="importBtn">Restore</button><input id="importFile" type="file" accept="application/json" hidden></div></header>
 <div class="layout"><aside class="side"><nav class="nav" id="nav"><button class="active" data-view="dashboard">Dashboard</button><button data-view="detainee">Data Deteni</button><button data-view="placement">Penempatan</button><button data-view="movement">Pergerakan</button><button data-view="leave">Izin</button><button data-view="documents">Dokumen</button><button data-view="audit">Audit Trail</button></nav></aside><main class="main"><div id="appView" class="view"></div></main></div>
 <footer class="footer"><span>MTA DETENI Digital · Synthetic functional runtime · No operational detainee data</span><span id="clock"></span></footer>
 </div><div id="modal" class="modal"><div class="dialog" id="dialog"></div></div><div id="toast" class="toast"></div>
@@ -63,6 +63,12 @@ function entityId(){return isCloudRuntime()&&crypto?.randomUUID?crypto.randomUUI
 function now(){return new Date().toISOString()}
 function esc(v=''){return String(v).replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]))}
 function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2200)}
+function updateRuntimeChrome(){
+  const mode=window.MTADeteniRuntimeAdapter?.getMode?.()||'LOCAL';
+  const pill=document.getElementById('runtimePill');
+  if(pill)pill.textContent='● '+(mode==='CLOUD'?'CLOUD AUTHENTICATED':mode==='LAN'?'LAN LOCAL':'LOCAL SYNTHETIC');
+}
+
 function audit(action,resourceType,resourceId,result='SUCCESS'){if(isCloudRuntime())return;db.audit.unshift({id:uid('AUD'),action,resourceType,resourceId:resourceId||'',result,occurredAt:now(),actor:'DEMO-OPERATOR',requestId:uid('REQ'),correlationId:uid('COR'),policyVersion:'AUTHZ-1.0'});save()}
 function openModal(html){document.getElementById('dialog').innerHTML=html;document.getElementById('modal').classList.add('open')}
 function closeModal(){document.getElementById('modal').classList.remove('open')}
@@ -89,7 +95,8 @@ async function syncCloudDomain(){
   }catch(e){console.warn('MTA_SHARED_DOMAIN_SYNC',e);toast('Shared persistence belum tersedia');return false}
 }
 async function syncSharedDetaineeDomain(){return syncCloudDomain()}
-window.addEventListener('mta-auth-state',async()=>{if(isCloudRuntime()){await syncCloudDomain();render()}});
+window.addEventListener('mta-auth-state',async()=>{if(isCloudRuntime()){await syncCloudDomain();render()}updateRuntimeChrome()});
+window.addEventListener('mta:runtime-mode',async()=>{updateRuntimeChrome();if(isCloudRuntime()){await syncCloudDomain();render()}else{db=load();render()}});
 function statCards(){return `<section class="grid stats"><div class="card"><div class="label">Deteni Aktif</div><div class="value">${db.detainees.filter(x=>x.status==='AKTIF').length}</div><span class="status">Operational</span></div><div class="card"><div class="label">Penempatan</div><div class="value">${db.placements.length}</div><span class="status">Tracked</span></div><div class="card"><div class="label">Pergerakan</div><div class="value">${db.movements.length}</div><span class="status">Logged</span></div><div class="card"><div class="label">Izin</div><div class="value">${db.leaves.length}</div><span class="status">Workflow</span></div><div class="card"><div class="label">Audit Event</div><div class="value">${db.audit.length}</div><span class="status">Evidence</span></div></section>`}
 function render(){const v=document.getElementById('appView'); if(current==='dashboard')return dashboard(v);if(current==='detainee')return detainee(v);if(current==='placement')return placement(v);if(current==='movement')return movement(v);if(current==='leave')return leave(v);if(current==='documents')return documents(v);if(current==='audit')return auditView(v)}
 function shell(title,desc,body){return `<section class="hero"><h1>${title}</h1><p class="sub">${desc}</p></section>${body}`}
@@ -266,5 +273,5 @@ document.getElementById('nav').addEventListener('click',e=>{const b=e.target.clo
 document.getElementById('backupBtn').onclick=()=>{const blob=new Blob([JSON.stringify(db,null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='mta-deteni-synthetic-backup.json';a.click();audit('EXPORT_DOWNLOAD','BACKUP','synthetic');toast('Backup JSON dibuat')};
 document.getElementById('importBtn').onclick=()=>document.getElementById('importFile').click();
 document.getElementById('importFile').onchange=e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{try{const x=JSON.parse(r.result);if(!x.detainees||!x.audit)throw new Error('format');db=x;save();audit('BACKUP_RESTORE','BACKUP','synthetic');render();toast('Backup dipulihkan')}catch{toast('Backup tidak valid')}};r.readAsText(f)};
-setInterval(()=>document.getElementById('clock').textContent=new Date().toLocaleString('id-ID'),1000);render();
+updateRuntimeChrome();setInterval(()=>document.getElementById('clock').textContent=new Date().toLocaleString('id-ID'),1000);render();
 </script></body></html>
