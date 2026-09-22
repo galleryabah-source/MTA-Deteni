@@ -73,8 +73,10 @@ Supabase Edge/API → Supabase PostgreSQL → SharedQrRegistry
 
 No UI code is allowed to know which persistence backend is active.
 
-## Migration gate
+## Activation status
 
-This document is a design/audit result only. No production migration has been executed.
+The design gate has now been executed on the controlled MTA DETENI Supabase project. Canonical scope authorization, QR registry RLS, and the database QR resolver were applied through the repository migrations `mta_canonical_scope_and_qr_registry`, `mta_scope_policy_hardening`, `mta_scope_policy_legacy_cleanup`, and `mta_qr_resolver_active_expiry_hardening`.
 
-Before applying the proposed table, canonical scope authorization must be established and the RLS policy must be reviewed against the final scope model.
+The live database contained zero detainee rows when the mandatory scope constraint was activated, so no real detainee records required backfill. The remaining authorization gate is authenticated multi-user isolation evidence using controlled non-production identities and synthetic scope/detainee records.
+
+No real detainee/PII data is introduced by this activation.
