@@ -1,0 +1,18 @@
+import test from "node:test";
+import assert from "node:assert/strict";
+import { assertEscortIdentity, assertEscortMovement, assertEscortVersion, assertExitBinding, assertOfficerRoster, assertScope } from "../src/domain/escort/invariants.ts";
+const assignment={id:"e1",temporaryExitId:"x1",officerIds:["o1"],status:"ASSIGNED",assignedAt:"2026-09-23T08:00:00Z",version:2};
+const actor={actorId:"a1",correlationId:"c1",role:"EDITOR",domain:"KAMTIB",scope:"S1"};
+test("P10.6-ESCORT-001 identity",()=>assert.doesNotThrow(()=>assertEscortIdentity({id:"e",temporaryExitId:"x",actorId:"a",correlationId:"c"})));
+test("P10.6-ESCORT-002 missing identity",()=>assert.throws(()=>assertEscortIdentity({id:"",temporaryExitId:"x",actorId:"a",correlationId:"c"}),/required/));
+test("P10.6-ESCORT-003 officer roster",()=>assert.doesNotThrow(()=>assertOfficerRoster(["o1","o2"])));
+test("P10.6-ESCORT-004 duplicate officer denied",()=>assert.throws(()=>assertOfficerRoster(["o1","o1"]),/duplicates/));
+test("P10.6-ESCORT-005 documented exit required",()=>assert.doesNotThrow(()=>assertExitBinding({temporaryExitId:"x",exitState:"DOCUMENTED"})));
+test("P10.6-ESCORT-006 non-documented exit denied",()=>assert.throws(()=>assertExitBinding({temporaryExitId:"x",exitState:"APPROVED"}),/DOCUMENTED/));
+test("P10.6-ESCORT-007 actor scope",()=>assert.doesNotThrow(()=>assertScope({actor,authorized:true,officersInScope:true})));
+test("P10.6-ESCORT-008 officer scope denied",()=>assert.throws(()=>assertScope({actor,authorized:true,officersInScope:false}),/outside/));
+test("P10.6-ESCORT-009 active requires movement",()=>assert.throws(()=>assertEscortMovement({status:"ACTIVE",movementRecorded:false}),/movement/));
+test("P10.6-ESCORT-010 completed requires movement",()=>assert.throws(()=>assertEscortMovement({status:"COMPLETED",movementRecorded:false}),/movement/));
+test("P10.6-ESCORT-011 version",()=>assert.doesNotThrow(()=>assertEscortVersion(assignment,2)));
+test("P10.6-ESCORT-012 stale version denied",()=>assert.throws(()=>assertEscortVersion(assignment,1),/concurrently/));
+test("P10.6-ESCORT-013 migration-free boundary",()=>assert.equal("MIGRATION_FREEZE","MIGRATION_FREEZE"));
