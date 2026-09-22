@@ -34,6 +34,10 @@ jobs:
           grep -q 'MONITOR_DERIVED_STATE' web/mta-unified-shell-v2.js
           grep -q 'LEAVE_STATE_MACHINE' web/mta-unified-shell-v2.js
           grep -q 'LEAVE_DEPART_BLOCKED' web/index.html
+          grep -q 'PLACEMENT_ASSIGN_BLOCKED' web/index.html
+          grep -q 'PLACEMENT_CAPACITY_BLOCKED' web/index.html
+          grep -q 'MOVEMENT_CREATE_BLOCKED' web/index.html
+          grep -q 'mtaUnifiedValidateLeave' web/index.html
           grep -q 'SYNTH-QR-' web/mta-unified-shell-v2.js
           grep -q 'MTA_DETENI_QR_PRINT_ENGINE' web/qr-print-clean-v3.js
           grep -q 'mta:data-changed' web/index.html
