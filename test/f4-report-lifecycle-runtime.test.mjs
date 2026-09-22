@@ -25,6 +25,7 @@ for (const marker of [
   "REV-",
   "SHA-256",
   "verifyAndRecord",
+  "registerDownload",
   "VERIFY_INTEGRITY",
 ]) assert.ok(adapter.includes(marker), "missing adapter marker: "+marker);
 
@@ -33,6 +34,9 @@ assert.ok(preview.includes("DAILY_GUARD_REPORT_DOWNLOAD"), "missing download aud
 assert.ok(preview.includes("F4_DOWNLOAD_REQUIRES_FINAL"), "missing final-only download guard");
 assert.ok(preview.includes("F4_FINALIZE_REQUIRES_APPROVAL"), "missing approval-gated finalize guard");
 assert.ok(preview.includes("finalArtifactId"), "missing final artifact gate");
+assert.ok(preview.includes("integrity(l,entry.snapshot,l.finalArtifactId)"), "integrity must bind final artifact");
+assert.ok(preview.includes("entry.lifecycle=verified.report"), "verification event must persist");
+assert.ok(preview.includes("MTAF4Lifecycle.registerDownload"), "download lifecycle event must persist");
 assert.ok(preview.includes("prompt('Alasan perubahan/revisi:')"));
 
 console.log("F4_REPORT_LIFECYCLE_RUNTIME PASS");
