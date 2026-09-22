@@ -37,6 +37,7 @@ grep -q 'buildMonitorMetrics' web/mta-unified-shell-v2.js
 grep -q 'JOURNEY_AUDIT_TO_QUEUE' web/mta-unified-shell-v2.js
 grep -q 'JOURNEY_STATE_TO_MONITOR' web/mta-unified-shell-v2.js
 grep -q 'REPORT_SOURCE_SHARED_STATE' web/mta-unified-shell-v2.js
+grep -q 'REPORT_EVIDENCE_CONTRACT' web/mta-unified-shell-v2.js
 grep -q 'buildReportEvidence' web/index.html
 grep -q 'validateReportEvidence' web/index.html
 grep -q 'REPORT_EVIDENCE_REQUIRED' web/index.html
