@@ -33,7 +33,7 @@ function interceptQrPrintButtons(){
   const raw=String(root.textContent||'').match(/mta:\/\/(detainee|room|leave)\/([A-Za-z0-9._-]+)\/([A-Za-z0-9._-]+?)(?=Cetak|\s|$)/i);
   if(!raw)return;
   e.preventDefault();e.stopPropagation();e.stopImmediatePropagation();
-  const kind=raw[1].toLowerCase(),id=raw[2],payload='mta://'+kind+'/'+id+'/'+raw[3];
+  const kind=raw[1].toLowerCase(),id=raw[2],token=String(raw[3]||'').replace(/(?:Cetak.*)$/i,'').replace(/[^A-Za-z0-9._-]+$/g,''),payload='mta://'+kind+'/'+id+'/'+token;
   let label=id;
   const text=String(root.textContent||'');
   if(kind==='room'){const m=text.match(/Blok\s*[^\n]+\/\s*Kamar\s*\d+/i);if(m)label=m[0].trim()}
