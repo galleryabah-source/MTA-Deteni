@@ -1,6 +1,6 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
-const allowedOrigin=(origin)=>origin&&(/^https:\/\/(?:[a-z0-9-]+-)?mta-deteni\\.galleryabah\\.workers\\.dev$/i.test(origin)||origin==="https://mta-deteni.galleryabah.workers.dev")?origin:"null";
+const allowedOrigin=(origin)=>origin&&(/^https:\/\/(?:[a-z0-9-]+-)?mta-deteni\.galleryabah\.workers\.dev$/i.test(origin)||origin==="https://mta-deteni.galleryabah.workers.dev")?origin:"null";
 const cors=(req)=>({"Access-Control-Allow-Origin":allowedOrigin(req.headers.get("Origin")),"Access-Control-Allow-Headers":"authorization, x-client-info, apikey, content-type","Access-Control-Allow-Methods":"GET,POST,PATCH,DELETE,OPTIONS","Vary":"Origin","Content-Type":"application/json","X-Content-Type-Options":"nosniff"});
 const TABLES=new Set(["detainees","placements","movements","leaves","documents"]);
 const WRITE_ROLES=new Set(["OWNER","ADMIN","EDITOR"]);
@@ -26,7 +26,7 @@ Deno.serve(async(req)=>{
     const email=String(body?.email||"").trim().toLowerCase();
     const password=String(body?.password||"");
     const displayName=String(body?.full_name||"").trim();
-    if(!/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(email)) return json(req,{ok:false,error:"INVALID_EMAIL"},400);
+    if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return json(req,{ok:false,error:"INVALID_EMAIL"},400);
     if(password.length<12||password.length>128) return json(req,{ok:false,error:"PASSWORD_POLICY_MIN_12"},400);
     if(displayName.length<2||displayName.length>120) return json(req,{ok:false,error:"INVALID_DISPLAY_NAME"},400);
     const serviceKey=Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
