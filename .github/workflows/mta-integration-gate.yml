@@ -18,95 +18,105 @@ jobs:
         shell: bash
         run: |
           set -e
-          grep -q 'mta-unified-shell-v2.js?v=2' web/index.html
-          grep -q 'mtaUnifiedResolve' web/mta-unified-shell-v2.js
-          grep -q 'mta:qr-detected' web/mta-unified-shell-v2.js
-          grep -q 'mtaUnifiedScannerContractTest' web/mta-unified-shell-v2.js
-          grep -q 'mtaUnifiedOperationalContractTest' web/mta-unified-shell-v2.js
-          grep -q 'mtaUnifiedValidateMovement' web/mta-unified-shell-v2.js
-          grep -q 'mtaUnifiedValidateLeave' web/mta-unified-shell-v2.js
-          grep -q 'ACTION_ENTRYPOINT' web/mta-unified-shell-v2.js
-          grep -q 'INACTIVE_DETAINEE_DENY' web/mta-unified-shell-v2.js
-          grep -q 'INACTIVE_ROOM_DENY' web/mta-unified-shell-v2.js
-          grep -q 'INVALID_LEAVE_TRANSITION_DENY' web/mta-unified-shell-v2.js
-          grep -q 'QUEUE_DERIVED_FROM_AUDIT' web/mta-unified-shell-v2.js
-          grep -q 'SHARED_STATE_EVENT' web/mta-unified-shell-v2.js
-          grep -q 'MONITOR_DERIVED_STATE' web/mta-unified-shell-v2.js
-          grep -q 'buildOperationalQueue' web/mta-unified-shell-v2.js
-          grep -q 'buildMonitorMetrics' web/mta-unified-shell-v2.js
-          grep -q 'JOURNEY_AUDIT_TO_QUEUE' web/mta-unified-shell-v2.js
-          grep -q 'JOURNEY_STATE_TO_MONITOR' web/mta-unified-shell-v2.js
-          grep -q 'REPORT_SOURCE_SHARED_STATE' web/mta-unified-shell-v2.js
-          grep -q 'REPORT_EVIDENCE_CONTRACT' web/mta-unified-shell-v2.js
-          grep -q 'failureRecoveryContractTest' web/mta-unified-shell-v2.js
-          grep -q 'mtaUnifiedStateConsistencyContractTest' web/mta-unified-shell-v2.js
-          grep -q 'STATE_ROOT_ARRAYS' web/mta-unified-shell-v2.js
-          grep -q 'AUDIT_MOVEMENT_REFERENTIAL_INTEGRITY' web/mta-unified-shell-v2.js
-          grep -q 'mtaUnifiedReferentialIntegrityContractTest' web/mta-unified-shell-v2.js
-          grep -q 'DETAINEE_PLACEMENT_REFERENCE' web/mta-unified-shell-v2.js
-          grep -q 'PLACEMENT_DETAINEE_REFERENCE' web/mta-unified-shell-v2.js
-          grep -q 'PLACEMENT_MASTER_ROOM_REFERENCE' web/mta-unified-shell-v2.js
-          grep -q 'MOVEMENT_DETAINEE_REFERENCE' web/mta-unified-shell-v2.js
-          grep -q 'MOVEMENT_ACTIVE_ROOM_REFERENCE' web/mta-unified-shell-v2.js
-          grep -q 'LEAVE_DETAINEE_REFERENCE' web/mta-unified-shell-v2.js
-          grep -q 'QR_RESOURCE_REFERENCE' web/mta-unified-shell-v2.js
-          grep -q 'QR_ACTIVE_RESOURCE_STATE' web/mta-unified-shell-v2.js
-          grep -q 'DOCUMENT_SOURCE_REFERENCE' web/mta-unified-shell-v2.js
-          grep -q 'REPORT_EVIDENCE_REFERENCE' web/mta-unified-shell-v2.js
-          grep -q 'AUDIT_RESOURCE_REFERENCE' web/mta-unified-shell-v2.js
-          grep -q 'buildReferentialIntegrityReport' web/mta-unified-shell-v2.js
-          grep -q 'mtaUnifiedFinalIntegrityGate' web/mta-unified-shell-v2.js
-          grep -q 'SINGLE_SYNTHETIC_STATE' web/mta-unified-shell-v2.js
-          grep -q 'SINGLE_MUTATION_BOUNDARY' web/mta-unified-shell-v2.js
-          grep -q 'AUDIT_CHAIN_COMPLETE' web/mta-unified-shell-v2.js
-          grep -q 'AUDIT_TO_MONITOR' web/mta-unified-shell-v2.js
-          grep -q 'EVIDENCE_CHAIN_COMPLETE' web/mta-unified-shell-v2.js
-          grep -q 'ALL_EXISTING_CONTRACTS_PASS' web/mta-unified-shell-v2.js
-          grep -q 'MTA_DETENI_FINAL_INTEGRITY_GATE' web/mta-unified-shell-v2.js
-          grep -q 'MOVEMENT_IDEMPOTENCY_KEYS_UNIQUE' web/mta-unified-shell-v2.js
-          grep -q 'FAILURE_RECOVERY_CONTRACT' web/mta-unified-shell-v2.js
-          grep -q 'requestKey' web/movement-v9.js
-          grep -q 'appendAudit(d' web/movement-v9.js
-          grep -q 'appendLocalAudit' web/index.html
-          grep -q 'lastMutationKey' web/index.html
-          grep -q 'lastMutation' web/movement-v9.js
-          grep -q 'state=null' web/admin-settings-v9.js
-          grep -q 'DETAINEE_CREATE' web/admin-settings-v9.js
-          grep -q 'appendAudit(d' web/room-ops-v9.js
-          grep -q 'QR_ROOM_STATE' web/room-ops-v9.js
-          grep -q 'validateRuntimeState' web/index.html
-          grep -q 'BACKUP_RESTORE' web/index.html
-          grep -q 'OFFLINE_IDEMPOTENCY_KEY_REQUIRED' web/offline-queue-v1.js
-          grep -q 'OFFLINE_SINGLE_ENTRY' web/offline-queue-v1.js
-          grep -q 'buildReportEvidence' web/index.html
-          grep -q 'validateReportEvidence' web/index.html
-          grep -q 'REPORT_EVIDENCE_REQUIRED' web/index.html
-          grep -q 'REPORT_SOURCE_MISSING' web/index.html
-          grep -q 'buildReportEvidence' web/index.html
-          grep -q 'LEAVE_STATE_MACHINE' web/mta-unified-shell-v2.js
-          grep -q 'mtaUnifiedJourneyContractTest' web/mta-unified-shell-v2.js
-          grep -q 'JOURNEY_ACTIVE_DETAINEE' web/mta-unified-shell-v2.js
-          grep -q 'JOURNEY_QR_ACCEPT' web/mta-unified-shell-v2.js
-          grep -q 'JOURNEY_QR_TOKEN_DENY' web/mta-unified-shell-v2.js
-          grep -q 'JOURNEY_QR_NOT_FOUND' web/mta-unified-shell-v2.js
-          grep -q 'EXPIRED' web/mta-unified-shell-v2.js
-          grep -q 'FUTURE' web/mta-unified-shell-v2.js
-          grep -q 'LEAVE_DEPART_BLOCKED' web/index.html
-          grep -q 'PLACEMENT_ASSIGN_BLOCKED' web/index.html
-          grep -q 'PLACEMENT_CAPACITY_BLOCKED' web/index.html
-          grep -q 'MOVEMENT_CREATE_BLOCKED' web/index.html
-          grep -q 'mtaUnifiedValidateLeave' web/index.html
-          grep -q 'SYNTH-QR-' web/mta-unified-shell-v2.js
-          grep -q 'MTA_DETENI_QR_PRINT_ENGINE' web/qr-print-clean-v3.js
-          grep -q 'mta:data-changed' web/index.html
-          grep -q 'mta:data-changed' web/movement-v9.js
-          grep -q 'mta:data-changed' web/room-ops-v9.js
-          grep -q 'mta:data-changed' web/admin-settings-v9.js
+          checks=(
+          "mta-unified-shell-v2.js?v=2|web/index.html"
+          "mtaUnifiedResolve|web/mta-unified-shell-v2.js"
+          "mta:qr-detected|web/mta-unified-shell-v2.js"
+          "mtaUnifiedScannerContractTest|web/mta-unified-shell-v2.js"
+          "mtaUnifiedOperationalContractTest|web/mta-unified-shell-v2.js"
+          "mtaUnifiedValidateMovement|web/mta-unified-shell-v2.js"
+          "mtaUnifiedValidateLeave|web/mta-unified-shell-v2.js"
+          "ACTION_ENTRYPOINT|web/mta-unified-shell-v2.js"
+          "INACTIVE_DETAINEE_DENY|web/mta-unified-shell-v2.js"
+          "INACTIVE_ROOM_DENY|web/mta-unified-shell-v2.js"
+          "INVALID_LEAVE_TRANSITION_DENY|web/mta-unified-shell-v2.js"
+          "QUEUE_DERIVED_FROM_AUDIT|web/mta-unified-shell-v2.js"
+          "SHARED_STATE_EVENT|web/mta-unified-shell-v2.js"
+          "MONITOR_DERIVED_STATE|web/mta-unified-shell-v2.js"
+          "buildOperationalQueue|web/mta-unified-shell-v2.js"
+          "buildMonitorMetrics|web/mta-unified-shell-v2.js"
+          "JOURNEY_AUDIT_TO_QUEUE|web/mta-unified-shell-v2.js"
+          "JOURNEY_STATE_TO_MONITOR|web/mta-unified-shell-v2.js"
+          "REPORT_SOURCE_SHARED_STATE|web/mta-unified-shell-v2.js"
+          "REPORT_EVIDENCE_CONTRACT|web/mta-unified-shell-v2.js"
+          "failureRecoveryContractTest|web/mta-unified-shell-v2.js"
+          "mtaUnifiedStateConsistencyContractTest|web/mta-unified-shell-v2.js"
+          "STATE_ROOT_ARRAYS|web/mta-unified-shell-v2.js"
+          "AUDIT_MOVEMENT_REFERENTIAL_INTEGRITY|web/mta-unified-shell-v2.js"
+          "mtaUnifiedReferentialIntegrityContractTest|web/mta-unified-shell-v2.js"
+          "DETAINEE_PLACEMENT_REFERENCE|web/mta-unified-shell-v2.js"
+          "PLACEMENT_DETAINEE_REFERENCE|web/mta-unified-shell-v2.js"
+          "PLACEMENT_MASTER_ROOM_REFERENCE|web/mta-unified-shell-v2.js"
+          "MOVEMENT_DETAINEE_REFERENCE|web/mta-unified-shell-v2.js"
+          "MOVEMENT_ACTIVE_ROOM_REFERENCE|web/mta-unified-shell-v2.js"
+          "LEAVE_DETAINEE_REFERENCE|web/mta-unified-shell-v2.js"
+          "QR_RESOURCE_REFERENCE|web/mta-unified-shell-v2.js"
+          "QR_ACTIVE_RESOURCE_STATE|web/mta-unified-shell-v2.js"
+          "DOCUMENT_SOURCE_REFERENCE|web/mta-unified-shell-v2.js"
+          "REPORT_EVIDENCE_REFERENCE|web/mta-unified-shell-v2.js"
+          "AUDIT_RESOURCE_REFERENCE|web/mta-unified-shell-v2.js"
+          "buildReferentialIntegrityReport|web/mta-unified-shell-v2.js"
+          "mtaUnifiedFinalIntegrityGate|web/mta-unified-shell-v2.js"
+          "SINGLE_SYNTHETIC_STATE|web/mta-unified-shell-v2.js"
+          "SINGLE_MUTATION_BOUNDARY|web/mta-unified-shell-v2.js"
+          "AUDIT_CHAIN_COMPLETE|web/mta-unified-shell-v2.js"
+          "AUDIT_TO_MONITOR|web/mta-unified-shell-v2.js"
+          "EVIDENCE_CHAIN_COMPLETE|web/mta-unified-shell-v2.js"
+          "ALL_EXISTING_CONTRACTS_PASS|web/mta-unified-shell-v2.js"
+          "MTA_DETENI_FINAL_INTEGRITY_GATE|web/mta-unified-shell-v2.js"
+          "MOVEMENT_IDEMPOTENCY_KEYS_UNIQUE|web/mta-unified-shell-v2.js"
+          "FAILURE_RECOVERY_CONTRACT|web/mta-unified-shell-v2.js"
+          "requestKey|web/movement-v9.js"
+          "appendAudit(d|web/movement-v9.js"
+          "appendLocalAudit|web/index.html"
+          "lastMutationKey|web/index.html"
+          "lastMutation|web/movement-v9.js"
+          "state=null|web/admin-settings-v9.js"
+          "DETAINEE_CREATE|web/admin-settings-v9.js"
+          "appendAudit(d|web/room-ops-v9.js"
+          "QR_ROOM_STATE|web/room-ops-v9.js"
+          "validateRuntimeState|web/index.html"
+          "BACKUP_RESTORE|web/index.html"
+          "OFFLINE_IDEMPOTENCY_KEY_REQUIRED|web/offline-queue-v1.js"
+          "OFFLINE_SINGLE_ENTRY|web/offline-queue-v1.js"
+          "buildReportEvidence|web/index.html"
+          "validateReportEvidence|web/index.html"
+          "REPORT_EVIDENCE_REQUIRED|web/index.html"
+          "REPORT_SOURCE_MISSING|web/index.html"
+          "buildReportEvidence|web/index.html"
+          "LEAVE_STATE_MACHINE|web/mta-unified-shell-v2.js"
+          "mtaUnifiedJourneyContractTest|web/mta-unified-shell-v2.js"
+          "JOURNEY_ACTIVE_DETAINEE|web/mta-unified-shell-v2.js"
+          "JOURNEY_QR_ACCEPT|web/mta-unified-shell-v2.js"
+          "JOURNEY_QR_TOKEN_DENY|web/mta-unified-shell-v2.js"
+          "JOURNEY_QR_NOT_FOUND|web/mta-unified-shell-v2.js"
+          "EXPIRED|web/mta-unified-shell-v2.js"
+          "FUTURE|web/mta-unified-shell-v2.js"
+          "LEAVE_DEPART_BLOCKED|web/index.html"
+          "PLACEMENT_ASSIGN_BLOCKED|web/index.html"
+          "PLACEMENT_CAPACITY_BLOCKED|web/index.html"
+          "MOVEMENT_CREATE_BLOCKED|web/index.html"
+          "mtaUnifiedValidateLeave|web/index.html"
+          "SYNTH-QR-|web/mta-unified-shell-v2.js"
+          "MTA_DETENI_QR_PRINT_ENGINE|web/qr-print-clean-v3.js"
+          "mta:data-changed|web/index.html"
+          "mta:data-changed|web/movement-v9.js"
+          "mta:data-changed|web/room-ops-v9.js"
+          "mta:data-changed|web/admin-settings-v9.js"
+          "MTA_DETENI_INTEGRATION_SELF_TEST|web/mta-unified-shell-v2.js"
+          "MTAQrContext|web/mta-unified-shell-v2.js"
+          "MTADeteniOfflineQueue|web/mta-unified-shell-v2.js"
+          "mtaUnifiedPrintQR|web/mta-unified-shell-v2.js"
+          )
+          for spec in "${checks[@]}"; do
+            pattern="${spec%%|*}"
+            file="${spec#*|}"
+            if ! grep -Fq -- "$pattern" "$file"; then
+              echo "STATIC_CONTRACT_FAIL pattern=$pattern file=$file"
+              exit 1
+            fi
+          done
           test "$(grep -c 'function detected' web/qr-camera-v2.js)" -eq 1
-          grep -q 'MTA_DETENI_INTEGRATION_SELF_TEST' web/mta-unified-shell-v2.js
-          grep -q 'MTAQrContext' web/mta-unified-shell-v2.js
-          grep -q 'MTADeteniOfflineQueue' web/mta-unified-shell-v2.js
-          grep -q 'mtaUnifiedPrintQR' web/mta-unified-shell-v2.js
       - name: Enforce runtime boundaries
         shell: bash
         run: |
