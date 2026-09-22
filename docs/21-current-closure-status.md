@@ -148,6 +148,7 @@ The runtime integration was tightened as a single-application boundary rather th
 - Runtime mode is surfaced in the UI (LOCAL SYNTHETIC, LAN LOCAL, or CLOUD AUTHENTICATED) and a mode change rehydrates the appropriate state boundary.
 - Audit events in CLOUD mode are read from the backend audit surface; the browser synthetic audit ledger is not used as a substitute for database audit events.
 - The Cloud API exposes audit-events as read-only; domain writes remain governed by RLS and role checks.
+- Live Supabase `mta_audit_events` now has an explicit authenticated SELECT grant while its existing RLS policy restricts visibility to OWNER/ADMIN/AUDITOR; the corresponding migration is committed as `20260922170000_mta_audit_events_authenticated_read_grant.sql`.
 - Service-worker/cache versioning was bumped so the new shared gateway cannot remain hidden behind the previous shell cache.
 - Domain CI and P1 observation are configured to execute on the audit branch as well as main, improving evidence visibility before merge.
 
