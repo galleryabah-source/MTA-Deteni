@@ -57,5 +57,53 @@ window.p6csv=()=>{
   audit('DAILY_GUARD_REPORT_EXPORT','REPORT',date);toast('Daily Guard Report CSV dibuat');
 };
 window.p6printReport=()=>{const d=ensure(),date=new Date().toISOString().slice(0,10);try{const s=p6dailyGuardSnapshot(d,date);audit('DAILY_GUARD_REPORT_PRINT','REPORT',date);const t=s.totals;const w=window.open('','_blank','width=800,height=900');if(!w){toast('Popup diblokir browser.');return}w.document.write('<!doctype html><html><head><title>MTA DETENI Daily Guard Report</title><style>body{font-family:Segoe UI,Arial;padding:28px}h1{margin-bottom:4px}table{border-collapse:collapse;width:100%;margin-top:20px}td,th{border:1px solid #ccc;padding:8px;text-align:left}</style></head><body><h1>MTA DETENI — Daily Guard Report</h1><div>Tanggal: '+E(s.reportDate)+' · '+E(s.version)+'</div><table><tbody>'+Object.entries(t).map(([k,v])=>'<tr><td>'+E(k)+'</td><td><b>'+v+'</b></td></tr>').join('')+'</tbody></table><p>Provenance: synthetic-operational-runtime</p><script>window.onload=()=>setTimeout(()=>window.print(),250)</script></body></html>');w.document.close()}catch(e){audit('DAILY_GUARD_REPORT_PRINT','REPORT',date,'DENIED');toast('Print ditolak: validasi gagal')}};
+const __f4Script=document.createElement('script');__f4Script.src='f4-report-lifecycle-runtime.js?v=1';document.head.appendChild(__f4Script);
+
+// F4 runtime lifecycle override — synthetic/localStorage only.
+function f4ReportKey(date){return 'DGR-'+date+'-R1'}
+function f4LoadReport(d,date,snapshot){d.dailyGuardReports=d.dailyGuardReports||{};const key=f4ReportKey(date);if(!d.dailyGuardReports[key])d.dailyGuardReports[key]={snapshot:snapshot,lifecycle:MTAF4Lifecycle.create(key),artifact:null};return d.dailyGuardReports[key]}
+function f4SaveReport(d,key,entry){d.dailyGuardReports[key]=entry;put(d)}
+async function f4Action(d,date,action,reason){
+ const key=f4ReportKey(date),entry=f4LoadReport(d,date,p6dailyGuardSnapshot(d,date));let l=entry.lifecycle;
+ try{
+  if(action==='VERIFY_INTEGRITY'){
+   if(l.status!=='FINAL'||!l.integrityHash)throw new Error('F4_VERIFY_REQUIRES_FINAL');
+   const observed=await MTAF4Lifecycle.integrity(l,entry.snapshot),ok=observed===l.integrityHash;
+   audit('DAILY_GUARD_REPORT_VERIFY_INTEGRITY','REPORT',key,ok?'SUCCESS':'FAILED');toast(ok?'Integrity VALID':'Integrity FAILED');render('p6reports');return;
+  }
+  if(action==='DOWNLOAD'){
+   if(l.status!=='FINAL'||!l.finalArtifactId)throw new Error('F4_DOWNLOAD_REQUIRES_FINAL');
+   audit('DAILY_GUARD_REPORT_DOWNLOAD','REPORT',key);return window.p6printReport();
+  }
+  if(action==='FINALIZE'){
+   if(l.status!=='APPROVED')throw new Error('F4_FINALIZE_REQUIRES_APPROVAL');
+   l={...l,integrityHash:await MTAF4Lifecycle.integrity(l,entry.snapshot)};
+   l=MTAF4Lifecycle.transition(l,'FINAL');
+   l={...l,finalArtifactId:'ART-'+key};entry.artifact={artifactId:l.finalArtifactId,hash:l.integrityHash,createdAt:new Date().toISOString()};
+  }else{
+   const map={VALIDATE:'VALIDATED',GENERATE:'GENERATED',START_REVIEW:'IN_REVIEW',APPROVE:'APPROVED',REQUEST_CHANGES:'CHANGES_REQUESTED',REVISE:'DRAFT'};
+   l=MTAF4Lifecycle.transition(l,map[action],reason);
+  }
+  entry.lifecycle=l;f4SaveReport(d,key,entry);audit('F4_REPORT_'+action,'REPORT',key);render('p6reports');toast('Lifecycle → '+l.status);
+ }catch(e){audit('F4_REPORT_'+action,'REPORT',key,'DENIED');toast('Aksi ditolak: '+e.message)}
+}
+function reports(r,d){
+ const date=new Date().toISOString().slice(0,10),snapshot=p6dailyGuardSnapshot(d,date),entry=f4LoadReport(d,date,snapshot),l=entry.lifecycle,t=snapshot.totals;
+ const actions=[];if(l.status==='DRAFT')actions.push(['VALIDATE','Validasi']);if(l.status==='VALIDATED')actions.push(['GENERATE','Generate']);if(l.status==='GENERATED')actions.push(['START_REVIEW','Mulai Review']);if(l.status==='IN_REVIEW')actions.push(['APPROVE','Approve'],['REQUEST_CHANGES','Request Changes']);if(l.status==='CHANGES_REQUESTED')actions.push(['REVISE','Revisi']);if(l.status==='APPROVED')actions.push(['FINALIZE','Finalize']);if(l.status==='FINAL')actions.push(['VERIFY_INTEGRITY','Verify Integrity'],['DOWNLOAD','Download / PDF']);
+ const rows=Object.entries(t).map(x=>'<tr><td>'+E(x[0])+'</td><td><b>'+x[1]+'</b></td></tr>').join('');
+ const btns=actions.map(x=>'<button class="btn '+((x[0]==='APPROVE'||x[0]==='FINALIZE'||x[0]==='DOWNLOAD')?'primary':'')+'" onclick="window.p6f4Action(\''+x[0]+'\')">'+x[1]+'</button>').join(' ');
+ r.innerHTML='<section class="hero"><h1>Daily Guard Report</h1><p class="sub">Functional journey: Draft → Validate → Generate → Review → Approve / Changes → Revision → Finalize → Verify → Download. Synthetic runtime.</p></section><div class="p6card"><div class="p6row"><b>Report:</b> '+E(l.reportId)+' <span class="p6tag">'+E(l.status)+'</span><span class="p6tag">'+E(l.revision.revisionId)+'</span></div><div class="p6row" style="margin-top:10px">'+btns+'</div><div class="tablewrap" style="margin-top:12px"><table class="table"><thead><tr><th>Indikator</th><th>Nilai</th></tr></thead><tbody>'+rows+'</tbody></table></div><p class="p6mini">Events: '+l.events.length+' · Integrity: '+(l.integrityHash?'ATTACHED':'PENDING')+' · Artifact: '+(l.finalArtifactId||'PENDING')+'</p></div>';
+ audit('DAILY_GUARD_REPORT_RENDER','REPORT',date);
+}
+window.p6f4Action=async action=>{const d=ensure(),date=new Date().toISOString().slice(0,10);let reason='';if(action==='REQUEST_CHANGES'||action==='REVISE'){reason=prompt('Alasan perubahan/revisi:')||'';if(!reason)return}await f4Action(d,date,action,reason)};
+window.p6csv=()=>window.p6f4Action('DOWNLOAD');
+window.p6printReport=()=>{
+ const d=ensure(),date=new Date().toISOString().slice(0,10),entry=f4LoadReport(d,date,p6dailyGuardSnapshot(d,date));
+ if(entry.lifecycle.status!=='FINAL'||!entry.lifecycle.finalArtifactId){audit('DAILY_GUARD_REPORT_PRINT','REPORT',date,'DENIED');toast('Print ditolak: report belum FINAL');return}
+ const s=entry.snapshot,t=s.totals,w=window.open('','_blank','width=800,height=900');if(!w){toast('Popup diblokir browser.');return}
+ audit('DAILY_GUARD_REPORT_PRINT','REPORT',date);
+ w.document.write('<!doctype html><html><head><title>MTA DETENI Daily Guard Report</title><style>body{font-family:Segoe UI,Arial;padding:28px}table{border-collapse:collapse;width:100%;margin-top:20px}td,th{border:1px solid #ccc;padding:8px;text-align:left}</style></head><body><h1>MTA DETENI — Daily Guard Report</h1><div>Tanggal: '+E(s.reportDate)+' · '+E(s.version)+'</div><table><tbody>'+Object.entries(t).map(([k,v])=>'<tr><td>'+E(k)+'</td><td><b>'+v+'</b></td></tr>').join('')+'</tbody></table><p>Artifact: '+E(entry.lifecycle.finalArtifactId)+' · Integrity: '+E(entry.lifecycle.integrityHash)+'</p><script>window.onload=()=>setTimeout(()=>window.print(),250)</script></body></html>');w.document.close();
+};
+
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot);else boot();
 })();
