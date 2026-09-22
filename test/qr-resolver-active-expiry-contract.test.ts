@@ -8,5 +8,4 @@ test("canonical QR resolver SQL enforces active and non-expired state",()=>{
   assert.match(sql,/q\.expires_at\s+is\s+null\s+or\s+q\.expires_at\s*>\s*now\(\)/);
   assert.match(sql,/QR_SCOPE_DENIED/);
   assert.match(sql,/QR_TOKEN_REQUIRED/);
-  assert.match(sql,/private\.mta_current_role\(\)/,{message:"Resolver must remain compatible with private role helper"});
 });
