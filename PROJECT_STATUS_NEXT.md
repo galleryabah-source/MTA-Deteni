@@ -39,6 +39,16 @@ Cloudflare deployment is still blocked at the credential/permission boundary. Th
 
 Define a deterministic, synthetic-only publication request admission contract over certified publication readiness. Preserve the complete projection/certification/publication identity chain, reject drift/conflict/incomplete/non-synthetic state, and remain strictly before external transport or durable publication.
 
+## Authentication / RBAC login gate
+
+- Dedicated login boundary is restored before the application shell; unauthenticated users do not receive the operational UI.
+- Existing Supabase Auth session is used for login; the authenticated role is resolved through the protected `/api/mta/me` path.
+- Accepted roles are explicitly constrained to OWNER, ADMIN, EDITOR, REVIEWER, and AUDITOR.
+- Navigation and privileged backup/restore controls are projected from the resolved RBAC role.
+- Public self-registration is removed from the visible application entry point; account provisioning remains administrative.
+- Added a dedicated authentication/RBAC contract test and Domain CI gate.
+- This remains a synthetic/local UI contract; production authorization continues to depend on the protected API/RLS boundary.
+
 ## Governance lock
 
 Migration Freeze TRUE. AI OFF. Repository SYNTHETIC ONLY. Production access NOT AUTHORIZED. Live PostgreSQL execution BLOCKED pending explicit governance clearance and approved non-production target.
