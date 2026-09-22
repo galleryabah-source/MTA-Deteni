@@ -1,7 +1,18 @@
 # MTA DETENI — Current Closure Status
 
-**Revision:** `a81e24bb41310e9eaaefaa90d64a294a43df2486`  
+**Revision:** `fix/runtime-functional-audit-2026-09-22`  
 **Date:** 2026-09-22
+
+## Full Functional + Runtime Integration Audit — 2026-09-22
+
+- Audit branch: `fix/runtime-functional-audit-2026-09-22`.
+- QR print action was found bypassing the clean QR-only printer; the action is now wired to `window.p6printQR()` and the worker cache version was bumped to `v5`.
+- Duplicate QR camera `detected()` implementation was found and removed.
+- The production API CORS response now varies on `Origin`; this is a hardening change, not a production authorization grant.
+- **Open functional blocker:** QR resolution is still local-storage scoped in preview. A QR generated on device A cannot resolve its synthetic resource on device B unless the resource registry is shared. This must be solved by the LAN/local runtime shared registry or the authorized production API; the current `resourceId/token` payload alone is insufficient.
+- **Open architecture blocker:** the main UI domain workflows still persist to `mta-deteni-demo-v2` localStorage, while `mta-production-api.js` exists as a separate adapter. Production API availability therefore must not be interpreted as domain persistence integration.
+- **Open runtime blocker:** CI evidence is synthetic/controlled-nonprod. Physical PC/LAN, real multi-device acceptance, controlled Cloudflare non-prod runtime, and actual restore/DR remain external gates.
+- **Open authorization blocker:** canonical scope authorization is not yet established; production SELECT RLS must remain unchanged until the scope model is explicit.
 
 ## Verified
 
