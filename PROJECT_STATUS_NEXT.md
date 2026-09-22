@@ -1,7 +1,7 @@
 # MTA DETENI — Next Gate
 
 **Foundation:** v1.122+  
-**Current:** P13.19361–20080 — receipt closure integrity through terminal evidence certification integrated and under CI verification on the current branch
+**Current:** P13.20081–20320 — terminal evidence through evidence closure continuity integrated and under CI verification on the current branch
 
 ## Completed through current audited gate
 
@@ -30,6 +30,9 @@
 - P13.18961–19360: terminal integrity receipt closure and certification.
 - P13.19361–19720: receipt-closure integrity certification with exact receipt/integrity lineage.
 - P13.19721–20080: terminal receipt-closure integrity evidence and certification.
+- P13.20081–20160: terminal evidence closure preserves complete identity/integrity/receipt lineage.
+- P13.20161–20240: terminal evidence closure replay is deterministic and rejects identity/fingerprint drift.
+- P13.20241–20320: terminal evidence closure certification remains review-only and non-executable.
 
 ## Integrated publication-chain gate
 
@@ -63,7 +66,8 @@ Current integration branch: `phase-p13-evidence-closure-integrity-receipt-chain`
 - Domain CI #1691: **SUCCESS** on P13 admission-chain base head
 - P1 Runtime Observation #394: **SUCCESS** on P13 admission-chain base head
 - New P13 evidence-closure → integrity → receipt → receipt-closure integration gate: **SUCCESS** in PR #151 Domain CI #1692.
-- New P13 receipt-closure → closure-integrity → evidence integration gate: added on current branch; awaiting CI result
+- New P13 receipt-closure → closure-integrity → evidence integration gate: verified after test-contract hardening in PR #153 Domain CI #1696.
+- New P13 terminal evidence → evidence closure integration gate: added on current branch; awaiting CI result
 - Deployment parity auth/RBAC contract: **SUCCESS**
 - TypeScript domain tests: **SUCCESS**
 - Integrated acceptance/runtime/recovery/device-handoff/evidence gates: **SUCCESS**
@@ -74,4 +78,4 @@ Migration Freeze TRUE. AI OFF. Repository SYNTHETIC ONLY. Production access NOT 
 
 ## Next gate
 
-P13.20081–20320 — continue terminal evidence → evidence closure continuity, preserving exact identity/fingerprint lineage and zero external publication side effect.
+P13.20321–20640 — continue evidence-closure replay/certification continuity, preserving exact identity/fingerprint lineage and zero external publication side effect.
