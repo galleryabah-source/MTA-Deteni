@@ -1,0 +1,13 @@
+import { strict as assert } from "node:assert";
+import fs from "node:fs";
+const preview=fs.readFileSync("web/preview-v5.js","utf8");
+const start=preview.indexOf("window.p5return=");
+const end=preview.indexOf("\n function ops", start);
+const fn=preview.slice(start,end);
+assert.match(fn,/l\.status='RETURNED'/);
+assert.match(fn,/d\.events=d\.events\|\|\[\]/);
+assert.match(fn,/LEAVE_RETURNED/);
+assert.match(fn,/LEAVE_RETURN_CONFIRM/);
+assert.match(fn,/LEAVE_QR_REVOKE/);
+assert.match(fn,/put\(d\)/);
+console.log("F3_LEAVE_RETURN_STATE_EVENT_AUDIT_CONTINUITY PASS");
