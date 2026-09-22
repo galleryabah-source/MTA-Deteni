@@ -57,6 +57,9 @@ jobs:
       - name: QR scan verification tests
         run: npx tsx test/qr-scan-result.test.ts
 
+      - name: Browser QR context verification tests
+        run: node test/qr-browser-context.test.mjs
+
       - name: TypeScript domain tests
         run: npm run test:unit
 
