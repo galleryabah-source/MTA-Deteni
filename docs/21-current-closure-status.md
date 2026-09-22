@@ -1,6 +1,6 @@
 # MTA DETENI — Current Closure Status
 
-**Revision:** `1cc8de55656de158e58ddfa2d5c07aab90431187`  
+**Revision:** `1bee6844f7a0873007ed77a6d896aad161cc170d`  
 **Date:** 2026-09-22
 
 ## Verified
@@ -33,6 +33,7 @@
   - Daily Guard Report
   - audit/outbox correlation
 - Negative-path regression for stage incompleteness and audit/outbox correlation drift.
+- Backup/recovery continuity executable evidence: Domain CI Run #1484 **PASS**, including valid-chain READY, missing-predecessor BLOCKED, and committed recovery certification with canonical RETRY → SKIP_DUPLICATE evidence.
 - Documentation now distinguishes contract completion from runtime evidence.
 
 ## Still open before production activation
@@ -40,7 +41,7 @@
 1. Physical Offline/LAN execution on the intended PC/local runtime, including real local persistence, reconnect/reconciliation, and device/network handoff acceptance.
 2. Daily Guard Report + QR + desktop/tablet/smartphone acceptance.
 4. Cloudflare controlled-nonprod runtime validation.
-6. Backup/restore and disaster-recovery execution evidence.
+6. Backup/restore and disaster-recovery execution evidence against an actual recoverable runtime/storage target; synthetic backup-chain and recovery certification are now executable but do not substitute for restore testing.
 7. Canonical scope-authorization model before tightening domain SELECT RLS.
 8. Final production-readiness review.
 
