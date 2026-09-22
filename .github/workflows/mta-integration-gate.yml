@@ -1,0 +1,35 @@
+name: MTA DETENI Static Integration Gate
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+jobs:
+  integration:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate JavaScript syntax
+        shell: bash
+        run: |
+          set -e
+          find web -maxdepth 1 -type f -name '*.js' -print0 | xargs -0 -n1 node --check
+      - name: Validate unified shell contract
+        shell: bash
+        run: |
+          set -e
+          grep -q 'mta-unified-shell-v2.js?v=2' web/index.html
+          grep -q 'mtaUnifiedResolve' web/mta-unified-shell-v2.js
+          grep -q 'mta:qr-detected' web/mta-unified-shell-v2.js
+          grep -q 'MTA_DETENI_INTEGRATION_SELF_TEST' web/mta-unified-shell-v2.js
+          grep -q 'MTAQrContext' web/mta-unified-shell-v2.js
+          grep -q 'MTADeteniOfflineQueue' web/mta-unified-shell-v2.js
+          grep -q 'p6printQR' web/mta-unified-shell-v2.js
+      - name: Enforce runtime boundaries
+        shell: bash
+        run: |
+          set -e
+          grep -q 'SYNTHETIC' web/index.html
+          grep -q 'AI' web/index.html
+          grep -q 'DB_DISCONNECTED' web/mta-unified-shell-v2.js
+          grep -q 'MIGRATION_FREEZE' web/mta-unified-shell-v2.js
