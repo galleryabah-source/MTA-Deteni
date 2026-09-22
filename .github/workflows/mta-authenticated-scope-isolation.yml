@@ -1,0 +1,30 @@
+name: MTA DETENI Authenticated Scope Isolation
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  isolation:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      MTA_EXECUTION_ENV: controlled-nonprod
+      SUPABASE_URL: ${{ secrets.MTA_NONPROD_SUPABASE_URL }}
+      SUPABASE_ANON_KEY: ${{ secrets.MTA_NONPROD_SUPABASE_ANON_KEY }}
+      SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.MTA_NONPROD_SUPABASE_SERVICE_ROLE_KEY }}
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '24'
+      - name: Verify controlled environment
+        run: |
+          test "$MTA_EXECUTION_ENV" = "controlled-nonprod"
+          test -n "$SUPABASE_URL"
+          test -n "$SUPABASE_ANON_KEY"
+          test -n "$SUPABASE_SERVICE_ROLE_KEY"
+      - name: Execute authenticated two-user isolation
+        run: node scripts/mta-authenticated-scope-isolation.mjs
