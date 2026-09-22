@@ -29,12 +29,12 @@ test("shared domain gateway executes cloud detainee CRUD through runtime adapter
   assert.deepEqual(await g.listAuditEvents(),[{id:"DET-SHARED-1",code:"DET-SHARED-1",name:"SYNTHETIC SHARED",status:"AKTIF"}]);
   await g.updateDetainee("DET-SHARED-2",{status:"NONAKTIF"});
   await g.archiveDetainee("DET-SHARED-2");
-  assert.deepEqual(calls.map(x=>x.slice(0,2)),[["list","detainees"],["create","detainees"],["update","detainees"],["update","detainees"]]);
+  assert.deepEqual(calls.map(x=>x.slice(0,2)),[["list","detainees"],["create","detainees"],["list","placements"],["list","movements"],["list","leaves"],["list","documents"],["list","audit-events"],["update","detainees"],["update","detainees"]]);
 });
 
 test("application shell actually loads and wires shared persistence gateway",async()=>{
   const html=await read("index.html");
-  assert.match(html,/shared-domain-gateway-v1\.js\?v=1/);
+  assert.match(html,/shared-domain-gateway-v1\.js\?v=2/);
   assert.match(html,/syncSharedDetaineeDomain/);
   assert.match(html,/window\.MTADeteniSharedDomain\.createDetainee/);
   assert.match(html,/window\.MTADeteniSharedDomain\.updateDetainee/);
