@@ -90,6 +90,9 @@ jobs:
       - name: P13 evidence closure through receipt closure integration tests
         run: npx tsx test/p13-publication-evidence-closure-integrity-receipt-chain.test.ts
 
+      - name: P13 receipt closure integrity evidence integration tests
+        run: npx tsx test/p13-publication-receipt-closure-integrity-evidence-chain.test.ts
+
       - name: TypeScript domain tests
         run: npm run test:unit
 
