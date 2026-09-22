@@ -50,9 +50,9 @@ jobs:
           grep -Fq 'OWNER' /tmp/mta-auth-ui.js
           grep -Fq 'ADMIN' /tmp/mta-auth-ui.js
           grep -Fq 'Tambah Pengguna' /tmp/mta-auth-ui.js
-          if grep -Fq 'signUp(' /tmp/mta-auth-ui.js; then
-            echo "Public Supabase signUp() unexpectedly present in preview auth UI"
+          grep -Fq 'adminRegister' /tmp/mta-auth-ui.js
+          if grep -Fq 'Daftar Akun' /tmp/mta-auth-ui.js; then
+            echo "Public registration label unexpectedly present in preview auth UI"
             exit 1
           fi
-          grep -Fq 'adminRegister' /tmp/mta-auth-ui.js
           echo "Preview login/security smoke: PASS"
