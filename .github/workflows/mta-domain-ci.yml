@@ -78,6 +78,9 @@ jobs:
       - name: RBAC API and RLS parity audit tests
         run: node test/rbac-rls-parity-audit.test.mjs
 
+      - name: RBAC end-to-end privilege contract tests
+        run: node test/rbac-e2e-privilege-contract.test.mjs
+
       - name: TypeScript domain tests
         run: npm run test:unit
 
