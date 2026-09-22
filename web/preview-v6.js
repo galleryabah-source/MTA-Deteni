@@ -98,7 +98,17 @@ function reports(r,d){
  audit('DAILY_GUARD_REPORT_RENDER','REPORT',date);
 }
 window.p6f4Action=async action=>{const d=ensure(),date=new Date().toISOString().slice(0,10);let reason='';if(action==='REQUEST_CHANGES'||action==='REVISE'){reason=prompt('Alasan perubahan/revisi:')||'';if(!reason)return}await f4Action(d,date,action,reason)};
-window.p6csv=()=>window.p6f4Action('DOWNLOAD');
+window.p6csv=()=>{
+ const d=ensure(),date=new Date().toISOString().slice(0,10),key=f4ReportKey(date),entry=f4LoadReport(d,date,p6dailyGuardSnapshot(d,date));
+ try{
+  if(entry.lifecycle.status!=='FINAL'||!entry.lifecycle.finalArtifactId)throw new Error('F4_DOWNLOAD_REQUIRES_FINAL');
+  entry.lifecycle=MTAF4Lifecycle.registerDownload(entry.lifecycle);f4SaveReport(d,key,entry);
+  const s=entry.snapshot,t=s.totals,rows=[['MTA DETENI','DAILY GUARD REPORT'],['Report Date',s.reportDate],['Artifact',entry.lifecycle.finalArtifactId],['Integrity',entry.lifecycle.integrityHash],['Generated',s.generatedAt],...Object.entries(t)];
+  const csv=rows.map(x=>x.map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(',')).join('\\n');
+  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));a.download='mta-deteni-daily-guard-report-'+date+'.csv';a.click();
+  audit('DAILY_GUARD_REPORT_DOWNLOAD','REPORT',key);toast('Daily Guard Report CSV dibuat');
+ }catch(e){audit('DAILY_GUARD_REPORT_DOWNLOAD','REPORT',key,'DENIED');toast('Download ditolak: '+e.message)}
+};
 window.p6printReport=()=>{
  const d=ensure(),date=new Date().toISOString().slice(0,10),entry=f4LoadReport(d,date,p6dailyGuardSnapshot(d,date));
  if(entry.lifecycle.status!=='FINAL'||!entry.lifecycle.finalArtifactId){audit('DAILY_GUARD_REPORT_PRINT','REPORT',date,'DENIED');toast('Print ditolak: report belum FINAL');return}
