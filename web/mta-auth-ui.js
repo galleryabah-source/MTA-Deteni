@@ -124,6 +124,13 @@
       }
       badge.textContent=role+' · '+(RBAC[role]?.label||'RBAC');
       badge.title=RBAC[role]?.readOnly?'Mode baca/review':'Mode operasional sesuai role';
+      let logout=document.getElementById('mtaRbacLogout');
+      if(!logout){
+        logout=el('button',{id:'mtaRbacLogout',className:'btn small'},'Logout');
+        host.appendChild(logout);
+        logout.onclick=async()=>{await window.mtaAuth.signOut()};
+      }
+      logout.hidden=false;
     }
     const backup=document.getElementById('backupBtn');
     const restore=document.getElementById('importBtn');
@@ -162,6 +169,7 @@
     state.user=event.detail?.user||session?.user||null;
     if(!session){
       state.resolved=true;state.role=null;state.profile=null;
+      const logout=document.getElementById('mtaRbacLogout');if(logout)logout.hidden=true;
       setGateVisible(true);
       return;
     }
