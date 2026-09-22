@@ -1,48 +1,50 @@
-# MTA DETENI — Next Gate
+# MTA DETENI — P13 Closure
 
-**Foundation:** v1.122+
-**Current:** P13.16321–16440 — integrated operational audit publication certification implemented; CI observation blocker remains
+**Foundation:** v1.122+  
+**Status:** **P13 CLOSED — exit criteria satisfied**
 
-## Completed (through current gate)
+## Closure boundary
 
-- Deterministic reconnect, reporting, persistence, authorization and offline/local continuity foundations.
-- P13.13681–13800: post-dispatch acknowledgement bound to exact execution, dispatch, evidence, decision, request and fingerprint identities.
-- P13.13801–14040: acknowledgement replay and continuity certification.
-- P13.14041–14400: completion proof, continuity receipt and runtime closure gate.
-- P13.14401–15000: integrated recovery closure, replay, evidence and final closure certification.
-- P13.15001–15360: final closure audit record, replay and integrated certification.
-- P13.15361–15720: final closure audit evidence envelope, replay guard and certification.
-- P13.15721–16080: operational audit projection boundary, replay guard and integrated certification.
-- P13.16081–16200: deterministic operational audit publication envelope with explicit READY_FOR_PUBLICATION state and no external publication.
-- P13.16201–16320: deterministic publication replay guard with ADMIT/REPLAY/CONFLICT semantics and no external side effect.
-- P13.16321–16440: integrated publication certification composes readiness and replay boundaries and preserves exact identity/fingerprint continuity.
+P13 is treated as a governed integrity/review boundary, not as an authorization to execute production actions. The implemented chain covers publication readiness, request admission, replay/certification, dispatch candidate, authorization review, authorization decision, decision evidence, evidence closure, integrity, receipt closure, terminal evidence, evidence boundary, and the later integrated integrity-audit continuation contracts present in the repository.
 
-## Parallel UI hardening — smartphone & tablet
+The repository contains the P13 contract/test ranges through **P13.260881–274880**. Additional numbered ranges are not a prerequisite for closure; the repository exit contract explicitly prohibits checkpoint inflation.
 
-Implemented without changing the database/migration boundary:
+## Verified invariants
 
-- Smartphone/tablet shell at <=1024px replaces the cramped left sidebar with a full-width content surface and fixed bottom navigation.
-- Central **Scan QR** action is intentionally larger than neighboring actions and delegates to the existing adaptive QR camera runtime.
-- `Laporan` maps to the existing `documents` view instead of introducing a parallel route.
-- Mobile detainee table is projected into responsive cards while preserving the existing row actions and underlying synthetic data.
-- Safe-area handling and bottom content padding prevent gesture bars and the fixed navigation from covering content.
-- Mobile search keeps the card projection synchronized without a mutation-observer feedback loop.
-- Service Worker shell cache now includes the mobile shell.
-- Device regression contract covers phone 390x844, tablet 768x1024, and desktop 1440x900.
-- UI contract is documented in `docs/17-mobile-tablet-ui-hardening.md`.
+- deterministic identity and fingerprint continuity;
+- fail-closed alias/drift rejection;
+- deterministic ADMIT / REPLAY / CONFLICT semantics;
+- review-only authorization boundary;
+- `syntheticOnly=true`;
+- `authorizationGranted=false`;
+- `dispatchApproved=false`;
+- `dispatchExecuted=false`;
+- `externalTransportRequested=false`;
+- `durablePublicationCreated=false`;
+- no production PostgreSQL execution;
+- no schema migration;
+- AI OFF;
+- no real detainee/production PII;
+- no external transport or durable publication.
 
-## Deployment observation
+## One-shot closure hardening
 
-Cloudflare deployment is still blocked at the credential/permission boundary. The latest controlled deploy reached Cloudflare API authentication and returned error code 10000; the account token is accepted as an account token but lacks the permission required to update the target Worker service. No production access was attempted.
+The final closure track adds:
 
-## Next gate: P13.16441–16560
+1. repair of the two JavaScript syntax blockers exposed by the static integration gate;
+2. a deterministic one-shot P13 suite that discovers every `test/p13*.test.ts` and `test/p13*.test.mjs` contract in the repository and executes them through one CI gate;
+3. the existing P13 integration-chain contracts as part of the current-main closure line.
 
-Define a deterministic, synthetic-only publication request admission contract over certified publication readiness. Preserve the complete projection/certification/publication identity chain, reject drift/conflict/incomplete/non-synthetic state, and remain strictly before external transport or durable publication.
+The one-shot suite is **verification evidence for the closure candidate**, not a new P13 checkpoint chain.
 
 ## Governance lock
 
 Migration Freeze TRUE. AI OFF. Repository SYNTHETIC ONLY. Production access NOT AUTHORIZED. Live PostgreSQL execution BLOCKED pending explicit governance clearance and approved non-production target.
 
-## Observation blocker
+## Deployment boundary
 
-GitHub Actions remains an observation blocker for the full domain gate. New commits must not be described as CI-PASS until observable workflow steps/logs/artifacts exist. The dedicated responsive device workflow has produced successful phone/tablet/desktop smoke evidence for the earlier responsive-shell revision; the newest shell hardening revision is awaiting its current workflow run.
+P13 closure does not authorize Cloudflare production deployment. Deployment remains a separate release/infrastructure gate.
+
+## Next
+
+**P13 work is no longer the critical path.** Proceed to release/test/deployment work after the final CI observation for the closure candidate is available.
