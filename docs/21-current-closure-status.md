@@ -83,6 +83,22 @@
 - Adapter parity tests added in `test/shared-qr-persistence-adapters.test.ts`.
 - **No QR migration has been applied to Supabase.** The adapters are concrete and migration-ready, but the physical table and RLS policy remain intentionally uncreated until canonical scope authorization is settled.
 
+## Canonical Scope + QR Registry Activation — 2026-09-22
+
+- Canonical scope model implemented as `mta_scopes` + `mta_profile_scopes`.
+- `mta_detainees.scope_id` is now mandatory; the live database had 0 detainees at migration time, so no existing records required backfill.
+- Scope inheritance is enforced for detainee-linked placements, movements, and leaves.
+- Legacy broad `using(true)` policies on those operational tables were explicitly removed by the scope-hardening migration.
+- Canonical `mta_qr_registry` was created with RLS enabled and no anonymous/authenticated direct table grants.
+- QR registry stores `token_hash`, not raw QR tokens.
+- `mta_resolve_qr(resource_id, token, context)` is a SECURITY DEFINER resolver with explicit authentication, active-profile, role, and scope checks.
+- The Cloud MTA API now exposes the authenticated QR resolution path at `qr-registry/resolve`, backed by the canonical database function.
+- Local PostgreSQL and Supabase adapters therefore now target the same runtime-neutral resolver contract.
+- Supabase migrations applied successfully:
+  - `mta_canonical_scope_and_qr_registry`
+  - `mta_scope_policy_hardening`
+- **Remaining gate:** populate/assign real operational scopes and profile memberships, then execute authenticated multi-user scope isolation tests. No real detainee data has been introduced.
+
 ## Still open before production activation
 
 1. Physical Offline/LAN execution on the intended PC/local runtime, including real local persistence, reconnect/reconciliation, and device/network handoff acceptance.
