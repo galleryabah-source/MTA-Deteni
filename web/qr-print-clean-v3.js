@@ -3,7 +3,8 @@
 const KEY='mta-deteni-demo-v2';
 const read=()=>{try{return JSON.parse(localStorage.getItem(KEY)||'{}')}catch{return {}}};
 const esc=v=>String(v??'').replace(/[&<>\"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;',"'":'&#39;'}[c]));
-let qrReady=null;function ensureQrEngine(){if(typeof window.qrcode==='function')return Promise.resolve(true);if(qrReady)return qrReady;qrReady=new Promise((resolve)=>{const s=document.createElement('script');s.src='https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js';s.async=true;s.onload=()=>resolve(typeof window.qrcode==='function');s.onerror=()=>resolve(false);document.head.appendChild(s)});return qrReady}\nasync function printQR(kind,id){
+let qrReady=null;function ensureQrEngine(){if(typeof window.qrcode==='function')return Promise.resolve(true);if(qrReady)return qrReady;qrReady=new Promise((resolve)=>{const s=document.createElement('script');s.src='https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js';s.async=true;s.onload=()=>resolve(typeof window.qrcode==='function');s.onerror=()=>resolve(false);document.head.appendChild(s)});return qrReady}
+async function printQR(kind,id){
   const d=read();
   if(!await ensureQrEngine()){window.toast?.('Mesin QR belum tersedia. Periksa koneksi lalu coba lagi.');return false;}
   const map=kind==='room'?'room':kind==='leave'?'leave':'detainee';
