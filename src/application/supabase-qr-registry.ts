@@ -6,7 +6,7 @@ export type CloudQrRegistryHttp = Readonly<{
 
 export function createSupabaseSharedQrRegistry(http: CloudQrRegistryHttp, accessToken: string): SharedQrRegistry {
   return Object.freeze({
-    find(input) {
+    find(input: SharedQrLookup) {
       if (!accessToken.trim()) throw new Error("Cloud QR registry requires an authenticated access token.");
       return http.resolve({ ...input, accessToken });
     }
