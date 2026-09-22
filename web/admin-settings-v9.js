@@ -10,6 +10,7 @@ function ensure(){const d=get();d.adminSettings=d.adminSettings||{role:'ADMIN',f
 function nav(){const n=document.querySelector('#nav');if(!n||document.querySelector('#p9settings'))return;const b=document.createElement('button');b.id='p9settings';b.dataset.view='p9settings';b.textContent='Pengaturan';b.onclick=e=>{e.stopPropagation();settings()};n.appendChild(b)}
 function settings(){
   const d=ensure();
+  d.adminSettings.aiSettings=d.adminSettings.aiSettings||{enabled:false,provider:'Gemini',apiUrl:'',model:'',apiKeyConfigured:false};
   const app=document.querySelector('#appView');
   if(!app)return;
   if(d.adminSettings.role!=='ADMIN'){
@@ -60,9 +61,24 @@ function settings(){
           '<option '+(d.adminSettings.timezone==='Asia/Makassar'?'selected':'')+'>Asia/Makassar</option>'+
           '<option '+(d.adminSettings.timezone==='Asia/Jayapura'?'selected':'')+'>Asia/Jayapura</option>'+
         '</select></div>'+
-        '<div class="field"><label>AI Runtime</label><input value="OFF" disabled></div>'+
+        '<div class="field"><label>AI Runtime</label><input value="'+(d.adminSettings.aiSettings.enabled?'ON':'OFF')+'" disabled></div>'+
         '<div class="field"><label>Migration Freeze</label><input value="'+(d.adminSettings.migrationFreeze?'TRUE':'FALSE')+'" disabled></div>'+
       '</div><div class="actions"><button class="btn primary" onclick="window.p9saveSystem()">Simpan System</button></div></div>'+
+      '<div class="p6card"><h2>Pengaturan API AI</h2>'+
+        '<div class="notice">AI bersifat assistive-only. API key tidak disimpan di localStorage/browser. Untuk production gunakan secret server-side <b>AI_API_KEY</b>; field API Key di bawah hanya sebagai indikator konfigurasi dan tidak dipersist.</div>'+
+        '<div class="formgrid" style="margin-top:12px">'+
+          '<div class="field"><label>AI Enabled</label><select id="p9aiEnabled"><option value="false" '+(!d.adminSettings.aiSettings.enabled?'selected':'')+'>OFF</option><option value="true" '+(d.adminSettings.aiSettings.enabled?'selected':'')+'>ON</option></select></div>'+
+          '<div class="field"><label>Provider</label><select id="p9aiProvider">'+
+            '<option '+(d.adminSettings.aiSettings.provider==='Gemini'?'selected':'')+'>Gemini</option>'+
+            '<option '+(d.adminSettings.aiSettings.provider==='OpenAI'?'selected':'')+'>OpenAI</option>'+
+            '<option '+(d.adminSettings.aiSettings.provider==='Custom'?'selected':'')+'>Custom</option>'+
+          '</select></div>'+
+          '<div class="field"><label>API URL</label><input id="p9aiUrl" placeholder="https://provider.example/v1" value="'+E(d.adminSettings.aiSettings.apiUrl||'')+'"></div>'+
+          '<div class="field"><label>Model</label><input id="p9aiModel" placeholder="Nama model" value="'+E(d.adminSettings.aiSettings.model||'')+'"></div>'+
+          '<div class="field full"><label>API Key</label><input id="p9aiKey" type="password" autocomplete="new-password" placeholder="Tidak disimpan di browser"><small class="p6mini">Status: <b>'+(d.adminSettings.aiSettings.apiKeyConfigured?'TERKONFIGURASI SERVER':'BELUM TERKONFIGURASI SERVER')+'</b></small></div>'+
+        '</div>'+
+        '<div class="actions"><button class="btn" onclick="window.p9clearAiConfig()">Matikan AI</button><button class="btn primary" onclick="window.p9saveAiSettings()">Simpan Pengaturan API AI</button></div>'+
+      '</div>'+
       '<div class="p6card"><h2>Security &amp; Governance</h2><div class="notice">Role synthetic: <b>'+E(d.adminSettings.role)+
         '</b><br>QR Policy: <b>'+E(d.adminSettings.qrPolicy)+'</b><br>Real data: <b>DISALLOWED IN PREVIEW</b></div>'+
         '<p class="p6mini">User, role, permission, scope, duty assignment, dan policy produksi tetap mengikuti authorization boundary; password/secret tidak disimpan di runtime preview.</p></div>'+
@@ -88,6 +104,8 @@ function settings(){
 }
 function shell(t,desc,b){return `<section class="hero"><h1>${t}</h1><p class="sub">${desc}</p></section>${b}`}
 window.p9saveSystem=()=>{const d=ensure();d.adminSettings.facilityName=(document.querySelector('#p9facility')?.value||d.adminSettings.facilityName).trim();d.adminSettings.timezone=document.querySelector('#p9tz')?.value||d.adminSettings.timezone;audit('ADMIN_SETTINGS_UPDATE','SYSTEM','ADMIN');put(d);settings();toast('Pengaturan system tersimpan.')};
+window.p9saveAiSettings=()=>{const d=ensure(),enabled=document.querySelector('#p9aiEnabled')?.value==='true',provider=document.querySelector('#p9aiProvider')?.value||'Gemini',apiUrl=(document.querySelector('#p9aiUrl')?.value||'').trim(),model=(document.querySelector('#p9aiModel')?.value||'').trim(),key=(document.querySelector('#p9aiKey')?.value||'').trim();if(enabled&&(!provider||!apiUrl||!model)){toast('AI ON memerlukan Provider, API URL, dan Model.');return}d.adminSettings.aiSettings={...d.adminSettings.aiSettings,enabled,provider,apiUrl,model,apiKeyConfigured:d.adminSettings.aiSettings.apiKeyConfigured===true};audit('AI_SETTINGS_UPDATE','AI_CONFIGURATION',provider);put(d);settings();toast('Pengaturan API AI tersimpan. API key tetap harus dikonfigurasi server-side.')};
+window.p9clearAiConfig=()=>{const d=ensure();d.adminSettings.aiSettings={...d.adminSettings.aiSettings,enabled:false};audit('AI_SETTINGS_DISABLE','AI_CONFIGURATION',d.adminSettings.aiSettings.provider||'AI');put(d);settings();toast('AI dimatikan.')};
 window.p9addCatalog=(key,label)=>{openModal(`<div class="dialoghead"><h2>Tambah ${E(label)}</h2><button class="x" onclick="closeModal()">×</button></div><div class="field"><label>Nilai</label><input id="p9cat" placeholder="Masukkan nilai master"></div><div class="actions"><button class="btn" onclick="closeModal()">Batal</button><button class="btn primary" onclick="window.p9saveCatalog('${E(key)}')">Simpan</button></div>`) };
 window.p9saveCatalog=key=>{const d=ensure(),v=(document.querySelector('#p9cat')?.value||'').trim();if(!v){toast('Nilai wajib diisi.');return}if(d.adminCatalogs[key].some(x=>x.toLowerCase()===v.toLowerCase())){toast('Nilai sudah terdaftar.');return}d.adminCatalogs[key].push(v);audit('MASTER_CATALOG_CREATE','ADMIN_CATALOG',key);put(d);closeModal();settings();toast('Master tersimpan.')};
 window.p9removeCatalog=(key,i)=>{const d=ensure();const v=d.adminCatalogs[key]?.[i];if(!v)return;if(!confirm('Nonaktifkan master '+v+'?'))return;d.adminCatalogs[key].splice(i,1);audit('MASTER_CATALOG_DEACTIVATE','ADMIN_CATALOG',key);put(d);settings();toast('Master dinonaktifkan.')};
