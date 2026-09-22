@@ -42,6 +42,19 @@ jobs:
           grep -q 'mtaUnifiedStateConsistencyContractTest' web/mta-unified-shell-v2.js
           grep -q 'STATE_ROOT_ARRAYS' web/mta-unified-shell-v2.js
           grep -q 'AUDIT_MOVEMENT_REFERENTIAL_INTEGRITY' web/mta-unified-shell-v2.js
+          grep -q 'mtaUnifiedReferentialIntegrityContractTest' web/mta-unified-shell-v2.js
+          grep -q 'DETAINEE_PLACEMENT_REFERENCE' web/mta-unified-shell-v2.js
+          grep -q 'PLACEMENT_DETAINEE_REFERENCE' web/mta-unified-shell-v2.js
+          grep -q 'PLACEMENT_MASTER_ROOM_REFERENCE' web/mta-unified-shell-v2.js
+          grep -q 'MOVEMENT_DETAINEE_REFERENCE' web/mta-unified-shell-v2.js
+          grep -q 'MOVEMENT_ACTIVE_ROOM_REFERENCE' web/mta-unified-shell-v2.js
+          grep -q 'LEAVE_DETAINEE_REFERENCE' web/mta-unified-shell-v2.js
+          grep -q 'QR_RESOURCE_REFERENCE' web/mta-unified-shell-v2.js
+          grep -q 'QR_ACTIVE_RESOURCE_STATE' web/mta-unified-shell-v2.js
+          grep -q 'DOCUMENT_SOURCE_REFERENCE' web/mta-unified-shell-v2.js
+          grep -q 'REPORT_EVIDENCE_REFERENCE' web/mta-unified-shell-v2.js
+          grep -q 'AUDIT_RESOURCE_REFERENCE' web/mta-unified-shell-v2.js
+          grep -q 'buildReferentialIntegrityReport' web/mta-unified-shell-v2.js
           grep -q 'MOVEMENT_IDEMPOTENCY_KEYS_UNIQUE' web/mta-unified-shell-v2.js
           grep -q 'FAILURE_RECOVERY_CONTRACT' web/mta-unified-shell-v2.js
           grep -q 'requestKey' web/movement-v9.js
