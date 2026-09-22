@@ -205,6 +205,7 @@ export function validateF4ReportLifecycle(report: F4ReportLifecycle): void {
   if (report.version !== F4_REPORT_LIFECYCLE_VERSION) throw new Error("F4_LIFECYCLE_VERSION_INVALID");
   requireText(report.reportId, "F4_REPORT_ID_REQUIRED");
   if (!report.revision.revisionId) throw new Error("F4_REVISION_ID_REQUIRED");
+  requireText(report.revision.createdAt, "F4_REVISION_CREATED_AT_REQUIRED");
 
   const [first, ...rest] = report.events;
   if (!first || first.action !== "CREATE" || first.from !== null || first.to !== F4_REPORT_STATUS.DRAFT) {
@@ -213,7 +214,8 @@ export function validateF4ReportLifecycle(report: F4ReportLifecycle): void {
   let previous = first;
   for (const current of rest) {
     if (current.from !== previous.to) throw new Error("F4_EVENT_CHAIN_BROKEN");
-    if (!current.actor?.actorId?.trim() || !current.actor?.role?.trim() ||
+    if (!current.id?.trim() || !current.actor?.actorId?.trim() || !current.actor?.role?.trim() ||
+        !current.occurredAt?.trim() || Number.isNaN(Date.parse(current.occurredAt)) ||
         !current.correlationId.trim() || !current.requestId.trim()) {
       throw new Error("F4_EVENT_CONTEXT_REQUIRED");
     }
