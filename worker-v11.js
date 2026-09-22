@@ -12,6 +12,12 @@ function apiRequest(request,url){const headers=new Headers();const auth=request.
 export default {async fetch(request,env){
   const url=new URL(request.url);
   if(url.pathname.startsWith("/api/mta/")){
+    if(request.method==="OPTIONS"){
+      const origin=request.headers.get("Origin")||url.origin;
+      const allow=origin===url.origin||/^https:\/\/(?:[a-z0-9-]+-)?mta-deteni\.galleryabah\.workers\.dev$/i.test(origin);
+      if(!allow)return secureResponse(Response.json({ok:false,error:"CORS_ORIGIN_DENIED"},{status:403,headers:{"Vary":"Origin"}}));
+      return secureResponse(new Response(null,{status:204,headers:{"Access-Control-Allow-Origin":origin,"Access-Control-Allow-Headers":"Authorization, Content-Type, Accept","Access-Control-Allow-Methods":"GET,POST,PATCH,DELETE,OPTIONS","Vary":"Origin"}}));
+    }
     const auth=request.headers.get("Authorization");
     if(!auth?.startsWith("Bearer "))return secureResponse(Response.json({ok:false,error:"AUTH_REQUIRED"},{status:401}));
     const upstream=new URL("https://tmmhxqgzelgrsrxbbfzh.supabase.co/functions/v1/mta-api");
