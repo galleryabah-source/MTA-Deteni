@@ -24,8 +24,8 @@ assert.doesNotMatch(edge,/detail:String\(error\)/);
 
 assert.match(client,/mtaProductionApi/);
 assert.match(auth,/signInWithPassword/);
-assert.match(auth,/signUp/);
+assert.match(auth,/adminRegister/);\nassert.doesNotMatch(auth,/signUp\(/);\nassert.match(edge,/admin-register/);\nassert.match(edge,/RBAC_REGISTER_DENIED/);\nassert.match(edge,/SUPABASE_SERVICE_ROLE_KEY/);\nassert.match(edge,/PASSWORD_POLICY_MIN_12/);
 assert.match(auth,/onAuthStateChange/);
 assert.match(migration,/production activation/i);
 
-console.log('Production Auth/RBAC API contract PASS');
+assert.match(fs.readFileSync('web/mta-auth-ui.js','utf8'),/Login MTA DETENI/);\nassert.match(fs.readFileSync('web/mta-auth-ui.js','utf8'),/OWNER.*ADMIN/);\nassert.doesNotMatch(fs.readFileSync('web/mta-auth-ui.js','utf8'),/Daftar Akun/);\nassert.match(fs.readFileSync('worker-v11.js','utf8'),/X-Frame-Options/);\nassert.match(fs.readFileSync('worker-v11.js','utf8'),/AUTH_REQUIRED/);\nassert.match(fs.readFileSync('worker-v11.js','utf8'),/Content-Security-Policy-Report-Only/);\nconsole.log('Production Auth/RBAC API contract PASS');
