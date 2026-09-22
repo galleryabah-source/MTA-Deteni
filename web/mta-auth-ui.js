@@ -146,9 +146,15 @@
     }
 
     try{
-      const me=await window.mtaProductionApi.get('me');
-      state.role=String(me.role||'').toUpperCase();
-      state.profile=me.profile||null;
+      let me=null;
+      try{
+        me=await window.mtaProductionApi.get('me');
+      }catch(apiErr){
+        if(window.mtaAuth?.profile) me=await window.mtaAuth.profile();
+        else throw apiErr;
+      }
+      state.role=String(me.role||me.profile?.role||'').toUpperCase();
+      state.profile=me.profile||me;
       if(!CAN_REGISTER.has(state.role)&&!['OWNER','ADMIN','EDITOR','REVIEWER','AUDITOR'].includes(state.role)){
         throw new Error('RBAC_PROFILE_INVALID');
       }
