@@ -1,6 +1,6 @@
 # MTA DETENI — Current Closure Status
 
-**Revision:** `558fe7d51395a050ee9167faef54b6f4ddefb47a`  
+**Revision:** `1cc8de55656de158e58ddfa2d5c07aab90431187`  
 **Date:** 2026-09-22
 
 ## Verified
@@ -23,7 +23,9 @@
 
 - Integrated Acceptance Journey contract `IAJ-v1`
 - Controlled-nonprod executable Integrated Acceptance runtime evidence: Domain CI Run #1470; artifact `10673903431`; all five mandatory stages observed PASS.
-- Local Runtime Adapter executable evidence is now added to Domain CI; it validates the governed adapter, offline mutation admission and deterministic sync engine. This remains adapter-level evidence; physical PC/LAN deployment remains an external acceptance gate.
+- Local Runtime Adapter executable evidence: Domain CI Run #1480 **PASS**.
+- Local Runtime Recovery executable evidence: Domain CI Run #1480 **PASS**; artifact `10674888472` proves first admission APPLY, idempotent replay `REPLAYED`, fingerprint drift `CONFLICT/FINGERPRINT_CONFLICT`, deterministic sync APPLY, and deterministic sync replay `REPLAYED`.
+- The evidence remains synthetic controlled-nonprod adapter/engine evidence; physical PC/LAN deployment remains an external acceptance gate.
 - Cross-stage binding for:
   - domain journey
   - offline/reconnect
@@ -35,9 +37,9 @@
 
 ## Still open before production activation
 
-1. Offline/LAN execution with an actual local runtime and reconnect/reconciliation evidence.
+1. Physical Offline/LAN execution on the intended PC/local runtime, including real local persistence, reconnect/reconciliation, and device/network handoff acceptance.
 2. Daily Guard Report + QR + desktop/tablet/smartphone acceptance.
-4. Cloudflare controlled-nonprod validation.
+4. Cloudflare controlled-nonprod runtime validation.
 6. Backup/restore and disaster-recovery execution evidence.
 7. Canonical scope-authorization model before tightening domain SELECT RLS.
 8. Final production-readiness review.
