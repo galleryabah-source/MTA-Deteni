@@ -9,7 +9,7 @@ for(const marker of [
   "mtaAuthGate","mta-auth-guest","mta-auth-pending",
   "OWNER","ADMIN","EDITOR","REVIEWER","AUDITOR",
   "RBAC_ROLE_NOT_ASSIGNED","mtaProductionApi.get('me')",
-  "mtaRbac-ready","mtaRbacLogout",
+  "mta-rbac-ready","mtaRbacLogout",
   "Akses publik dan pendaftaran mandiri dinonaktifkan"
 ]) assert.ok(ui.includes(marker),"missing RBAC login marker: "+marker);
 
