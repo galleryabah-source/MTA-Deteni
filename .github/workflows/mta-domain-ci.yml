@@ -60,6 +60,9 @@ jobs:
       - name: Browser QR context verification tests
         run: node test/qr-browser-context.test.mjs
 
+      - name: F3 operational actions contract tests
+        run: node test/f3-operational-actions.test.mjs
+
       - name: TypeScript domain tests
         run: npm run test:unit
 
