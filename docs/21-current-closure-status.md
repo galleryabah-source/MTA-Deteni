@@ -50,6 +50,23 @@
 - Documentation now distinguishes contract completion from runtime evidence.
 - F4 Daily Guard Report implementation now aggregates operational runtime state into DGR-v1 metrics, validates consistency/provenance before rendering/export, records report validation/render/export/print audit events, and binds the controlled Integrated Acceptance runtime to the same aggregation path. CI execution for the latest F4 commits is still pending/awaiting observable GitHub Actions evidence.
 
+## Shared Persistence → QR → Protected Projection Audit — 2026-09-22
+
+- P1 Runtime Observation #261: **PASS** on commit `8fbd7f4`.
+- Added executable shared persistence gateway for the Detainee vertical slice:
+  - Cloud LIST/CREATE/UPDATE/ARCHIVE route through Runtime Adapter → Production API.
+  - Application shell loads the gateway and synchronizes the Detainee projection when an authenticated Cloud session is active.
+- Added executable shared QR resolver contract for controlled-nonprod:
+  - resourceId + opaque token lookup
+  - active/revoked/expired/context validation
+  - explicit DENIED outcomes
+- Added protected QR projection boundary:
+  - QR validation → authentication → authorization/RBAC → projection
+  - correlated QR resolve and projection audit events.
+- Added multi-device E2E contract execution using two distinct device identities against one shared registry; this proves the intended execution composition in synthetic controlled-nonprod only.
+- **Important limitation:** the shared QR resolver is currently an executable in-memory controlled-nonprod contract. It is not yet a LAN persistent registry or production PostgreSQL-backed resolver. Therefore physical cross-device QR acceptance remains OPEN.
+- Domain CI #1554 was observed pending at the time of this audit continuation; its final conclusion must be verified before treating the latest branch as CI-green.
+
 ## Still open before production activation
 
 1. Physical Offline/LAN execution on the intended PC/local runtime, including real local persistence, reconnect/reconciliation, and device/network handoff acceptance.
