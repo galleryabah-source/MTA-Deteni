@@ -72,6 +72,9 @@ jobs:
       - name: F4 Daily Guard Report browser contract tests
         run: node test/f4-daily-guard-report-browser.test.mjs
 
+      - name: Authentication and RBAC login gate contract tests
+        run: node test/auth-rbac-login-gate.test.mjs
+
       - name: TypeScript domain tests
         run: npm run test:unit
 
