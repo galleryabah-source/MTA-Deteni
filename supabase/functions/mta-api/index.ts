@@ -5,6 +5,8 @@ const cors=(req)=>({"Access-Control-Allow-Origin":allowedOrigin(req.headers.get(
 const TABLES=new Set(["detainees","placements","movements","leaves","documents"]);
 const WRITE_ROLES=new Set(["OWNER","ADMIN","EDITOR"]);
 const json=(req,body,status=200)=>new Response(JSON.stringify(body),{status,headers:cors(req)});
+const stableJson=(value)=>{if(value===null||typeof value!=="object")return JSON.stringify(value);if(Array.isArray(value))return "["+value.map(stableJson).join(",")+"]";return "{"+Object.keys(value).sort().map((k)=>JSON.stringify(k)+":"+stableJson(value[k])).join(",")+"}";};
+const sha256Hex=async(value)=>{const bytes=new TextEncoder().encode(value),hash=await crypto.subtle.digest("SHA-256",bytes);return Array.from(new Uint8Array(hash)).map((b)=>b.toString(16).padStart(2,"0")).join("");};
 
 Deno.serve(async(req)=>{
   if(req.method==="OPTIONS") return new Response(null,{status:204,headers:cors(req)});
@@ -125,24 +127,45 @@ Deno.serve(async(req)=>{
       if(error) return json(req,{ok:false,error:"DB_READ_FAILED"},400);
       return json(req,{ok:true,resource,role,data});
     }
-    if(req.method==="POST"){
-      const body=await req.json();
-      const {data,error}=await supabase.from(table).insert(body).select("*").single();
-      if(error) return json(req,{ok:false,error:"DB_INSERT_FAILED"},400);
-      return json(req,{ok:true,resource,role,data},201);
+
+    const adminKey=Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+    if(!adminKey) return json(req,{ok:false,error:"SERVER_CONFIGURATION_ERROR"},503);
+    const admin=createClient(Deno.env.get("SUPABASE_URL")!,adminKey,{auth:{autoRefreshToken:false,persistSession:false}});
+    const requestId=req.headers.get("X-Request-Id")||crypto.randomUUID();
+    const correlationId=req.headers.get("X-Correlation-Id")||requestId;
+    const idempotencyKey=req.headers.get("Idempotency-Key")||crypto.randomUUID();
+    const body=req.method==="DELETE"?{}:await req.json().catch(()=>({}));
+    const operation=req.method==="POST"?"INSERT":req.method==="PATCH"?"UPDATE":"DELETE";
+    const requestHash=await sha256Hex(stableJson({method:req.method,resource,id:id||null,body}));
+    const resourceType={detainees:"DETAINEE",placements:"PLACEMENT",movements:"MOVEMENT",leaves:"LEAVE",documents:"DOCUMENT"}[resource];
+    const action=resourceType+"_"+operation;
+    const {data,error}=await admin.rpc("mta_execute_idempotent_mutation",{
+      p_idempotency_key:idempotencyKey,
+      p_request_hash:requestHash,
+      p_operation:operation,
+      p_table:table,
+      p_payload:body,
+      p_where:req.method==="POST"?{}:{id},
+      p_audit:{
+        action,
+        resourceType,
+        resourceId:id||null,
+        result:"SUCCESS",
+        actorUserId:user.id,
+        requestId,
+        correlationId,
+        metadata:{role,resource,operation,idempotencyKey}
+      }
+    });
+    if(error){
+      const message=String(error.message||"");
+      if(message.includes("P9_7_IDEMPOTENCY_CONFLICT")) return json(req,{ok:false,error:"IDEMPOTENCY_CONFLICT"},409);
+      if(message.includes("P9_7_TARGET_NOT_FOUND")) return json(req,{ok:false,error:"DB_TARGET_NOT_FOUND"},404);
+      if(message.includes("P9_7_")) return json(req,{ok:false,error:"P9_7_MUTATION_REJECTED"},400);
+      return json(req,{ok:false,error:"DB_MUTATION_FAILED"},400);
     }
-    if(!id) return json(req,{ok:false,error:"ID_REQUIRED"},400);
-    if(req.method==="PATCH"){
-      const body=await req.json();
-      const {data,error}=await supabase.from(table).update(body).eq("id",id).select("*").single();
-      if(error) return json(req,{ok:false,error:"DB_UPDATE_FAILED"},400);
-      return json(req,{ok:true,resource,role,data});
-    }
-    if(req.method==="DELETE"){
-      const {data,error}=await supabase.from(table).delete().eq("id",id).select("id").single();
-      if(error) return json(req,{ok:false,error:"DB_DELETE_FAILED"},400);
-      return json(req,{ok:true,resource,role,deleted:data});
-    }
-    return json(req,{ok:false,error:"METHOD_NOT_ALLOWED"},405);
+    if(req.method==="POST") return json(req,{ok:true,resource,role,data:data?.row,row:data?.row,replayed:!!data?.replayed},data?.replayed?200:201);
+    if(req.method==="PATCH") return json(req,{ok:true,resource,role,data:data?.row,replayed:!!data?.replayed});
+    return json(req,{ok:true,resource,role,deleted:{id:data?.row?.id},replayed:!!data?.replayed});
   }catch(error){console.error("MTA_API_UNHANDLED_ERROR",error);return json(req,{ok:false,error:"UNHANDLED_API_ERROR"},500);}
 });
