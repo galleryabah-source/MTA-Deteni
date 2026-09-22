@@ -22,6 +22,8 @@ jobs:
           grep -q 'mtaUnifiedResolve' web/mta-unified-shell-v2.js
           grep -q 'mta:qr-detected' web/mta-unified-shell-v2.js
           grep -q 'mtaUnifiedScannerContractTest' web/mta-unified-shell-v2.js
+          grep -q 'mtaUnifiedOperationalContractTest' web/mta-unified-shell-v2.js
+          grep -q 'LEAVE_DEPART_BLOCKED' web/index.html
           grep -q 'SYNTH-QR-' web/mta-unified-shell-v2.js
           grep -q 'MTA_DETENI_QR_PRINT_ENGINE' web/qr-print-clean-v3.js
           grep -q 'mta:data-changed' web/index.html
