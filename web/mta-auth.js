@@ -20,5 +20,11 @@ window.mtaAuth=Object.freeze({
   async adminRegister(payload){const r=await window.mtaProductionApi.create("admin-register",payload);return {data:r,error:null}},
   async signOut(){return supabase.auth.signOut()},
   async session(){return supabase.auth.getSession()},
-  async user(){const r=await supabase.auth.getUser();return r.data.user||null}
+  async user(){const r=await supabase.auth.getUser();return r.data.user||null},
+  async profile(){
+    const {data,error}=await supabase.from('mta_profiles').select('id,role,display_name,active').eq('id',(await supabase.auth.getUser()).data.user?.id||'').single();
+    if(error) throw error;
+    if(!data?.active) throw new Error('RBAC_PROFILE_MISSING_OR_INACTIVE');
+    return {ok:true,user:{id:data.id},profile:data,role:String(data.role||'').toUpperCase()};
+  }
 });
