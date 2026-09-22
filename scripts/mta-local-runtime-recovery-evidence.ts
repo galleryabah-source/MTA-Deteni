@@ -35,9 +35,12 @@ const mutation: OfflineMutation = Object.freeze({
   syntheticOnly: true,
 });
 
+// Admission is evaluated before the mutation is persisted to the local queue.
 const first = adapter.admitMutation(mutation, "v1");
 if (first.status !== "APPLIED" || !first.effectApplied) throw new Error("Local runtime first admission did not APPLY.");
 
+// Simulate successful local persistence/acknowledgement, then verify a replay is deduplicated.
+adapter.queueMutation(mutation);
 const replay = adapter.admitMutation(mutation, "v1");
 if (replay.status !== "REPLAYED" || replay.effectApplied) throw new Error("Local runtime replay did not deduplicate.");
 
@@ -56,8 +59,17 @@ const batch: OfflineSyncBatch = Object.freeze({
   mutations: Object.freeze([mutation]),
   syntheticOnly: true,
 });
+
+// The deterministic sync engine owns its replay state: first execution applies,
+// the identical subsequent batch is classified as an idempotent replay.
 const sync = syncEngine.buildResult(batch, new Map([["SYN-DET-LAN-001", "v1"]]));
-if (sync.results[0]?.disposition.status !== "APPLIED" || sync.acceptedThroughSequence !== 1) throw new Error("Deterministic sync did not apply the queued mutation.");
+if (sync.results[0]?.disposition.status !== "APPLIED" || sync.acceptedThroughSequence !== 1) {
+  throw new Error("Deterministic sync did not apply the mutation.");
+}
+const syncReplay = syncEngine.buildResult(batch, new Map([["SYN-DET-LAN-001", "v1"]]));
+if (syncReplay.results[0]?.disposition.status !== "REPLAYED" || syncReplay.results[0]?.disposition.effectApplied) {
+  throw new Error("Deterministic sync replay did not deduplicate.");
+}
 
 await mkdir("artifacts/mta-evidence", { recursive: true });
 await writeFile(
@@ -82,6 +94,7 @@ await writeFile(
       replay: replay,
       fingerprintConflict: conflict,
       deterministicSync: sync,
+      deterministicSyncReplay: syncReplay,
     },
     result: "PASS",
   }, null, 2) + "\n",
