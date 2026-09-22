@@ -38,7 +38,8 @@ for(const [method,allowed] of Object.entries(apiPolicy)){
   for(const role of roles.filter(r=>!allowed.includes(r))) assert.ok(!line[1].includes('"'+role+'"'),method+' must deny '+role);
 }
 
-assert.match(api,/CANONICAL_ROLES=new Set\(\["OWNER","ADMIN","EDITOR","REVIEWER","AUDITOR"\]\)/);\nassert.match(api,/RBAC_ROLE_INVALID/);
+assert.match(api,/CANONICAL_ROLES=new Set\(\["OWNER","ADMIN","EDITOR","REVIEWER","AUDITOR"\]\)/);
+assert.match(api,/RBAC_ROLE_INVALID/);
 assert.match(api,/RBAC_ACTION_DENIED/);
 assert.match(api,/RBAC_PROFILE_MISSING_OR_INACTIVE/);
 assert.match(api,/supabase\.auth\.getUser\(\)/);
