@@ -1,0 +1,50 @@
+name: MTA DETENI Non-Production Preview Smoke
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [release-candidate-2026-09-22]
+    paths:
+      - 'web/**'
+      - 'worker-v*.js'
+      - '.github/workflows/mta-preview-smoke.yml'
+
+permissions:
+  contents: read
+
+env:
+  PREVIEW_URL: https://release-candidate-2026-09-22-mta-deteni.galleryabah.workers.dev
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Wait for preview
+        shell: bash
+        run: |
+          set -euo pipefail
+          for i in $(seq 1 24); do
+            code=$(curl -L -sS -o /tmp/mta-preview.html -w '%{http_code}' --max-time 10 "$PREVIEW_URL/")
+            if [ "$code" = "200" ]; then
+              echo "Preview HTTP 200"
+              exit 0
+            fi
+            echo "Attempt $i: HTTP $code; retrying..."
+            sleep 5
+          done
+          echo "Preview did not return HTTP 200"
+          exit 1
+
+      - name: Validate login gate and security headers
+        shell: bash
+        run: |
+          set -euo pipefail
+          headers=$(curl -L -sS -D - -o /tmp/mta-preview.html --max-time 15 "$PREVIEW_URL/")
+          printf '%s\n' "$headers" | grep -qi '^x-frame-options: DENY'
+          printf '%s\n' "$headers" | grep -qi '^x-content-type-options: nosniff'
+          printf '%s\n' "$headers" | grep -qi '^x-robots-tag: noindex, nofollow'
+          grep -Fq 'Silakan login untuk masuk ke aplikasi.' /tmp/mta-preview.html
+          grep -Fq 'mta-authenticated' /tmp/mta-preview.html
+          ! grep -Fq 'Daftar Akun' /tmp/mta-preview.html
+          echo "Preview login/security smoke: PASS"
