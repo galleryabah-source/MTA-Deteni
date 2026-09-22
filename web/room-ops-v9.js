@@ -1,7 +1,7 @@
 (()=>{
 const K='mta-deteni-demo-v2';
 const get=()=>JSON.parse(localStorage.getItem(K)||'{}');
-const put=d=>localStorage.setItem(K,JSON.stringify(d));
+const put=d=>{localStorage.setItem(K,JSON.stringify(d));window.dispatchEvent(new CustomEvent('mta:data-changed'))};
 const E=s=>String(s??'').replace(/[&<>\"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;',"'":'&#39;'}[c]));
 const uid=p=>p+'-'+crypto.randomUUID().slice(0,10).toUpperCase();
 const audit=(a,t,i,r='SUCCESS')=>{const d=get();d.audit=d.audit||[];d.audit.unshift({id:uid('AUD'),action:a,resourceType:t,resourceId:i||'',result:r,occurredAt:new Date().toISOString(),actor:'DEMO-OPERATOR',requestId:uid('REQ'),correlationId:uid('COR'),policyVersion:'AUTHZ-1.0'});put(d)};
