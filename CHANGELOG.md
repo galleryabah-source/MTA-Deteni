@@ -1,3 +1,12 @@
+## 2026-09-22 — Local Runtime Recovery Evidence Closure
+
+- Fixed the local runtime recovery evidence harness to model admission, local persistence and deterministic replay in the correct order.
+- Domain CI Run #1480 completed **PASS** on commit `1cc8de55656de158e58ddfa2d5c07aab90431187`.
+- Executable recovery evidence now proves first admission `APPLIED`, idempotent replay `REPLAYED`, fingerprint drift `CONFLICT/FINGERPRINT_CONFLICT`, deterministic sync `APPLIED`, and deterministic sync replay `REPLAYED`.
+- Evidence artifact: `10674888472`.
+- Physical PC/LAN deployment, real local persistence, device/network handoff and reconnect acceptance remain external runtime gates.
+- No schema migration, production authorization, AI activation or real detainee data was introduced.
+
 ## 2026-09-22 — Audit Remediation: Governance and Cloudflare Deployment Boundary
 
 - Corrected the Cloudflare runtime health contract so migration freeze and all production/AI/data governance locks are explicitly represented as executable runtime state.
