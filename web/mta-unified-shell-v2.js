@@ -1,5 +1,5 @@
 (()=>{'use strict';
-const VERSION='mta-unified-shell-v2';
+const VERSION='mta-unified-shell-v2-navfix1';
 const BASE=['/desktop-shell-v2.css?v=3','/responsive-v11.css?v=13'];
 const SCRIPTS=['/offline-v1.js?v=2','/offline-queue-v1.js?v=2','/qr-context-v1.js?v=2','/qr-camera-v2.js?v=3','/qr-print-clean-v3.js?v=5','/movement-v9.js?v=10','/room-ops-v9.js?v=10','/master-room-guard-v10.js?v=11','/desktop-shell-v2.js?v=3','/preview-v10.js?v=11','/mobile-shell-v1.js?v=2'];
 function bootstrapQrResources(){const d=read();d.qr=d.qr||{detainee:{},room:{},leave:{}};d.qr.detainee=d.qr.detainee||{};d.qr.room=d.qr.room||{};d.qr.leave=d.qr.leave||{};let changed=false;(d.detainees||[]).forEach(x=>{if(x?.id&&!d.qr.detainee[x.id]){d.qr.detainee[x.id]={token:'SYNTH-QR-'+x.id,status:x.status==='AKTIF'?'ACTIVE':'SUSPENDED',issuedAt:x.createdAt||new Date().toISOString(),expiresAt:null};changed=true}});(d.leaves||[]).forEach(x=>{if(x?.id&&!d.qr.leave[x.id]){d.qr.leave[x.id]={token:'SYNTH-QR-'+x.id,status:'ACTIVE',issuedAt:x.createdAt||new Date().toISOString(),expiresAt:null};changed=true}});(d.rooms||[]).forEach(x=>{if(x?.id&&!d.qr.room[x.id]){d.qr.room[x.id]={token:'SYNTH-QR-'+x.id,status:x.status==='ACTIVE'?'ACTIVE':'SUSPENDED',issuedAt:x.createdAt||new Date().toISOString(),expiresAt:null};changed=true}});if(changed)write(d);return d}
@@ -11,7 +11,7 @@ function style(h){return new Promise(r=>{if(document.querySelector('link[data-mt
 function script(src){return new Promise(r=>{if(document.querySelector('script[data-mta-unified-src="'+src.split('?')[0]+'"]'))return r({src,ok:true,existing:true});const x=document.createElement('script');x.src=src;x.async=false;x.dataset.mtaUnifiedSrc=src.split('?')[0];x.onload=()=>r({src,ok:true});x.onerror=()=>{console.warn('[MTA] module load failed',src);r({src,ok:false})};document.head.appendChild(x)})}
 const toast=m=>window.toast?window.toast(m):console.info('[MTA]',m);
 function nav(v,l,i){const n=document.getElementById('nav');if(!n||n.querySelector('[data-view="'+v+'"]'))return;const b=document.createElement('button');b.type='button';b.dataset.view=v;b.dataset.icon=i;b.textContent=i+' '+l;b.onclick=e=>{e.stopPropagation();window.show(v)};n.appendChild(b)}
-function installNav(){nav('monitor','Operational Monitor','◉');nav('ops-queue','Operational Queue','☷');nav('qr-center','QR Center','▣');nav('camera-scan','Scanner Kamera','⌾');nav('room-ops','Room Operations','▥');nav('reports','Laporan','▤')}
+function installNav(){nav('monitor','Operational Monitor','◉');nav('ops-queue','Operational Queue','☷');nav('qr-center','QR Center','▣');nav('camera-scan','Scanner Kamera','⌾');nav('room-ops','Room Operations','▥');nav('reports','Laporan','▤');const n=document.getElementById('nav');if(!n)return;n.querySelectorAll('button[data-view]').forEach(b=>{b.type='button';b.onclick=e=>{e.preventDefault();e.stopPropagation();const view=b.dataset.view;if(typeof window.show==='function')window.show(view)}})}
 function buildOperationalQueue(d){
   const audit=Array.isArray(d?.audit)?d.audit:[];
   const material=audit.filter(x=>x&&x.action&&x.resourceType&&x.occurredAt);
