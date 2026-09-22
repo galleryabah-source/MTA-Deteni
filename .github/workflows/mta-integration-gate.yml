@@ -53,6 +53,10 @@ jobs:
           grep -q 'DETAINEE_CREATE.*SUCCESS.*d' web/admin-settings-v9.js
           grep -q 'appendAudit(d' web/room-ops-v9.js
           grep -q 'QR_ROOM_STATE:' web/room-ops-v9.js
+          grep -q 'validateRuntimeState' web/index.html
+          grep -q 'BACKUP_RESTORE' web/index.html
+          grep -q 'OFFLINE_IDEMPOTENCY_KEY_REQUIRED' web/offline-queue-v1.js
+          grep -q 'OFFLINE_SINGLE_ENTRY' web/offline-queue-v1.js
           grep -q 'buildReportEvidence' web/index.html
           grep -q 'validateReportEvidence' web/index.html
           grep -q 'REPORT_EVIDENCE_REQUIRED' web/index.html
