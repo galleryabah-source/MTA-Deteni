@@ -57,6 +57,9 @@ jobs:
       - name: TypeScript domain tests
         run: npm run test:unit
 
+      - name: Integrated acceptance runtime evidence
+        run: npx tsx scripts/mta-integrated-acceptance-runtime.ts
+
       - name: Controlled execution evidence harness
         run: node .github/scripts/mta-execution-harness.mjs
 
