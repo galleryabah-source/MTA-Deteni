@@ -75,6 +75,9 @@ jobs:
       - name: Authentication and RBAC login gate contract tests
         run: node test/auth-rbac-login-gate.test.mjs
 
+      - name: RBAC API and RLS parity audit tests
+        run: node test/rbac-rls-parity-audit.test.mjs
+
       - name: TypeScript domain tests
         run: npm run test:unit
 
