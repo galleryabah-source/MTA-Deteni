@@ -78,6 +78,14 @@ assert.equal(verified.valid, true);
 report = verified.report;
 assert.equal(report.events.at(-1)?.action, "VERIFY_INTEGRITY");
 
+const failedVerification = recordF4IntegrityVerification(report, {
+  observedHash: "sha256:tampered",
+  actor, occurredAt: "2026-09-22T08:11:30.000Z", correlationId: "COR-013B", requestId: "REQ-013B",
+});
+assert.equal(failedVerification.valid, false);
+assert.equal(failedVerification.report.events.at(-1)?.action, "VERIFY_INTEGRITY");
+report = failedVerification.report;
+
 report = registerF4Download(report, {
   actor, occurredAt: "2026-09-22T08:12:00.000Z", correlationId: "COR-014", requestId: "REQ-014",
 });
