@@ -42,6 +42,17 @@ Define a deterministic, synthetic-only publication request admission contract ov
 ## Authentication / RBAC login gate
 
 - Dedicated login boundary restored before the application shell; unauthenticated users do not receive operational UI.
+- Supabase session authentication resolves the account through protected /api/mta/me before RBAC access is granted.
+- Canonical roles: OWNER, ADMIN, EDITOR, REVIEWER, AUDITOR.
+- Explicit client/API action policy is enforced for READ, CREATE, UPDATE, DELETE, with fail-closed RBAC_ACTION_DENIED responses.
+- Public self-registration removed from browser auth adapter.
+- RBAC ↔ API ↔ RLS parity audit completed at repository level.
+- REVIEWER Audit UI was removed because the current frozen RLS policy grants audit-event SELECT only to OWNER, ADMIN, AUDITOR.
+- Known RLS drift documented: placements, movements, and leaves still use FOR ALL for OWNER/ADMIN/EDITOR, which gives EDITOR direct DB DELETE capability. No migration was changed or executed because migration freeze remains active.
+- Added RBAC/RLS parity audit contract and CI gate.
+
+
+- Dedicated login boundary restored before the application shell; unauthenticated users do not receive operational UI.
 - Supabase session authentication resolves the account through the protected `/api/mta/me` endpoint before RBAC access is granted.
 - Accepted roles: OWNER, ADMIN, EDITOR, REVIEWER, AUDITOR.
 - Client RBAC now includes an explicit action policy for READ, CREATE, UPDATE, DELETE, APPROVE, FINALIZE, and AUDIT.
