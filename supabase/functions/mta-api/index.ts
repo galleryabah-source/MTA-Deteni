@@ -1,22 +1,31 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { createObservabilityEvent, sanitizeObservabilityError, serializeObservabilityEvent } from "./observability.ts";
 
 const allowedOrigin=(origin)=>origin&&(/^https:\/\/(?:[a-z0-9-]+-)?mta-deteni\.galleryabah\.workers\.dev$/i.test(origin)||origin==="https://mta-deteni.galleryabah.workers.dev")?origin:"null";
-const cors=(req)=>({"Access-Control-Allow-Origin":allowedOrigin(req.headers.get("Origin")),"Access-Control-Allow-Headers":"authorization, x-client-info, apikey, content-type","Access-Control-Allow-Methods":"GET,POST,PATCH,DELETE,OPTIONS","Vary":"Origin","Content-Type":"application/json","X-Content-Type-Options":"nosniff"});
+const cors=(req)=>({"Access-Control-Allow-Origin":allowedOrigin(req.headers.get("Origin")),"Access-Control-Allow-Headers":"authorization, x-client-info, apikey, content-type, x-request-id, x-correlation-id, idempotency-key","Access-Control-Allow-Methods":"GET,POST,PATCH,DELETE,OPTIONS","Access-Control-Expose-Headers":"X-Request-Id, X-Correlation-Id","Vary":"Origin","Content-Type":"application/json","X-Content-Type-Options":"nosniff"});
 const TABLES=new Set(["detainees","placements","movements","leaves","documents"]);
 const WRITE_ROLES=new Set(["OWNER","ADMIN","EDITOR"]);
-const json=(req,body,status=200)=>new Response(JSON.stringify(body),{status,headers:cors(req)});
+const requestStarts=new WeakMap();
+const json=(req,body,status=200,context={})=>{const requestId=context.requestId||req.headers.get("X-Request-Id")||crypto.randomUUID();const correlationId=context.correlationId||req.headers.get("X-Correlation-Id")||requestId;const durationMs=requestStarts.has(req)?performance.now()-requestStarts.get(req):undefined;const event=(()=>{try{return serializeObservabilityEvent(createObservabilityEvent({level:status>=500?"ERROR":status>=400?"WARN":"INFO",service:"mta-api",event:status>=500?"request.failed":"request.completed",requestId,correlationId,method:req.method,route:new URL(req.url).pathname,status,durationMs,outcome:status>=500?"FAILED":status>=400?"DENIED":"SUCCESS",errorCode:body?.error}));}catch{return null;}})();if(event)console.log(event);return new Response(JSON.stringify(body),{status,headers:{...cors(req),"X-Request-Id":requestId,"X-Correlation-Id":correlationId}});};
 const stableJson=(value)=>{if(value===null||typeof value!=="object")return JSON.stringify(value);if(Array.isArray(value))return "["+value.map(stableJson).join(",")+"]";return "{"+Object.keys(value).sort().map((k)=>JSON.stringify(k)+":"+stableJson(value[k])).join(",")+"}";};
 const sha256Hex=async(value)=>{const bytes=new TextEncoder().encode(value),hash=await crypto.subtle.digest("SHA-256",bytes);return Array.from(new Uint8Array(hash)).map((b)=>b.toString(16).padStart(2,"0")).join("");};
 
 Deno.serve(async(req)=>{
-  if(req.method==="OPTIONS") return new Response(null,{status:204,headers:cors(req)});
+  const startedAt=performance.now();
+  const requestId=req.headers.get("X-Request-Id")||crypto.randomUUID();
+  const correlationId=req.headers.get("X-Correlation-Id")||requestId;
+  const normalizedHeaders=new Headers(req.headers); normalizedHeaders.set("X-Request-Id",requestId); normalizedHeaders.set("X-Correlation-Id",correlationId);
+  req=new Request(req,{headers:normalizedHeaders}); requestStarts.set(req,startedAt);
+  const emit=(level,event,extra={})=>{try{console.log(serializeObservabilityEvent(createObservabilityEvent({level,service:"mta-api",event,requestId,correlationId,method:req.method,route:new URL(req.url).pathname,...extra})));}catch{}};
+  emit("INFO","request.started");
+  if(req.method==="OPTIONS") return new Response(null,{status:204,headers:{...cors(req),"X-Request-Id":requestId,"X-Correlation-Id":correlationId}});
   const authorization=req.headers.get("Authorization");
-  if(!authorization?.startsWith("Bearer ")) return json(req,{ok:false,error:"AUTH_REQUIRED"},401);
+  if(!authorization?.startsWith("Bearer ")) { emit("WARN","request.denied",{status:401,outcome:"DENIED",errorCode:"AUTH_REQUIRED",durationMs:performance.now()-startedAt}); return json(req,{ok:false,error:"AUTH_REQUIRED"},401,{requestId,correlationId}); }
   const supabase=createClient(Deno.env.get("SUPABASE_URL")!,Deno.env.get("SUPABASE_ANON_KEY")!,{global:{headers:{Authorization:authorization}}});
   const {data:{user},error:userError}=await supabase.auth.getUser();
-  if(userError||!user) return json(req,{ok:false,error:"AUTH_INVALID"},401);
+  if(userError||!user) { emit("WARN","request.denied",{status:401,outcome:"DENIED",errorCode:"AUTH_INVALID",durationMs:performance.now()-startedAt}); return json(req,{ok:false,error:"AUTH_INVALID"},401,{requestId,correlationId}); }
   const {data:profile,error:profileError}=await supabase.from("mta_profiles").select("id,role,display_name,active").eq("id",user.id).single();
-  if(profileError||!profile?.active) return json(req,{ok:false,error:"RBAC_PROFILE_MISSING_OR_INACTIVE"},403);
+  if(profileError||!profile?.active) { emit("WARN","request.denied",{status:403,outcome:"DENIED",errorCode:"RBAC_PROFILE_MISSING_OR_INACTIVE",durationMs:performance.now()-startedAt}); return json(req,{ok:false,error:"RBAC_PROFILE_MISSING_OR_INACTIVE"},403,{requestId,correlationId}); }
   const role=String(profile.role||"").toUpperCase();
   const url=new URL(req.url);
   const parts=url.pathname.replace(/^\/+/,"").split("/").filter(Boolean);
@@ -167,5 +176,5 @@ Deno.serve(async(req)=>{
     if(req.method==="POST") return json(req,{ok:true,resource,role,data:data?.row,row:data?.row,replayed:!!data?.replayed},data?.replayed?200:201);
     if(req.method==="PATCH") return json(req,{ok:true,resource,role,data:data?.row,replayed:!!data?.replayed});
     return json(req,{ok:true,resource,role,deleted:{id:data?.row?.id},replayed:!!data?.replayed});
-  }catch(error){console.error("MTA_API_UNHANDLED_ERROR",error);return json(req,{ok:false,error:"UNHANDLED_API_ERROR"},500);}
+  }catch(error){const safe=sanitizeObservabilityError(error);emit("ERROR","request.error",{status:500,outcome:"FAILED",errorCode:"UNHANDLED_API_ERROR",durationMs:performance.now()-startedAt});console.error(JSON.stringify({service:"mta-api",event:"request.error",requestId,correlationId,error:safe}));return json(req,{ok:false,error:"UNHANDLED_API_ERROR"},500,{requestId,correlationId});}
 });
