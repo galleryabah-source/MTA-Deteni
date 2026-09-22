@@ -164,7 +164,7 @@ Deno.serve(async(req)=>{
       if(message.includes("P9_7_")) return json(req,{ok:false,error:"P9_7_MUTATION_REJECTED"},400);
       return json(req,{ok:false,error:"DB_MUTATION_FAILED"},400);
     }
-    if(req.method==="POST") return json(req,{ok:true,resource,role,data:data?.row,row:data?.row,replayed:!!data?.replayed},p.replayed?200:201);
+    if(req.method==="POST") return json(req,{ok:true,resource,role,data:data?.row,row:data?.row,replayed:!!data?.replayed},data?.replayed?200:201);
     if(req.method==="PATCH") return json(req,{ok:true,resource,role,data:data?.row,replayed:!!data?.replayed});
     return json(req,{ok:true,resource,role,deleted:{id:data?.row?.id},replayed:!!data?.replayed});
   }catch(error){console.error("MTA_API_UNHANDLED_ERROR",error);return json(req,{ok:false,error:"UNHANDLED_API_ERROR"},500);}
