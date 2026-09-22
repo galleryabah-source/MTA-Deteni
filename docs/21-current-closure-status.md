@@ -1,7 +1,7 @@
 # MTA DETENI — Current Closure Status
 
-**Revision:** `ee57af249e2faf7c1d10d27357a4f2a7edef4d12`  
-**Date:** 2026-09-21
+**Revision:** `558fe7d51395a050ee9167faef54b6f4ddefb47a`  
+**Date:** 2026-09-22
 
 ## Verified
 
@@ -22,6 +22,7 @@
 ## Implemented in this closure pass
 
 - Integrated Acceptance Journey contract `IAJ-v1`
+- Controlled-nonprod executable Integrated Acceptance runtime evidence: Domain CI Run #1470; artifact `10673903431`; all five mandatory stages observed PASS.
 - Cross-stage binding for:
   - domain journey
   - offline/reconnect
@@ -33,11 +34,9 @@
 
 ## Still open before production activation
 
-1. Runtime execution evidence for the complete integrated journey on a controlled non-production target.
-2. Offline/LAN execution with an actual local runtime and reconnect/reconciliation evidence.
-3. Daily Guard Report + QR + desktop/tablet/smartphone acceptance.
-4. Controlled-nonprod PostgreSQL execution against the actual adapter.
-5. Cloudflare controlled-nonprod validation.
+1. Offline/LAN execution with an actual local runtime and reconnect/reconciliation evidence.
+2. Daily Guard Report + QR + desktop/tablet/smartphone acceptance.
+4. Cloudflare controlled-nonprod validation.
 6. Backup/restore and disaster-recovery execution evidence.
 7. Canonical scope-authorization model before tightening domain SELECT RLS.
 8. Final production-readiness review.
