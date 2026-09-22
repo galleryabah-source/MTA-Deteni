@@ -22,6 +22,11 @@ test("shared domain gateway executes cloud detainee CRUD through runtime adapter
   const created=await g.createDetainee({code:"DET-X",name:"X",scope_id:"SCOPE-A"});
   assert.equal(created.data.id,"DET-SHARED-2");
   assert.equal(calls[1][2].scope_id,"SCOPE-A");
+  assert.deepEqual(await g.listPlacements(),[{id:"DET-SHARED-1",code:"DET-SHARED-1",name:"SYNTHETIC SHARED",status:"AKTIF"}]);
+  assert.deepEqual(await g.listMovements(),[{id:"DET-SHARED-1",code:"DET-SHARED-1",name:"SYNTHETIC SHARED",status:"AKTIF"}]);
+  assert.deepEqual(await g.listLeaves(),[{id:"DET-SHARED-1",code:"DET-SHARED-1",name:"SYNTHETIC SHARED",status:"AKTIF"}]);
+  assert.deepEqual(await g.listDocuments(),[{id:"DET-SHARED-1",code:"DET-SHARED-1",name:"SYNTHETIC SHARED",status:"AKTIF"}]);
+  assert.deepEqual(await g.listAuditEvents(),[{id:"DET-SHARED-1",code:"DET-SHARED-1",name:"SYNTHETIC SHARED",status:"AKTIF"}]);
   await g.updateDetainee("DET-SHARED-2",{status:"NONAKTIF"});
   await g.archiveDetainee("DET-SHARED-2");
   assert.deepEqual(calls.map(x=>x.slice(0,2)),[["list","detainees"],["create","detainees"],["update","detainees"],["update","detainees"]]);
