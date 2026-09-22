@@ -60,12 +60,13 @@ const batch: OfflineSyncBatch = Object.freeze({
   syntheticOnly: true,
 });
 
-// The deterministic sync engine owns its replay state: first execution applies,
-// the identical subsequent batch is classified as an idempotent replay.
+// The first sync admission is evaluated; persistence/acknowledgement then records the
+// mutation in the sync queue, so the identical subsequent batch is a replay.
 const sync = syncEngine.buildResult(batch, new Map([["SYN-DET-LAN-001", "v1"]]));
 if (sync.results[0]?.disposition.status !== "APPLIED" || sync.acceptedThroughSequence !== 1) {
   throw new Error("Deterministic sync did not apply the mutation.");
 }
+syncEngine.enqueue(mutation);
 const syncReplay = syncEngine.buildResult(batch, new Map([["SYN-DET-LAN-001", "v1"]]));
 if (syncReplay.results[0]?.disposition.status !== "REPLAYED" || syncReplay.results[0]?.disposition.effectApplied) {
   throw new Error("Deterministic sync replay did not deduplicate.");
