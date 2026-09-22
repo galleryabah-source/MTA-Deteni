@@ -226,7 +226,7 @@ async function approveReport(id){
 }
 async function requestReportChanges(id){
   const r=documentById(id);if(!r)return;
-  workflowNote('Request Changes','Minta Perubahan',async note=>{try{window.mtaDailyGuardReport.transitionStatus(r,'CHANGES_REQUESTED');r.changesRequestedAt=now();r.changeRequestNote=note;audit('DOCUMENT_CHANGES_REQUESTED','DOCUMENT',id);save();closeModal();render();toast('Perubahan diminta — buat revision baru')}catch(err){toast('Request Changes gagal: '+err.message)}});
+  workflowNote('Request Changes','Minta Perubahan',async note=>{try{window.mtaDailyGuardReport.transitionStatus(r,'CHANGES_REQUESTED');r.changesRequestedAt=now();r.changeRequestNote=note;if(isCloudRuntime()){await updateDocumentCloud(r);await syncCloudDomain()}else{audit('DOCUMENT_CHANGES_REQUESTED','DOCUMENT',id);save()}closeModal();render();toast('Perubahan diminta — buat revision baru')}catch(err){toast('Request Changes gagal: '+err.message)}});
 }
 async function reviseReport(id){
   const source=documentById(id);if(!source)return;
@@ -234,7 +234,7 @@ async function reviseReport(id){
     if(source.status!=='CHANGES_REQUESTED')throw new Error('REPORT_NOT_IN_CHANGES_REQUESTED');
     const revision=structuredClone(source);
     const newId=uid('RPT');
-    revision.documentId=newId;revision.id=undefined;revision.status='DRAFT';revision.revision=Number(source.revision||1)+1;revision.revisionOf=source.documentId||source.id;revision.createdAt=now();delete revision.integrityHash;delete revision.filename;delete revision.generatedAt;delete revision.finalizedAt;delete revision.approvedAt;delete revision.approvalNote;delete revision.reviewStartedAt;delete revision.reviewerNote;revision.revisionCreatedAt=now();
+    revision.documentId=newId;revision.id=undefined;revision.status='DRAFT';revision.revision=Number(source.revision||1)+1;revision.revisionOf=(String(source.id||'').match(/^[0-9a-f-]{36}$/i)?source.id:null)||source.documentId||source.id;revision.createdAt=now();delete revision.integrityHash;delete revision.filename;delete revision.generatedAt;delete revision.finalizedAt;delete revision.approvedAt;delete revision.approvalNote;delete revision.reviewStartedAt;delete revision.reviewerNote;revision.revisionCreatedAt=now();
     if(isCloudRuntime()){revision.id=entityId();await persistDocumentCloud(revision);await syncCloudDomain()}else{db.documents.unshift(revision);audit('DOCUMENT_REVISION_CREATE','DOCUMENT',newId);save()}render();previewReport(newId);toast('Revision '+revision.revision+' dibuat sebagai DRAFT');
   }catch(err){toast('Revision gagal: '+err.message)}
 }
