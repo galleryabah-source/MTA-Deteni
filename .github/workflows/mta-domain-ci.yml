@@ -21,7 +21,7 @@ env:
 jobs:
   domain-ci:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 45
     steps:
       - name: Checkout
         uses: actions/checkout@v7
@@ -71,6 +71,9 @@ jobs:
 
       - name: F4 Daily Guard Report browser contract tests
         run: node test/f4-daily-guard-report-browser.test.mjs
+
+      - name: P13 full one-shot contract suite
+        run: node scripts/p13-full-suite.mjs
 
       - name: TypeScript domain tests
         run: npm run test:unit
