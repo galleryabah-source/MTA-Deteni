@@ -1,0 +1,13 @@
+import { strict as assert } from "node:assert";
+import fs from "node:fs";
+import vm from "node:vm";
+const src=fs.readFileSync("web/qr-context-v1.js","utf8");
+const ctx={window:{}};vm.runInNewContext(src,ctx);
+const verify=ctx.window.MTAQrContext.verify;
+const base={context:"DETAINEE",detaineeId:"D-1",issuedAt:"2026-09-22T08:00:00.000Z",expiresAt:"2026-09-22T10:00:00.000Z",expectedContext:"RUDENIM_STAY",now:"2026-09-22T09:00:00.000Z",activeDetainee:true};
+assert.equal(verify(base).outcome,"ACCEPTED");
+assert.equal(verify({...base,context:"TEMPORARY_EXIT"}).outcome,"CONTEXT_MISMATCH");
+assert.equal(verify({...base,expiresAt:"2026-09-22T08:59:00.000Z"}).outcome,"EXPIRED");
+assert.equal(verify({...base,issuedAt:"2026-09-22T09:01:00.000Z"}).outcome,"FUTURE");
+assert.equal(verify({...base,activeDetainee:false}).outcome,"INACTIVE");
+console.log("QR_BROWSER_CONTEXT_TEST PASS");
