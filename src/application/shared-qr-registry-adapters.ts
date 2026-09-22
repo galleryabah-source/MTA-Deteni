@@ -18,7 +18,7 @@ export type CloudQrRegistryTransport = Readonly<{
 
 export function createCloudSharedQrRegistry(transport: CloudQrRegistryTransport): SharedQrRegistry {
   return Object.freeze({
-    find(input) {
+    find(input: SharedQrLookup) {
       return transport.lookup(input);
     }
   });
