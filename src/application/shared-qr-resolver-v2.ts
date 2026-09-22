@@ -35,8 +35,9 @@ export interface SharedQrResolver {
 }
 
 export function createSharedQrResolver(registry: SharedQrRegistry): SharedQrResolver {
+  type ResolveInput = Parameters<SharedQrResolver["resolve"]>[0];
   return Object.freeze({
-    async resolve(input) {
+    async resolve(input: ResolveInput): Promise<SharedQrResolution> {
       const record = await registry.find({ resourceId: input.resourceId, token: input.token });
       if (!record) return {
         outcome: "DENIED",
@@ -85,7 +86,7 @@ export function createSharedQrResolver(registry: SharedQrRegistry): SharedQrReso
 export function createInMemorySharedQrRegistry(seed: SharedQrRecord[] = []): SharedQrRegistry {
   const registry = new Map(seed.map(record => [record.resourceId + "::" + record.token, record]));
   return Object.freeze({
-    async find(input) {
+    async find(input: SharedQrLookup) {
       return registry.get(input.resourceId + "::" + input.token) ?? null;
     }
   });
