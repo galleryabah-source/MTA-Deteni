@@ -36,7 +36,7 @@ drop policy if exists mta_scopes_select_authorized on public.mta_scopes;
 create policy mta_scopes_select_authorized on public.mta_scopes
 for select to authenticated
 using (
-  public.mta_current_role() in ('OWNER','ADMIN','AUDITOR')
+  private.mta_current_role() in ('OWNER','ADMIN','AUDITOR')
   or exists (
     select 1 from public.mta_profile_scopes ps
     where ps.profile_id = (select auth.uid())
@@ -50,14 +50,14 @@ create policy mta_profile_scopes_select_authorized on public.mta_profile_scopes
 for select to authenticated
 using (
   profile_id = (select auth.uid())
-  or public.mta_current_role() in ('OWNER','ADMIN','AUDITOR')
+  or private.mta_current_role() in ('OWNER','ADMIN','AUDITOR')
 );
 
 drop policy if exists mta_detainees_select_scope on public.mta_detainees;
 create policy mta_detainees_select_scope on public.mta_detainees
 for select to authenticated
 using (
-  public.mta_current_role() in ('OWNER','ADMIN','AUDITOR')
+  private.mta_current_role() in ('OWNER','ADMIN','AUDITOR')
   or exists (
     select 1 from public.mta_profile_scopes ps
     where ps.profile_id = (select auth.uid())
@@ -70,9 +70,9 @@ drop policy if exists mta_detainees_insert_scope on public.mta_detainees;
 create policy mta_detainees_insert_scope on public.mta_detainees
 for insert to authenticated
 with check (
-  public.mta_current_role() in ('OWNER','ADMIN','EDITOR')
+  private.mta_current_role() in ('OWNER','ADMIN','EDITOR')
   and (
-    public.mta_current_role() in ('OWNER','ADMIN')
+    private.mta_current_role() in ('OWNER','ADMIN')
     or exists (
       select 1 from public.mta_profile_scopes ps
       where ps.profile_id = (select auth.uid())
@@ -86,9 +86,9 @@ drop policy if exists mta_detainees_update_scope on public.mta_detainees;
 create policy mta_detainees_update_scope on public.mta_detainees
 for update to authenticated
 using (
-  public.mta_current_role() in ('OWNER','ADMIN','EDITOR')
+  private.mta_current_role() in ('OWNER','ADMIN','EDITOR')
   and (
-    public.mta_current_role() in ('OWNER','ADMIN')
+    private.mta_current_role() in ('OWNER','ADMIN')
     or exists (
       select 1 from public.mta_profile_scopes ps
       where ps.profile_id = (select auth.uid())
@@ -98,9 +98,9 @@ using (
   )
 )
 with check (
-  public.mta_current_role() in ('OWNER','ADMIN','EDITOR')
+  private.mta_current_role() in ('OWNER','ADMIN','EDITOR')
   and (
-    public.mta_current_role() in ('OWNER','ADMIN')
+    private.mta_current_role() in ('OWNER','ADMIN')
     or exists (
       select 1 from public.mta_profile_scopes ps
       where ps.profile_id = (select auth.uid())
@@ -114,9 +114,9 @@ drop policy if exists mta_detainees_delete_scope on public.mta_detainees;
 create policy mta_detainees_delete_scope on public.mta_detainees
 for delete to authenticated
 using (
-  public.mta_current_role() in ('OWNER','ADMIN')
+  private.mta_current_role() in ('OWNER','ADMIN')
   and (
-    public.mta_current_role() in ('OWNER','ADMIN')
+    private.mta_current_role() in ('OWNER','ADMIN')
     or exists (
       select 1 from public.mta_profile_scopes ps
       where ps.profile_id = (select auth.uid())
@@ -159,7 +159,7 @@ drop policy if exists mta_qr_registry_select_scope on public.mta_qr_registry;
 create policy mta_qr_registry_select_scope on public.mta_qr_registry
 for select to authenticated
 using (
-  public.mta_current_role() in ('OWNER','ADMIN','AUDITOR')
+  private.mta_current_role() in ('OWNER','ADMIN','AUDITOR')
   or exists (
     select 1
     from public.mta_detainees d
@@ -174,9 +174,9 @@ drop policy if exists mta_qr_registry_write_scope on public.mta_qr_registry;
 create policy mta_qr_registry_write_scope on public.mta_qr_registry
 for all to authenticated
 using (
-  public.mta_current_role() in ('OWNER','ADMIN')
+  private.mta_current_role() in ('OWNER','ADMIN')
   or (
-    public.mta_current_role() = 'EDITOR'
+    private.mta_current_role() = 'EDITOR'
     and exists (
       select 1
       from public.mta_detainees d
@@ -188,9 +188,9 @@ using (
   )
 )
 with check (
-  public.mta_current_role() in ('OWNER','ADMIN')
+  private.mta_current_role() in ('OWNER','ADMIN')
   or (
-    public.mta_current_role() = 'EDITOR'
+    private.mta_current_role() = 'EDITOR'
     and exists (
       select 1
       from public.mta_detainees d
