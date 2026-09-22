@@ -41,7 +41,7 @@ context.globalThis=context; context.db=structuredClone(state); context.KEY='mta-
 context.save=function save(){localStorage.setItem(KEY,JSON.stringify(db));window.dispatchEvent(new CustomEvent('mta:data-changed'))};
 context.window.mtaQrCameraV2={open(){},close(){}};
 context.window.MTAQrContext={verify(x){if(x.context!==x.expectedContext)return{outcome:'CONTEXT_MISMATCH'};if(x.expiresAt&&Date.parse(x.expiresAt)<=Date.now())return{outcome:'EXPIRED'};if(x.issuedAt&&Date.parse(x.issuedAt)>Date.now())return{outcome:'FUTURE'};return{outcome:'ACCEPTED'}}};
-context.window.MTADeteniOfflineQueue={}; context.window.p9refreshRooms=()=>{}; context.window.p6printQR=()=>{}; context.window.p9addRoom=()=>{}; context.window.documents=()=>{}; context.window.mtaUnifiedAction=()=>{};
+context.window.MTADeteniOfflineQueue={}; context.window.p9refreshRooms=()=>{}; context.window.p6printQR=()=>{}; context.window.p9addRoom=()=>{}; context.window.documents=()=>{}; context.window.mtaUnifiedAction=()=>{}; context.window.show=()=>{};
 context.window.buildReportEvidence=r=>r.evidence;
 context.validateReportEvidence=function validateReportEvidence(r){const e=r?.evidence;if(!e||!Array.isArray(e.sourceRecords)||!Array.isArray(e.auditIds))throw Error('REPORT_EVIDENCE_REQUIRED');for(const s of e.sourceRecords){const a={DETAINEE:db.detainees,MOVEMENT:db.movements,LEAVE:db.leaves,PLACEMENT:db.placements,ROOM:db.rooms}[s.type];if(!(a||[]).some(v=>v?.id===s.id))throw Error('REPORT_SOURCE_MISSING:'+s.type+':'+s.id)}return true};
 context.window.validateReportEvidence=context.validateReportEvidence;
