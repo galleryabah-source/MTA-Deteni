@@ -101,13 +101,42 @@ function settings(){
     'Control plane untuk master data dan konfigurasi operasional. Runtime tetap synthetic/local.',
     body
   );
-  if(window.MTADeteniRuntimeAdapter?.getMode?.()==='CLOUD' && window.mtaProductionApi){
+  organizeSettingsPages(app);
+    if(window.MTADeteniRuntimeAdapter?.getMode?.()==='CLOUD' && window.mtaProductionApi){
     window.mtaProductionApi.get('ai-config').then(r=>{
       const a=r?.data||{}, en=document.querySelector('#p9aiEnabled'), pr=document.querySelector('#p9aiProvider'), url=document.querySelector('#p9aiUrl'), model=document.querySelector('#p9aiModel'), st=document.querySelector('#p9aiKeyStatus');
       if(en)en.value=String(!!a.enabled); if(pr&&a.provider)pr.value=a.provider; if(url)url.value=a.api_url||''; if(model)model.value=a.model||'';
       if(st)st.innerHTML='<b>'+((a.api_key_configured||a.key_configured)?'TERKONFIGURASI SERVER':'BELUM TERKONFIGURASI SERVER')+'</b>';
     }).catch(()=>{});
   }
+}
+
+function organizeSettingsPages(app){
+  if(!app||app.querySelector('#p9settingsPages'))return;
+  const groups=[...app.children].filter(x=>x.classList?.contains('p6grid')||x.classList?.contains('p6card'));
+  const systemGrid=groups.find(x=>x.classList.contains('p6grid')&&x.querySelector('h2')?.textContent.trim()==='System');
+  const firstCards=systemGrid?[...systemGrid.children]:[];
+  const system=firstCards[0],ai=firstCards[1],security=firstCards[2];
+  const directCards=groups.filter(x=>x.classList.contains('p6card'));
+  const block=directCards.find(x=>x.querySelector('h2')?.textContent.trim()==='Master Blok');
+  const room=directCards.find(x=>x.querySelector('h2')?.textContent.trim()==='Master Kamar');
+  const roomParam=directCards.find(x=>x.querySelector('h2')?.textContent.trim()==='Master Room Parameter');
+  const catalogGrid=groups.find(x=>x.classList.contains('p6grid')&&x!==systemGrid&&x.querySelector('h2')?.textContent.trim()==='Regu Jaga');
+  if(!system||!ai||!security||!block||!room||!catalogGrid||!roomParam)return;
+  const old=[systemGrid,block,room,catalogGrid,roomParam];
+  const wrap=document.createElement('div');wrap.id='p9settingsPages';wrap.className='p9settingsLayout';
+  const menu=document.createElement('div');menu.className='p9settingsMenu p6card';
+  menu.innerHTML='<div class="p9settingsMenuTitle">Pengaturan Administrator</div><button data-p9page="system">System</button><button data-p9page="ai">Pengaturan API AI</button><button data-p9page="security">Security &amp; Governance</button><button data-p9page="block">Master Blok</button><button data-p9page="room">Master Kamar</button><button data-p9page="catalog">Master Catalog</button><button data-p9page="room-parameter">Master Room Parameter</button>';
+  const content=document.createElement('div');content.className='p9settingsContent';
+  const defs={system:[system],ai:[ai],security:[security],block:[block],room:[room],catalog:[catalogGrid], 'room-parameter':[roomParam]};
+  Object.entries(defs).forEach(([key,nodes])=>{const p=document.createElement('section');p.className='p9settingsPage';p.dataset.p9page=key;nodes.forEach(n=>{n.remove();p.appendChild(n)});content.appendChild(p)});
+  wrap.append(menu,content);
+  const first=app.querySelector('.hero'); if(first)first.after(wrap); else app.prepend(wrap);
+  groups.forEach(g=>{if(g.parentNode===app)g.remove()});
+  const style=document.createElement('style');style.textContent='.p9settingsLayout{display:grid;grid-template-columns:minmax(190px,240px) 1fr;gap:12px;align-items:start}.p9settingsMenu{position:sticky;top:12px;padding:8px}.p9settingsMenuTitle{font-weight:700;padding:10px 12px 14px}.p9settingsMenu button{display:block;width:100%;text-align:left;border:0;background:transparent;padding:10px 12px;border-radius:8px;cursor:pointer}.p9settingsMenu button:hover,.p9settingsMenu button.active{background:rgba(127,127,127,.12)}.p9settingsPage{display:none}.p9settingsPage.active{display:block}@media(max-width:800px){.p9settingsLayout{grid-template-columns:1fr}.p9settingsMenu{position:static;display:grid;grid-template-columns:1fr 1fr;gap:4px}.p9settingsMenuTitle{grid-column:1/-1}}';app.appendChild(style);
+  const activate=key=>{app.querySelectorAll('.p9settingsPage').forEach(p=>p.classList.toggle('active',p.dataset.p9page===key));menu.querySelectorAll('button').forEach(b=>b.classList.toggle('active',b.dataset.p9page===key));window.__p9SettingsPage=key};
+  menu.querySelectorAll('button').forEach(b=>b.onclick=()=>activate(b.dataset.p9page));
+  activate(window.__p9SettingsPage||'system');
 }
 function shell(t,desc,b){return `<section class="hero"><h1>${t}</h1><p class="sub">${desc}</p></section>${b}`}
 window.p9saveSystem=()=>{const d=ensure();d.adminSettings.facilityName=(document.querySelector('#p9facility')?.value||d.adminSettings.facilityName).trim();d.adminSettings.timezone=document.querySelector('#p9tz')?.value||d.adminSettings.timezone;audit('ADMIN_SETTINGS_UPDATE','SYSTEM','ADMIN');put(d);settings();toast('Pengaturan system tersimpan.')};
