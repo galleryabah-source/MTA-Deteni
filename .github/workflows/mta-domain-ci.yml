@@ -54,6 +54,9 @@ jobs:
       - name: JavaScript regression tests
         run: npm test
 
+      - name: Settings navigation regression tests
+        run: node test/settings-navigation-regression.test.mjs
+
       - name: P9.5 audit integrity contract tests
         run: node test/p9.5-audit-integrity.test.mjs
 
