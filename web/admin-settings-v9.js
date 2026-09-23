@@ -126,18 +126,66 @@ function organizeSettingsPages(app){
   const old=[systemGrid,block,room,catalogGrid,roomParam];
   const wrap=document.createElement('div');wrap.id='p9settingsPages';wrap.className='p9settingsLayout';
   const menu=document.createElement('div');menu.className='p9settingsMenu p6card';
-  menu.innerHTML='<div class="p9settingsMenuTitle">Pengaturan Administrator</div><button data-p9page="system">System</button><button data-p9page="ai">Pengaturan API AI</button><button data-p9page="security">Security &amp; Governance</button><button data-p9page="block">Master Blok</button><button data-p9page="room">Master Kamar</button><button data-p9page="catalog">Master Catalog</button><button data-p9page="room-parameter">Master Room Parameter</button>';
+  menu.innerHTML='<div class="p9settingsMenuTitle">Pengaturan Administrator</div><button data-p9page="system">System</button><button data-p9page="ai">Pengaturan API AI</button><button data-p9page="security">Security &amp; Governance</button><button data-p9page="runtime-integrity">Runtime Integrity</button><button data-p9page="block">Master Blok</button><button data-p9page="room">Master Kamar</button><button data-p9page="catalog">Master Catalog</button><button data-p9page="room-parameter">Master Room Parameter</button>';
   const content=document.createElement('div');content.className='p9settingsContent';
-  const defs={system:[system],ai:[ai],security:[security],block:[block],room:[room],catalog:[catalogGrid], 'room-parameter':[roomParam]};
+  const runtime=document.createElement('section');runtime.className='p9settingsPage';runtime.dataset.p9page='runtime-integrity';runtime.innerHTML=runtimeIntegrityHtml();
+  const defs={system:[system],ai:[ai],security:[security], 'runtime-integrity':[runtime],block:[block],room:[room],catalog:[catalogGrid], 'room-parameter':[roomParam]};
   Object.entries(defs).forEach(([key,nodes])=>{const p=document.createElement('section');p.className='p9settingsPage';p.dataset.p9page=key;nodes.forEach(n=>{n.remove();p.appendChild(n)});content.appendChild(p)});
   wrap.append(menu,content);
   const first=app.querySelector('.hero'); if(first)first.after(wrap); else app.prepend(wrap);
   groups.forEach(g=>{if(g.parentNode===app)g.remove()});
-  const style=document.createElement('style');style.textContent='.p9settingsLayout{display:grid;grid-template-columns:minmax(190px,240px) 1fr;gap:12px;align-items:start}.p9settingsMenu{position:sticky;top:12px;padding:8px}.p9settingsMenuTitle{font-weight:700;padding:10px 12px 14px}.p9settingsMenu button{display:block;width:100%;text-align:left;border:0;background:transparent;padding:10px 12px;border-radius:8px;cursor:pointer}.p9settingsMenu button:hover,.p9settingsMenu button.active{background:rgba(127,127,127,.12)}.p9settingsPage{display:none}.p9settingsPage.active{display:block}@media(max-width:800px){.p9settingsLayout{grid-template-columns:1fr}.p9settingsMenu{position:static;display:grid;grid-template-columns:1fr 1fr;gap:4px}.p9settingsMenuTitle{grid-column:1/-1}}';app.appendChild(style);
-  const activate=key=>{app.querySelectorAll('.p9settingsPage').forEach(p=>p.classList.toggle('active',p.dataset.p9page===key));menu.querySelectorAll('button').forEach(b=>b.classList.toggle('active',b.dataset.p9page===key));window.__p9SettingsPage=key};
+  const style=document.createElement('style');style.textContent='.p9settingsLayout{display:grid;grid-template-columns:minmax(190px,240px) 1fr;gap:12px;align-items:start}.p9runtimeRows{display:grid;gap:6px;margin-top:12px}.p9runtimeRow{display:grid;grid-template-columns:62px 180px 1fr;gap:10px;align-items:center;padding:10px 12px;border-left:3px solid rgba(80,100,130,.35);background:rgba(127,127,127,.035);border-radius:4px}.p9runtimeRow.pass{border-left-color:#1f9d55}.p9runtimeRow.fail{border-left-color:#d93025}.p9runtimeBadge{font-weight:700;font-size:12px}.p9runtimeRow.pass .p9runtimeBadge{color:#168044}.p9runtimeRow.fail .p9runtimeBadge{color:#c5221f}.p9runtimeName{font-weight:600}.p9runtimeDetail{color:#667085;font-size:13px}@media(max-width:800px){.p9runtimeRow{grid-template-columns:62px 1fr}.p9runtimeDetail{grid-column:2}}.p9settingsMenu{position:sticky;top:12px;padding:8px}.p9settingsMenuTitle{font-weight:700;padding:10px 12px 14px}.p9settingsMenu button{display:block;width:100%;text-align:left;border:0;background:transparent;padding:10px 12px;border-radius:8px;cursor:pointer}.p9settingsMenu button:hover,.p9settingsMenu button.active{background:rgba(127,127,127,.12)}.p9settingsPage{display:none}.p9settingsPage.active{display:block}@media(max-width:800px){.p9settingsLayout{grid-template-columns:1fr}.p9settingsMenu{position:static;display:grid;grid-template-columns:1fr 1fr;gap:4px}.p9settingsMenuTitle{grid-column:1/-1}}';app.appendChild(style);
+  const activate=key=>{app.querySelectorAll('.p9settingsPage').forEach(p=>p.classList.toggle('active',p.dataset.p9page===key));menu.querySelectorAll('button').forEach(b=>b.classList.toggle('active',b.dataset.p9page===key));window.__p9SettingsPage=key;if(key==='runtime-integrity')setTimeout(()=>window.p9runRuntimeIntegrity?.(),0)};
   menu.querySelectorAll('button').forEach(b=>b.onclick=()=>activate(b.dataset.p9page));
   activate(window.__p9SettingsPage||'system');
 }
+
+function runtimeIntegrityHtml(){
+  return '<div class="p6card p9runtimeIntegrity"><div class="toolbar"><div style="margin-right:auto"><h2 style="margin:0">Runtime Integrity</h2><div class="p6mini">Pemeriksaan integritas runtime lokal/synthetic. Panel ini hanya tersedia di Pengaturan Administrator.</div></div><button class="btn" onclick="window.p9runRuntimeIntegrity()">↻ Refresh</button><button class="btn primary" onclick="window.p9runRuntimeIntegrity()">▶ Jalankan Ulang Tes</button></div><div id="p9RuntimeIntegrityRows" class="p9runtimeRows"><div class="notice">Menyiapkan pemeriksaan…</div></div></div>';
+}
+function runtimeIntegrityChecks(){
+  const readLocal=()=>{try{return JSON.parse(localStorage.getItem('mta-deteni-demo-v2')||'null')}catch{return null}};
+  const local=readLocal();
+  const nav=!!document.querySelector('#nav');
+  const show=typeof window.show==='function';
+  const camera=typeof window.mtaQrCameraV2==='object'&&typeof window.mtaQrCameraV2?.start==='function';
+  const context=typeof window.MTAQrContext==='object';
+  const offline=!!('indexedDB' in window);
+  const roomOps=typeof window.roomOps==='object'||typeof window.p9addRoom==='function';
+  const qrPrint=typeof window.p6printQR==='function'||typeof window.printQR==='function';
+  const qrResources=typeof window.qrcode==='function'||typeof window.mtaQrCameraV2==='object';
+  const admin=!!document.querySelector('#p9settingsPages');
+  const synthetic=!!local&&Array.isArray(local.detainees)&&Array.isArray(local.audit);
+  const aiOff=ensure().adminSettings?.aiSettings?.enabled!==true;
+  const dbDisconnected=window.MTADeteniRuntimeAdapter?.getMode?.()!=='CLOUD';
+  const freeze=ensure().adminSettings?.migrationFreeze===true;
+  return [
+    ['INDEX_DATA',!!local&&Array.isArray(local.detainees),'Synthetic index tersedia'],
+    ['NAV',nav,'Navigasi utama tersedia'],
+    ['SHOW',show,'Router show tersedia'],
+    ['QR_CAMERA',camera,'QR camera runtime tersedia'],
+    ['QR_CONTEXT',context,'QR context tersedia'],
+    ['OFFLINE_QUEUE',offline,'IndexedDB/offline runtime tersedia'],
+    ['ROOM_OPS',roomOps,'Room operations runtime tersedia'],
+    ['QR_PRINT',qrPrint,'QR print handler tersedia'],
+    ['QR_RESOURCES',qrResources,'QR encoder/resource tersedia'],
+    ['ADMIN_SETTINGS',admin,'Admin settings surface aktif'],
+    ['SYNTHETIC_DATA',synthetic,'Data synthetic terdeteksi'],
+    ['AI_OFF',aiOff,'AI runtime tidak aktif'],
+    ['DB_DISCONNECTED',dbDisconnected,'Runtime tidak terhubung ke database produksi'],
+    ['MIGRATION_FREEZE',freeze,'Migration freeze aktif']
+  ];
+}
+window.p9runRuntimeIntegrity=()=>{
+  const rows=document.querySelector('#p9RuntimeIntegrityRows');if(!rows)return;
+  const checks=runtimeIntegrityChecks();
+  rows.innerHTML=checks.map(([name,ok,detail])=>'<div class="p9runtimeRow '+(ok?'pass':'fail')+'"><span class="p9runtimeBadge">'+(ok?'PASS':'FAIL')+'</span><span class="p9runtimeName">'+E(name)+'</span><span class="p9runtimeDetail">'+E(detail)+'</span></div>').join('');
+  const failed=checks.filter(x=>!x[1]).length;
+  const summary=document.createElement('div');summary.className='notice '+(failed?'p6danger':'p6success');summary.style.marginTop='10px';
+  summary.innerHTML=failed?'<b>'+failed+' pemeriksaan gagal.</b> Periksa resource/runtime terkait sebelum certification.':'<b>Semua pemeriksaan runtime PASS.</b> Runtime Integrity sesuai kontrak synthetic/admin.';
+  rows.appendChild(summary);
+};
+
 function shell(t,desc,b){return `<section class="hero"><h1>${t}</h1><p class="sub">${desc}</p></section>${b}`}
 window.p9saveSystem=()=>{const d=ensure();d.adminSettings.facilityName=(document.querySelector('#p9facility')?.value||d.adminSettings.facilityName).trim();d.adminSettings.timezone=document.querySelector('#p9tz')?.value||d.adminSettings.timezone;audit('ADMIN_SETTINGS_UPDATE','SYSTEM','ADMIN');put(d);settings();toast('Pengaturan system tersimpan.')};
 window.p9saveAiSettings=async()=>{const d=ensure(),enabled=document.querySelector('#p9aiEnabled')?.value==='true',provider=document.querySelector('#p9aiProvider')?.value||'Gemini',apiUrl=(document.querySelector('#p9aiUrl')?.value||'').trim(),model=(document.querySelector('#p9aiModel')?.value||'').trim(),key=(document.querySelector('#p9aiKey')?.value||'').trim();if(enabled&&(!provider||!apiUrl||!model)){toast('AI ON memerlukan Provider, API URL, dan Model.');return}try{if(window.MTADeteniRuntimeAdapter?.getMode?.()==='CLOUD'&&window.mtaProductionApi){const r=await window.mtaProductionApi.update('ai-config',null,{enabled,provider,api_url:apiUrl,model,...(key?{api_key:key}:{})});d.adminSettings.aiSettings={...d.adminSettings.aiSettings,enabled,provider,apiUrl,model,apiKeyConfigured:!!r?.data?.api_key_configured};toast('Pengaturan API AI tersimpan aman di server/Vault.');settings();return}d.adminSettings.aiSettings={...d.adminSettings.aiSettings,enabled,provider,apiUrl,model};audit('AI_SETTINGS_UPDATE','AI_CONFIGURATION',provider);put(d);settings();toast('Pengaturan AI tersimpan pada runtime synthetic.')};
