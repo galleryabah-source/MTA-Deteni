@@ -19,15 +19,15 @@
   const NAV_ORDER=['dashboard','detainee','placement','movement','leave','monitor','ops-queue','qr-center','scan-center','leave-qr','camera-scan','documents','audit','reports','room-ops','p9settings'];
   function groupNav(nav){
     const buttons=[...nav.querySelectorAll('button[data-view]')];
-    const signature=buttons.map(b=>b.dataset.view).join('|');
-    const desired=NAV_ORDER.filter(v=>buttons.some(b=>b.dataset.view===v)).join('|');
-    const hasDuplicate=new Set(buttons.map(b=>b.dataset.view)).size!==buttons.length;
-    if(signature===desired&&!hasDuplicate&&nav.querySelectorAll('.mta-desktop-group-label').length){
-      return;
-    }
+    const allowed=new Set(NAV_ORDER);
+    const seen=new Set();
+    buttons.forEach(b=>{
+      const view=b.dataset.view;
+      if(!allowed.has(view)||seen.has(view)) b.remove();
+      else seen.add(view);
+    });
     nav.querySelectorAll('.mta-desktop-group-label').forEach(x=>x.remove());
-    const byView=new Map();
-    buttons.forEach(b=>{if(!byView.has(b.dataset.view))byView.set(b.dataset.view,b)});
+    const byView=new Map([...nav.querySelectorAll('button[data-view]')].map(b=>[b.dataset.view,b]));
     NAV_ORDER.forEach(v=>{const b=byView.get(v);if(b)nav.appendChild(b)});
     let last='';
     [...nav.querySelectorAll('button[data-view]')].forEach(b=>{
