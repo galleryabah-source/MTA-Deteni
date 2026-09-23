@@ -117,6 +117,20 @@ jobs:
             fi
           done
           test "$(grep -c 'function detected' web/qr-camera-v2.js)" -eq 1
+      - name: Enforce authentication and security contracts
+        shell: bash
+        run: |
+          set -e
+          if grep -Eq 'mtaAuth\.signUp|mtaAuthSignupMode|signUp\(email,password' web/mta-auth-ui.js; then echo "AUTH_SELF_REGISTRATION_CONTRACT_FAIL"; exit 1; fi
+          grep -Fq 'SELF_REGISTRATION_DISABLED' web/mta-auth.js
+          grep -Fq 'resource==="admin-users"' supabase/functions/mta-api/index.ts
+          grep -Fq 'RBAC_USER_ADMIN_DENIED' supabase/functions/mta-api/index.ts
+          grep -Fq 'allowedOrigin' supabase/functions/mta-api/index.ts
+          grep -Fq 'mta_documents_select_authorized' supabase/migrations/20260923040000_mta_document_storage_read_hardening.sql
+          grep -Fq 'mta_audit_before_insert_hash' supabase/migrations/20260923041000_mta_audit_hash_chain_v1.sql
+          grep -Fq 'mta_verify_audit_integrity' supabase/migrations/20260923041000_mta_audit_hash_chain_v1.sql
+          if grep -Fq '<script src="/admin-settings-v9.js' worker-v11.js; then echo "DUPLICATE_ADMIN_SETTINGS_INJECTION"; exit 1; fi
+          echo "AUTH/RBAC/AUDIT/INJECTION SECURITY CONTRACT: PASS"
       - name: Enforce runtime boundaries
         shell: bash
         run: |
