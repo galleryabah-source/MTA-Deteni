@@ -31,3 +31,18 @@ test("all navigation menus receive deterministic SVG icon contract",()=>{
   assert.match(shell,/class="mta-nav-icon"/);
   assert.match(shell,/installNavIconStyle\(\)/);
 });
+
+test("sidebar navigation is canonical and duplicate-free by source contract",()=>{
+  const roomOps=fs.readFileSync("web/room-ops-v9.js","utf8");
+  const preview5=fs.readFileSync("web/preview-v5.js","utf8");
+  const preview6=fs.readFileSync("web/preview-v6.js","utf8");
+  const desktop=fs.readFileSync("web/desktop-shell-v2.js","utf8");
+  assert.doesNotMatch(roomOps,/id='p9rooms'|data-view='p9rooms'/);
+  assert.doesNotMatch(preview5,/p5m.*Monitor.*p5monitor/);
+  assert.doesNotMatch(preview6,/p6r.*Room Ops.*p6rooms/);
+  assert.match(shell,/nav\('scan-center','Scan Center','scan'\)/);
+  assert.match(shell,/nav\('leave-qr','Leave QR','leave'\)/);
+  assert.match(shell,/nav\('room-ops','Room Ops','room'\)/);
+  assert.match(desktop,/NAV_ORDER=\[/);
+  assert.match(desktop,/groupNav\(nav\)/);
+});
