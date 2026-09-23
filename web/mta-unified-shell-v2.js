@@ -1,5 +1,5 @@
 (()=>{'use strict';
-const VERSION='mta-unified-shell-v2-navfix3';
+const VERSION='mta-unified-shell-v2-navfix4';
 const BASE=['/desktop-shell-v2.css?v=3','/responsive-v11.css?v=13'];
 const SCRIPTS=['/offline-v1.js?v=2','/offline-queue-v1.js?v=2','/qr-context-v1.js?v=2','/qr-camera-v2.js?v=3','/qr-print-clean-v3.js?v=5','/movement-v9.js?v=10','/room-ops-v9.js?v=10','/master-room-guard-v10.js?v=11','/desktop-shell-v2.js?v=3','/preview-v10.js?v=11','/mobile-shell-v1.js?v=2'];
 function bootstrapQrResources(){const d=read();d.qr=d.qr||{detainee:{},room:{},leave:{}};d.qr.detainee=d.qr.detainee||{};d.qr.room=d.qr.room||{};d.qr.leave=d.qr.leave||{};let changed=false;(d.detainees||[]).forEach(x=>{if(x?.id&&!d.qr.detainee[x.id]){d.qr.detainee[x.id]={token:'SYNTH-QR-'+x.id,status:x.status==='AKTIF'?'ACTIVE':'SUSPENDED',issuedAt:x.createdAt||new Date().toISOString(),expiresAt:null};changed=true}});(d.leaves||[]).forEach(x=>{if(x?.id&&!d.qr.leave[x.id]){d.qr.leave[x.id]={token:'SYNTH-QR-'+x.id,status:'ACTIVE',issuedAt:x.createdAt||new Date().toISOString(),expiresAt:null};changed=true}});(d.rooms||[]).forEach(x=>{if(x?.id&&!d.qr.room[x.id]){d.qr.room[x.id]={token:'SYNTH-QR-'+x.id,status:x.status==='ACTIVE'?'ACTIVE':'SUSPENDED',issuedAt:x.createdAt||new Date().toISOString(),expiresAt:null};changed=true}});if(changed)write(d);return d}
@@ -13,12 +13,12 @@ const toast=m=>window.toast?window.toast(m):console.info('[MTA]',m);
 const NAV_ICONS={
   dashboard:'grid',detainee:'person',placement:'layers',movement:'arrow',leave:'exit',documents:'file',
   audit:'clock',p9settings:'settings',monitor:'monitor','ops-queue':'queue','qr-center':'qr',
-  'camera-scan':'camera','room-ops':'room',reports:'report','scan-center':'scan','leave-qr':'leave','scan-center':'scan','leave-qr':'leave'
+  'camera-scan':'camera','room-ops':'room',reports:'report','scan-center':'scan','leave-qr':'leave'
 };
 const NAV_LABELS={
   dashboard:'Dashboard',detainee:'Data Deteni',placement:'Penempatan',movement:'Pergerakan',leave:'Izin',
   documents:'Dokumen',audit:'Audit Trail',p9settings:'Pengaturan',monitor:'Operational Monitor',
-  'ops-queue':'Operational Queue','qr-center':'QR Center','camera-scan':'Scanner Kamera',
+  'ops-queue':'Operational Queue','qr-center':'QR Center','camera-scan':'Camera Scan',
   'room-ops':'Room Ops',reports:'Laporan','scan-center':'Scan Center','leave-qr':'Leave QR'
 };
 const NAV_PATHS={
