@@ -16,14 +16,26 @@
     nav.setAttribute('aria-label','Navigasi utama MTA DETENI');
     nav.querySelectorAll('button').forEach(b=>{b.setAttribute('aria-current',b.classList.contains('active')?'page':'false');if(!b.title)b.title=b.textContent.trim()});
   }
+  const NAV_ORDER=['dashboard','detainee','placement','movement','leave','monitor','ops-queue','qr-center','scan-center','leave-qr','camera-scan','documents','audit','reports','room-ops','p9settings'];
   function groupNav(nav){
-    if(nav.dataset.desktopGrouped==='1')return;
+    nav.querySelectorAll('.mta-desktop-group-label').forEach(x=>x.remove());
+    const buttons=[...nav.querySelectorAll('button[data-view]')];
+    const byView=new Map();
+    buttons.forEach(b=>{if(!byView.has(b.dataset.view))byView.set(b.dataset.view,b)});
+    NAV_ORDER.forEach(v=>{const b=byView.get(v);if(b)nav.appendChild(b)});
     let last='';
     [...nav.querySelectorAll('button[data-view]')].forEach(b=>{
       const group=GROUPS[b.dataset.view];
       if(!group)return;
       b.dataset.desktopGroup=group;
-      if(group!==last){const label=document.createElement('div');label.className='mta-desktop-group-label';label.dataset.desktopGroupLabel=group;label.textContent=group;nav.insertBefore(label,b);last=group}
+      if(group!==last){
+        const label=document.createElement('div');
+        label.className='mta-desktop-group-label';
+        label.dataset.desktopGroupLabel=group;
+        label.textContent=group;
+        nav.insertBefore(label,b);
+        last=group;
+      }
     });
     nav.dataset.desktopGrouped='1';
   }
@@ -46,8 +58,8 @@
     loadCss();apply();
     const nav=document.getElementById('nav');
     if(nav){
-      nav.addEventListener('click',()=>setTimeout(()=>syncA11y(nav),0),true);
-      new MutationObserver(()=>syncA11y(nav)).observe(nav,{subtree:true,attributes:true,attributeFilter:['class']});
+      nav.addEventListener('click',()=>setTimeout(()=>{groupNav(nav);syncA11y(nav)},0),true);
+      new MutationObserver(()=>{groupNav(nav);syncA11y(nav)}).observe(nav,{subtree:true,childList:true,attributes:true,attributeFilter:['class']});
     }
     window.addEventListener('resize',apply,{passive:true});
   }
