@@ -122,6 +122,7 @@ function settings(){
       if(st)st.innerHTML='<b>'+((a.api_key_configured||a.key_configured)?'TERKONFIGURASI SERVER':'BELUM TERKONFIGURASI SERVER')+'</b>';
     }).catch(()=>{});
   }
+  if(window.MTADeteniRuntimeAdapter?.getMode?.()==='CLOUD' && window.mtaProductionApi)window.p9loadUsers?.();
 }
 
 function organizeSettingsPages(app){
