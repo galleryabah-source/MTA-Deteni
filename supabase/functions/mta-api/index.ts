@@ -32,6 +32,72 @@ Deno.serve(async(req)=>{
   const resource=parts[0],id=parts[1];
   if(resource==="me" && req.method==="GET") return json(req,{ok:true,user:{id:user.id,email:user.email},profile,role});
 
+
+  if(resource==="admin-users"){
+    if(!new Set(["OWNER","ADMIN"]).has(role)) return json(req,{ok:false,error:"RBAC_USER_ADMIN_DENIED"},403);
+    const adminKey=Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+    if(!adminKey) return json(req,{ok:false,error:"SERVER_CONFIGURATION_ERROR"},503);
+    const admin=createClient(Deno.env.get("SUPABASE_URL")!,adminKey,{auth:{autoRefreshToken:false,persistSession:false}});
+    try{
+      if(req.method==="GET"){
+        const {data:profiles,error:pe}=await admin.from("mta_profiles").select("id,role,display_name,active,created_at,updated_at").order("created_at",{ascending:true});
+        if(pe) return json(req,{ok:false,error:"ADMIN_USERS_READ_FAILED"},500);
+        const listed=await admin.auth.admin.listUsers({page:1,perPage:1000});
+        if(listed.error) return json(req,{ok:false,error:"ADMIN_AUTH_USERS_READ_FAILED"},500);
+        const emails=new Map((listed.data.users||[]).map(u=>[u.id,u.email||null]));
+        const data=(profiles||[]).map(p=>({...p,email:emails.get(p.id)||null}));
+        return json(req,{ok:true,resource,data});
+      }
+      if(req.method==="POST"){
+        const body=await req.json().catch(()=>null)||{};
+        const email=String(body.email||"").trim().toLowerCase();
+        const password=String(body.password||"");
+        const displayName=String(body.display_name||"").trim();
+        const requestedRole=String(body.role||"VIEWER").toUpperCase();
+        if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return json(req,{ok:false,error:"USER_EMAIL_INVALID"},400);
+        if(password.length<12) return json(req,{ok:false,error:"USER_PASSWORD_TOO_WEAK"},400);
+        const allowedRoles=role==="OWNER"?new Set(["OWNER","ADMIN","EDITOR","REVIEWER","AUDITOR","VIEWER"]):new Set(["EDITOR","REVIEWER","AUDITOR","VIEWER"]);
+        if(!allowedRoles.has(requestedRole)) return json(req,{ok:false,error:"USER_ROLE_NOT_ALLOWED"},403);
+        const created=await admin.auth.admin.createUser({email,password,email_confirm:true,user_metadata:{full_name:displayName}});
+        if(created.error||!created.data.user) return json(req,{ok:false,error:"ADMIN_USER_CREATE_FAILED"},400);
+        const uid=created.data.user.id;
+        const prof=await admin.from("mta_profiles").insert({id:uid,role:requestedRole,display_name:displayName||email,active:true}).select("id,role,display_name,active,created_at,updated_at").single();
+        if(prof.error){
+          await admin.auth.admin.deleteUser(uid);
+          return json(req,{ok:false,error:"ADMIN_PROFILE_CREATE_FAILED"},500);
+        }
+        await admin.from("mta_audit_events").insert({action:"USER_CREATE",resource_type:"USER",resource_id:uid,result:"SUCCESS",actor_user_id:user.id,request_id:requestId,correlation_id:correlationId,metadata:{role:requestedRole,email}});
+        return json(req,{ok:true,resource,data:{...prof.data,email,temporaryCredentialIssued:true}});
+      }
+      if(req.method==="PATCH"&&id){
+        const body=await req.json().catch(()=>null)||{};
+        if(id===user.id && body.active===false) return json(req,{ok:false,error:"SELF_DISABLE_FORBIDDEN"},409);
+        const target=await admin.from("mta_profiles").select("id,role,display_name,active").eq("id",id).single();
+        if(target.error||!target.data) return json(req,{ok:false,error:"USER_NOT_FOUND"},404);
+        const targetRole=String(target.data.role||"VIEWER").toUpperCase();
+        const nextRole=body.role===undefined?targetRole:String(body.role).toUpperCase();
+        const allowedRoles=role==="OWNER"?new Set(["OWNER","ADMIN","EDITOR","REVIEWER","AUDITOR","VIEWER"]):new Set(["EDITOR","REVIEWER","AUDITOR","VIEWER"]);
+        if(!allowedRoles.has(targetRole)||!allowedRoles.has(nextRole)) return json(req,{ok:false,error:"USER_ROLE_NOT_ALLOWED"},403);
+        if(role==="ADMIN"&&targetRole==="ADMIN") return json(req,{ok:false,error:"ADMIN_CANNOT_MANAGE_ADMIN"},403);
+        if(id===user.id&&nextRole!==targetRole) return json(req,{ok:false,error:"SELF_ROLE_CHANGE_FORBIDDEN"},409);
+        const patch={};
+        if(body.role!==undefined)patch.role=nextRole;
+        if(body.display_name!==undefined)patch.display_name=String(body.display_name||"").trim()||target.data.display_name;
+        if(body.active!==undefined)patch.active=!!body.active;
+        if(!Object.keys(patch).length)return json(req,{ok:false,error:"USER_UPDATE_EMPTY"},400);
+        const updated=await admin.from("mta_profiles").update(patch).eq("id",id).select("id,role,display_name,active,created_at,updated_at").single();
+        if(updated.error)return json(req,{ok:false,error:"ADMIN_USER_UPDATE_FAILED"},400);
+        if(patch.active===false)await admin.auth.admin.signOut(id,"global").catch(()=>{});
+        await admin.from("mta_audit_events").insert({action:"USER_UPDATE",resource_type:"USER",resource_id:id,result:"SUCCESS",actor_user_id:user.id,request_id:requestId,correlation_id:correlationId,metadata:{changedFields:Object.keys(patch),role:nextRole,active:patch.active}});
+        return json(req,{ok:true,resource,data:updated.data});
+      }
+      return json(req,{ok:false,error:"METHOD_NOT_ALLOWED"},405);
+    }catch(e){
+      emit("ERROR","admin.users.failed",{status:500,outcome:"FAILED",errorCode:"ADMIN_USERS_ERROR"});
+      return json(req,{ok:false,error:"ADMIN_USERS_ERROR"},500);
+    }
+  }
+
   if(resource==="ai-config"){
     if(!new Set(["OWNER","ADMIN"]).has(role)) return json(req,{ok:false,error:"RBAC_AI_ADMIN_DENIED",role},403);
     const adminKey=Deno.env.get("SUPABASE_SERVICE_ROLE_KEY"); if(!adminKey) return json(req,{ok:false,error:"SERVER_CONFIGURATION_ERROR"},503);
