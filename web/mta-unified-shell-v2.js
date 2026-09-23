@@ -10,8 +10,54 @@ const audit=(action,type,id,result='SUCCESS')=>{const d=read();d.audit=d.audit||
 function style(h){return new Promise(r=>{if(document.querySelector('link[data-mta-unified="'+h.split('?')[0]+'"]'))return r();const x=document.createElement('link');x.rel='stylesheet';x.href=h;x.dataset.mtaUnified=h.split('?')[0];x.onload=x.onerror=()=>r();document.head.appendChild(x)})}
 function script(src){return new Promise(r=>{if(document.querySelector('script[data-mta-unified-src="'+src.split('?')[0]+'"]'))return r({src,ok:true,existing:true});const x=document.createElement('script');x.src=src;x.async=false;x.dataset.mtaUnifiedSrc=src.split('?')[0];x.onload=()=>r({src,ok:true});x.onerror=()=>{console.warn('[MTA] module load failed',src);r({src,ok:false})};document.head.appendChild(x)})}
 const toast=m=>window.toast?window.toast(m):console.info('[MTA]',m);
-function nav(v,l,i){const n=document.getElementById('nav');if(!n||n.querySelector('[data-view="'+v+'"]'))return;const b=document.createElement('button');b.type='button';b.dataset.view=v;b.dataset.icon=i;b.textContent=i+' '+l;b.onclick=e=>{e.stopPropagation();window.show(v)};n.appendChild(b)}
-function installNav(){nav('monitor','Operational Monitor','◉');nav('ops-queue','Operational Queue','☷');nav('qr-center','QR Center','▣');nav('camera-scan','Scanner Kamera','⌾');nav('room-ops','Room Operations','▥');nav('reports','Laporan','▤');const n=document.getElementById('nav');if(!n)return;n.querySelectorAll('button[data-view]').forEach(b=>{b.type='button';b.setAttribute('role','button');b.style.pointerEvents='auto';b.onclick=e=>{e.preventDefault();e.stopPropagation();const view=b.dataset.view;if(typeof window.show==='function')window.show(view)}});if(n.dataset.mtaNavRouter!=='1'){n.dataset.mtaNavRouter='1';n.addEventListener('click',e=>{const b=e.target&&e.target.closest?e.target.closest('button[data-view]'):null;if(!b||!n.contains(b))return;const view=b.dataset.view;if(!view)return;e.preventDefault();e.stopImmediatePropagation();if(typeof window.show==='function'){window.show(view)}else{console.error('[MTA] navigation unavailable: window.show is not a function')}},true)}}
+const NAV_ICONS={
+  dashboard:'grid',detainee:'person',placement:'layers',movement:'arrow',leave:'exit',documents:'file',
+  audit:'clock',p9settings:'settings',monitor:'monitor','ops-queue':'queue','qr-center':'qr',
+  'camera-scan':'camera','room-ops':'room',reports:'report','scan-center':'scan','leave-qr':'leave'
+};
+const NAV_LABELS={
+  dashboard:'Dashboard',detainee:'Data Deteni',placement:'Penempatan',movement:'Pergerakan',leave:'Izin',
+  documents:'Dokumen',audit:'Audit Trail',p9settings:'Pengaturan',monitor:'Operational Monitor',
+  'ops-queue':'Operational Queue','qr-center':'QR Center','camera-scan':'Scanner Kamera',
+  'room-ops':'Room Operations',reports:'Laporan','scan-center':'Scan Center','leave-qr':'Leave QR'
+};
+const NAV_PATHS={
+  grid:'<rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/>',
+  person:'<circle cx="12" cy="8" r="3.5"/><path d="M5 21c.7-4 3-6 7-6s6.3 2 7 6"/>',
+  layers:'<path d="m12 3 8 4-8 4-8-4 8-4Z"/><path d="m4 12 8 4 8-4"/><path d="m4 17 8 4 8-4"/>',
+  arrow:'<path d="M4 12h16"/><path d="m14 6 6 6-6 6"/>',
+  exit:'<path d="M14 4H5v16h9"/><path d="M11 12h9"/><path d="m16 8 4 4-4 4"/>',
+  file:'<path d="M6 3h8l4 4v14H6z"/><path d="M14 3v5h5"/><path d="M9 13h6M9 17h6"/>',
+  clock:'<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
+  settings:'<path d="M12 8.5a3.5 3.5 0 1 0 0 7 3.5 3.5 0 0 0 0-7Z"/><path d="m19.4 15 .2 1.8-1.8 1.8-1.8-.2-1.1 1.1-.2 1.8h-2.6l-.2-1.8-1.1-1.1-1.8.2-1.8-1.8.2-1.8-1.1-1.1L4.5 12l1.8-.2 1.1-1.1-.2-1.8L9 7.1l1.8.2L12 6.2l.2-1.8h2.6l.2 1.8 1.1 1.1 1.8-.2 1.8 1.8-.2 1.8 1.1 1.1 1.8.2v2.6l-1.8.2-1.1 1.1Z"/>',
+  monitor:'<rect x="3" y="4" width="18" height="13" rx="2"/><path d="M8 21h8M12 17v4"/><path d="m7 13 3-3 2 2 4-4"/>',
+  queue:'<path d="M5 6h2M10 6h9M5 12h2M10 12h9M5 18h2M10 18h9"/><path d="m5 5 1 1 2-2M5 11l1 1 2-2M5 17l1 1 2-2"/>',
+  qr:'<rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><path d="M14 14h3v3h-3zM18 18h3v3h-3zM14 18v3"/>',
+  camera:'<path d="M4 8h3l1.5-2h7L17 8h3v11H4z"/><circle cx="12" cy="13.5" r="3.5"/>',
+  room:'<path d="M6 20V5a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v15"/><path d="M6 20h13M11 12h2"/>',
+  report:'<path d="M6 3h8l4 4v14H6z"/><path d="M14 3v5h5M9 17v-4M12 17v-7M15 17v-3"/>',
+  scan:'<path d="M5 8V5h3M19 8V5h-3M5 16v3h3M19 16v3h-3"/><path d="M8 12h8"/>',
+  leave:'<path d="M5 4h10l4 4v12H5z"/><path d="M14 4v5h5M8 14h7M12 11l3 3-3 3"/>'
+};
+function navIcon(view){
+  const key=NAV_ICONS[view]||'grid';
+  return '<svg class="mta-nav-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">'+NAV_PATHS[key]+'</svg>';
+}
+function ensureNavIcon(b){
+  if(!b||!b.dataset.view)return;
+  const view=b.dataset.view;
+  const label=NAV_LABELS[view]||b.dataset.label||b.textContent.replace(/^\s*[◉☷▣⌾▥▤•·]+\s*/,'').trim()||view;
+  b.dataset.label=label;
+  b.innerHTML=navIcon(view)+'<span class="mta-nav-label">'+esc(label)+'</span>';
+  b.title=label;
+  b.setAttribute('aria-label',label);
+}
+function installNavIconStyle(){
+  if(document.getElementById('mta-unified-nav-icons'))return;
+  const s=document.createElement('style');s.id='mta-unified-nav-icons';s.textContent='.nav button{display:flex;align-items:center;gap:11px}.mta-nav-icon{width:18px;height:18px;flex:0 0 18px;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}.mta-nav-label{min-width:0}.nav button.active .mta-nav-icon{stroke-width:2.1}.nav button:hover .mta-nav-icon{transform:translateX(1px)}';document.head.appendChild(s);
+}
+function nav(v,l,i){const n=document.getElementById('nav');if(!n||n.querySelector('[data-view="'+v+'"]'))return;const b=document.createElement('button');b.type='button';b.dataset.view=v;b.dataset.icon=i;b.textContent=l||v;b.onclick=e=>{e.stopPropagation();window.show(v)};n.appendChild(b);ensureNavIcon(b)}
+function installNav(){installNavIconStyle();nav('monitor','Operational Monitor','monitor');nav('ops-queue','Operational Queue','queue');nav('qr-center','QR Center','qr');nav('camera-scan','Scanner Kamera','camera');nav('room-ops','Room Operations','room');nav('reports','Laporan','report');const n=document.getElementById('nav');if(!n)return;n.querySelectorAll('button[data-view]').forEach(b=>{b.type='button';b.setAttribute('role','button');b.style.pointerEvents='auto';ensureNavIcon(b);b.onclick=e=>{e.preventDefault();e.stopPropagation();const view=b.dataset.view;if(typeof window.show==='function')window.show(view)}});if(n.dataset.mtaNavRouter!=='1'){n.dataset.mtaNavRouter='1';n.addEventListener('click',e=>{const b=e.target&&e.target.closest?e.target.closest('button[data-view]'):null;if(!b||!n.contains(b))return;const view=b.dataset.view;if(!view)return;e.preventDefault();e.stopImmediatePropagation();if(typeof window.show==='function'){window.show(view)}else{console.error('[MTA] navigation unavailable: window.show is not a function')}},true)}}
 function buildOperationalQueue(d){
   const audit=Array.isArray(d?.audit)?d.audit:[];
   const material=audit.filter(x=>x&&x.action&&x.resourceType&&x.occurredAt);
