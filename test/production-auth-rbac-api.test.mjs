@@ -17,6 +17,9 @@ assert.match(rbac,/security definer/);
 
 assert.match(edge,/supabase\.auth\.getUser\(\)/);
 assert.match(edge,/RBAC_WRITE_DENIED/);
+assert.match(edge,/resource==="admin-users"/);
+assert.match(edge,/RBAC_USER_ADMIN_DENIED/);
+assert.match(edge,/allowedOrigin/);
 assert.match(edge,/const TABLES=new Set\(\["detainees","placements","movements","leaves","documents"\]\)/);
 assert.equal(edge.includes('const table="mta_"+resource;'),true);
 assert.doesNotMatch(edge,/detail:error\.message/);
@@ -24,7 +27,7 @@ assert.doesNotMatch(edge,/detail:String\(error\)/);
 
 assert.match(client,/mtaProductionApi/);
 assert.match(auth,/signInWithPassword/);
-assert.match(auth,/signUp/);
+assert.doesNotMatch(auth,/supabase\.auth\.signUp/);
 assert.match(auth,/onAuthStateChange/);
 assert.match(migration,/production activation/i);
 
