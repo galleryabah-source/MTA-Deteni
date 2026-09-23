@@ -1,75 +1,170 @@
-(function(){
+(()=>{ 
   'use strict';
-  function el(tag,props,text){
-    const x=document.createElement(tag);
-    Object.entries(props||{}).forEach(([k,v])=>x[k]=v);
-    if(text!==undefined)x.textContent=text;
-    return x;
+
+  const GATE_ID='mtaAuthGate';
+
+  const css=()=>{
+    if(document.getElementById('mtaAuthGateCss')) return;
+    const s=document.createElement('style');
+    s.id='mtaAuthGateCss';
+    s.textContent=`
+      body.mta-auth-locked .app{display:none!important}
+      #mtaAuthGate{position:fixed;inset:0;z-index:9999;display:none;align-items:center;justify-content:center;padding:24px;background:linear-gradient(135deg,#eef4ff 0%,#f7f9fc 48%,#eaf0f7 100%);font-family:"Segoe UI",system-ui,-apple-system,BlinkMacSystemFont,sans-serif}
+      #mtaAuthGate.open{display:flex}
+      .mta-auth-card{width:min(440px,100%);background:rgba(255,255,255,.96);border:1px solid #d7dce3;border-radius:22px;padding:30px;box-shadow:0 24px 80px rgba(15,23,42,.14)}
+      .mta-auth-brand{display:flex;align-items:center;gap:12px;margin-bottom:24px}
+      .mta-auth-logo{width:44px;height:44px;border-radius:12px;background:#0b63ce;color:#fff;display:grid;place-items:center;font-weight:800;font-size:20px}
+      .mta-auth-brand strong{display:block;font-size:17px;color:#172033}.mta-auth-brand small{display:block;color:#667085;font-size:11px;margin-top:2px}
+      .mta-auth-title{font-size:26px;font-weight:750;color:#172033;margin:0 0 6px}
+      .mta-auth-sub{font-size:13px;line-height:1.5;color:#667085;margin:0 0 20px}
+      .mta-auth-mode{display:grid;grid-template-columns:1fr 1fr;gap:6px;padding:4px;background:#f2f4f7;border-radius:11px;margin-bottom:16px}
+      .mta-auth-mode button{border:0;background:transparent;border-radius:8px;padding:9px;color:#667085;cursor:pointer;font-weight:650}
+      .mta-auth-mode button.active{background:#fff;color:#0754ae;box-shadow:0 1px 4px rgba(15,23,42,.08)}
+      .mta-auth-field{display:grid;gap:6px;margin-top:11px}.mta-auth-field label{font-size:11px;color:#526176;font-weight:650}
+      .mta-auth-field input{width:100%;border:1px solid #d7dce3;border-radius:10px;padding:11px 12px;outline:none;background:#fff}
+      .mta-auth-field input:focus{border-color:#6aa2e8;box-shadow:0 0 0 3px #e6f0ff}
+      .mta-auth-submit{width:100%;margin-top:18px;border:0;border-radius:10px;padding:12px;background:#0b63ce;color:#fff;font-weight:700;cursor:pointer}
+      .mta-auth-submit:disabled{opacity:.6;cursor:wait}
+      .mta-auth-message{min-height:18px;margin-top:10px;font-size:11px;color:#667085}.mta-auth-message.error{color:#b42318}.mta-auth-message.ok{color:#16763b}
+      .mta-auth-foot{margin-top:18px;padding-top:14px;border-top:1px solid #edf0f4;color:#98a2b3;font-size:10px;line-height:1.5;text-align:center}
+      @media(max-width:600px){#mtaAuthGate{padding:14px}.mta-auth-card{padding:22px;border-radius:18px}.mta-auth-title{font-size:23px}}
+    `;
+    document.head.appendChild(s);
+  };
+
+  function makeGate(){
+    if(document.getElementById(GATE_ID)) return document.getElementById(GATE_ID);
+    css();
+    document.body.classList.add('mta-auth-locked');
+    const gate=document.createElement('div');
+    gate.id=GATE_ID;
+    gate.innerHTML=`
+      <div class="mta-auth-card">
+        <div class="mta-auth-brand">
+          <div class="mta-auth-logo">M</div>
+          <div><strong>MTA DETENI Digital</strong><small>Manajemen Terpadu Administrasi Deteni</small></div>
+        </div>
+        <h1 class="mta-auth-title">Masuk ke MTA DETENI</h1>
+        <p class="mta-auth-sub">Authentication diperlukan sebelum mengakses dashboard dan data operasional. Runtime saat ini tetap synthetic dan tidak menggunakan data deteni produksi.</p>
+        <div class="mta-auth-mode">
+          <button type="button" id="mtaAuthLoginMode" class="active">Login</button>
+          <button type="button" id="mtaAuthSignupMode">Daftar</button>
+        </div>
+        <form id="mtaAuthForm">
+          <div class="mta-auth-field" id="mtaAuthNameField" style="display:none"><label>Nama</label><input id="mtaAuthName" autocomplete="name"></div>
+          <div class="mta-auth-field"><label>Email</label><input id="mtaAuthEmail" type="email" autocomplete="email" required></div>
+          <div class="mta-auth-field"><label>Password</label><input id="mtaAuthPassword" type="password" autocomplete="current-password" required minlength="6"></div>
+          <button class="mta-auth-submit" id="mtaAuthSubmit" type="submit">Login</button>
+          <div class="mta-auth-message" id="mtaAuthMessage"></div>
+        </form>
+        <div class="mta-auth-foot">MTA DETENI · Authentication boundary · AI OFF · Synthetic runtime</div>
+      </div>`;
+    document.body.appendChild(gate);
+    return gate;
   }
-  function render(){
+
+  function renderHeader(authenticated,user){
     const host=document.querySelector('.topright');
-    if(!host||document.getElementById('mtaAuthUi'))return;
-    const box=el('span',{id:'mtaAuthUi',style:'display:inline-flex;gap:5px;align-items:center'});
-    const state=el('span',{id:'mtaAuthUiState',className:'pill'},'Guest');
-    const login=el('button',{className:'btn small'},'Login');
-    const signup=el('button',{className:'btn small'},'Daftar');
-    const logout=el('button',{className:'btn small'},'Logout');
-    logout.style.display='none';
-    box.append(state,login,signup,logout);
-    host.prepend(box);
-    login.onclick=()=>show(false);
-    signup.onclick=()=>show(true);
-    logout.onclick=async()=>{await window.mtaAuth.signOut();};
-    window.addEventListener('mta-auth-state',update);
-  }
-  function show(signup){
-    if(typeof openModal!=='function')return;
-    const wrap=document.createElement('div');
-    const title=el('h2',{},signup?'Daftar Akun':'Login');
-    const head=el('div',{className:'dialoghead'}); head.append(title);
-    const close=el('button',{className:'x'},'×'); close.onclick=()=>closeModal(); head.append(close);
-    const notice=el('div',{className:'notice'},signup?'Akun baru mendapat role VIEWER. OWNER/ADMIN dapat menaikkan role setelah verifikasi.':'Gunakan akun Supabase Auth yang sudah terdaftar.');
-    const grid=el('div',{className:'formgrid',style:'margin-top:12px'});
-    const email=el('input',{type:'email',autocomplete:'email'});
-    const pass=el('input',{type:'password',autocomplete:signup?'new-password':'current-password'});
-    const ef=el('div',{className:'field'}); ef.append(el('label',{},'Email'),email);
-    const pf=el('div',{className:'field'}); pf.append(el('label',{},'Password'),pass);
-    grid.append(ef,pf);
-    if(signup){
-      const name=el('input',{type:'text',autocomplete:'name'});
-      const nf=el('div',{className:'field full'}); nf.append(el('label',{},'Nama'),name); grid.append(nf);
-      wrap._name=name;
+    if(!host) return;
+    let box=document.getElementById('mtaAuthUi');
+    if(!box){
+      box=document.createElement('span');
+      box.id='mtaAuthUi';
+      box.style.cssText='display:inline-flex;gap:5px;align-items:center';
+      host.prepend(box);
     }
-    const actions=el('div',{className:'actions'});
-    const cancel=el('button',{className:'btn'},'Batal'); cancel.onclick=()=>closeModal();
-    const go=el('button',{className:'btn primary'},signup?'Daftar':'Login');
-    go.onclick=async()=>{
+    box.innerHTML='';
+    const state=document.createElement('span');
+    state.className='pill';
+    state.textContent=authenticated ? (user?.email||'Authenticated') : 'Guest';
+    box.appendChild(state);
+    if(authenticated){
+      const logout=document.createElement('button');
+      logout.className='btn small'; logout.type='button'; logout.textContent='Logout';
+      logout.onclick=async()=>{await window.mtaAuth.signOut()};
+      box.appendChild(logout);
+    }
+  }
+
+  function mode(signup){
+    const login=document.getElementById('mtaAuthLoginMode');
+    const reg=document.getElementById('mtaAuthSignupMode');
+    const name=document.getElementById('mtaAuthNameField');
+    const submit=document.getElementById('mtaAuthSubmit');
+    if(!login||!reg||!name||!submit)return;
+    login.classList.toggle('active',!signup); reg.classList.toggle('active',signup);
+    name.style.display=signup?'grid':'none';
+    submit.textContent=signup?'Daftar':'Login';
+    document.getElementById('mtaAuthPassword')?.setAttribute('autocomplete',signup?'new-password':'current-password');
+    document.getElementById('mtaAuthMessage').textContent='';
+  }
+
+  function bindForm(){
+    const gate=makeGate();
+    document.getElementById('mtaAuthLoginMode').onclick=()=>mode(false);
+    document.getElementById('mtaAuthSignupMode').onclick=()=>mode(true);
+    document.getElementById('mtaAuthForm').onsubmit=async(e)=>{
+      e.preventDefault();
+      const msg=document.getElementById('mtaAuthMessage');
+      const submit=document.getElementById('mtaAuthSubmit');
+      const signup=document.getElementById('mtaAuthSignupMode').classList.contains('active');
+      submit.disabled=true; msg.className='mta-auth-message'; msg.textContent='Memproses...';
       try{
-        const r=signup?await window.mtaAuth.signUp(email.value.trim(),pass.value, {full_name:wrap._name?.value||''}):await window.mtaAuth.signIn(email.value.trim(),pass.value);
-        if(r.error)throw r.error;
-        closeModal();
-        toast(signup?(r.data.session?'Akun dibuat dan login.':'Akun dibuat. Periksa email konfirmasi.'):'Login berhasil.');
-      }catch(e){toast(e.message||'Auth gagal');}
+        const email=document.getElementById('mtaAuthEmail').value.trim();
+        const password=document.getElementById('mtaAuthPassword').value;
+        const name=document.getElementById('mtaAuthName').value.trim();
+        const r=signup
+          ? await window.mtaAuth.signUp(email,password,{full_name:name})
+          : await window.mtaAuth.signIn(email,password);
+        if(r?.error) throw r.error;
+        if(signup && !r?.data?.session){
+          msg.className='mta-auth-message ok';
+          msg.textContent='Akun berhasil dibuat. Periksa email konfirmasi sebelum login.';
+        }else{
+          msg.className='mta-auth-message ok';
+          msg.textContent='Login berhasil. Membuka aplikasi...';
+        }
+      }catch(err){
+        msg.className='mta-auth-message error';
+        msg.textContent=err?.message||'Authentication gagal.';
+      }finally{submit.disabled=false}
     };
-    actions.append(cancel,go);
-    wrap.append(head,notice,grid,actions);
-    openModal(wrap.outerHTML);
+    mode(false);
   }
+
   async function update(event){
-    const state=document.getElementById('mtaAuthUiState');
-    if(!state)return;
-    const box=document.getElementById('mtaAuthUi');
-    const buttons=box.querySelectorAll('button');
-    if(event.detail.authenticated){
+    const authenticated=!!event?.detail?.authenticated;
+    const gate=makeGate();
+    if(authenticated){
+      document.body.classList.remove('mta-auth-locked');
+      gate.classList.remove('open');
+      renderHeader(true,event.detail.user);
       try{
-        const me=await window.mtaProductionApi.get('me');
-        state.textContent=me.role||'AUTH';
-      }catch(_){state.textContent='AUTH';}
-      buttons[0].style.display='none'; buttons[1].style.display='none'; buttons[2].style.display='inline-flex';
+        const me=await window.mtaProductionApi?.get('me');
+        const box=document.getElementById('mtaAuthUi');
+        const state=box?.querySelector('.pill');
+        if(state&&me?.role)state.textContent=me.role;
+      }catch(_){}
     }else{
-      state.textContent='Guest';
-      buttons[0].style.display='inline-flex'; buttons[1].style.display='inline-flex'; buttons[2].style.display='none';
+      document.body.classList.add('mta-auth-locked');
+      gate.classList.add('open');
+      renderHeader(false,null);
     }
   }
-  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',render);else render();
+
+  function init(){
+    makeGate();
+    bindForm();
+    window.addEventListener('mta-auth-state',update);
+    setTimeout(async()=>{
+      try{
+        if(window.mtaAuth){
+          const r=await window.mtaAuth.session();
+          update({detail:{authenticated:!!r?.data?.session,user:r?.data?.session?.user||null}});
+        }
+      }catch(_){update({detail:{authenticated:false,user:null}})}
+    },800);
+  }
+
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
 })();
