@@ -48,10 +48,9 @@
         <p class="mta-auth-sub">Authentication diperlukan sebelum mengakses dashboard dan data operasional. Runtime saat ini tetap synthetic dan tidak menggunakan data deteni produksi.</p>
         <div class="mta-auth-mode">
           <button type="button" id="mtaAuthLoginMode" class="active">Login</button>
-          <button type="button" id="mtaAuthSignupMode">Daftar</button>
+          
         </div>
         <form id="mtaAuthForm">
-          <div class="mta-auth-field" id="mtaAuthNameField" style="display:none"><label>Nama</label><input id="mtaAuthName" autocomplete="name"></div>
           <div class="mta-auth-field"><label>Email</label><input id="mtaAuthEmail" type="email" autocomplete="email" required></div>
           <div class="mta-auth-field"><label>Password</label><input id="mtaAuthPassword" type="password" autocomplete="current-password" required minlength="6"></div>
           <button class="mta-auth-submit" id="mtaAuthSubmit" type="submit">Login</button>
@@ -88,34 +87,26 @@
 
   function mode(signup){
     const login=document.getElementById('mtaAuthLoginMode');
-    const reg=document.getElementById('mtaAuthSignupMode');
-    const name=document.getElementById('mtaAuthNameField');
     const submit=document.getElementById('mtaAuthSubmit');
-    if(!login||!reg||!name||!submit)return;
-    login.classList.toggle('active',!signup); reg.classList.toggle('active',signup);
-    name.style.display=signup?'grid':'none';
-    submit.textContent=signup?'Daftar':'Login';
-    document.getElementById('mtaAuthPassword')?.setAttribute('autocomplete',signup?'new-password':'current-password');
+    if(!login||!submit)return;
+    login.classList.add('active');
+    submit.textContent='Login';
+    document.getElementById('mtaAuthPassword')?.setAttribute('autocomplete','current-password');
     document.getElementById('mtaAuthMessage').textContent='';
   }
 
   function bindForm(){
     const gate=makeGate();
-    document.getElementById('mtaAuthLoginMode').onclick=()=>mode(false);
-    document.getElementById('mtaAuthSignupMode').onclick=()=>mode(true);
     document.getElementById('mtaAuthForm').onsubmit=async(e)=>{
       e.preventDefault();
       const msg=document.getElementById('mtaAuthMessage');
       const submit=document.getElementById('mtaAuthSubmit');
-      const signup=document.getElementById('mtaAuthSignupMode').classList.contains('active');
+      const signup=false;
       submit.disabled=true; msg.className='mta-auth-message'; msg.textContent='Memproses...';
       try{
         const email=document.getElementById('mtaAuthEmail').value.trim();
         const password=document.getElementById('mtaAuthPassword').value;
-        const name=document.getElementById('mtaAuthName').value.trim();
-        const r=signup
-          ? await window.mtaAuth.signUp(email,password,{full_name:name})
-          : await window.mtaAuth.signIn(email,password);
+        const r=await window.mtaAuth.signIn(email,password);
         if(r?.error) throw r.error;
         if(signup && !r?.data?.session){
           msg.className='mta-auth-message ok';
