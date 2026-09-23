@@ -18,8 +18,14 @@
   }
   const NAV_ORDER=['dashboard','detainee','placement','movement','leave','monitor','ops-queue','qr-center','scan-center','leave-qr','camera-scan','documents','audit','reports','room-ops','p9settings'];
   function groupNav(nav){
-    nav.querySelectorAll('.mta-desktop-group-label').forEach(x=>x.remove());
     const buttons=[...nav.querySelectorAll('button[data-view]')];
+    const signature=buttons.map(b=>b.dataset.view).join('|');
+    const desired=NAV_ORDER.filter(v=>buttons.some(b=>b.dataset.view===v)).join('|');
+    const hasDuplicate=new Set(buttons.map(b=>b.dataset.view)).size!==buttons.length;
+    if(signature===desired&&!hasDuplicate&&nav.querySelectorAll('.mta-desktop-group-label').length){
+      return;
+    }
+    nav.querySelectorAll('.mta-desktop-group-label').forEach(x=>x.remove());
     const byView=new Map();
     buttons.forEach(b=>{if(!byView.has(b.dataset.view))byView.set(b.dataset.view,b)});
     NAV_ORDER.forEach(v=>{const b=byView.get(v);if(b)nav.appendChild(b)});
