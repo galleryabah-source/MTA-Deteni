@@ -81,7 +81,20 @@ function settings(){
       '</div>'+
       '<div class="p6card"><h2>Security &amp; Governance</h2><div class="notice">Role synthetic: <b>'+E(d.adminSettings.role)+
         '</b><br>QR Policy: <b>'+E(d.adminSettings.qrPolicy)+'</b><br>Real data: <b>DISALLOWED IN PREVIEW</b></div>'+
-        '<p class="p6mini">User, role, permission, scope, duty assignment, dan policy produksi tetap mengikuti authorization boundary; password/secret tidak disimpan di runtime preview.</p></div>'+
+        '<p class="p6mini">User, role, permission, scope, duty assignment, dan policy produksi tetap mengikuti authorization boundary; password/secret tidak disimpan di runtime preview.</p>'+
+        '<div style="margin-top:14px;border-top:1px solid #edf0f4;padding-top:14px">'+
+        '<div class="toolbar"><h3 style="margin-right:auto;font-size:15px">Anggota / User</h3><button class="btn small" onclick="window.p9loadUsers()">↻ Muat Ulang</button></div>'+
+        '<div class="notice">Tidak ada pendaftaran mandiri. Pembuatan dan pengelolaan akun hanya melalui Administrator. Password awal hanya digunakan saat pembuatan dan tidak pernah ditampilkan kembali.</div>'+
+        '<div class="formgrid" style="margin-top:10px">'+
+        '<div class="field"><label>Nama</label><input id="p9userName" autocomplete="off" placeholder="Nama pengguna"></div>'+
+        '<div class="field"><label>Email</label><input id="p9userEmail" type="email" autocomplete="off" placeholder="nama@instansi.go.id"></div>'+
+        '<div class="field"><label>Role</label><select id="p9userRole"><option>VIEWER</option><option>REVIEWER</option><option>AUDITOR</option><option>EDITOR</option><option>ADMIN</option><option>OWNER</option></select></div>'+
+        '<div class="field"><label>Password awal · min. 12 karakter</label><input id="p9userPassword" type="password" autocomplete="new-password" placeholder="Password awal"></div>'+
+        '<div class="field full"><label>Konfirmasi Password</label><input id="p9userPassword2" type="password" autocomplete="new-password" placeholder="Ulangi password awal"></div>'+
+        '</div>'+
+        '<div class="actions"><button class="btn primary" onclick="window.p9createUser()">+ Buat Akun oleh Admin</button></div>'+
+        '<div id="p9UsersTable" class="tablewrap" style="margin-top:12px"><div class="empty">Muat daftar anggota setelah autentikasi production aktif.</div></div>'+
+        '</div></div>'+
     '</div>'+
     '<div class="p6card" style="margin-top:12px"><div class="toolbar"><h2 style="margin-right:auto">Master Blok</h2>'+
       '<button class="btn primary" onclick="window.p9addBlock()">+ Tambah Blok</button></div>'+
@@ -139,6 +152,34 @@ function organizeSettingsPages(app){
   menu.querySelectorAll('button').forEach(b=>b.onclick=()=>activate(b.dataset.p9page));
   activate(window.__p9SettingsPage||'system');
 }
+
+
+window.p9loadUsers=async()=>{
+  const host=document.querySelector('#p9UsersTable');if(!host||!window.mtaProductionApi)return;
+  if(window.MTADeteniRuntimeAdapter?.getMode?.()!=='CLOUD'){host.innerHTML='<div class="empty">Runtime synthetic/local tidak memuat akun production.</div>';return;}
+  host.innerHTML='<div class="empty">Memuat daftar anggota…</div>';
+  try{
+    const r=await window.mtaProductionApi.list('admin-users');
+    const rows=(r?.data||[]).map(u=>'<tr><td><b>'+E(u.display_name||'-')+'</b></td><td>'+E(u.email||'-')+'</td><td>'+E(u.role)+'</td><td>'+E(u.active?'ACTIVE':'DISABLED')+'</td><td><button class="btn small" onclick="window.p9toggleUser(\''+E(u.id)+'\','+(!u.active)+')">'+(u.active?'Nonaktifkan':'Aktifkan')+'</button></td></tr>').join('');
+    host.innerHTML='<table class="table"><thead><tr><th>Nama</th><th>Email</th><th>Role</th><th>Status</th><th>Aksi</th></tr></thead><tbody>'+(rows||'<tr><td colspan="5" class="empty">Belum ada anggota.</td></tr>')+'</tbody></table>';
+  }catch(e){host.innerHTML='<div class="empty">Gagal memuat anggota: '+E(e?.message||'API error')+'</div>'}
+};
+window.p9createUser=async()=>{
+  const name=document.querySelector('#p9userName')?.value.trim()||'',email=document.querySelector('#p9userEmail')?.value.trim().toLowerCase()||'',role=document.querySelector('#p9userRole')?.value||'VIEWER',p1=document.querySelector('#p9userPassword')?.value||'',p2=document.querySelector('#p9userPassword2')?.value||'';
+  if(!email||!name)return toast('Nama dan email wajib diisi.');
+  if(p1.length<12)return toast('Password awal minimal 12 karakter.');
+  if(p1!==p2)return toast('Konfirmasi password tidak cocok.');
+  if(window.MTADeteniRuntimeAdapter?.getMode?.()!=='CLOUD')return toast('Pembuatan akun hanya tersedia pada runtime production/authenticated.');
+  try{
+    const r=await window.mtaProductionApi.create('admin-users',{display_name:name,email,password:p1,role});
+    document.querySelector('#p9userPassword').value='';document.querySelector('#p9userPassword2').value='';
+    toast('Akun berhasil dibuat oleh Administrator.');await window.p9loadUsers();return r;
+  }catch(e){toast(e?.data?.error||e?.message||'Gagal membuat akun.')}
+};
+window.p9toggleUser=async(id,active)=>{
+  if(!window.mtaProductionApi||window.MTADeteniRuntimeAdapter?.getMode?.()!=='CLOUD')return;
+  try{await window.mtaProductionApi.update('admin-users',id,{active});toast(active?'Akun diaktifkan.':'Akun dinonaktifkan.');await window.p9loadUsers()}catch(e){toast(e?.data?.error||e?.message||'Gagal memperbarui akun.')}
+};
 
 function runtimeIntegrityHtml(){
   return '<div class="p6card p9runtimeIntegrity"><div class="toolbar"><div style="margin-right:auto"><h2 style="margin:0">Runtime Integrity</h2><div class="p6mini">Pemeriksaan integritas runtime lokal/synthetic. Panel ini hanya tersedia di Pengaturan Administrator.</div></div><button class="btn" onclick="window.p9runRuntimeIntegrity()">↻ Refresh</button><button class="btn primary" onclick="window.p9runRuntimeIntegrity()">▶ Jalankan Ulang Tes</button></div><div id="p9RuntimeIntegrityRows" class="p9runtimeRows"><div class="notice">Menyiapkan pemeriksaan…</div></div></div>';
