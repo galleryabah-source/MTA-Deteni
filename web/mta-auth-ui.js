@@ -12,43 +12,36 @@
     const box=el('span',{id:'mtaAuthUi',style:'display:inline-flex;gap:5px;align-items:center'});
     const state=el('span',{id:'mtaAuthUiState',className:'pill'},'Guest');
     const login=el('button',{className:'btn small'},'Login');
-    const signup=el('button',{className:'btn small'},'Daftar');
     const logout=el('button',{className:'btn small'},'Logout');
     logout.style.display='none';
-    box.append(state,login,signup,logout);
+    box.append(state,login,logout);
     host.prepend(box);
-    login.onclick=()=>show(false);
-    signup.onclick=()=>show(true);
+    login.onclick=()=>show();
     logout.onclick=async()=>{await window.mtaAuth.signOut();};
     window.addEventListener('mta-auth-state',update);
   }
-  function show(signup){
+  function show(){
     if(typeof openModal!=='function')return;
     const wrap=document.createElement('div');
-    const title=el('h2',{},signup?'Daftar Akun':'Login');
+    const title=el('h2',{},'Masuk ke MTA DETENI');
     const head=el('div',{className:'dialoghead'}); head.append(title);
     const close=el('button',{className:'x'},'×'); close.onclick=()=>closeModal(); head.append(close);
-    const notice=el('div',{className:'notice'},signup?'Akun baru mendapat role VIEWER. OWNER/ADMIN dapat menaikkan role setelah verifikasi.':'Gunakan akun Supabase Auth yang sudah terdaftar.');
+    const notice=el('div',{className:'notice'},'Tidak ada pendaftaran mandiri. Akun pengguna hanya dapat dibuat oleh Administrator. Gunakan akun yang telah diberikan Administrator.');
     const grid=el('div',{className:'formgrid',style:'margin-top:12px'});
     const email=el('input',{type:'email',autocomplete:'email'});
-    const pass=el('input',{type:'password',autocomplete:signup?'new-password':'current-password'});
+    const pass=el('input',{type:'password',autocomplete:'current-password'});
     const ef=el('div',{className:'field'}); ef.append(el('label',{},'Email'),email);
     const pf=el('div',{className:'field'}); pf.append(el('label',{},'Password'),pass);
     grid.append(ef,pf);
-    if(signup){
-      const name=el('input',{type:'text',autocomplete:'name'});
-      const nf=el('div',{className:'field full'}); nf.append(el('label',{},'Nama'),name); grid.append(nf);
-      wrap._name=name;
-    }
     const actions=el('div',{className:'actions'});
     const cancel=el('button',{className:'btn'},'Batal'); cancel.onclick=()=>closeModal();
-    const go=el('button',{className:'btn primary'},signup?'Daftar':'Login');
+    const go=el('button',{className:'btn primary'},'Masuk');
     go.onclick=async()=>{
       try{
-        const r=signup?await window.mtaAuth.signUp(email.value.trim(),pass.value, {full_name:wrap._name?.value||''}):await window.mtaAuth.signIn(email.value.trim(),pass.value);
+        const r=await window.mtaAuth.signIn(email.value.trim(),pass.value);
         if(r.error)throw r.error;
         closeModal();
-        toast(signup?(r.data.session?'Akun dibuat dan login.':'Akun dibuat. Periksa email konfirmasi.'):'Login berhasil.');
+        toast('Login berhasil.');
       }catch(e){toast(e.message||'Auth gagal');}
     };
     actions.append(cancel,go);
@@ -65,10 +58,10 @@
         const me=await window.mtaProductionApi.get('me');
         state.textContent=me.role||'AUTH';
       }catch(_){state.textContent='AUTH';}
-      buttons[0].style.display='none'; buttons[1].style.display='none'; buttons[2].style.display='inline-flex';
+      buttons[0].style.display='none'; buttons[1].style.display='inline-flex';
     }else{
       state.textContent='Guest';
-      buttons[0].style.display='inline-flex'; buttons[1].style.display='inline-flex'; buttons[2].style.display='none';
+      buttons[0].style.display='inline-flex'; buttons[1].style.display='none';
     }
   }
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',render);else render();
