@@ -13,6 +13,5 @@ function render(){const r=document.querySelector('#appView');if(!r)return;const 
 window.p9roomQrState=id=>{const d=ensure(),x=d.rooms.find(z=>z.id===id),q=d.qr.room[id];if(!x||!q)return;const next={ACTIVE:'SUSPENDED',SUSPENDED:'REVOKED',REVOKED:'ACTIVE'}[q.status]||'ACTIVE';q.status=next;appendAudit(d,'QR_ROOM_STATE_CHANGE','ROOM_QR',id);d.lastMutation={key:'QR_ROOM_STATE:'+id+':'+next,action:'QR_ROOM_STATE_CHANGE',completedAt:now()};put(d);toast('Room QR state → '+next);render()};
 window.p9refreshRooms=()=>{ensure();render();toast('Room Ops diperbarui.')};
 const oldShow=window.show;window.show=v=>v==='p9rooms'?render():v==='p6rooms'?render():oldShow(v);
-const nav=document.querySelector('#nav');if(nav&&!document.querySelector('#p9rooms')){const b=document.createElement('button');b.id='p9rooms';b.dataset.view='p9rooms';b.textContent='Room Ops';b.onclick=()=>window.show('p9rooms');nav.appendChild(b)}
 ensure();
 })();
