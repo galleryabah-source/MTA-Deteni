@@ -1,7 +1,7 @@
 (()=>{
   'use strict';
   const STYLE_ID='mta-desktop-shell-v2-style';
-  const CSS='/desktop-shell-v2.css?v=5';
+  const CSS='/desktop-shell-v2.css?v=6';
   const GROUPS={
     dashboard:'UTAMA',
     detainee:'DATA & PENEMPATAN',placement:'DATA & PENEMPATAN',
