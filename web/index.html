@@ -72,7 +72,7 @@ function normalizeRuntimeState(x){
     const room=roomByLabel.get(\`\${p.block}|\${p.room}\`);
     return room?{...p,roomId:room.id,blockId:room.blockId,source:p.source||'MASTER_ROOM',requestKey:p.requestKey||\`PLACEMENT:\${p.detaineeId}:\${room.id}\`}:p;
   });
-  if(!state.detainees.length&&!state.placements.length&&!state.movements.length&&!state.leaves.length&&!state.documents.length&&!state.audit.length){
+  if((Number(state.meta?.version)||0)<3&&!state.detainees.length){
     return structuredClone(seed);
   }
   state.meta={...(state.meta||{}),version:3};
