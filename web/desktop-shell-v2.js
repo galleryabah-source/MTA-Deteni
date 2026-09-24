@@ -26,9 +26,27 @@
       if(!allowed.has(view)||seen.has(view)) b.remove();
       else seen.add(view);
     });
+    const currentButtons=[...nav.querySelectorAll('button[data-view]')];
+    const expectedViews=NAV_ORDER.filter(v=>currentButtons.some(b=>b.dataset.view===v));
+    const actualViews=currentButtons.map(b=>b.dataset.view);
+    const expectedGroups=[];
+    let expectedLast='';
+    expectedViews.forEach(v=>{
+      const group=GROUPS[v];
+      if(group&&group!==expectedLast){expectedGroups.push(group);expectedLast=group}
+    });
+    const actualGroups=[...nav.querySelectorAll('.mta-desktop-group-label')].map(x=>x.dataset.desktopGroupLabel||x.textContent.trim());
+    const alreadyNormalized=
+      actualViews.join('|')===expectedViews.join('|') &&
+      actualGroups.join('|')===expectedGroups.join('|') &&
+      currentButtons.every(b=>b.dataset.desktopGroup===GROUPS[b.dataset.view]);
+    if(alreadyNormalized){
+      nav.dataset.desktopGrouped='1';
+      return;
+    }
     nav.querySelectorAll('.mta-desktop-group-label').forEach(x=>x.remove());
     const byView=new Map([...nav.querySelectorAll('button[data-view]')].map(b=>[b.dataset.view,b]));
-    NAV_ORDER.forEach(v=>{const b=byView.get(v);if(b)nav.appendChild(b)});
+    NAV_ORDER.forEach(v=>{const b=byView.get(v);if(b&&b.parentElement===nav)nav.appendChild(b)});
     let last='';
     [...nav.querySelectorAll('button[data-view]')].forEach(b=>{
       const group=GROUPS[b.dataset.view];
