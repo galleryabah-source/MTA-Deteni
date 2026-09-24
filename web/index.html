@@ -104,15 +104,15 @@ function filterDetainee(){const q=(document.getElementById('dSearch')?.value||''
 function addDetainee(existing){
   const d=existing||{id:'',code:'',name:'',nationality:'Contoh',status:'AKTIF',placement:''};
   const placementLabel=d.placement||'Belum ditempatkan — gunakan menu Penempatan';
-  openModal(\`<div class="dialoghead"><h2>\${existing?'Edit':'Tambah'} Deteni</h2><button class="x" onclick="closeModal()">×</button></div>
+  openModal(`<div class="dialoghead"><h2>${existing?'Edit':'Tambah'} Deteni</h2><button class="x" onclick="closeModal()">×</button></div>
   <form id="dForm" class="formgrid">
-    <div class="field"><label>Kode</label><input name="code" required value="\${esc(d.code)}" placeholder="DET-2026-003"></div>
-    <div class="field"><label>Nama (synthetic)</label><input name="name" required value="\${esc(d.name)}"></div>
-    <div class="field"><label>Kebangsaan</label><input name="nationality" value="\${esc(d.nationality)}"></div>
-    <div class="field"><label>Status</label><select name="status"><option \${d.status==='AKTIF'?'selected':''}>AKTIF</option><option \${d.status==='NONAKTIF'?'selected':''}>NONAKTIF</option></select></div>
-    <div class="field full"><label>Penempatan</label><div class="notice"><b>\${esc(placementLabel)}</b><small style="display:block;margin-top:4px">Penempatan dikelola melalui Master Kamar agar tidak terjadi divergence antara Data Deteni dan Penempatan.</small></div></div>
+    <div class="field"><label>Kode</label><input name="code" required value="${esc(d.code)}" placeholder="DET-2026-003"></div>
+    <div class="field"><label>Nama (synthetic)</label><input name="name" required value="${esc(d.name)}"></div>
+    <div class="field"><label>Kebangsaan</label><input name="nationality" value="${esc(d.nationality)}"></div>
+    <div class="field"><label>Status</label><select name="status"><option ${d.status==='AKTIF'?'selected':''}>AKTIF</option><option ${d.status==='NONAKTIF'?'selected':''}>NONAKTIF</option></select></div>
+    <div class="field full"><label>Penempatan</label><div class="notice"><b>${esc(placementLabel)}</b><small style="display:block;margin-top:4px">Penempatan dikelola melalui Master Kamar agar tidak terjadi divergence antara Data Deteni dan Penempatan.</small></div></div>
     <div class="actions full"><button type="button" class="btn" onclick="closeModal()">Batal</button><button class="btn primary">Simpan</button></div>
-  </form>\`);
+  </form>`);
   document.getElementById('dForm').onsubmit=e=>{
     e.preventDefault();
     const f=new FormData(e.target),code=String(f.get('code')||'').trim();
@@ -138,10 +138,10 @@ function placement(v){
   const rows=db.placements.map(p=>{
     const d=db.detainees.find(x=>x.id===p.detaineeId);
     const room=(db.rooms||[]).find(x=>x.id===p.roomId);
-    const roomLabel=room?\`\${room.block} / \${room.room}\`:\`\${p.block||'—'} / \${p.room||'—'}\`;
-    return \`<tr><td><b>\${esc(p.id)}</b></td><td>\${esc(d?.code||p.detaineeId)}</td><td>\${esc(d?.name||'-')}</td><td>\${esc(roomLabel)}</td><td>\${esc(p.source||'LEGACY')}</td><td>\${new Date(p.since).toLocaleString('id-ID')}</td></tr>\`;
+    const roomLabel=room?`${room.block} / ${room.room}`:`${p.block||'—'} / ${p.room||'—'}`;
+    return `<tr><td><b>${esc(p.id)}</b></td><td>${esc(d?.code||p.detaineeId)}</td><td>${esc(d?.name||'-')}</td><td>${esc(roomLabel)}</td><td>${esc(p.source||'LEGACY')}</td><td>${new Date(p.since).toLocaleString('id-ID')}</td></tr>`;
   }).join('');
-  v.innerHTML=shell('Penempatan','Assignment menggunakan Master Kamar ACTIVE dan menjadi sumber penempatan terkini.',\`<div class="toolbar"><button class="btn primary" onclick="addPlacement()">+ Assign Penempatan</button><button class="btn" onclick="render()">↻ Refresh</button></div><div class="notice">Governance: blok/kamar tidak diinput bebas. Pilihan berasal dari Master Kamar Administrator; kapasitas dan status kamar divalidasi sebelum mutation.</div><div class="tablewrap" style="margin-top:12px"><table class="table"><thead><tr><th>ID</th><th>Kode</th><th>Nama</th><th>Kamar</th><th>Sumber</th><th>Mulai</th></tr></thead><tbody>\${rows||'<tr><td colspan="6" class="empty">Belum ada data</td></tr>'}</tbody></table></div>\`);
+  v.innerHTML=shell('Penempatan','Assignment menggunakan Master Kamar ACTIVE dan menjadi sumber penempatan terkini.',`<div class="toolbar"><button class="btn primary" onclick="addPlacement()">+ Assign Penempatan</button><button class="btn" onclick="render()">↻ Refresh</button></div><div class="notice">Governance: blok/kamar tidak diinput bebas. Pilihan berasal dari Master Kamar Administrator; kapasitas dan status kamar divalidasi sebelum mutation.</div><div class="tablewrap" style="margin-top:12px"><table class="table"><thead><tr><th>ID</th><th>Kode</th><th>Nama</th><th>Kamar</th><th>Sumber</th><th>Mulai</th></tr></thead><tbody>${rows||'<tr><td colspan="6" class="empty">Belum ada data</td></tr>'}</tbody></table></div>`);
 }
 function addPlacement(){
   const active=db.detainees.filter(d=>d.status==='AKTIF');
@@ -150,20 +150,20 @@ function addPlacement(){
     const p=db.placements.filter(y=>y.detaineeId===x.id).sort((a,b)=>String(b.since||'').localeCompare(String(a.since||'')))[0];
     return p&&(p.roomId===roomId);
   }).length;
-  const opts=active.map(d=>\`<option value="\${esc(d.id)}">\${esc(d.code)} — \${esc(d.name)}</option>\`).join('');
+  const opts=active.map(d=>`<option value="${esc(d.id)}">${esc(d.code)} — ${esc(d.name)}</option>`).join('');
   const roomOpts=masters.map(r=>{
     const occ=occupancyFor(r.id),cap=Number(r.capacity)||0,full=cap>0&&occ>=cap;
-    return \`<option value="\${esc(r.id)}" \${full?'disabled':''}>\${esc(r.block)} / \${esc(r.room)} — \${occ}/\${cap||'∞'}\${full?' · FULL':''}</option>\`;
+    return `<option value="${esc(r.id)}" ${full?'disabled':''}>${esc(r.block)} / ${esc(r.room)} — ${occ}/${cap||'∞'}${full?' · FULL':''}</option>`;
   }).join('');
   if(!active.length){toast('Tidak ada deteni AKTIF yang dapat ditempatkan.');return}
   if(!masters.length){toast('Master Kamar ACTIVE belum tersedia.');return}
-  openModal(\`<div class="dialoghead"><h2>Assign Penempatan</h2><button class="x" onclick="closeModal()">×</button></div>
+  openModal(`<div class="dialoghead"><h2>Assign Penempatan</h2><button class="x" onclick="closeModal()">×</button></div>
   <form id="pForm" class="formgrid">
-    <div class="field full"><label>Deteni</label><select name="detaineeId" required><option value="">Pilih deteni</option>\${opts}</select></div>
-    <div class="field full"><label>Kamar Tujuan · Master Kamar</label><select name="roomId" required><option value="">Pilih kamar</option>\${roomOpts}</select></div>
+    <div class="field full"><label>Deteni</label><select name="detaineeId" required><option value="">Pilih deteni</option>${opts}</select></div>
+    <div class="field full"><label>Kamar Tujuan · Master Kamar</label><select name="roomId" required><option value="">Pilih kamar</option>${roomOpts}</select></div>
     <div class="field full"><div class="notice">Kapasitas dihitung dari placement aktif. Kamar INACTIVE atau FULL tidak dapat dipilih.</div></div>
     <div class="actions full"><button type="button" class="btn" onclick="closeModal()">Batal</button><button class="btn primary">Assign</button></div>
-  </form>\`);
+  </form>`);
   document.getElementById('pForm').onsubmit=e=>{
     e.preventDefault();
     const f=new FormData(e.target),id=String(f.get('detaineeId')||''),roomId=String(f.get('roomId')||''),d=db.detainees.find(x=>x.id===id),master=(db.rooms||[]).find(r=>r.id===roomId);
@@ -185,16 +185,16 @@ function leave(v){const rows=db.leaves.map(l=>{const d=db.detainees.find(x=>x.id
 function leaveActions(l){const map={DRAFT:'SUBMIT',SUBMITTED:'APPROVE',APPROVED:'DEPART',DEPARTED:'RETURN',RETURNED:'COMPLETE'};const next=map[l.status];return next?`<button class="btn small primary" onclick="advanceLeave('${l.id}')">${next}</button>`:'—'}
 function addLeave(){
   const active=db.detainees.filter(d=>d.status==='AKTIF');
-  const opts=active.map(d=>\`<option value="\${esc(d.id)}">\${esc(d.code)} — \${esc(d.name)}</option>\`).join('');
+  const opts=active.map(d=>`<option value="${esc(d.id)}">${esc(d.code)} — ${esc(d.name)}</option>`).join('');
   if(!active.length){toast('Tidak ada deteni AKTIF yang dapat dibuatkan izin.');return}
-  openModal(\`<div class="dialoghead"><h2>Buat Izin</h2><button class="x" onclick="closeModal()">×</button></div>
+  openModal(`<div class="dialoghead"><h2>Buat Izin</h2><button class="x" onclick="closeModal()">×</button></div>
   <form id="lForm" class="formgrid">
-    <div class="field full"><label>Deteni</label><select name="detaineeId" required><option value="">Pilih deteni</option>\${opts}</select></div>
+    <div class="field full"><label>Deteni</label><select name="detaineeId" required><option value="">Pilih deteni</option>${opts}</select></div>
     <div class="field"><label>Tujuan</label><input name="destination" required></div>
     <div class="field"><label>Mulai</label><input name="startAt" type="datetime-local" required></div>
     <div class="field full"><label>Keperluan</label><textarea name="purpose" rows="3"></textarea></div>
     <div class="actions full"><button type="button" class="btn" onclick="closeModal()">Batal</button><button class="btn primary">Buat</button></div>
-  </form>\`);
+  </form>`);
   document.getElementById('lForm').onsubmit=e=>{
     e.preventDefault();
     const f=new FormData(e.target),detaineeId=String(f.get('detaineeId')||''),destination=String(f.get('destination')||'').trim(),startRaw=String(f.get('startAt')||''),d=db.detainees.find(x=>x.id===detaineeId);
