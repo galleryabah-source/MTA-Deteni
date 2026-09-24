@@ -22,3 +22,11 @@ Admin configuration and Offline/Local Runtime.
 4. regression tests;
 5. evidence collection;
 6. only then feature expansion.
+
+## Acceleration track — governed admin AI configuration
+
+A non-executing AI API configuration surface is now exposed from Administrator Settings. The surface records provider/model/base URL metadata only; API keys are deliberately not persisted in browser local storage, non-HTTPS endpoints are rejected, and runtime enablement remains hard-disabled (`enabled:false`). This does not activate an AI provider, create a schema change, or alter the production AI boundary.
+
+## F10-G entry criteria
+
+F10-G remains blocked until controlled non-production browser evidence is collected for the current commit. Source contracts alone are insufficient for final certification. Required evidence must cover load, navigation, scanner, resolve, action, mutation, audit, monitor, report, offline/recovery and final integrity, with governance locks preserved.
