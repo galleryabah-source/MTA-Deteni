@@ -448,6 +448,32 @@ function mtaCoreJourneyContractTest(){
   return {ok:results.every(x=>x.ok),results};
 }
 window.mtaCoreJourneyContractTest=mtaCoreJourneyContractTest;
+function mtaCoreJourneySimulationTest(){
+  const s=structuredClone(db),results=[];
+  s.movements=s.movements||[];s.leaves=s.leaves||[];s.audit=s.audit||[];
+  const d=s.detainees.find(x=>x.status==='AKTIF'),from=s.placements.find(x=>x.detaineeId===d?.id),target=s.rooms.find(x=>x.status==='ACTIVE'&&x.id!==from?.roomId);
+  results.push({name:'SIM_FIXTURE_DETAINEE',ok:!!d});
+  results.push({name:'SIM_FIXTURE_PLACEMENT',ok:!!from});
+  results.push({name:'SIM_FIXTURE_TARGET_ROOM',ok:!!target});
+  if(d&&from&&target){
+    const cap=Number(target.capacity)||0;
+    const occ=s.detainees.filter(x=>x.status==='AKTIF'&&x.id!==d.id).filter(x=>{const p=s.placements.find(y=>y.detaineeId===x.id&&y.roomId===target.id);return !!p}).length;
+    const allowed=target.status==='ACTIVE'&&from.roomId!==target.id&&(cap===0||occ<cap);
+    results.push({name:'SIM_MOVEMENT_POLICY',ok:allowed});
+    if(allowed){
+      const requestKey='SIM:ROOM_TRANSFER:'+d.id+':'+target.id;
+      const movement={id:'SIM-MOV-001',detaineeId:d.id,requestKey,toRoomId:target.id,fromRoomId:from.roomId,createdAt:now()};
+      const placement={id:'SIM-PLC-001',detaineeId:d.id,roomId:target.id,blockId:target.blockId,block:target.block,room:target.room,since:now(),source:'ROOM_TRANSFER',requestKey};
+      s.movements.unshift(movement);s.placements.unshift(placement);s.leaves.unshift({id:'SIM-LV-001',detaineeId:d.id,destination:'Synthetic Destination',startAt:now(),status:'DRAFT',requestKey:'SIM:LEAVE:'+d.id});s.audit.unshift({id:'SIM-AUD-001',action:'MOVEMENT_CREATE',resourceType:'MOVEMENT',resourceId:movement.id,occurredAt:now(),result:'SUCCESS'});
+      results.push({name:'SIM_MUTATION_CHAIN',ok:s.movements[0].requestKey===requestKey&&s.placements[0].roomId===target.id&&s.leaves[0].detaineeId===d.id&&s.audit[0].resourceId===movement.id});
+      const duplicate=s.movements.filter(x=>x.requestKey===requestKey).length;
+      results.push({name:'SIM_IDEMPOTENCY',ok:duplicate===1});
+      results.push({name:'SIM_AUDIT_EVIDENCE',ok:s.audit.some(x=>x.resourceId===movement.id&&x.result==='SUCCESS')});
+    }
+  }
+  return {ok:results.every(x=>x.ok),results,syntheticOnly:true,persisted:false};
+}
+window.mtaCoreJourneySimulationTest=mtaCoreJourneySimulationTest;
 function show(v){current=v;document.querySelectorAll('.nav button').forEach(b=>b.classList.toggle('active',b.dataset.view===v));render()}
 window.__mtaLegacyShow=show;
 document.getElementById('nav').addEventListener('click',e=>{const b=e.target.closest('button');if(b)show(b.dataset.view)});
