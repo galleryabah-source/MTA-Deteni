@@ -66,11 +66,11 @@ function normalizeRuntimeState(x){
   for(const k of ['detainees','placements','movements','leaves','documents','audit'])if(!Array.isArray(state[k]))state[k]=[];
   if(!Array.isArray(state.blocks)||!state.blocks.length)state.blocks=structuredClone(syntheticBlocks);
   if(!Array.isArray(state.rooms)||!state.rooms.length)state.rooms=structuredClone(syntheticRooms);
-  const roomByLabel=new Map(state.rooms.map(r=>[\`\${r.block}|\${r.room}\`,r]));
+  const roomByLabel=new Map(state.rooms.map(r=>[`${r.block}|${r.room}`,r]));
   state.placements=state.placements.map(p=>{
     if(p.roomId)return p;
-    const room=roomByLabel.get(\`\${p.block}|\${p.room}\`);
-    return room?{...p,roomId:room.id,blockId:room.blockId,source:p.source||'MASTER_ROOM',requestKey:p.requestKey||\`PLACEMENT:\${p.detaineeId}:\${room.id}\`}:p;
+    const room=roomByLabel.get(`${p.block}|${p.room}`);
+    return room?{...p,roomId:room.id,blockId:room.blockId,source:p.source||'MASTER_ROOM',requestKey:p.requestKey||`PLACEMENT:${p.detaineeId}:${room.id}`}:p;
   });
   if((Number(state.meta?.version)||0)<3&&!state.detainees.length){
     return structuredClone(seed);
