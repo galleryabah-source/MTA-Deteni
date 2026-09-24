@@ -130,12 +130,11 @@
       document.body.classList.remove('mta-auth-locked');
       gate.classList.remove('open');
       renderHeader(true,event.detail.user);
-      try{
-        const me=await window.mtaProductionApi?.get('me');
-        const box=document.getElementById('mtaAuthUi');
-        const state=box?.querySelector('.pill');
-        if(state&&me?.role)state.textContent=me.role;
-      }catch(_){}
+      // Synthetic runtime is deliberately not coupled to /api/mta/me.
+      // Production API access remains blocked until the governed auth/RBAC adapter is enabled.
+      const box=document.getElementById('mtaAuthUi');
+      const state=box?.querySelector('.pill');
+      if(state)state.textContent=event.detail.user?.email||'Authenticated';
     }else{
       document.body.classList.add('mta-auth-locked');
       gate.classList.add('open');

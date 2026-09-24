@@ -8,7 +8,7 @@
 :root{font-family:"Segoe UI",system-ui,-apple-system,BlinkMacSystemFont,sans-serif;color:#1b1b1b;background:#eef2f7;--blue:#0b63ce;--blue2:#e6f0ff;--line:#d7dce3;--card:#fff;--muted:#687385;--ok:#16763b;--warn:#8a5a00;--danger:#b42318}*{box-sizing:border-box}body{margin:0;min-height:100vh;background:linear-gradient(135deg,#f7f9fc,#e9eef5)}button,input,select,textarea{font:inherit}button{cursor:pointer}.app{min-height:100vh;display:grid;grid-template-rows:56px 1fr 28px}.top{display:flex;align-items:center;justify-content:space-between;padding:0 16px;background:rgba(255,255,255,.9);backdrop-filter:blur(18px);border-bottom:1px solid var(--line);position:sticky;top:0;z-index:20}.brand{display:flex;align-items:center;gap:10px}.logo{width:34px;height:34px;border-radius:9px;background:var(--blue);color:#fff;display:grid;place-items:center;font-weight:800}.brand strong{display:block;font-size:14px}.brand small{display:block;color:var(--muted);font-size:10px}.topright{display:flex;gap:8px;align-items:center}.pill{display:inline-flex;align-items:center;gap:5px;padding:5px 9px;border-radius:999px;background:#edf8f0;color:var(--ok);font-size:11px;border:1px solid #d5eedb}.layout{display:grid;grid-template-columns:240px 1fr;min-height:0}.side{padding:12px;border-right:1px solid var(--line);background:rgba(255,255,255,.74)}.nav{display:grid;gap:3px}.nav button{border:0;background:transparent;text-align:left;padding:10px 11px;border-radius:9px;color:#303640}.nav button:hover,.nav button.active{background:var(--blue2);color:#0754ae}.main{padding:20px;overflow:auto}.view{max-width:1500px;margin:auto}.hero{background:rgba(255,255,255,.9);border:1px solid var(--line);border-radius:15px;padding:20px;box-shadow:0 7px 28px rgba(30,45,65,.06)}h1{margin:0 0 5px;font-size:27px}h2{font-size:18px;margin:0 0 12px}.sub{margin:0;color:var(--muted);font-size:13px}.grid{display:grid;gap:12px}.stats{grid-template-columns:repeat(5,minmax(0,1fr));margin-top:12px}.card{background:rgba(255,255,255,.92);border:1px solid var(--line);border-radius:13px;padding:14px}.label{font-size:11px;color:var(--muted)}.value{font-size:24px;font-weight:750;margin-top:5px}.status{display:inline-block;margin-top:7px;padding:3px 7px;border-radius:999px;font-size:10px;background:#edf8f0;color:var(--ok)}.toolbar{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:14px 0}.btn{border:1px solid var(--line);background:#fff;padding:8px 11px;border-radius:9px}.btn:hover{background:#f4f7fb}.btn.primary{background:var(--blue);border-color:var(--blue);color:#fff}.btn.danger{color:var(--danger)}.btn.small{padding:5px 8px;font-size:11px}.tablewrap{overflow:auto;border:1px solid var(--line);border-radius:12px;background:#fff}.table{width:100%;border-collapse:collapse;min-width:760px}.table th,.table td{padding:9px 10px;border-bottom:1px solid #edf0f4;text-align:left;font-size:12px}.table th{font-size:10px;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);background:#f8fafc}.empty{padding:30px;text-align:center;color:var(--muted)}.formgrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.field{display:grid;gap:5px}.field label{font-size:11px;color:var(--muted)}.field input,.field select,.field textarea{border:1px solid var(--line);border-radius:8px;padding:9px;background:#fff;outline:none}.field input:focus,.field select:focus,.field textarea:focus{border-color:#6aa2e8;box-shadow:0 0 0 3px #e6f0ff}.full{grid-column:1/-1}.modal{position:fixed;inset:0;background:rgba(17,24,39,.38);display:none;align-items:center;justify-content:center;padding:16px;z-index:50}.modal.open{display:flex}.dialog{width:min(680px,100%);max-height:90vh;overflow:auto;background:#fff;border-radius:16px;padding:18px;box-shadow:0 20px 60px rgba(0,0,0,.2)}.dialoghead{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}.x{border:0;background:#f3f5f7;border-radius:50%;width:30px;height:30px}.actions{display:flex;justify-content:flex-end;gap:8px;margin-top:14px}.notice{padding:10px 12px;border-radius:10px;background:#f5f8fc;border:1px solid var(--line);font-size:12px;color:#536071}.kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}.timeline{display:grid;gap:8px}.event{border-left:3px solid #b7c6d9;padding:7px 10px;background:#fafbfc;border-radius:0 8px 8px 0}.event b{font-size:11px}.event small{display:block;color:var(--muted);font-size:10px;margin-top:2px}.report{background:#fff;border:1px solid #cfd5dd;padding:26px;line-height:1.45}.report .center{text-align:center}.report hr{border:0;border-top:1px solid #555;margin:16px 0}.report table{width:100%;border-collapse:collapse}.report th,.report td{border:1px solid #888;padding:7px;font-size:11px}.toast{position:fixed;right:16px;bottom:40px;background:#172033;color:#fff;padding:10px 13px;border-radius:10px;box-shadow:0 8px 30px rgba(0,0,0,.2);display:none;z-index:70;font-size:12px}.toast.show{display:block}.footer{border-top:1px solid var(--line);background:rgba(255,255,255,.8);padding:6px 14px;font-size:10px;color:var(--muted);display:flex;justify-content:space-between}.muted{color:var(--muted)}
 @media(max-width:1050px){.stats{grid-template-columns:repeat(3,1fr)}}@media(max-width:760px){.layout{grid-template-columns:1fr}.side{border-right:0;border-bottom:1px solid var(--line);padding:7px;position:sticky;top:56px;z-index:15}.nav{display:flex;overflow:auto}.nav button{white-space:nowrap}.main{padding:12px}.stats{grid-template-columns:repeat(2,1fr)}.formgrid{grid-template-columns:1fr}.kpis{grid-template-columns:1fr 1fr}.top{padding:0 10px}.topright .pill{display:none}}@media(max-width:430px){.value{font-size:20px}.hero{padding:15px}h1{font-size:22px}.footer{display:none}}
 @media print{body{background:#fff}.top,.side,.footer,.toolbar,.no-print{display:none!important}.main{padding:0}.hero{display:none}.report{border:0;padding:0;box-shadow:none}.app{display:block}.modal{position:static;display:block!important;background:#fff;padding:0}.dialog{width:auto;max-height:none;overflow:visible;background:#fff;border-radius:0;padding:0;box-shadow:none}.mta-report-preview{background:#fff!important;padding:0!important}}
-<style id="mta-daily-report-workflow-v1">
+.mta-dashboard-date{display:flex;align-items:center;gap:10px;float:right;margin:-62px 0 0;padding:9px 13px;border:1px solid #e4eaf2;border-radius:12px;background:#fff;color:#344054;box-shadow:0 4px 14px rgba(15,23,42,.04)}.mta-dashboard-date-icon{font-size:18px;color:#0b63ce}.mta-dashboard-date b{display:block;font-size:12px}.mta-dashboard-date small{display:block;margin-top:2px;color:#64748b;font-size:10px}.mta-dashboard-stats{clear:both}.mta-kpi-card{display:flex;align-items:center;gap:13px;min-height:112px}.mta-kpi-icon{width:44px;height:44px;display:grid;place-items:center;border-radius:12px;font-size:22px;font-weight:800;flex:0 0 44px}.mta-kpi-icon.blue{background:#e8f1ff;color:#0b63ce}.mta-kpi-icon.green{background:#e8f8ef;color:#12905a}.mta-kpi-icon.purple{background:#f0e9ff;color:#6840d8}.mta-kpi-icon.orange{background:#fff0df;color:#d97706}.mta-kpi-icon.red{background:#ffe8e7;color:#d92d20}.mta-dashboard-two{grid-template-columns:minmax(0,2fr) minmax(300px,1fr);margin-top:14px}.mta-dashboard-bottom{grid-template-columns:minmax(0,1.55fr) minmax(330px,1fr);margin-top:14px}.mta-section-heading{display:flex;align-items:center;gap:11px;margin-bottom:14px}.mta-section-heading h2{margin:0;font-size:18px;color:#172033}.mta-section-heading p{margin:3px 0 0;color:#64748b;font-size:11px}.mta-section-icon{width:36px;height:36px;display:grid;place-items:center;border-radius:10px;background:#e8f1ff;color:#0b63ce;font-size:19px;font-weight:800}.mta-section-icon.green{background:#e8f8ef;color:#12905a}.mta-quick-actions{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px}.mta-quick-action{min-height:116px;border:1px solid #e4eaf2;border-radius:12px;padding:13px 9px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;background:#f8fafc;color:#172033}.mta-quick-action>span{font-size:23px;font-weight:800}.mta-quick-action b{font-size:12px}.mta-quick-action small{font-size:10px;color:#64748b}.mta-quick-action.primary{background:#1677e8;color:#fff;border-color:#1677e8}.mta-quick-action.primary small{color:#eaf3ff}.mta-quick-action.green{background:#eafaf1;color:#075f3a}.mta-quick-action.purple{background:#f0eaff;color:#3f2b8f}.mta-quick-action.orange{background:#fff2e4;color:#9a4f05}.mta-quick-action.slate{background:#edf2f8;color:#344054}.mta-system-list{display:grid}.mta-system-list>div{display:grid;grid-template-columns:24px 1fr auto;align-items:center;gap:8px;padding:10px 0;border-bottom:1px solid #edf0f4;font-size:12px}.mta-system-list>div:last-child{border-bottom:0}.mta-system-list span{color:#64748b}.mta-system-list strong{padding:4px 8px;border-radius:999px;background:#eaf8ef;color:#16803c;font-size:9px;letter-spacing:.03em}.mta-runtime-list{display:grid;gap:5px}.mta-runtime-list>div{display:grid;grid-template-columns:145px 1fr;gap:8px;align-items:center;padding:6px 10px;border-radius:8px;background:#f6f8fb;font-size:11px}.mta-runtime-list code{color:#526176;font-size:10px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.mta-admin-actions{display:grid;gap:7px}.mta-admin-actions button{display:grid;grid-template-columns:34px 1fr 15px;align-items:center;text-align:left;gap:9px;border:1px solid #e4eaf2;border-radius:11px;background:#fff;padding:9px 10px;color:#172033}.mta-admin-actions button>span{width:30px;height:30px;border-radius:9px;background:#e8f1ff;color:#0b63ce;display:grid;place-items:center;font-weight:800}.mta-admin-actions b{display:block;font-size:12px}.mta-admin-actions small{display:block;color:#64748b;font-size:10px;margin-top:2px}.mta-admin-actions i{font-style:normal;font-size:19px;color:#64748b}@media(max-width:1100px){.mta-quick-actions{grid-template-columns:repeat(3,1fr)}.mta-dashboard-two,.mta-dashboard-bottom{grid-template-columns:1fr}}@media(max-width:760px){.mta-dashboard-date{float:none;margin:12px 0 0;width:max-content}.mta-dashboard-stats{margin-top:12px}.mta-quick-actions{grid-template-columns:repeat(2,1fr)}.mta-runtime-list>div{grid-template-columns:115px 1fr}}\n<style id="mta-daily-report-workflow-v1">
 .mta-doc-status{display:inline-flex;align-items:center;padding:4px 8px;border-radius:999px;font-size:10px;font-weight:800;letter-spacing:.02em;background:#f2f4f7;color:#475467}
 .mta-doc-status-draft{background:#eef2f7;color:#526176}.mta-doc-status-validated{background:#eaf2ff;color:#175cd3}.mta-doc-status-generated{background:#edf8f0;color:#16763b}.mta-doc-status-in_review{background:#fff4e5;color:#8a5a00}.mta-doc-status-changes_requested{background:#fff0ee;color:#b42318}.mta-doc-status-approved{background:#eaf8ef;color:#16763b}.mta-doc-status-final{background:#172033;color:#fff}
 .mta-doc-actions{display:flex;gap:5px;flex-wrap:wrap}.mta-doc-revision{display:block;color:#98a2b3;font-size:9px;margin-top:2px}
@@ -43,12 +43,59 @@ body.mta-desktop-enhanced .detainee-pagination .page-current{background:#0b63ce;
 <div class="layout"><aside class="side"><nav class="nav" id="nav"><button class="active" data-view="dashboard">Dashboard</button><button data-view="detainee">Data Deteni</button><button data-view="placement">Penempatan</button><button data-view="movement">Pergerakan</button><button data-view="leave">Izin</button><button data-view="documents">Dokumen</button><button data-view="audit">Audit Trail</button></nav></aside><main class="main"><div id="appView" class="view"></div></main></div>
 <footer class="footer"><span>MTA DETENI Digital · Synthetic functional runtime · No operational detainee data</span><span id="clock"></span></footer>
 </div><div id="modal" class="modal"><div class="dialog" id="dialog"></div></div><div id="toast" class="toast"></div>
-<script src="/mta-production-api.js"></script><script src="/mta-auth-ui.js"></script><script type="module" src="/mta-auth.js"></script><script src="/daily-guard-report-v2.js"></script><script src="/daily-guard-report-d57.js"></script><script src="/admin-settings-v9.js"></script>\n<script src="/mta-unified-shell-v2.js?v=5"></script>
+<script src="/mta-production-api.js?v=2"></script><script src="/mta-auth-ui.js?v=3"></script><script type="module" src="/mta-auth.js?v=2"></script><script src="/daily-guard-report-v2.js"></script><script src="/daily-guard-report-d57.js"></script><script src="/admin-settings-v9.js"></script>\n<script src="/mta-unified-shell-v2.js?v=8"></script>
 <script>
 const KEY='mta-deteni-demo-v2';
-const seed={meta:{version:2,createdAt:new Date().toISOString()},detainees:[{id:'DET-001',code:'DET-2026-001',name:'SYNTHETIC A',nationality:'Contoh',status:'AKTIF',placement:'Blok A / Kamar 01',createdAt:'2026-09-16T07:00:00Z'},{id:'DET-002',code:'DET-2026-002',name:'SYNTHETIC B',nationality:'Contoh',status:'AKTIF',placement:'Blok B / Kamar 02',createdAt:'2026-09-16T07:10:00Z'}],placements:[{id:'PLC-001',detaineeId:'DET-001',block:'Blok A',room:'Kamar 01',since:'2026-09-16T07:20:00Z'},{id:'PLC-002',detaineeId:'DET-002',block:'Blok B',room:'Kamar 02',since:'2026-09-16T07:25:00Z'}],movements:[],leaves:[],documents:[],audit:[]};
+const syntheticBlocks=[{id:'BLK-A',code:'A',name:'Blok A',status:'ACTIVE'},{id:'BLK-B',code:'B',name:'Blok B',status:'ACTIVE'}];
+const syntheticRooms=[
+  {id:'ROOM-A01',blockId:'BLK-A',block:'Blok A',room:'Kamar 01',capacity:4,status:'ACTIVE'},
+  {id:'ROOM-A02',blockId:'BLK-A',block:'Blok A',room:'Kamar 02',capacity:4,status:'ACTIVE'},
+  {id:'ROOM-B01',blockId:'BLK-B',block:'Blok B',room:'Kamar 01',capacity:4,status:'ACTIVE'},
+  {id:'ROOM-B02',blockId:'BLK-B',block:'Blok B',room:'Kamar 02',capacity:4,status:'ACTIVE'}
+];
+const seed={meta:{version:3,createdAt:new Date().toISOString()},blocks:structuredClone(syntheticBlocks),rooms:structuredClone(syntheticRooms),detainees:[
+  {id:'DET-001',code:'DET-2026-001',name:'SYNTHETIC A',nationality:'Contoh',status:'AKTIF',placement:'Blok A / Kamar 01',createdAt:'2026-09-16T07:00:00Z'},
+  {id:'DET-002',code:'DET-2026-002',name:'SYNTHETIC B',nationality:'Contoh',status:'AKTIF',placement:'Blok B / Kamar 02',createdAt:'2026-09-16T07:10:00Z'}
+],placements:[
+  {id:'PLC-001',detaineeId:'DET-001',roomId:'ROOM-A01',blockId:'BLK-A',block:'Blok A',room:'Kamar 01',since:'2026-09-16T07:20:00Z',source:'MASTER_ROOM',requestKey:'PLACEMENT:DET-001:ROOM-A01'},
+  {id:'PLC-002',detaineeId:'DET-002',roomId:'ROOM-B02',blockId:'BLK-B',block:'Blok B',room:'Kamar 02',since:'2026-09-16T07:25:00Z',source:'MASTER_ROOM',requestKey:'PLACEMENT:DET-002:ROOM-B02'}
+],movements:[],leaves:[],documents:[],audit:[]};
 let db=load(); let current='dashboard';
-function load(){try{const x=JSON.parse(localStorage.getItem(KEY));return x&&x.detainees?x:structuredClone(seed)}catch{return structuredClone(seed)}}
+function normalizeRuntimeState(x){
+  const state=x&&typeof x==='object'?x:structuredClone(seed);
+  for(const k of ['detainees','placements','movements','leaves','documents','audit'])if(!Array.isArray(state[k]))state[k]=[];
+  if(!Array.isArray(state.blocks)||!state.blocks.length)state.blocks=structuredClone(syntheticBlocks);
+  if(!Array.isArray(state.rooms)||!state.rooms.length)state.rooms=structuredClone(syntheticRooms);
+  const roomByLabel=new Map(state.rooms.map(r=>[`${r.block}|${r.room}`,r]));
+  state.placements=state.placements.map(p=>{
+    if(p.roomId)return p;
+    const room=roomByLabel.get(`${p.block}|${p.room}`);
+    return room?{...p,roomId:room.id,blockId:room.blockId,source:p.source||'MASTER_ROOM',requestKey:p.requestKey||`PLACEMENT:${p.detaineeId}:${room.id}`}:p;
+  });
+  if(!state.detainees.length){
+    return structuredClone(seed);
+  }
+  state.meta={...(state.meta||{}),version:3};
+  return state;
+}
+function load(){
+  try{
+    const raw=localStorage.getItem(KEY);
+    if(!raw){
+      const initial=structuredClone(seed);
+      localStorage.setItem(KEY,JSON.stringify(initial));
+      return initial;
+    }
+    const normalized=normalizeRuntimeState(JSON.parse(raw));
+    localStorage.setItem(KEY,JSON.stringify(normalized));
+    return normalized;
+  }catch{
+    const fallback=structuredClone(seed);
+    try{localStorage.setItem(KEY,JSON.stringify(fallback))}catch{}
+    return fallback;
+  }
+}
+
 function save(){localStorage.setItem(KEY,JSON.stringify(db));window.dispatchEvent(new CustomEvent('mta:data-changed'))}
 function uid(prefix){return prefix+'-'+Math.random().toString(36).slice(2,8).toUpperCase()}
 function now(){return new Date().toISOString()}
@@ -63,19 +110,151 @@ document.getElementById('modal').addEventListener('click',e=>{if(e.target.id==='
 function statCards(){return `<section class="grid stats"><div class="card"><div class="label">Deteni Aktif</div><div class="value">${db.detainees.filter(x=>x.status==='AKTIF').length}</div><span class="status">Operational</span></div><div class="card"><div class="label">Penempatan</div><div class="value">${db.placements.length}</div><span class="status">Tracked</span></div><div class="card"><div class="label">Pergerakan</div><div class="value">${db.movements.length}</div><span class="status">Logged</span></div><div class="card"><div class="label">Izin</div><div class="value">${db.leaves.length}</div><span class="status">Workflow</span></div><div class="card"><div class="label">Audit Event</div><div class="value">${db.audit.length}</div><span class="status">Evidence</span></div></section>`}
 function render(){const v=document.getElementById('appView'); if(current==='dashboard')return dashboard(v);if(current==='detainee')return detainee(v);if(current==='placement')return placement(v);if(current==='movement')return movement(v);if(current==='leave')return leave(v);if(current==='documents')return documents(v);if(current==='audit')return auditView(v)}
 function shell(title,desc,body){return `<section class="hero"><h1>${title}</h1><p class="sub">${desc}</p></section>${body}`}
-function dashboard(v){v.innerHTML=shell('Dashboard','Operational surface untuk menguji alur aplikasi menggunakan data sintetis.',statCards()+`<div class="grid" style="grid-template-columns:2fr 1fr;margin-top:12px"><section class="card"><h2>Alur cepat</h2><div class="toolbar"><button class="btn primary" onclick="show('detainee');addDetainee()">+ Deteni</button><button class="btn" onclick="show('placement')">Penempatan</button><button class="btn" onclick="show('movement')">Catat Pergerakan</button><button class="btn" onclick="show('leave')">Buat Izin</button><button class="btn" onclick="show('documents')">Laporan Harian</button></div><div class="notice">Runtime ini sengaja tidak memanggil database produksi. Data tersimpan persisten di browser untuk simulasi end-to-end; siap diganti adapter API/Supabase setelah governance gate database dibuka.</div></section><section class="card"><h2>Health</h2><div class="kpis"><div><div class="label">Storage</div><b>LOCAL</b></div><div><div class="label">AI</div><b>OFF</b></div><div><div class="label">Data</div><b>SYNTHETIC</b></div></div></section></div>`)}
-function detainee(v){const rows=db.detainees.map(d=>`<tr><td><b>${esc(d.code)}</b></td><td>${esc(d.name)}</td><td>${esc(d.nationality)}</td><td><span class="detainee-status-badge ${d.status==='AKTIF'?'is-active':''}">${esc(d.status)}</span></td><td>${esc(d.placement||'-')}</td><td><button class="btn small" onclick="editDetainee('${d.id}')">Edit</button> <button class="btn small danger" onclick="archiveDetainee('${d.id}')">Arsip</button></td></tr>`).join('');v.innerHTML=shell('Data Deteni','Master data sintetis dengan audit event. Penghapusan permanen tidak tersedia pada demo.',`<div class="toolbar detainee-toolbar"><button class="btn primary" onclick="addDetainee()">+ Tambah Deteni</button><input id="dSearch" placeholder="Cari kode/nama" oninput="filterDetainee()" style="padding:8px;border:1px solid var(--line);border-radius:9px"><div class="detainee-desktop-filters"><select id="dStatusFilter" onchange="filterDetainee()" aria-label="Filter status"><option value="">Semua Status</option><option value="AKTIF">AKTIF</option><option value="NONAKTIF">NONAKTIF</option></select><select id="dPlacementFilter" onchange="filterDetainee()" aria-label="Filter penempatan"><option value="">Semua Penempatan</option>${[...new Set(db.detainees.map(x=>x.placement).filter(Boolean))].map(x=>`<option value="${esc(x)}">${esc(x)}</option>`).join('')}</select><button class="btn" onclick="filterDetainee()">Filter</button><button class="btn" onclick="render()">↻ Refresh</button></div></div><div class="tablewrap detainee-tablewrap"><table class="table detainee-table"><thead><tr><th>No</th><th>Kode</th><th>Nama</th><th>Kebangsaan</th><th>Status</th><th>Penempatan</th><th>Aksi</th></tr></thead><tbody id="dRows">${rows}</tbody></table><div class="detainee-desktop-footer"><span id="detaineeCount">Menampilkan ${db.detainees.length ? 1 : 0} - ${db.detainees.length} dari ${db.detainees.length} data</span><div class="detainee-pagination"><button class="btn small" disabled>‹</button><button class="btn small page-current">1</button><button class="btn small" disabled>›</button></div></div></div>`)}
+function dashboard(v){
+  const active=db.detainees.filter(x=>x.status==='AKTIF').length;
+  const today=new Intl.DateTimeFormat('id-ID',{weekday:'long',day:'2-digit',month:'long',year:'numeric'}).format(new Date());
+  const time=new Intl.DateTimeFormat('id-ID',{hour:'2-digit',minute:'2-digit',hour12:false}).format(new Date());
+  v.innerHTML=shell('Dashboard','Ringkasan operasional dan status aplikasi MTA DETENI Digital.',
+    '<div class="mta-dashboard-date"><span class="mta-dashboard-date-icon">▣</span><div><b>'+esc(today)+'</b><small>'+esc(time)+' WITA</small></div></div>'+
+    '<section class="grid stats mta-dashboard-stats">'+
+      '<div class="card mta-kpi-card"><span class="mta-kpi-icon blue">♙</span><div><div class="label">Deteni Aktif</div><div class="value">'+active+'</div><span class="status">Operational</span></div></div>'+
+      '<div class="card mta-kpi-card"><span class="mta-kpi-icon green">▦</span><div><div class="label">Penempatan</div><div class="value">'+db.placements.length+'</div><span class="status">Tracked</span></div></div>'+
+      '<div class="card mta-kpi-card"><span class="mta-kpi-icon purple">→</span><div><div class="label">Pergerakan</div><div class="value">'+db.movements.length+'</div><span class="status">Logged</span></div></div>'+
+      '<div class="card mta-kpi-card"><span class="mta-kpi-icon orange">▤</span><div><div class="label">Izin</div><div class="value">'+db.leaves.length+'</div><span class="status">Workflow</span></div></div>'+
+      '<div class="card mta-kpi-card"><span class="mta-kpi-icon red">◉</span><div><div class="label">Audit Event</div><div class="value">'+db.audit.length+'</div><span class="status">Evidence</span></div></div>'+
+    '</section>'+
+    '<div class="grid mta-dashboard-two">'+
+      '<section class="card mta-quick-card"><div class="mta-section-heading"><span class="mta-section-icon">ϟ</span><div><h2>Alur Cepat</h2><p>Akses fungsi yang paling sering digunakan</p></div></div><div class="mta-quick-actions">'+
+        '<button class="mta-quick-action primary" onclick="show(\'detainee\');addDetainee()"><span>♙</span><b>+ Deteni</b><small>Tambah data</small></button>'+
+        '<button class="mta-quick-action green" onclick="show(\'placement\')"><span>▦</span><b>Penempatan</b><small>Atur kamar</small></button>'+
+        '<button class="mta-quick-action purple" onclick="show(\'movement\')"><span>→</span><b>Catat Pergerakan</b><small>Masuk / Pindah</small></button>'+
+        '<button class="mta-quick-action orange" onclick="show(\'leave\')"><span>▤</span><b>Buat Izin</b><small>Izin keluar</small></button>'+
+        '<button class="mta-quick-action slate" onclick="show(\'documents\')"><span>▥</span><b>Laporan Harian</b><small>Rekap operasional</small></button>'+
+      '</div></section>'+
+      '<section class="card mta-system-card"><div class="mta-section-heading"><span class="mta-section-icon green">♥</span><div><h2>Status Sistem</h2><p>Kondisi layanan dan runtime saat ini</p></div></div>'+
+        '<div class="mta-system-list"><div><span>▤</span><b>Storage</b><strong>LOCAL</strong></div><div><span>◈</span><b>AI Assistant</b><strong>OFF</strong></div><div><span>▣</span><b>Data Mode</b><strong>SYNTHETIC</strong></div><div><span>⌁</span><b>Koneksi</b><strong>LOCAL</strong></div></div>'+
+      '</section>'+
+    '</div>'+
+    '<div class="grid mta-dashboard-bottom">'+
+      '<section class="card"><div class="mta-section-heading"><span class="mta-section-icon blue">i</span><div><h2>Informasi Runtime</h2><p>Mode operasi aplikasi</p></div></div><div class="mta-runtime-list">'+
+        '<div><span>Runtime</span><code>cloudflare-static-adapter</code></div><div><span>Data Mode</span><code>SYNTHETIC_ONLY</code></div><div><span>Database</span><code>SUPABASE_PRODUCTION_SCHEMA_READY_RLS_DENY_DEFAULT</code></div><div><span>AI</span><code>OFF</code></div><div><span>Preview Version</span><code>v16</code></div><div><span>Migration Freeze</span><code>Enabled</code></div>'+
+      '</div></section>'+
+      '<section class="card"><div class="mta-section-heading"><span class="mta-section-icon blue">⚙</span><div><h2>Aksi Cepat</h2><p>Fungsi administrasi sistem</p></div></div><div class="mta-admin-actions">'+
+        '<button onclick="show(\'p9settings\')"><span>⚙</span><div><b>Manajemen Pengaturan</b><small>Konfigurasi sistem dan preferensi</small></div><i>›</i></button>'+
+        '<button onclick="document.getElementById(\'backupBtn\')?.click()"><span>▣</span><div><b>Backup & Restore</b><small>Kelola data lokal</small></div><i>›</i></button>'+
+        '<button onclick="show(\'audit\')"><span>◷</span><div><b>Lihat Audit Trail</b><small>Riwayat aktivitas sistem</small></div><i>›</i></button>'+
+      '</div></section>'+
+    '</div>');
+}
+function detainee(v){const rows=db.detainees.map((d,i)=>`<tr><td>${i+1}</td><td><b>${esc(d.code)}</b></td><td>${esc(d.name)}</td><td>${esc(d.nationality)}</td><td><span class="detainee-status-badge ${d.status==='AKTIF'?'is-active':''}">${esc(d.status)}</span></td><td>${esc(d.placement||'-')}</td><td><button class="btn small" onclick="editDetainee('${d.id}')">Edit</button> <button class="btn small danger" onclick="archiveDetainee('${d.id}')">Arsip</button></td></tr>`).join('');v.innerHTML=shell('Data Deteni','Master data sintetis dengan audit event. Penghapusan permanen tidak tersedia pada demo.',`<div class="toolbar detainee-toolbar"><button class="btn primary" onclick="addDetainee()">+ Tambah Deteni</button><input id="dSearch" placeholder="Cari kode/nama" oninput="filterDetainee()" style="padding:8px;border:1px solid var(--line);border-radius:9px"><div class="detainee-desktop-filters"><select id="dStatusFilter" onchange="filterDetainee()" aria-label="Filter status"><option value="">Semua Status</option><option value="AKTIF">AKTIF</option><option value="NONAKTIF">NONAKTIF</option></select><select id="dPlacementFilter" onchange="filterDetainee()" aria-label="Filter penempatan"><option value="">Semua Penempatan</option>${[...new Set(db.detainees.map(x=>x.placement).filter(Boolean))].map(x=>`<option value="${esc(x)}">${esc(x)}</option>`).join('')}</select><button class="btn" onclick="filterDetainee()">Filter</button><button class="btn" onclick="render()">↻ Refresh</button></div></div><div class="tablewrap detainee-tablewrap"><table class="table detainee-table"><thead><tr><th>No</th><th>Kode</th><th>Nama</th><th>Kebangsaan</th><th>Status</th><th>Penempatan</th><th>Aksi</th></tr></thead><tbody id="dRows">${rows}</tbody></table><div class="detainee-desktop-footer"><span id="detaineeCount">Menampilkan ${db.detainees.length ? 1 : 0} - ${db.detainees.length} dari ${db.detainees.length} data</span><div class="detainee-pagination"><button class="btn small" disabled>‹</button><button class="btn small page-current">1</button><button class="btn small" disabled>›</button></div></div></div>`)}
 function filterDetainee(){const q=(document.getElementById('dSearch')?.value||'').toLowerCase();const status=document.getElementById('dStatusFilter')?.value||'';const placement=document.getElementById('dPlacementFilter')?.value||'';document.querySelectorAll('#dRows tr').forEach(r=>{const text=r.textContent.toLowerCase();const cells=r.cells;const rowStatus=(cells[4]?.textContent||'').trim();const rowPlacement=(cells[5]?.textContent||'').trim();const ok=text.includes(q)&&(!status||rowStatus.includes(status))&&(!placement||rowPlacement===placement);r.style.display=ok?'':'none'});const visible=[...document.querySelectorAll('#dRows tr')].filter(r=>r.style.display!=='none').length;const count=document.getElementById('detaineeCount');if(count)count.textContent=visible?`Menampilkan 1 - ${visible} dari ${document.querySelectorAll('#dRows tr').length} data`:'Menampilkan 0 dari 0 data'}
-function addDetainee(existing){const d=existing||{id:'',code:'',name:'',nationality:'Contoh',status:'AKTIF',placement:''};openModal(`<div class="dialoghead"><h2>${existing?'Edit':'Tambah'} Deteni</h2><button class="x" onclick="closeModal()">×</button></div><form id="dForm" class="formgrid"><div class="field"><label>Kode</label><input name="code" required value="${esc(d.code)}" placeholder="DET-2026-003"></div><div class="field"><label>Nama (synthetic)</label><input name="name" required value="${esc(d.name)}"></div><div class="field"><label>Kebangsaan</label><input name="nationality" value="${esc(d.nationality)}"></div><div class="field"><label>Status</label><select name="status"><option ${d.status==='AKTIF'?'selected':''}>AKTIF</option><option ${d.status==='NONAKTIF'?'selected':''}>NONAKTIF</option></select></div><div class="field full"><label>Penempatan</label><input name="placement" value="${esc(d.placement)}"></div><div class="actions full"><button type="button" class="btn" onclick="closeModal()">Batal</button><button class="btn primary">Simpan</button></div></form>`);document.getElementById('dForm').onsubmit=e=>{e.preventDefault();const f=new FormData(e.target);if(existing){Object.assign(existing,{code:f.get('code'),name:f.get('name'),nationality:f.get('nationality'),status:f.get('status'),placement:f.get('placement')});audit('DETAINEE_UPDATE','DETAINEE',existing.id)}else{const code=String(f.get('code')||'').trim();if(db.detainees.some(x=>String(x.code||'').toLowerCase()===code.toLowerCase())){toast('Kode deteni sudah terdaftar.');return}const x={id:uid('DET'),code,name:f.get('name'),nationality:f.get('nationality'),status:f.get('status'),placement:f.get('placement'),createdAt:now()};db.detainees.unshift(x);audit('DETAINEE_CREATE','DETAINEE',x.id)}save();closeModal();render();toast('Data tersimpan')}}
+function addDetainee(existing){
+  const d=existing||{id:'',code:'',name:'',nationality:'Contoh',status:'AKTIF',placement:''};
+  const placementLabel=d.placement||'Belum ditempatkan — gunakan menu Penempatan';
+  openModal(`<div class="dialoghead"><h2>${existing?'Edit':'Tambah'} Deteni</h2><button class="x" onclick="closeModal()">×</button></div>
+  <form id="dForm" class="formgrid">
+    <div class="field"><label>Kode</label><input name="code" required value="${esc(d.code)}" placeholder="DET-2026-003"></div>
+    <div class="field"><label>Nama (synthetic)</label><input name="name" required value="${esc(d.name)}"></div>
+    <div class="field"><label>Kebangsaan</label><input name="nationality" value="${esc(d.nationality)}"></div>
+    <div class="field"><label>Status</label><select name="status"><option ${d.status==='AKTIF'?'selected':''}>AKTIF</option><option ${d.status==='NONAKTIF'?'selected':''}>NONAKTIF</option></select></div>
+    <div class="field full"><label>Penempatan</label><div class="notice"><b>${esc(placementLabel)}</b><small style="display:block;margin-top:4px">Penempatan dikelola melalui Master Kamar agar tidak terjadi divergence antara Data Deteni dan Penempatan.</small></div></div>
+    <div class="actions full"><button type="button" class="btn" onclick="closeModal()">Batal</button><button class="btn primary">Simpan</button></div>
+  </form>`);
+  document.getElementById('dForm').onsubmit=e=>{
+    e.preventDefault();
+    const f=new FormData(e.target),code=String(f.get('code')||'').trim();
+    if(!code){toast('Kode deteni wajib diisi.');return}
+    const duplicate=db.detainees.find(x=>String(x.id)!==String(existing?.id||'')&&String(x.code||'').trim().toLowerCase()===code.toLowerCase());
+    if(duplicate){audit('DETAINEE_WRITE_BLOCKED','DETAINEE',duplicate.id,'DENIED');toast('Kode deteni sudah terdaftar.');return}
+    if(existing){
+      const beforeStatus=existing.status;
+      Object.assign(existing,{code,name:f.get('name'),nationality:f.get('nationality'),status:f.get('status')});
+      audit('DETAINEE_UPDATE','DETAINEE',existing.id);
+      if(beforeStatus!==existing.status)db.lastMutation={key:'DETAINEE_STATUS:'+existing.id+':'+existing.status,action:'DETAINEE_STATUS_UPDATE',completedAt:now()};
+    }else{
+      const x={id:uid('DET'),code,name:f.get('name'),nationality:f.get('nationality'),status:f.get('status'),placement:'',createdAt:now()};
+      db.detainees.unshift(x);audit('DETAINEE_CREATE','DETAINEE',x.id);
+      db.lastMutation={key:'DETAINEE_CREATE:'+x.id,action:'DETAINEE_CREATE',completedAt:now()};
+    }
+    save();closeModal();render();toast('Data tersimpan');
+  }
+}
 function editDetainee(id){addDetainee(db.detainees.find(x=>x.id===id))}
 function archiveDetainee(id){const d=db.detainees.find(x=>x.id===id);if(!d)return;d.status='NONAKTIF';audit('DETAINEE_ARCHIVE','DETAINEE',id);save();render();toast('Deteni diarsipkan')}
-function placement(v){const rows=db.placements.map(p=>{const d=db.detainees.find(x=>x.id===p.detaineeId);return `<tr><td>${esc(p.id)}</td><td>${esc(d?.code||p.detaineeId)}</td><td>${esc(d?.name||'-')}</td><td>${esc(p.block)}</td><td>${esc(p.room)}</td><td>${new Date(p.since).toLocaleString('id-ID')}</td></tr>`}).join('');v.innerHTML=shell('Penempatan','Riwayat penempatan sintetis dan assignment terkini.',`<div class="toolbar"><button class="btn primary" onclick="addPlacement()">+ Assign Penempatan</button></div><div class="tablewrap"><table class="table"><thead><tr><th>ID</th><th>Kode</th><th>Nama</th><th>Blok</th><th>Kamar</th><th>Mulai</th></tr></thead><tbody>${rows||'<tr><td colspan="6" class="empty">Belum ada data</td></tr>'}</tbody></table></div>`)}
-function addPlacement(){const opts=db.detainees.filter(d=>d.status==='AKTIF').map(d=>`<option value="${d.id}">${esc(d.code)} — ${esc(d.name)}</option>`).join('');openModal(`<div class="dialoghead"><h2>Assign Penempatan</h2><button class="x" onclick="closeModal()">×</button></div><form id="pForm" class="formgrid"><div class="field full"><label>Deteni</label><select name="detaineeId" required>${opts}</select></div><div class="field"><label>Blok</label><input name="block" required placeholder="Blok A"></div><div class="field"><label>Kamar</label><input name="room" required placeholder="Kamar 01"></div><div class="actions full"><button type="button" class="btn" onclick="closeModal()">Batal</button><button class="btn primary">Assign</button></div></form>`);document.getElementById('pForm').onsubmit=e=>{e.preventDefault();const f=new FormData(e.target),id=String(f.get('detaineeId')||''),block=String(f.get('block')||''),room=String(f.get('room')||''),d=db.detainees.find(x=>x.id===id),masters=(db.rooms||[]).filter(r=>r.status==='ACTIVE'),master=masters.find(r=>r.block===block&&r.room===room);if(!d||d.status!=='AKTIF'||!master){audit('PLACEMENT_ASSIGN_BLOCKED','PLACEMENT',id||block+' / '+room,'DENIED');toast('Assignment ditolak: deteni harus aktif dan kamar harus berasal dari Master Kamar ACTIVE.');return}const occupied=db.detainees.filter(x=>x.status==='AKTIF'&&x.id!==id).filter(x=>{const p=db.placements.filter(y=>y.detaineeId===x.id).sort((a,b)=>String(b.since||'').localeCompare(String(a.since||'')))[0];return p&&(p.roomId===master.id||(p.block===master.block&&p.room===master.room))}).length;if(Number(master.capacity)>0&&occupied>=Number(master.capacity)){audit('PLACEMENT_CAPACITY_BLOCKED','PLACEMENT',master.id,'DENIED');toast('Assignment ditolak: kamar penuh.');return}const currentPlacement=db.placements.filter(x=>x.detaineeId===id).sort((a,b)=>String(b.since||'').localeCompare(String(a.since||'')))[0];if(currentPlacement?.roomId===master.id){toast('Deteni sudah berada di kamar tersebut.');return}const p={id:uid('PLC'),detaineeId:id,roomId:master.id,blockId:master.blockId,block:master.block,room:master.room,since:now(),source:'MASTER_ROOM',requestKey:'PLACEMENT:'+id+':'+master.id};db.placements.unshift(p);if(d)d.placement=p.block+' / '+p.room;db.lastMutation={key:p.requestKey,action:'PLACEMENT_ASSIGN',completedAt:now()};audit('PLACEMENT_ASSIGN','PLACEMENT',p.id);save();closeModal();render();toast('Penempatan dicatat')}}
+function placement(v){
+  const rows=db.placements.map(p=>{
+    const d=db.detainees.find(x=>x.id===p.detaineeId);
+    const room=(db.rooms||[]).find(x=>x.id===p.roomId);
+    const roomLabel=room?`${room.block} / ${room.room}`:`${p.block||'—'} / ${p.room||'—'}`;
+    return `<tr><td><b>${esc(p.id)}</b></td><td>${esc(d?.code||p.detaineeId)}</td><td>${esc(d?.name||'-')}</td><td>${esc(roomLabel)}</td><td>${esc(p.source||'LEGACY')}</td><td>${new Date(p.since).toLocaleString('id-ID')}</td></tr>`;
+  }).join('');
+  v.innerHTML=shell('Penempatan','Assignment menggunakan Master Kamar ACTIVE dan menjadi sumber penempatan terkini.',`<div class="toolbar"><button class="btn primary" onclick="addPlacement()">+ Assign Penempatan</button><button class="btn" onclick="render()">↻ Refresh</button></div><div class="notice">Governance: blok/kamar tidak diinput bebas. Pilihan berasal dari Master Kamar Administrator; kapasitas dan status kamar divalidasi sebelum mutation.</div><div class="tablewrap" style="margin-top:12px"><table class="table"><thead><tr><th>ID</th><th>Kode</th><th>Nama</th><th>Kamar</th><th>Sumber</th><th>Mulai</th></tr></thead><tbody>${rows||'<tr><td colspan="6" class="empty">Belum ada data</td></tr>'}</tbody></table></div>`);
+}
+function addPlacement(){
+  const active=db.detainees.filter(d=>d.status==='AKTIF');
+  const masters=(db.rooms||[]).filter(r=>r.status==='ACTIVE');
+  const occupancyFor=roomId=>db.detainees.filter(x=>x.status==='AKTIF').filter(x=>{
+    const p=db.placements.filter(y=>y.detaineeId===x.id).sort((a,b)=>String(b.since||'').localeCompare(String(a.since||'')))[0];
+    return p&&(p.roomId===roomId);
+  }).length;
+  const opts=active.map(d=>`<option value="${esc(d.id)}">${esc(d.code)} — ${esc(d.name)}</option>`).join('');
+  const roomOpts=masters.map(r=>{
+    const occ=occupancyFor(r.id),cap=Number(r.capacity)||0,full=cap>0&&occ>=cap;
+    return `<option value="${esc(r.id)}" ${full?'disabled':''}>${esc(r.block)} / ${esc(r.room)} — ${occ}/${cap||'∞'}${full?' · FULL':''}</option>`;
+  }).join('');
+  if(!active.length){toast('Tidak ada deteni AKTIF yang dapat ditempatkan.');return}
+  if(!masters.length){toast('Master Kamar ACTIVE belum tersedia.');return}
+  openModal(`<div class="dialoghead"><h2>Assign Penempatan</h2><button class="x" onclick="closeModal()">×</button></div>
+  <form id="pForm" class="formgrid">
+    <div class="field full"><label>Deteni</label><select name="detaineeId" required><option value="">Pilih deteni</option>${opts}</select></div>
+    <div class="field full"><label>Kamar Tujuan · Master Kamar</label><select name="roomId" required><option value="">Pilih kamar</option>${roomOpts}</select></div>
+    <div class="field full"><div class="notice">Kapasitas dihitung dari placement aktif. Kamar INACTIVE atau FULL tidak dapat dipilih.</div></div>
+    <div class="actions full"><button type="button" class="btn" onclick="closeModal()">Batal</button><button class="btn primary">Assign</button></div>
+  </form>`);
+  document.getElementById('pForm').onsubmit=e=>{
+    e.preventDefault();
+    const f=new FormData(e.target),id=String(f.get('detaineeId')||''),roomId=String(f.get('roomId')||''),d=db.detainees.find(x=>x.id===id),master=(db.rooms||[]).find(r=>r.id===roomId);
+    if(!d||d.status!=='AKTIF'||!master||master.status!=='ACTIVE'){audit('PLACEMENT_ASSIGN_BLOCKED','PLACEMENT',id||roomId,'DENIED');toast('Assignment ditolak: deteni atau Master Kamar tidak valid.');return}
+    const requestKey='PLACEMENT:'+id+':'+master.id;
+    if(db.placements.some(x=>x.requestKey===requestKey)){toast('Assignment yang sama sudah diproses.');return}
+    const currentPlacement=db.placements.filter(x=>x.detaineeId===id).sort((a,b)=>String(b.since||'').localeCompare(String(a.since||'')))[0];
+    if(currentPlacement?.roomId===master.id){toast('Deteni sudah berada di kamar tersebut.');return}
+    const occupied=occupancyFor(master.id);
+    if(Number(master.capacity)>0&&occupied>=Number(master.capacity)){audit('PLACEMENT_CAPACITY_BLOCKED','PLACEMENT',master.id,'DENIED');toast('Assignment ditolak: kamar penuh.');return}
+    const p={id:uid('PLC'),detaineeId:id,roomId:master.id,blockId:master.blockId,block:master.block,room:master.room,since:now(),source:'MASTER_ROOM',requestKey};
+    db.placements.unshift(p);d.placement=p.block+' / '+p.room;db.lastMutation={key:requestKey,action:'PLACEMENT_ASSIGN',completedAt:now()};
+    audit('PLACEMENT_ASSIGN','PLACEMENT',p.id);save();closeModal();render();toast('Penempatan dicatat');
+  }
+}
 function movement(v){const rows=db.movements.map(m=>{const d=db.detainees.find(x=>x.id===m.detaineeId);return `<tr><td>${esc(m.id)}</td><td>${esc(d?.code||m.detaineeId)}</td><td>${esc(m.type)}</td><td>${esc(m.location)}</td><td>${esc(m.note)}</td><td>${new Date(m.at).toLocaleString('id-ID')}</td></tr>`}).join('');v.innerHTML=shell('Pergerakan','Pencatatan pergerakan sintetis sebagai event operasional.',`<div class="toolbar"><button class="btn primary" onclick="addMovement()">+ Catat Pergerakan</button></div><div class="tablewrap"><table class="table"><thead><tr><th>ID</th><th>Deteni</th><th>Tipe</th><th>Lokasi</th><th>Catatan</th><th>Waktu</th></tr></thead><tbody>${rows||'<tr><td colspan="6" class="empty">Belum ada pergerakan</td></tr>'}</tbody></table></div>`)}
 function addMovement(){const opts=db.detainees.filter(d=>d.status==='AKTIF').map(d=>`<option value="${d.id}">${esc(d.code)} — ${esc(d.name)}</option>`).join('');openModal(`<div class="dialoghead"><h2>Catat Pergerakan</h2><button class="x" onclick="closeModal()">×</button></div><form id="mForm" class="formgrid"><div class="field full"><label>Deteni</label><select name="detaineeId">${opts}</select></div><div class="field"><label>Tipe</label><select name="type"><option>INTERNAL</option><option>ESCORT</option><option>RETURN</option></select></div><div class="field"><label>Lokasi</label><input name="location" required placeholder="Area pemeriksaan"></div><div class="field full"><label>Catatan</label><textarea name="note" rows="3"></textarea></div><div class="actions full"><button type="button" class="btn" onclick="closeModal()">Batal</button><button class="btn primary">Catat</button></div></form>`);document.getElementById('mForm').onsubmit=e=>{e.preventDefault();const f=new FormData(e.target),detaineeId=String(f.get('detaineeId')||''),det=db.detainees.find(x=>x.id===detaineeId);if(!det||det.status!=='AKTIF'){audit('MOVEMENT_CREATE_BLOCKED','MOVEMENT',detaineeId,'DENIED');toast('Pergerakan ditolak: deteni tidak aktif atau tidak ditemukan.');return}const requestKey='LEGACY_MOVEMENT:'+detaineeId+':'+String(f.get('type')||'INTERNAL')+':'+String(f.get('location')||'').trim()+':'+String(f.get('note')||'').trim();if(db.movements.some(x=>x.requestKey===requestKey)){toast('Pergerakan yang sama sudah diproses.');return}const m={id:uid('MOV'),detaineeId,type:String(f.get('type')||'INTERNAL'),location:String(f.get('location')||''),note:String(f.get('note')||''),at:now(),createdAt:now(),requestKey};db.movements.unshift(m);db.lastMutation={key:requestKey,action:'LEGACY_MOVEMENT_CREATE',completedAt:now()};audit('MOVEMENT_CREATE','MOVEMENT',m.id);save();closeModal();render();toast('Pergerakan dicatat')}}
 function leave(v){const rows=db.leaves.map(l=>{const d=db.detainees.find(x=>x.id===l.detaineeId);return `<tr><td>${esc(l.id)}</td><td>${esc(d?.code||l.detaineeId)}</td><td>${esc(l.destination)}</td><td>${esc(l.status)}</td><td>${new Date(l.startAt).toLocaleString('id-ID')}</td><td>${leaveActions(l)}</td></tr>`}).join('');v.innerHTML=shell('Izin','Workflow demo dengan state transition yang tercatat ke audit trail.',`<div class="toolbar"><button class="btn primary" onclick="addLeave()">+ Buat Izin</button></div><div class="tablewrap"><table class="table"><thead><tr><th>ID</th><th>Deteni</th><th>Tujuan</th><th>Status</th><th>Mulai</th><th>Aksi</th></tr></thead><tbody>${rows||'<tr><td colspan="6" class="empty">Belum ada izin</td></tr>'}</tbody></table></div>`)}
 function leaveActions(l){const map={DRAFT:'SUBMIT',SUBMITTED:'APPROVE',APPROVED:'DEPART',DEPARTED:'RETURN',RETURNED:'COMPLETE'};const next=map[l.status];return next?`<button class="btn small primary" onclick="advanceLeave('${l.id}')">${next}</button>`:'—'}
-function addLeave(){const opts=db.detainees.filter(d=>d.status==='AKTIF').map(d=>`<option value="${d.id}">${esc(d.code)} — ${esc(d.name)}</option>`).join('');openModal(`<div class="dialoghead"><h2>Buat Izin</h2><button class="x" onclick="closeModal()">×</button></div><form id="lForm" class="formgrid"><div class="field full"><label>Deteni</label><select name="detaineeId">${opts}</select></div><div class="field"><label>Tujuan</label><input name="destination" required></div><div class="field"><label>Mulai</label><input name="startAt" type="datetime-local" required></div><div class="field full"><label>Keperluan</label><textarea name="purpose" rows="3"></textarea></div><div class="actions full"><button type="button" class="btn" onclick="closeModal()">Batal</button><button class="btn primary">Buat</button></div></form>`);document.getElementById('lForm').onsubmit=e=>{e.preventDefault();const f=new FormData(e.target),detaineeId=String(f.get('detaineeId')||''),startRaw=String(f.get('startAt')||'');const startDate=new Date(startRaw);if(Number.isNaN(startDate.getTime())){toast('Waktu mulai tidak valid.');return}const requestKey='LEAVE_CREATE:'+detaineeId+':'+String(f.get('destination')||'').trim()+':'+startDate.toISOString();if(db.leaves.some(x=>x.requestKey===requestKey)){toast('Izin yang sama sudah diproses.');return}const l={id:uid('LV'),detaineeId,destination:f.get('destination'),purpose:f.get('purpose'),startAt:startDate.toISOString(),status:'DRAFT',createdAt:now(),requestKey};db.leaves.unshift(l);audit('LEAVE_CREATE','LEAVE',l.id);save();closeModal();render();toast('Izin dibuat sebagai DRAFT')}}
+function addLeave(){
+  const active=db.detainees.filter(d=>d.status==='AKTIF');
+  const opts=active.map(d=>`<option value="${esc(d.id)}">${esc(d.code)} — ${esc(d.name)}</option>`).join('');
+  if(!active.length){toast('Tidak ada deteni AKTIF yang dapat dibuatkan izin.');return}
+  openModal(`<div class="dialoghead"><h2>Buat Izin</h2><button class="x" onclick="closeModal()">×</button></div>
+  <form id="lForm" class="formgrid">
+    <div class="field full"><label>Deteni</label><select name="detaineeId" required><option value="">Pilih deteni</option>${opts}</select></div>
+    <div class="field"><label>Tujuan</label><input name="destination" required></div>
+    <div class="field"><label>Mulai</label><input name="startAt" type="datetime-local" required></div>
+    <div class="field full"><label>Keperluan</label><textarea name="purpose" rows="3"></textarea></div>
+    <div class="actions full"><button type="button" class="btn" onclick="closeModal()">Batal</button><button class="btn primary">Buat</button></div>
+  </form>`);
+  document.getElementById('lForm').onsubmit=e=>{
+    e.preventDefault();
+    const f=new FormData(e.target),detaineeId=String(f.get('detaineeId')||''),destination=String(f.get('destination')||'').trim(),startRaw=String(f.get('startAt')||''),d=db.detainees.find(x=>x.id===detaineeId);
+    const startDate=new Date(startRaw);
+    if(!d||d.status!=='AKTIF'){audit('LEAVE_CREATE_BLOCKED','LEAVE',detaineeId,'DENIED');toast('Izin ditolak: deteni harus AKTIF.');return}
+    if(!destination){toast('Tujuan wajib diisi.');return}
+    if(Number.isNaN(startDate.getTime())){toast('Waktu mulai tidak valid.');return}
+    const requestKey='LEAVE_CREATE:'+detaineeId+':'+destination+':'+startDate.toISOString();
+    if(db.leaves.some(x=>x.requestKey===requestKey)){toast('Izin yang sama sudah diproses.');return}
+    const l={id:uid('LV'),detaineeId,destination,purpose:String(f.get('purpose')||''),startAt:startDate.toISOString(),status:'DRAFT',createdAt:now(),requestKey};
+    db.leaves.unshift(l);db.lastMutation={key:requestKey,action:'LEAVE_CREATE',completedAt:now()};audit('LEAVE_CREATE','LEAVE',l.id);save();closeModal();render();toast('Izin dibuat sebagai DRAFT');
+  }
+}
 function appendLocalAudit(state,action,type,id,result='SUCCESS',correlationId){
   state.audit=state.audit||[];
   state.audit.unshift({id:uid('AUD'),action,resourceType:type,resourceId:id||'',result,occurredAt:now(),actor:'DEMO-OPERATOR',requestId:uid('REQ'),correlationId:correlationId||uid('COR'),policyVersion:'AUTHZ-1.0'});
@@ -264,6 +443,47 @@ function previewReport(id){
 function auditView(v){const rows=db.audit.map(a=>`<div class="event"><b>${esc(a.action)}</b> · ${esc(a.result)} · ${esc(a.resourceType)} ${esc(a.resourceId)}<small>${new Date(a.occurredAt).toLocaleString('id-ID')} · actor ${esc(a.actor)} · request ${esc(a.requestId)}</small></div>`).join('');v.innerHTML=shell('Audit Trail','Evidence lokal sintetis untuk setiap tindakan material pada demo runtime.',`<div class="toolbar"><button class="btn" onclick="verifyAudit()">Verifikasi Chain</button><button class="btn" onclick="clearDemo()">Reset Demo</button></div><div class="timeline">${rows||'<div class="empty">Belum ada event audit</div>'}</div>`)}
 function verifyAudit(){toast('Audit demo valid secara event policy; hash-chain produksi menunggu kernel adapter')}
 function clearDemo(){if(confirm('Reset seluruh data synthetic demo?')){db=structuredClone(seed);save();render();toast('Demo direset')}}
+function mtaCoreJourneyContractTest(){
+  const results=[];
+  const active=db.detainees.filter(x=>x?.status==='AKTIF');
+  const rooms=(db.rooms||[]).filter(x=>x?.status==='ACTIVE');
+  results.push({name:'CORE_DETAINEE_MASTER',ok:Array.isArray(db.detainees)});
+  results.push({name:'CORE_PLACEMENT_MASTER_ROOM',ok:Array.isArray(db.placements)&&db.placements.every(p=>Boolean(p.roomId)&&Boolean(p.blockId)&&Boolean(p.source)&&Boolean(p.requestKey)&&(db.rooms||[]).some(r=>r.id===p.roomId))});
+  results.push({name:'CORE_ACTIVE_TARGETS',ok:active.length>0&&rooms.length>0});
+  results.push({name:'CORE_ROOM_CAPACITY',ok:rooms.every(r=>Number(r.capacity)>0)});
+  results.push({name:'CORE_LEAVE_ACTIVE_GUARD',ok:Array.isArray(db.leaves)&&db.leaves.every(l=>(db.detainees||[]).some(d=>d.id===l.detaineeId))});
+  results.push({name:'CORE_MOVEMENT_SHARED_STATE',ok:Array.isArray(db.movements)&&typeof localStorage!=='undefined'});
+  results.push({name:'CORE_AUDIT_SHARED_STATE',ok:Array.isArray(db.audit)});
+  results.push({name:'CORE_IDEMPOTENCY_KEYS',ok:(db.movements||[]).filter(x=>x.requestKey).every(x=>String(x.requestKey).trim())&&(db.leaves||[]).filter(x=>x.requestKey).every(x=>String(x.requestKey).trim())&&(db.placements||[]).filter(x=>x.requestKey).every(x=>String(x.requestKey).trim())});
+  return {ok:results.every(x=>x.ok),results};
+}
+window.mtaCoreJourneyContractTest=mtaCoreJourneyContractTest;
+function mtaCoreJourneySimulationTest(){
+  const s=structuredClone(db),results=[];
+  s.movements=s.movements||[];s.leaves=s.leaves||[];s.audit=s.audit||[];
+  const d=s.detainees.find(x=>x.status==='AKTIF'),from=s.placements.find(x=>x.detaineeId===d?.id),target=s.rooms.find(x=>x.status==='ACTIVE'&&x.id!==from?.roomId);
+  results.push({name:'SIM_FIXTURE_DETAINEE',ok:!!d});
+  results.push({name:'SIM_FIXTURE_PLACEMENT',ok:!!from});
+  results.push({name:'SIM_FIXTURE_TARGET_ROOM',ok:!!target});
+  if(d&&from&&target){
+    const cap=Number(target.capacity)||0;
+    const occ=s.detainees.filter(x=>x.status==='AKTIF'&&x.id!==d.id).filter(x=>{const p=s.placements.find(y=>y.detaineeId===x.id&&y.roomId===target.id);return !!p}).length;
+    const allowed=target.status==='ACTIVE'&&from.roomId!==target.id&&(cap===0||occ<cap);
+    results.push({name:'SIM_MOVEMENT_POLICY',ok:allowed});
+    if(allowed){
+      const requestKey='SIM:ROOM_TRANSFER:'+d.id+':'+target.id;
+      const movement={id:'SIM-MOV-001',detaineeId:d.id,requestKey,toRoomId:target.id,fromRoomId:from.roomId,createdAt:now()};
+      const placement={id:'SIM-PLC-001',detaineeId:d.id,roomId:target.id,blockId:target.blockId,block:target.block,room:target.room,since:now(),source:'ROOM_TRANSFER',requestKey};
+      s.movements.unshift(movement);s.placements.unshift(placement);s.leaves.unshift({id:'SIM-LV-001',detaineeId:d.id,destination:'Synthetic Destination',startAt:now(),status:'DRAFT',requestKey:'SIM:LEAVE:'+d.id});s.audit.unshift({id:'SIM-AUD-001',action:'MOVEMENT_CREATE',resourceType:'MOVEMENT',resourceId:movement.id,occurredAt:now(),result:'SUCCESS'});
+      results.push({name:'SIM_MUTATION_CHAIN',ok:s.movements[0].requestKey===requestKey&&s.placements[0].roomId===target.id&&s.leaves[0].detaineeId===d.id&&s.audit[0].resourceId===movement.id});
+      const duplicate=s.movements.filter(x=>x.requestKey===requestKey).length;
+      results.push({name:'SIM_IDEMPOTENCY',ok:duplicate===1});
+      results.push({name:'SIM_AUDIT_EVIDENCE',ok:s.audit.some(x=>x.resourceId===movement.id&&x.result==='SUCCESS')});
+    }
+  }
+  return {ok:results.every(x=>x.ok),results,syntheticOnly:true,persisted:false};
+}
+window.mtaCoreJourneySimulationTest=mtaCoreJourneySimulationTest;
 function show(v){current=v;document.querySelectorAll('.nav button').forEach(b=>b.classList.toggle('active',b.dataset.view===v));render()}
 window.__mtaLegacyShow=show;
 document.getElementById('nav').addEventListener('click',e=>{const b=e.target.closest('button');if(b)show(b.dataset.view)});

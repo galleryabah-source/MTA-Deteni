@@ -51,6 +51,8 @@ function settings(){
       rows+'</tbody></table></div></div>';
   }).join('');
 
+  const aiConfig=d.adminSettings.aiConfig||{provider:'OPENAI_COMPATIBLE',baseUrl:'',model:'',enabled:false};
+  const aiCard='<div class="p6card" style="margin-top:12px"><h2>AI API Configuration</h2><p class="p6mini">Control plane konfigurasi AI. Preview tetap AI OFF; API key/secret tidak disimpan di localStorage dan tidak dapat diaktifkan dari runtime synthetic.</p><div class="formgrid"><div class="field"><label>Provider</label><select id="p9aiProvider"><option '+(aiConfig.provider==='OPENAI_COMPATIBLE'?'selected':'')+'>OPENAI_COMPATIBLE</option><option '+(aiConfig.provider==='GEMINI'?'selected':'')+'>GEMINI</option><option '+(aiConfig.provider==='ANTHROPIC'?'selected':'')+'>ANTHROPIC</option></select></div><div class="field"><label>Model</label><input id="p9aiModel" value="'+E(aiConfig.model||'')+'" placeholder="model-name"></div><div class="field full"><label>Base URL</label><input id="p9aiBaseUrl" value="'+E(aiConfig.baseUrl||'')+'" placeholder="https://provider.example/v1"></div><div class="field"><label>API Key</label><input type="password" id="p9aiKey" autocomplete="off" placeholder="Tidak disimpan di browser"></div><div class="field"><label>AI Runtime</label><input value="OFF — GOVERNANCE LOCK" disabled></div></div><div class="actions"><button class="btn primary" onclick="window.p9saveAiConfig()">Simpan Konfigurasi AI</button></div><div class="notice" style="margin-top:10px">Status: <b>OFF</b> · Migration Freeze: <b>TRUE</b> · Secret persistence: <b>FORBIDDEN</b></div></div>';
   const body=
     '<div class="p6grid">'+
       '<div class="p6card"><h2>System</h2><div class="formgrid">'+
@@ -66,7 +68,7 @@ function settings(){
       '<div class="p6card"><h2>Security &amp; Governance</h2><div class="notice">Role synthetic: <b>'+E(d.adminSettings.role)+
         '</b><br>QR Policy: <b>'+E(d.adminSettings.qrPolicy)+'</b><br>Real data: <b>DISALLOWED IN PREVIEW</b></div>'+
         '<p class="p6mini">User, role, permission, scope, duty assignment, dan policy produksi tetap mengikuti authorization boundary; password/secret tidak disimpan di runtime preview.</p></div>'+
-    '</div>'+
+    '</div>'+aiCard+
     '<div class="p6card" style="margin-top:12px"><div class="toolbar"><h2 style="margin-right:auto">Master Blok</h2>'+
       '<button class="btn primary" onclick="window.p9addBlock()">+ Tambah Blok</button></div>'+
       '<div class="tablewrap"><table class="table"><thead><tr><th>Blok</th><th>Status</th><th>Jumlah Kamar</th><th>Aksi</th></tr></thead><tbody>'+
@@ -88,6 +90,8 @@ function settings(){
 }
 window.p9openSettings=()=>settings();
 function shell(t,desc,b){return `<section class="hero"><h1>${t}</h1><p class="sub">${desc}</p></section>${b}`}
+async function aiConfigFingerprint(provider,model,baseUrl){const material=JSON.stringify({provider,model,baseUrl,enabled:false});const bytes=new TextEncoder().encode(material);const digest=await crypto.subtle.digest('SHA-256',bytes);return Array.from(new Uint8Array(digest)).map(x=>x.toString(16).padStart(2,'0')).join('');}
+window.p9saveAiConfig=async()=>{const d=ensure();const provider=document.querySelector('#p9aiProvider')?.value||'OPENAI_COMPATIBLE';const model=(document.querySelector('#p9aiModel')?.value||'').trim();const baseUrl=(document.querySelector('#p9aiBaseUrl')?.value||'').trim();const key=document.querySelector('#p9aiKey');if(!['OPENAI_COMPATIBLE','GEMINI','ANTHROPIC'].includes(provider)){toast('Provider tidak valid.');return}if(!model){toast('Model wajib diisi.');return}if(baseUrl&&!/^https:\/\//i.test(baseUrl)){toast('Base URL harus HTTPS.');return}const fingerprint=await aiConfigFingerprint(provider,model,baseUrl);d.adminSettings.aiConfig={provider,model,baseUrl,enabled:false,secretSource:'SERVER_SIDE_ONLY',fingerprint,revision:Number(d.adminSettings.aiConfig?.revision||0)+1,updatedAt:now()};audit('AI_API_CONFIG_UPDATE','AI_CONFIG','ADMIN','SUCCESS',d);put(d);if(key)key.value='';settings();toast('Konfigurasi AI tersimpan. Runtime tetap OFF; secret hanya boleh berasal dari server-side secret storage.');};
 window.p9saveSystem=()=>{const d=ensure();d.adminSettings.facilityName=(document.querySelector('#p9facility')?.value||d.adminSettings.facilityName).trim();d.adminSettings.timezone=document.querySelector('#p9tz')?.value||d.adminSettings.timezone;audit('ADMIN_SETTINGS_UPDATE','SYSTEM','ADMIN','SUCCESS',d);put(d);settings();toast('Pengaturan system tersimpan.')};
 window.p9addCatalog=(key,label)=>{openModal(`<div class="dialoghead"><h2>Tambah ${E(label)}</h2><button class="x" onclick="closeModal()">×</button></div><div class="field"><label>Nilai</label><input id="p9cat" placeholder="Masukkan nilai master"></div><div class="actions"><button class="btn" onclick="closeModal()">Batal</button><button class="btn primary" onclick="window.p9saveCatalog('${E(key)}')">Simpan</button></div>`) };
 window.p9saveCatalog=key=>{const d=ensure(),v=(document.querySelector('#p9cat')?.value||'').trim();if(!v){toast('Nilai wajib diisi.');return}if(d.adminCatalogs[key].some(x=>x.toLowerCase()===v.toLowerCase())){toast('Nilai sudah terdaftar.');return}d.adminCatalogs[key].push(v);audit('MASTER_CATALOG_CREATE','ADMIN_CATALOG',key,'SUCCESS',d);put(d);closeModal();settings();toast('Master tersimpan.')};
