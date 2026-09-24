@@ -12,9 +12,20 @@
     'admin-settings':'ADMINISTRASI'
   };
   function loadCss(){if(document.getElementById(STYLE_ID))return;const l=document.createElement('link');l.id=STYLE_ID;l.rel='stylesheet';l.href=CSS;document.head.appendChild(l)}
+  const ICONS={
+    dashboard:'⌂',detainee:'♙',placement:'▦',movement:'→',leave:'↪',
+    documents:'▤',audit:'◷',monitor:'◉','ops-queue':'☷','qr-center':'▦',
+    'scan-center':'⌗','leave-qr':'⌁','camera-scan':'⌾',reports:'▤',
+    p9settings:'⚙','room-ops':'▥'
+  };
   function syncA11y(nav){
     nav.setAttribute('aria-label','Navigasi utama MTA DETENI');
-    nav.querySelectorAll('button').forEach(b=>{b.setAttribute('aria-current',b.classList.contains('active')?'page':'false');if(!b.title)b.title=b.textContent.trim()});
+    nav.querySelectorAll('button[data-view]').forEach(b=>{
+      const view=b.dataset.view;
+      b.dataset.icon=ICONS[view]||'•';
+      b.setAttribute('aria-current',b.classList.contains('active')?'page':'false');
+      b.title=b.textContent.trim();
+    });
   }
   const NAV_ORDER=['dashboard','detainee','placement','movement','leave','monitor','ops-queue','qr-center','scan-center','leave-qr','camera-scan','documents','audit','reports','room-ops','p9settings'];
   function groupNav(nav){
