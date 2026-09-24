@@ -21,8 +21,14 @@ export type OutboxMessage = Readonly<{
   createdAt: string;
 }>;
 
+/**
+ * Canonical repository-level outbox lifecycle.
+ * Production maps these operations to the existing Supabase/PostgreSQL
+ * outbox RPCs; in-memory implementations remain test-only.
+ */
 export type OutboxRepository = {
   enqueue(message: OutboxMessage): Promise<"ENQUEUED" | "DUPLICATE">;
   claim(limit: number): Promise<readonly OutboxMessage[]>;
   acknowledge(id: string): Promise<void>;
+  release(id: string, error?: string, backoffSeconds?: number): Promise<void>;
 };
