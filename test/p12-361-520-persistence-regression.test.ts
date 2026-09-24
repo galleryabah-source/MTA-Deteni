@@ -17,7 +17,7 @@ test("P12.361-420 rolls back when transactional work fails", async () => {
 });
 
 test("P12.421-480 rejects missing outbox consumer context", async () => {
-  const repo = { enqueue: async () => "ENQUEUED" as const, claim: async () => [], acknowledge: async () => {} };
+  const repo = { enqueue: async () => "ENQUEUED" as const, claim: async () => [], acknowledge: async () => {}, release: async () => {} };
   const outbox = new ControlledDurableOutbox(repo);
   await assert.rejects(() => outbox.claim(1, ""), /OUTBOX_CLAIM_CONTEXT_REQUIRED/);
   await assert.rejects(() => outbox.acknowledge("", "consumer"), /OUTBOX_ACK_CONTEXT_REQUIRED/);
