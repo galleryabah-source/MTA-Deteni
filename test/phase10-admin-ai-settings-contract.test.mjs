@@ -15,3 +15,12 @@ test("Phase 10 AI settings reject non-HTTPS endpoint and never persist key",()=>
  assert.match(s,/d\.adminSettings\.aiConfig=\{provider,model,baseUrl,enabled:false\}/);
  assert.match(s,/key\.value=''/);
 });
+
+test("Phase 10 AI configuration has deterministic non-secret fingerprint and revision",()=>{
+ const src=readFileSync("web/admin-settings-v9.js","utf8");
+ assert.match(src,/aiConfigFingerprint/);
+ assert.match(src,/SHA-256/);
+ assert.match(src,/secretSource:'SERVER_SIDE_ONLY'/);
+ assert.match(src,/fingerprint/);
+ assert.match(src,/revision:Number\(d\.adminSettings\.aiConfig\?\.revision\|\|0\)\+1/);
+});
