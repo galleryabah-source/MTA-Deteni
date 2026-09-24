@@ -129,6 +129,8 @@
     if(authenticated){
       document.body.classList.remove('mta-auth-locked');
       document.body.classList.add('mta-auth-ready');
+      const app=document.querySelector('.app');
+      if(app)app.style.removeProperty('display');
       gate.classList.remove('open');
       renderHeader(true,event.detail.user);
       try{
@@ -140,6 +142,8 @@
     }else{
       document.body.classList.remove('mta-auth-ready');
       document.body.classList.add('mta-auth-locked');
+      const app=document.querySelector('.app');
+      if(app)app.style.setProperty('display','none','important');
       gate.classList.add('open');
       renderHeader(false,null);
     }
