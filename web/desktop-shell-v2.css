@@ -63,23 +63,14 @@
     line-height:1.2;
     transition:background .14s ease,color .14s ease,border-color .14s ease;
   }
-  body.mta-desktop-enhanced .nav button::before{content:attr(data-icon);
-    width:22px;
-    min-width:22px;
-    height:22px;
-    display:grid;
-    place-items:center;
-    color:#475467;
-    font-size:16px;
-    font-weight:700;
-    line-height:1;
-  }
+  /* Icon layer is rendered by mta-unified-shell-v2.js as inline SVG.
+     Do not render a second pseudo-element icon here. */
+  body.mta-desktop-enhanced .nav button::before{content:none!important;display:none!important}
   body.mta-desktop-enhanced .nav button:hover{
     color:#0754ae;
     background:#f4f8ff;
     border-color:#e0ebfb;
   }
-  body.mta-desktop-enhanced .nav button:hover::before{color:#0754ae}
   body.mta-desktop-enhanced .nav button.active{
     color:#0754ae;
     background:var(--mta-ui-blue-soft);
@@ -87,7 +78,6 @@
     font-weight:700;
     box-shadow:0 3px 10px rgba(11,99,206,.06);
   }
-  body.mta-desktop-enhanced .nav button.active::before{color:var(--mta-ui-blue)}
   body.mta-desktop-enhanced .nav button:focus-visible,
   body.mta-desktop-enhanced .mta-nav-toggle:focus-visible{
     outline:3px solid rgba(37,99,235,.22);
@@ -127,7 +117,6 @@
   body.mta-desktop-enhanced .mta-nav-toggle:hover{background:#f4f8ff;color:#0754ae;border-color:#cfe0f8}
   body.mta-desktop-enhanced .side.mta-collapsed{width:var(--mta-desktop-nav-mini);padding:18px 8px}
   body.mta-desktop-enhanced .side.mta-collapsed .nav button{min-height:42px;justify-content:center;padding:9px 6px}
-  body.mta-desktop-enhanced .side.mta-collapsed .nav button::before{font-size:17px}
   body.mta-desktop-enhanced .side.mta-collapsed .mta-desktop-group-label{font-size:0;height:1px;margin:5px 3px;border-top:1px solid #e5eaf0}
   body.mta-desktop-enhanced .side.mta-collapsed .mta-desktop-status{display:none}
   body.mta-desktop-enhanced .card{
