@@ -43,4 +43,5 @@ test('F11 unified shell still exposes operational journey contracts',()=>{
   assert.match(unified,/mtaUnifiedValidateLeave/);
   assert.match(unified,/mtaUnifiedMutationConsistencyContractTest/);
   assert.match(unified,/mtaUnifiedJourneyOperationalContractTest/);
+  assert.match(unified,/x\.status==='ACTIVE'&&x\.id!==currentPlacement\?\.roomId/);
 });
