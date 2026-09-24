@@ -1,7 +1,7 @@
 (()=>{
   'use strict';
   const STYLE_ID='mta-desktop-shell-v2-style';
-  const CSS='/desktop-shell-v2.css?v=4';
+  const CSS='/desktop-shell-v2.css?v=5';
   const GROUPS={
     dashboard:'UTAMA',
     detainee:'DATA & PENEMPATAN',placement:'DATA & PENEMPATAN',
@@ -12,6 +12,12 @@
     p9settings:'PENGATURAN'
   };
   function loadCss(){if(document.getElementById(STYLE_ID))return;const l=document.createElement('link');l.id=STYLE_ID;l.rel='stylesheet';l.href=CSS;document.head.appendChild(l)}
+  const NAV_LABELS={
+  dashboard:'Dashboard',detainee:'Data Deteni',placement:'Penempatan',movement:'Pergerakan',leave:'Izin',
+  monitor:'Operational Monitor','ops-queue':'Operational Queue','qr-center':'QR Center','scan-center':'Scan Center',
+  'leave-qr':'Leave QR','camera-scan':'Camera Scan',documents:'Dokumen',audit:'Audit Trail',reports:'Laporan',
+  'room-ops':'Room Ops',p9settings:'Pengaturan'
+  };
   const ICONS={
     dashboard:'⌂',detainee:'♙',placement:'▦',movement:'→',leave:'↪',
     documents:'▤',audit:'◷',monitor:'◉','ops-queue':'☷','qr-center':'▦',
@@ -36,6 +42,15 @@
       const view=b.dataset.view;
       if(!allowed.has(view)||seen.has(view)) b.remove();
       else seen.add(view);
+    });
+    NAV_ORDER.forEach(view=>{
+      if(nav.querySelector('button[data-view="'+view+'"]'))return;
+      const b=document.createElement('button');
+      b.type='button';
+      b.dataset.view=view;
+      b.textContent=NAV_LABELS[view]||view;
+      b.addEventListener('click',()=>{if(typeof window.show==='function')window.show(view)});
+      nav.appendChild(b);
     });
     const currentButtons=[...nav.querySelectorAll('button[data-view]')];
     const expectedViews=NAV_ORDER.filter(v=>currentButtons.some(b=>b.dataset.view===v));
