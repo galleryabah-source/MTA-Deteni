@@ -25,6 +25,8 @@ test('F11 detainee and leave mutations preserve identity and idempotency boundar
   assert.match(html,/window\.mtaCoreJourneyContractTest=mtaCoreJourneyContractTest/);
   assert.match(html,/if\(!state\.detainees\.length\)/);
   assert.match(html,/CORE_ROOM_CAPACITY/);
+  assert.match(html,/function mtaCoreJourneySimulationTest\(\)/);
+  assert.match(html,/persisted:false/);
 });
 
 test('F11 movement remains Master Kamar and capacity governed',()=>{
