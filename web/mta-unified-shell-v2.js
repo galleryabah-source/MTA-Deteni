@@ -183,7 +183,8 @@ function journeyOperationalContractTest(){
   probe.audit=[...(probe.audit||[])];
   probe.movements=[...(probe.movements||[])];
   const active=(probe.detainees||[]).find(x=>x.status==='AKTIF');
-  const target=(probe.rooms||[]).find(x=>x.status==='ACTIVE');
+  const currentPlacement=active?(probe.placements||[]).filter(p=>p.detaineeId===active.id).sort((a,b)=>String(b.since||'').localeCompare(String(a.since||'')))[0]:null;
+  const target=(probe.rooms||[]).find(x=>x.status==='ACTIVE'&&x.id!==currentPlacement?.roomId);
   const checks=[];
   if(active&&target){
     const v=validateMovementState(probe,active.id,target.id);
@@ -192,7 +193,8 @@ function journeyOperationalContractTest(){
   probe.audit.unshift({id:'AUD-F4-2-PROBE',action:'QR_ACTION_OPEN',resourceType:'DETAINEE',resourceId:active?.id||'PROBE',result:'SUCCESS',occurredAt:new Date().toISOString()});
   probe.audit.unshift({id:'AUD-F4-2-ACTION',action:'MOVEMENT_CREATE',resourceType:'MOVEMENT',resourceId:'MOV-F4-2',result:'SUCCESS',occurredAt:new Date().toISOString()});
   const after=buildOperationalQueue(probe),metrics=buildMonitorMetrics(probe);
-  checks.push({name:'JOURNEY_AUDIT_TO_QUEUE',ok:after.length===Math.min(20,q0+2)});
+  const materialAfter=(probe.audit||[]).filter(x=>x&&x.action&&x.resourceType&&x.occurredAt).length;
+  checks.push({name:'JOURNEY_AUDIT_TO_QUEUE',ok:after.length===Math.min(20,materialAfter)});
   checks.push({name:'JOURNEY_STATE_TO_MONITOR',ok:metrics.audit===base.audit+2&&metrics.queue===after.length});
   return {ok:checks.every(x=>x.ok),results:checks};
 }
