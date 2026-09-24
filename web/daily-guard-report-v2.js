@@ -117,11 +117,19 @@
     ];
     return '<div class="mta-report-preview">'+pages.join('')+'</div>';
   }
+  function buildPrintDocument(r){
+    validate(r);
+    const rendered=render(r);
+    if(!rendered.startsWith('<div class="mta-report-preview">')) throw new Error('REPORT_OUTPUT_BOUNDARY_INVALID');
+    if(/<script\\b|<iframe\\b|mta-deteni-demo-v2|mta-unified-shell|Operational Monitor|Operational Queue/i.test(rendered)) throw new Error('REPORT_OUTPUT_CONTAMINATION');
+    const title='MTA DETENI — '+r.documentId;
+    return '<!doctype html><html lang="id"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>'+esc(title)+'</title><style>html,body{margin:0;padding:0;background:#fff}'+document.getElementById('mta-daily-guard-report-v2-style')?.textContent+'</style></head><body>'+rendered+'</body></html>';
+  }
   async function prepare(input){
     const r=structuredClone(input);validate(r);const material=structuredClone(r);delete material.integrityHash;delete material.filename;
     r.integrityHash=await sha256Hex(canonicalize(material));
     r.filename='Laporan_Harian_Regu_Jaga_'+r.reportDate+'_'+String(r.reguId).replace(/[^A-Za-z0-9_-]/g,'_')+'_'+String(r.shiftId).replace(/[^A-Za-z0-9_-]/g,'_')+'.pdf';
     return r;
   }
-  window.mtaDailyGuardReport=Object.freeze({TYPE,VERSION,WORKFLOW,TRANSITIONS,PAGE_DEFS,canonicalize,sha256Hex,validate,canTransition,transitionStatus,lifecycleAction,prepare,render,ensureStyles});
+  window.mtaDailyGuardReport=Object.freeze({TYPE,VERSION,WORKFLOW,TRANSITIONS,PAGE_DEFS,canonicalize,sha256Hex,validate,canTransition,transitionStatus,lifecycleAction,prepare,render,buildPrintDocument,ensureStyles});
 })();
