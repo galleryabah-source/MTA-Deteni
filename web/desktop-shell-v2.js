@@ -1,7 +1,7 @@
 (()=>{
   'use strict';
   const STYLE_ID='mta-desktop-shell-v2-style';
-  const CSS='/desktop-shell-v2.css?v=2';
+  const CSS='/desktop-shell-v2.css?v=4';
   const GROUPS={
     dashboard:'UTAMA',
     detainee:'DATA & PENEMPATAN',placement:'DATA & PENEMPATAN',
@@ -9,7 +9,7 @@
     documents:'REKAM & KEPATUHAN',audit:'REKAM & KEPATUHAN',reports:'REKAM & KEPATUHAN',
     'qr-center':'QR & PEMINDAIAN','scan-center':'QR & PEMINDAIAN','leave-qr':'QR & PEMINDAIAN','camera-scan':'QR & PEMINDAIAN',
     'room-ops':'FASILITAS','p6rooms':'FASILITAS','master-block':'FASILITAS','master-room':'FASILITAS','master-operational-catalogs':'FASILITAS','room-transfer-master':'FASILITAS',
-    'admin-settings':'ADMINISTRASI'
+    p9settings:'PENGATURAN'
   };
   function loadCss(){if(document.getElementById(STYLE_ID))return;const l=document.createElement('link');l.id=STYLE_ID;l.rel='stylesheet';l.href=CSS;document.head.appendChild(l)}
   const ICONS={
