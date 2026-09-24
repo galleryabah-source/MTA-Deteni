@@ -21,6 +21,7 @@ export type OutboxPersistenceContract = Readonly<{
   enqueue(message: OutboxMessage, context: PersistenceOperationContext): Promise<"ENQUEUED" | "DUPLICATE">;
   claim(consumerId: string, limit: number, context: PersistenceOperationContext): Promise<readonly OutboxMessage[]>;
   acknowledge(consumerId: string, id: string, context: PersistenceOperationContext): Promise<void>;
+  release(consumerId: string, id: string, context: PersistenceOperationContext, error?: string, backoffSeconds?: number): Promise<void>;
 }>;
 
 export function validatePersistenceOperationContext(context: PersistenceOperationContext): "READY" | "BLOCKED" {
@@ -46,6 +47,7 @@ export function assertOutboxCompatibility(repository: OutboxRepository): OutboxP
   return {
     enqueue: (message, context) => { if (validatePersistenceOperationContext(context) === "BLOCKED") return Promise.reject(new Error("PERSISTENCE_CONTEXT_INVALID")); return repository.enqueue(message); },
     claim: (consumerId, limit, context) => { if (!consumerId.trim() || validatePersistenceOperationContext(context) === "BLOCKED") return Promise.reject(new Error("PERSISTENCE_CONTEXT_INVALID")); return repository.claim(limit); },
-    acknowledge: (consumerId, id, context) => { if (!consumerId.trim() || !id.trim() || validatePersistenceOperationContext(context) === "BLOCKED") return Promise.reject(new Error("PERSISTENCE_CONTEXT_INVALID")); return repository.acknowledge(id); }
+    acknowledge: (consumerId, id, context) => { if (!consumerId.trim() || !id.trim() || validatePersistenceOperationContext(context) === "BLOCKED") return Promise.reject(new Error("PERSISTENCE_CONTEXT_INVALID")); return repository.acknowledge(id); },
+    release: (consumerId, id, context, error, backoffSeconds) => { if (!consumerId.trim() || !id.trim() || validatePersistenceOperationContext(context) === "BLOCKED") return Promise.reject(new Error("PERSISTENCE_CONTEXT_INVALID")); return repository.release(id, error, backoffSeconds); }
   };
 }

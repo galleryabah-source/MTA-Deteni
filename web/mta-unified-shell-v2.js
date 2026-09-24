@@ -11,13 +11,13 @@ function style(h){return new Promise(r=>{if(document.querySelector('link[data-mt
 function script(src){return new Promise(r=>{if(document.querySelector('script[data-mta-unified-src="'+src.split('?')[0]+'"]'))return r({src,ok:true,existing:true});const x=document.createElement('script');x.src=src;x.async=false;x.dataset.mtaUnifiedSrc=src.split('?')[0];x.onload=()=>r({src,ok:true});x.onerror=()=>{console.warn('[MTA] module load failed',src);r({src,ok:false})};document.head.appendChild(x)})}
 const toast=m=>window.toast?window.toast(m):console.info('[MTA]',m);
 const NAV_ICONS={
-  dashboard:'grid',detainee:'person',placement:'layers',movement:'arrow',leave:'exit',documents:'file',
-  audit:'clock',p9settings:'settings',monitor:'monitor','ops-queue':'queue','qr-center':'qr',
+  'dashboard':'grid','detainee':'person',placement:'layers',movement:'arrow',leave:'exit',documents:'file',
+  'audit':'clock','p9settings':'settings','monitor':'monitor','ops-queue':'queue','qr-center':'qr',
   'camera-scan':'camera','room-ops':'room',reports:'report','scan-center':'scan','leave-qr':'leave'
 };
 const NAV_LABELS={
-  dashboard:'Dashboard',detainee:'Data Deteni',placement:'Penempatan',movement:'Pergerakan',leave:'Izin',
-  documents:'Dokumen',audit:'Audit Trail',p9settings:'Pengaturan',monitor:'Operational Monitor',
+  'dashboard':'Dashboard','detainee':'Data Deteni','placement':'Penempatan','movement':'Pergerakan','leave':'Izin',
+  'documents':'Dokumen','audit':'Audit Trail','p9settings':'Pengaturan','monitor':'Operational Monitor',
   'ops-queue':'Operational Queue','qr-center':'QR Center','camera-scan':'Camera Scan',
   'room-ops':'Room Ops',reports:'Laporan','scan-center':'Scan Center','leave-qr':'Leave QR'
 };

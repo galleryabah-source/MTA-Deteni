@@ -1,5 +1,6 @@
 import type { AppendOnlyRepository, OutboxMessage, OutboxRepository, RepositoryResult, VersionedEntity, VersionedRepository } from "./contracts.js";
 
+/** Test/offline-only repositories. Never use as production persistence. */
 export class InMemoryVersionedRepository<T extends VersionedEntity & { id: string }> implements VersionedRepository<T> {
   private readonly items = new Map<string, T>();
   async get(id: string): Promise<T | null> { return this.items.get(id) ?? null; }
@@ -35,4 +36,8 @@ export class InMemoryOutboxRepository implements OutboxRepository {
   }
   async claim(limit: number): Promise<readonly OutboxMessage[]> { return [...this.pending.values()].slice(0, Math.max(0, limit)); }
   async acknowledge(id: string): Promise<void> { this.pending.delete(id); }
+  async release(id: string): Promise<void> {
+    if (!this.pending.has(id)) return;
+    // In-memory messages remain pending; production release performs DB backoff.
+  }
 }
