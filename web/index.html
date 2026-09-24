@@ -81,9 +81,19 @@ function normalizeRuntimeState(x){
 function load(){
   try{
     const raw=localStorage.getItem(KEY);
-    if(!raw)return structuredClone(seed);
-    return normalizeRuntimeState(JSON.parse(raw));
-  }catch{return structuredClone(seed)}
+    if(!raw){
+      const initial=structuredClone(seed);
+      localStorage.setItem(KEY,JSON.stringify(initial));
+      return initial;
+    }
+    const normalized=normalizeRuntimeState(JSON.parse(raw));
+    localStorage.setItem(KEY,JSON.stringify(normalized));
+    return normalized;
+  }catch{
+    const fallback=structuredClone(seed);
+    try{localStorage.setItem(KEY,JSON.stringify(fallback))}catch{}
+    return fallback;
+  }
 }
 
 function save(){localStorage.setItem(KEY,JSON.stringify(db));window.dispatchEvent(new CustomEvent('mta:data-changed'))}
