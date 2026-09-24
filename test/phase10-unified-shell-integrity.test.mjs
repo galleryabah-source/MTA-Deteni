@@ -11,5 +11,5 @@ test('Phase 10 unified shell must remain complete and executable',()=>{
   assert.match(source,/mtaUnifiedMutationConsistencyContractTest/);
   assert.match(source,/mtaUnifiedOfflineRecoveryContractTest/);
   assert.match(source,/finalIntegrityGate\(\)/);
-  assert.match(source,/desktop-shell-v2\.js\?v=5/);
+  assert.match(source,/desktop-shell-v2\.js\?v=6/);
 });
