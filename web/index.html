@@ -46,9 +46,46 @@ body.mta-desktop-enhanced .detainee-pagination .page-current{background:#0b63ce;
 <script src="/mta-production-api.js?v=2"></script><script src="/mta-auth-ui.js?v=3"></script><script type="module" src="/mta-auth.js?v=2"></script><script src="/daily-guard-report-v2.js"></script><script src="/daily-guard-report-d57.js"></script><script src="/admin-settings-v9.js"></script>\n<script src="/mta-unified-shell-v2.js?v=8"></script>
 <script>
 const KEY='mta-deteni-demo-v2';
-const seed={meta:{version:2,createdAt:new Date().toISOString()},detainees:[{id:'DET-001',code:'DET-2026-001',name:'SYNTHETIC A',nationality:'Contoh',status:'AKTIF',placement:'Blok A / Kamar 01',createdAt:'2026-09-16T07:00:00Z'},{id:'DET-002',code:'DET-2026-002',name:'SYNTHETIC B',nationality:'Contoh',status:'AKTIF',placement:'Blok B / Kamar 02',createdAt:'2026-09-16T07:10:00Z'}],placements:[{id:'PLC-001',detaineeId:'DET-001',block:'Blok A',room:'Kamar 01',since:'2026-09-16T07:20:00Z'},{id:'PLC-002',detaineeId:'DET-002',block:'Blok B',room:'Kamar 02',since:'2026-09-16T07:25:00Z'}],movements:[],leaves:[],documents:[],audit:[]};
+const syntheticBlocks=[{id:'BLK-A',code:'A',name:'Blok A',status:'ACTIVE'},{id:'BLK-B',code:'B',name:'Blok B',status:'ACTIVE'}];
+const syntheticRooms=[
+  {id:'ROOM-A01',blockId:'BLK-A',block:'Blok A',room:'Kamar 01',capacity:4,status:'ACTIVE'},
+  {id:'ROOM-A02',blockId:'BLK-A',block:'Blok A',room:'Kamar 02',capacity:4,status:'ACTIVE'},
+  {id:'ROOM-B01',blockId:'BLK-B',block:'Blok B',room:'Kamar 01',capacity:4,status:'ACTIVE'},
+  {id:'ROOM-B02',blockId:'BLK-B',block:'Blok B',room:'Kamar 02',capacity:4,status:'ACTIVE'}
+];
+const seed={meta:{version:3,createdAt:new Date().toISOString()},blocks:structuredClone(syntheticBlocks),rooms:structuredClone(syntheticRooms),detainees:[
+  {id:'DET-001',code:'DET-2026-001',name:'SYNTHETIC A',nationality:'Contoh',status:'AKTIF',placement:'Blok A / Kamar 01',createdAt:'2026-09-16T07:00:00Z'},
+  {id:'DET-002',code:'DET-2026-002',name:'SYNTHETIC B',nationality:'Contoh',status:'AKTIF',placement:'Blok B / Kamar 02',createdAt:'2026-09-16T07:10:00Z'}
+],placements:[
+  {id:'PLC-001',detaineeId:'DET-001',roomId:'ROOM-A01',blockId:'BLK-A',block:'Blok A',room:'Kamar 01',since:'2026-09-16T07:20:00Z',source:'MASTER_ROOM',requestKey:'PLACEMENT:DET-001:ROOM-A01'},
+  {id:'PLC-002',detaineeId:'DET-002',roomId:'ROOM-B02',blockId:'BLK-B',block:'Blok B',room:'Kamar 02',since:'2026-09-16T07:25:00Z',source:'MASTER_ROOM',requestKey:'PLACEMENT:DET-002:ROOM-B02'}
+],movements:[],leaves:[],documents:[],audit:[]};
 let db=load(); let current='dashboard';
-function load(){try{const x=JSON.parse(localStorage.getItem(KEY));return x&&x.detainees?x:structuredClone(seed)}catch{return structuredClone(seed)}}
+function normalizeRuntimeState(x){
+  const state=x&&typeof x==='object'?x:structuredClone(seed);
+  for(const k of ['detainees','placements','movements','leaves','documents','audit'])if(!Array.isArray(state[k]))state[k]=[];
+  if(!Array.isArray(state.blocks)||!state.blocks.length)state.blocks=structuredClone(syntheticBlocks);
+  if(!Array.isArray(state.rooms)||!state.rooms.length)state.rooms=structuredClone(syntheticRooms);
+  const roomByLabel=new Map(state.rooms.map(r=>[\`\${r.block}|\${r.room}\`,r]));
+  state.placements=state.placements.map(p=>{
+    if(p.roomId)return p;
+    const room=roomByLabel.get(\`\${p.block}|\${p.room}\`);
+    return room?{...p,roomId:room.id,blockId:room.blockId,source:p.source||'MASTER_ROOM',requestKey:p.requestKey||\`PLACEMENT:\${p.detaineeId}:\${room.id}\`}:p;
+  });
+  if(!state.detainees.length&&!state.placements.length&&!state.movements.length&&!state.leaves.length&&!state.documents.length&&!state.audit.length){
+    return structuredClone(seed);
+  }
+  state.meta={...(state.meta||{}),version:3};
+  return state;
+}
+function load(){
+  try{
+    const raw=localStorage.getItem(KEY);
+    if(!raw)return structuredClone(seed);
+    return normalizeRuntimeState(JSON.parse(raw));
+  }catch{return structuredClone(seed)}
+}
+
 function save(){localStorage.setItem(KEY,JSON.stringify(db));window.dispatchEvent(new CustomEvent('mta:data-changed'))}
 function uid(prefix){return prefix+'-'+Math.random().toString(36).slice(2,8).toUpperCase()}
 function now(){return new Date().toISOString()}
