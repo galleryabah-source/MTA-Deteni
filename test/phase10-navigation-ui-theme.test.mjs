@@ -7,8 +7,11 @@ const js=fs.readFileSync(new URL('../web/desktop-shell-v2.js',import.meta.url),'
 
 test('Phase 10 desktop navigation uses one canonical SVG icon layer',()=>{
   assert.match(js,/const ICONS=\{/);
-  assert.match(js,/b\.dataset\.icon=ICONS\[view\]\|\|'•'/);\n  assert.match(js,/NAV_LABELS=\{/);\n  assert.match(js,/if\(nav\.querySelector\('button\[data-view="'\+view\+'"\]\)\)return/);
+  assert.match(js,/b\.dataset\.icon=ICONS\[view\]\|\|'•'/);
+  assert.match(js,/NAV_LABELS=\{/);
+  assert.match(js,/if\(nav\.querySelector\('button\[data-view="'\+view\+'\]\)\)return/);
   assert.match(css,/nav button::before\{content:none!important;display:none!important\}/);
   assert.match(css,/mta-desktop-group-label/);
-  assert.match(css,/mta-desktop-group-label/);
+  assert.match(js,/mta-nav-icon/);
+  assert.match(js,/b\.innerHTML=navIcon\(view\)\+'<span class="mta-nav-label">/);
 });
