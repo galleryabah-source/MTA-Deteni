@@ -63,7 +63,7 @@
     line-height:1.2;
     transition:background .14s ease,color .14s ease,border-color .14s ease;
   }
-  body.mta-desktop-enhanced .nav button::before{
+  body.mta-desktop-enhanced .nav button::before{content:none!important;
     content:attr(data-icon);
     width:22px;
     min-width:22px;
