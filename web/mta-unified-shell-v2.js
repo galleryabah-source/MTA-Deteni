@@ -1,7 +1,7 @@
 (()=>{'use strict';
 const VERSION='mta-unified-shell-v2-navfix4';
-const BASE=['/desktop-shell-v2.css?v=5','/responsive-v11.css?v=13'];
-const SCRIPTS=['/offline-v1.js?v=2','/offline-queue-v1.js?v=2','/qr-context-v1.js?v=2','/qr-camera-v2.js?v=3','/qr-print-clean-v3.js?v=5','/movement-v9.js?v=10','/room-ops-v9.js?v=10','/master-room-guard-v10.js?v=11','/desktop-shell-v2.js?v=5','/preview-v10.js?v=11','/mobile-shell-v1.js?v=2'];
+const BASE=['/desktop-shell-v2.css?v=5','/responsive-v11.css?v=14'];
+const SCRIPTS=['/offline-v1.js?v=2','/offline-queue-v1.js?v=2','/qr-context-v1.js?v=2','/qr-camera-v2.js?v=3','/qr-print-clean-v3.js?v=5','/movement-v9.js?v=10','/room-ops-v9.js?v=10','/master-room-guard-v10.js?v=11','/desktop-shell-v2.js?v=5','/preview-v10.js?v=11','/mobile-shell-v1.js?v=3'];
 function bootstrapQrResources(){const d=read();d.qr=d.qr||{detainee:{},room:{},leave:{}};d.qr.detainee=d.qr.detainee||{};d.qr.room=d.qr.room||{};d.qr.leave=d.qr.leave||{};let changed=false;(d.detainees||[]).forEach(x=>{if(x?.id&&!d.qr.detainee[x.id]){d.qr.detainee[x.id]={token:'SYNTH-QR-'+x.id,status:x.status==='AKTIF'?'ACTIVE':'SUSPENDED',issuedAt:x.createdAt||new Date().toISOString(),expiresAt:null};changed=true}});(d.leaves||[]).forEach(x=>{if(x?.id&&!d.qr.leave[x.id]){d.qr.leave[x.id]={token:'SYNTH-QR-'+x.id,status:'ACTIVE',issuedAt:x.createdAt||new Date().toISOString(),expiresAt:null};changed=true}});(d.rooms||[]).forEach(x=>{if(x?.id&&!d.qr.room[x.id]){d.qr.room[x.id]={token:'SYNTH-QR-'+x.id,status:x.status==='ACTIVE'?'ACTIVE':'SUSPENDED',issuedAt:x.createdAt||new Date().toISOString(),expiresAt:null};changed=true}});if(changed)write(d);return d}
 const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const read=()=>{try{return JSON.parse(localStorage.getItem('mta-deteni-demo-v2')||'{}')}catch{return {}}};
