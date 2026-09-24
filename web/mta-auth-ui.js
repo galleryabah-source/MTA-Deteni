@@ -8,7 +8,7 @@
     const s=document.createElement('style');
     s.id='mtaAuthGateCss';
     s.textContent=`
-      body.mta-auth-locked .app{display:none!important}
+      body.mta-auth-locked .app{display:none!important}body.mta-auth-ready #mtaAuthGate{display:none!important}
       #mtaAuthGate{position:fixed;inset:0;z-index:9999;display:none;align-items:center;justify-content:center;padding:24px;background:linear-gradient(135deg,#eef4ff 0%,#f7f9fc 48%,#eaf0f7 100%);font-family:"Segoe UI",system-ui,-apple-system,BlinkMacSystemFont,sans-serif}
       #mtaAuthGate.open{display:flex}
       .mta-auth-card{width:min(440px,100%);background:rgba(255,255,255,.96);border:1px solid #d7dce3;border-radius:22px;padding:30px;box-shadow:0 24px 80px rgba(15,23,42,.14)}
@@ -117,7 +117,7 @@
         }
       }catch(err){
         msg.className='mta-auth-message error';
-        msg.textContent=err?.message||'Authentication gagal.';
+        msg.textContent='Email atau password tidak valid, atau autentikasi belum dapat diproses.';
       }finally{submit.disabled=false}
     };
     mode(false);
@@ -128,6 +128,7 @@
     const gate=makeGate();
     if(authenticated){
       document.body.classList.remove('mta-auth-locked');
+      document.body.classList.add('mta-auth-ready');
       gate.classList.remove('open');
       renderHeader(true,event.detail.user);
       try{
@@ -137,6 +138,7 @@
         if(state&&me?.role)state.textContent=me.role;
       }catch(_){}
     }else{
+      document.body.classList.remove('mta-auth-ready');
       document.body.classList.add('mta-auth-locked');
       gate.classList.add('open');
       renderHeader(false,null);
@@ -147,14 +149,8 @@
     makeGate();
     bindForm();
     window.addEventListener('mta-auth-state',update);
-    setTimeout(async()=>{
-      try{
-        if(window.mtaAuth){
-          const r=await window.mtaAuth.session();
-          update({detail:{authenticated:!!r?.data?.session,user:r?.data?.session?.user||null}});
-        }
-      }catch(_){update({detail:{authenticated:false,user:null}})}
-    },800);
+    const reconcile=async()=>{try{if(window.mtaAuth){const r=await window.mtaAuth.session();update({detail:{authenticated:!!r?.data?.session,user:r?.data?.session?.user||null}});return true}}catch(_){}return false};
+    reconcile().then(ok=>{if(!ok){let n=0;const timer=setInterval(async()=>{if(await reconcile()||++n>=40)clearInterval(timer)},50)}});
   }
 
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
