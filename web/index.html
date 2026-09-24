@@ -72,7 +72,7 @@ function normalizeRuntimeState(x){
     const room=roomByLabel.get(`${p.block}|${p.room}`);
     return room?{...p,roomId:room.id,blockId:room.blockId,source:p.source||'MASTER_ROOM',requestKey:p.requestKey||`PLACEMENT:${p.detaineeId}:${room.id}`}:p;
   });
-  if((Number(state.meta?.version)||0)<3&&!state.detainees.length){
+  if(!state.detainees.length){
     return structuredClone(seed);
   }
   state.meta={...(state.meta||{}),version:3};
@@ -438,8 +438,9 @@ function mtaCoreJourneyContractTest(){
   const active=db.detainees.filter(x=>x?.status==='AKTIF');
   const rooms=(db.rooms||[]).filter(x=>x?.status==='ACTIVE');
   results.push({name:'CORE_DETAINEE_MASTER',ok:Array.isArray(db.detainees)});
-  results.push({name:'CORE_PLACEMENT_MASTER_ROOM',ok:Array.isArray(db.placements)&&db.placements.filter(p=>p.roomId).every(p=>(db.rooms||[]).some(r=>r.id===p.roomId))});
+  results.push({name:'CORE_PLACEMENT_MASTER_ROOM',ok:Array.isArray(db.placements)&&db.placements.every(p=>Boolean(p.roomId)&&Boolean(p.blockId)&&Boolean(p.source)&&Boolean(p.requestKey)&&(db.rooms||[]).some(r=>r.id===p.roomId))});
   results.push({name:'CORE_ACTIVE_TARGETS',ok:active.length>0&&rooms.length>0});
+  results.push({name:'CORE_ROOM_CAPACITY',ok:rooms.every(r=>Number(r.capacity)>0)});
   results.push({name:'CORE_LEAVE_ACTIVE_GUARD',ok:Array.isArray(db.leaves)&&db.leaves.every(l=>(db.detainees||[]).some(d=>d.id===l.detaineeId))});
   results.push({name:'CORE_MOVEMENT_SHARED_STATE',ok:Array.isArray(db.movements)&&typeof localStorage!=='undefined'});
   results.push({name:'CORE_AUDIT_SHARED_STATE',ok:Array.isArray(db.audit)});
