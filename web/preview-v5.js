@@ -1,7 +1,7 @@
 (()=>{
 const K='mta-deteni-demo-v2';
-const get=()=>JSON.parse(localStorage.getItem(K)||'{}');
-const put=d=>localStorage.setItem(K,JSON.stringify(d));
+const get=()=>window.MTADeteniStateKernel?window.MTADeteniStateKernel.read():JSON.parse(localStorage.getItem(K)||'{}');
+const put=d=>window.MTADeteniStateKernel?window.MTADeteniStateKernel.write(d):localStorage.setItem(K,JSON.stringify(d));
 const esc=s=>String(s??'').replace(/[&<>\"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;',"'":'&#39;'}[c]));
 const audit=(action,type,id,result='SUCCESS')=>{const d=get();d.audit=d.audit||[];d.audit.unshift({id:'AUD-'+crypto.randomUUID().slice(0,8).toUpperCase(),action,resourceType:type,resourceId:id||'',result,occurredAt:new Date().toISOString(),actor:'DEMO-OPERATOR',requestId:'REQ-'+crypto.randomUUID().slice(0,8),correlationId:'COR-'+crypto.randomUUID().slice(0,8),policyVersion:'AUTHZ-1.0'});put(d)};
 function ensure(){const d=get();d.qr=d.qr||{detainee:{},room:{},leave:{}};d.rooms=d.rooms||[{id:'ROOM-A01',block:'Blok A',room:'Kamar 01',capacity:8,status:'ACTIVE'},{id:'ROOM-A02',block:'Blok A',room:'Kamar 02',capacity:8,status:'ACTIVE'},{id:'ROOM-B01',block:'Blok B',room:'Kamar 01',capacity:8,status:'ACTIVE'},{id:'ROOM-B02',block:'Blok B',room:'Kamar 02',capacity:8,status:'ACTIVE'}];(d.detainees||[]).forEach(x=>{if(!d.qr.detainee[x.id])d.qr.detainee[x.id]={token:'DTQR-'+crypto.randomUUID().slice(0,10).toUpperCase(),status:'ACTIVE',context:'DETAINEE',issuedAt:new Date().toISOString()}});d.rooms.forEach(x=>{if(!d.qr.room[x.id])d.qr.room[x.id]={token:'RMQR-'+crypto.randomUUID().slice(0,10).toUpperCase(),status:x.status}});put(d);return d}
