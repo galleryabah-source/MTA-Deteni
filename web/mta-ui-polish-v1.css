@@ -117,3 +117,18 @@ body{color:var(--mta-text);background:linear-gradient(180deg,#f7f9fc 0%,#eef3f8 
   .stats{grid-template-columns:1fr!important}
 }
 @media(prefers-reduced-motion:reduce){*{transition:none!important}}
+
+/* Sidebar v2 — one icon, one label, no legacy text nodes */
+.mta-nav-icon-wrap{display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;flex:0 0 20px;color:currentColor}
+.mta-nav-icon-wrap .mta-nav-icon{width:18px;height:18px;display:block}
+.nav button{display:flex!important;align-items:center!important;gap:10px!important;padding:9px 12px!important}
+.nav button .mta-nav-label{display:block!important;flex:1 1 auto!important;min-width:0!important;overflow:hidden!important;text-overflow:ellipsis!important;white-space:nowrap!important}
+.nav button.active{box-shadow:inset 0 0 0 1px rgba(11,99,206,.04)}
+@media(min-width:761px){
+  .side{padding-left:12px;padding-right:12px}
+  .nav button{min-height:40px}
+}
+@media(max-width:760px){
+  .side{padding-left:8px;padding-right:8px}
+  .nav button{min-height:40px}
+}
