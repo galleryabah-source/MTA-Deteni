@@ -313,6 +313,7 @@ async function loadAuthenticatedRuntime(){
     '/mta-state-kernel-v1.js?v=4',
     '/offline-v1.js?v=2',
     '/offline-queue-v1.js?v=2',
+    '/mfe-evidence-v1.js?v=1',
     '/qr-camera-v2.js?v=4',
     '/qr-context-v1.js?v=2',
     'https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.js',
