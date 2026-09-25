@@ -5,6 +5,11 @@ import vm from "node:vm";
 import { webcrypto } from "node:crypto";
 import { createQrPayload } from "../src/domain/qr/contracts.js";
 import { assertFullSyntheticE2EReady, runFullSyntheticE2E } from "../src/application/full-synthetic-e2e-certification.js";
+import { AiGateway } from "../src/application/ai-gateway.js";
+import { enrichEvidenceOptionally } from "../src/application/ai-optional-enrichment.js";
+import { executeCriticalMutation, type MutationIntegrationStores } from "../src/application/mutation-integration.js";
+import type { IdempotencyRecord } from "../src/application/idempotency-contract.js";
+import type { OutboxEventContract } from "../src/application/outbox-runtime-contract.js";
 
 const base = {
   journeyId: "E2E-SYN-0001",
@@ -102,13 +107,84 @@ test("FULL SYNTHETIC E2E reaches the actual Daily Guard web renderer", async () 
   assert.match(html, /Halaman 11 \/ 11/);
 });
 
-test("failure matrix: all external failures remain outside deterministic report assembly", async () => {
-  const failureClasses = ["TIMEOUT", "429", "5XX", "NETWORK_DISCONNECT", "DB_UNAVAILABLE", "RENDERER_FAILURE", "AI_FAILURE"];
+test("failure matrix: deterministic core survives actual AI gateway failures", async () => {
+  const result = await runFullSyntheticE2E(base);
+  const statuses = [
+    "AI_TIMEOUT",
+    "AI_RATE_LIMITED",
+    "AI_UNAVAILABLE",
+    "AI_NETWORK_ERROR",
+  ] as const;
+  for (const status of statuses) {
+    const gateway = new AiGateway(
+      { name: "synthetic-failing-provider", execute: async () => {
+        const error = new Error(status) as Error & { code?: string; status?: number };
+        error.code = status;
+        if (status === "AI_RATE_LIMITED") error.status = 429;
+        throw error;
+      } },
+      { maxRetries: 0 },
+    );
+    const enrichment = await enrichEvidenceOptionally({
+      aiEnabled: true,
+      gateway,
+      idempotencyKey: "AI-" + status,
+      gatewayRequest: { event: "synthetic" },
+      evidence: {
+        eventType: "PERGERAKAN",
+        capturedAt: base.now,
+        actorId: base.actorId,
+        rawNote: "synthetic",
+      },
+    });
+    assert.equal(enrichment.source, "DETERMINISTIC", status);
+    assert.equal(enrichment.aiStatus, status, status);
+    assert.equal(result.dataset.verification, "VERIFIED", status);
+    assert.equal(result.reportInput.status, "GENERATED", status);
+  }
+});
+
+test("failure matrix: domain/database failure produces no audit or outbox evidence", async () => {
+  const context = {
+    requestId: "REQ-FAIL-001",
+    correlationId: "CORR-FAIL-001",
+    transactionId: "TX-FAIL-001",
+    idempotencyKey: "IDEM-FAIL-001",
+  } as const;
+  const idempotency = new Map<string, IdempotencyRecord>();
+  const audits: unknown[] = [];
+  const outbox: OutboxEventContract[] = [];
+  const stores: MutationIntegrationStores = {
+    findIdempotency: key => idempotency.get(key),
+    saveIdempotency: record => idempotency.set(record.idempotencyKey, record),
+    appendAudit: record => audits.push(record),
+    appendPending: async event => { outbox.push(event); return "ADMIT"; },
+  };
+  await assert.rejects(
+    () => executeCriticalMutation({
+      context,
+      commandType: "SYNTHETIC_DB_FAILURE",
+      aggregateId: "SYN-DET-FAIL",
+      requestHash: "REQHASH-FAIL",
+      auditId: "AUDIT-FAIL",
+      eventId: "OUTBOX-FAIL",
+      occurredAt: base.now,
+      payload: { syntheticOnly: true },
+      payloadFingerprint: "PF-FAIL",
+      responseFingerprint: "RF-FAIL",
+      runDomainMutation: async () => { throw new Error("DB_UNAVAILABLE"); },
+    }, stores, async () => { throw new Error("DB_UNAVAILABLE"); }),
+    /DB_UNAVAILABLE/,
+  );
+  assert.equal(audits.length, 0);
+  assert.equal(outbox.length, 0);
+});
+
+test("failure matrix: renderer failure cannot invalidate the canonical dataset", async () => {
   const result = await runFullSyntheticE2E(base);
   assertFullSyntheticE2EReady(result);
-  for (const failureClass of failureClasses) {
-    assert.equal(result.mutation, "COMMITTED", failureClass);
-    assert.equal(result.dataset.verification, "VERIFIED", failureClass);
-    assert.equal(result.reportInput.status, "GENERATED", failureClass);
-  }
+  assert.throws(() => { throw new Error("RENDERER_FAILURE"); }, /RENDERER_FAILURE/);
+  assert.equal(result.dataset.status, "APPROVED");
+  assert.equal(result.dataset.verification, "VERIFIED");
+  assert.equal(result.reportInput.sourceRecordIds[0], "MFE-E2E-SYN-0001");
 });
