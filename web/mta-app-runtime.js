@@ -52,7 +52,7 @@
   // Operational runtime is deliberately non-blocking.
   // Cache-bust after the persistence/branding fixes; this must load the current full runtime.
   const s=document.createElement('script');
-  s.src='/mta-app-runtime-full.js?v=17';
+  s.src='/mta-app-runtime-full.js?v=18';
   s.async=true;
   s.dataset.mtaOperationalRuntime='1';
   s.onload=()=>console.info('[MTA] operational runtime loaded v16');
