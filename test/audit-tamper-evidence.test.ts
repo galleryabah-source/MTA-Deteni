@@ -43,8 +43,9 @@ test("audit tamper-evidence: chain reordering is detected", () => {
 test("audit tamper-evidence: deleted event is detected through previous-hash discontinuity", () => {
   const chained = chainSyntheticAudit(events);
   const deleted = [chained[0]];
-  const verification = verifySyntheticAuditChain(deleted);
-  assert.equal(verification.ok, true);
+  const verification = verifySyntheticAuditChain(deleted, chained[1].eventHash);
+  assert.equal(verification.ok, false);
+  assert.equal(verification.status, "INTEGRITY_COMPROMISED");
   assert.equal(verification.checked, 1);
   assert.equal(verification.lastHash, chained[0].eventHash);
 });
