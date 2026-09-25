@@ -226,7 +226,26 @@ document.getElementById('importFile').onchange=e=>{const f=e.target.files[0];if(
 setInterval(()=>document.getElementById('clock').textContent=new Date().toLocaleString('id-ID'),1000);
 async function loadAuthenticatedRuntime(){
   if(window.__mtaRuntimeLoading)return window.__mtaRuntimeLoading;
-  const scripts=['/daily-guard-report-v2.js','/daily-guard-report-d57.js','/admin-settings-v9.js','/mta-unified-shell-v2.js?v=7'];
+  const scripts=[
+    '/offline-v1.js?v=2',
+    '/offline-queue-v1.js?v=2',
+    '/qr-camera-v2.js?v=4',
+    '/qr-context-v1.js?v=2',
+    'https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.js',
+    '/preview-v5.js?v=11',
+    '/preview-v6.js?v=8',
+    '/qr-print-clean-v3.js?v=5',
+    '/room-ops-v9.js?v=10',
+    '/movement-v9.js?v=10',
+    '/master-room-guard-v10.js?v=11',
+    '/preview-v10.js?v=11',
+    '/desktop-shell-v2.js?v=3',
+    '/mobile-shell-v1.js?v=2',
+    '/daily-guard-report-v2.js',
+    '/daily-guard-report-d57.js',
+    '/admin-settings-v9.js',
+    '/mta-unified-shell-v2.js?v=7'
+  ];
   window.__mtaRuntimeLoading=(async()=>{
     for(const src of scripts){
       await new Promise((resolve,reject)=>{
