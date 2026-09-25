@@ -91,6 +91,14 @@ try {
 
   stage = 'operational-nav';
   await page.waitForFunction(() =>
+    typeof window.mtaUnifiedResolve === 'function' &&
+    typeof window.mtaUnifiedAction === 'function' &&
+    !!window.mtaQrCameraV2 &&
+    !!window.mtaDailyGuardReport,
+    null,
+    { timeout: 60000 }
+  );
+  await page.waitForFunction(() =>
     document.querySelectorAll('#nav button[data-view="monitor"], #mtaMobileBottomNav button[data-view="monitor"]').length > 0,
     null,
     { timeout: 60000 }
