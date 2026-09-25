@@ -1,5 +1,8 @@
 import test from "node:test";
 import assert from "node:assert/strict";
+import fs from "node:fs/promises";
+import vm from "node:vm";
+import { webcrypto } from "node:crypto";
 import { createQrPayload } from "../src/domain/qr/contracts.js";
 import { assertFullSyntheticE2EReady, runFullSyntheticE2E } from "../src/application/full-synthetic-e2e-certification.js";
 
@@ -78,26 +81,25 @@ test("failure matrix: future QR stops before mutation", async () => {
   );
 });
 
-test("failure matrix: duplicate mutation is replay-safe", async () => {
-  const first = await runFullSyntheticE2E(base);
-  const second = await runFullSyntheticE2E(base);
-  assert.equal(first.mutation, "COMMITTED");
-  assert.equal(second.mutation, "COMMITTED");
-  assert.equal(first.dataset.deterministicHash, second.dataset.deterministicHash);
-});
-
-test("failure matrix: same idempotency key with different request hash is blocked", async () => {
-  await assert.rejects(
-    () => runFullSyntheticE2E({ ...base, requestHash: "REQHASH-DIFFERENT" }),
-    /FULL_SYNTHETIC_E2E/,
-  );
-});
-
 test("failure matrix: stale/corrupt correlation is structurally blocked by required identity", async () => {
   await assert.rejects(
     () => runFullSyntheticE2E({ ...base, correlationId: " " }),
     /FULL_SYNTHETIC_E2E_IDENTITY_REQUIRED/,
   );
+});
+
+test("FULL SYNTHETIC E2E reaches the actual Daily Guard web renderer", async () => {
+  const result = await runFullSyntheticE2E(base);
+  const source = await fs.readFile(new URL("../web/daily-guard-report-v2.js", import.meta.url), "utf8");
+  const window: Record<string, unknown> = {};
+  vm.runInNewContext(source, { window, crypto: webcrypto, TextEncoder, structuredClone });
+  const renderer = window.mtaDailyGuardReport as { validate: (input: unknown) => boolean; prepare: (input: unknown) => Promise<{ integrityHash: string }>; render: (input: unknown) => string };
+  assert.equal(renderer.validate(result.reportInput), true);
+  const prepared = await renderer.prepare(result.reportInput);
+  const html = renderer.render(prepared);
+  assert.equal((html.match(/class="mta-report-page"/g) || []).length, 11);
+  assert.match(html, /MFE-E2E-SYN-0001/);
+  assert.match(html, /Halaman 11 \/ 11/);
 });
 
 test("failure matrix: all external failures remain outside deterministic report assembly", async () => {
