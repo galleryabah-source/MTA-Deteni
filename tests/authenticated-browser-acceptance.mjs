@@ -229,7 +229,7 @@ try {
     const p = (d.placements || []).find(x => x.movementId === m?.id);
     const audits = (d.audit || []).filter(x => x.resourceId === m?.id || x.resourceId === p?.id);
     return { movementId: m?.id, placementId: p?.id, movementCount: d.movements.length, auditCount: d.audit.length, audits: audits.map(x => x.action), toRoomId: m?.toRoomId };
-  });
+  }, { id: mutationBaseline.detaineeId });
   if (!movementState.movementId || !movementState.placementId || movementState.auditCount < mutationBaseline.beforeAudit + 2 || movementState.audits.length < 2) {
     throw new Error(`browser movement mutation evidence failed: ${JSON.stringify(movementState)}`);
   }
