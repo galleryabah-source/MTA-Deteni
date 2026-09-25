@@ -273,13 +273,23 @@ async function bootMtaApp(){
   if(window.__mtaAppBooted)return;
   if(!window.__mtaAuthState?.resolved||!window.__mtaAuthState?.authenticated)return;
   if(!document.body.classList.contains('mta-auth-ready'))return;
+  // Core dashboard must not wait for optional/operational enhancement scripts.
+  // Render immediately after authentication; load enhancements in the background.
   try{
-    await loadAuthenticatedRuntime();
-    if(window.__mtaAppBooted)return;
     db=load();
     window.__mtaAppBooted=true;
     render();
-  }catch(_){}
+    void loadAuthenticatedRuntime().catch(err=>{
+      console.warn('[MTA] optional authenticated runtime incomplete',err);
+    });
+  }catch(err){
+    console.error('[MTA] core app boot failed',err);
+    const msg=document.getElementById('mtaAuthMessage');
+    if(msg){
+      msg.textContent='Dashboard gagal diinisialisasi: '+(err?.message||'CORE_BOOT_FAILED');
+      msg.className='mta-auth-message error';
+    }
+  }
 }
 window.addEventListener('mta-auth-state',()=>{void bootMtaApp()});
 void bootMtaApp();
