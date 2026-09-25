@@ -9,7 +9,7 @@ const get=()=>{
   }catch{}
   return d;
 };
-const put=d=>window.MTADeteniStateKernel?window.MTADeteniStateKernel.write(d):localStorage.setItem(K,JSON.stringify(d));
+const put=d=>{const result=window.MTADeteniStateKernel?window.MTADeteniStateKernel.write(d):(localStorage.setItem(K,JSON.stringify(d)),true);window.dispatchEvent(new CustomEvent('mta:data-changed',{detail:{source:'admin-settings-v9'}}));return result};
 const E=s=>String(s??'').replace(/[&<>\"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;',"'":'&#39;'}[c]));
 const uid=p=>p+'-'+crypto.randomUUID().slice(0,10).toUpperCase();
 const now=()=>new Date().toISOString();
