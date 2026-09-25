@@ -2,8 +2,8 @@
 'use strict';
 if(window.__mtaUnifiedShellBooted)return;
 window.__mtaUnifiedShellBooted=true;
-const VERSION='mta-unified-shell-v2-single-load';
-const BASE=['/desktop-shell-v2.css?v=4','/responsive-v11.css?v=14','/mta-ui-polish-v1.css?v=1'];
+const VERSION='mta-unified-shell-v2-single-load-ui2';
+const BASE=['/desktop-shell-v2.css?v=5','/responsive-v11.css?v=15','/mta-ui-polish-v1.css?v=2'];
 const SCRIPTS=[];
 const DB_DISCONNECTED='DB_DISCONNECTED';
 const MIGRATION_FREEZE='MIGRATION_FREEZE';
@@ -51,9 +51,18 @@ function navIcon(view){
 function ensureNavIcon(b){
   if(!b||!b.dataset.view)return;
   const view=b.dataset.view;
-  const label=NAV_LABELS[view]||b.dataset.label||b.textContent.replace(/^\s*[◉☷▣⌾▥▤•·]+\s*/,'').trim()||view;
+  const label=NAV_LABELS[view]||b.dataset.label||view;
   b.dataset.label=label;
-  b.innerHTML=navIcon(view)+'<span class="mta-nav-label">'+esc(label)+'</span>';
+  b.removeAttribute('data-icon');
+  b.replaceChildren();
+  const wrap=document.createElement('span');
+  wrap.className='mta-nav-icon-wrap';
+  wrap.setAttribute('aria-hidden','true');
+  wrap.innerHTML=navIcon(view);
+  const text=document.createElement('span');
+  text.className='mta-nav-label';
+  text.textContent=label;
+  b.append(wrap,text);
   b.title=label;
   b.setAttribute('aria-label',label);
 }
