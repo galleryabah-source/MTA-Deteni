@@ -113,8 +113,10 @@
         msg.textContent='Login berhasil. Membuka aplikasi...';
         // Do not depend solely on Supabase's asynchronous auth event.
         // Complete the UI handoff directly from the successful sign-in response.
-        await update({detail:{authenticated:true,user:r.data.user||r.data.session.user||null}});
-        window.dispatchEvent(new CustomEvent('mta-auth-state',{detail:{authenticated:true,user:r.data.user||r.data.session.user||null}}));
+        const authDetail={authenticated:true,user:r.data.user||r.data.session.user||null};
+        await update({detail:authDetail});
+        await loadCoreDashboard();
+        window.dispatchEvent(new CustomEvent('mta-auth-state',{detail:authDetail}));
       }catch(err){
         msg.className='mta-auth-message error';
         msg.textContent='Email atau password tidak valid, atau autentikasi belum dapat diproses.';
@@ -147,6 +149,27 @@
       gate.classList.add('open');
       renderHeader(false,null);
     }
+  }
+
+  function loadCoreDashboard(){
+    if(window.__mtaCoreDashboardLoading)return window.__mtaCoreDashboardLoading;
+    if(window.__mtaCoreBooted)return Promise.resolve();
+    window.__mtaCoreDashboardLoading=new Promise((resolve,reject)=>{
+      const existing=document.querySelector('script[data-mta-core-dashboard]');
+      if(existing){
+        existing.addEventListener('load',()=>resolve(),{once:true});
+        existing.addEventListener('error',()=>reject(new Error('CORE_DASHBOARD_LOAD_FAILED')),{once:true});
+        return;
+      }
+      const s=document.createElement('script');
+      s.src='/mta-app-runtime.js?v=3';
+      s.async=true;
+      s.dataset.mtaCoreDashboard='1';
+      s.onload=()=>resolve();
+      s.onerror=()=>reject(new Error('CORE_DASHBOARD_LOAD_FAILED'));
+      document.body.appendChild(s);
+    }).finally(()=>{window.__mtaCoreDashboardLoading=null});
+    return window.__mtaCoreDashboardLoading;
   }
 
   function loadAuthModule(){
