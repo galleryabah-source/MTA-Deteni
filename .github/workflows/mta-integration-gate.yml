@@ -21,7 +21,7 @@ jobs:
           checks=(
           "mta-app-runtime.js|web/index.html"
           "mta-app-runtime-full.js|web/mta-app-runtime.js"
-          "mta-unified-shell-v2.js?v=8|web/mta-app-runtime-full.js"
+          "mta-unified-shell-v2.js?v=10|web/mta-app-runtime-full.js"
           "mtaUnifiedResolve|web/mta-unified-shell-v2.js"
           "mta:qr-detected|web/mta-unified-shell-v2.js"
           "mtaUnifiedScannerContractTest|web/mta-unified-shell-v2.js"
