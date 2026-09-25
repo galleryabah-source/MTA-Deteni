@@ -169,7 +169,7 @@ jobs:
                 window.show('scan-center');
               });
               await page.locator('#p5out').waitFor({state:'visible',timeout:5000});
-              await page.evaluate(()=>window.mtaQrCameraV2.simulateDecode?.('mta://detainee/D-QR-TEST/DTQR-TEST'));
+              await page.evaluate(()=>{ window.mtaQrCameraV2.simulateDecode?.('mta://detainee/D-QR-TEST/DTQR-TEST'); });
               await page.waitForFunction(()=>/DETAINEE|Buka Data Deteni|Catat Pergerakan/i.test(document.querySelector('#p5out')?.textContent||''),null,{timeout:5000});
               const result=await page.evaluate(()=>document.querySelector('#p5out')?.textContent||'');
               if(!result.includes('DETAINEE')||!result.includes('Buka Data Deteni')||!result.includes('Catat Pergerakan')) throw new Error('QR Scan → Data → Action contract failed: '+result);
