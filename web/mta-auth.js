@@ -13,6 +13,9 @@ const supabase=createClient(
   }
 );
 
+let authHydrationResolved=false;
+let pendingAuthSession=null;
+
 async function syncSession(session, resolved=true){
   const token=session?.access_token||null;
   const authenticated=!!session;
@@ -33,9 +36,15 @@ const getSessionWithTimeout=async()=>{
   }
 };
 
-supabase.auth.onAuthStateChange((_event,session)=>{
-  // Auth events may arrive before getSession() finishes hydration. Do not
-  // interpret that transient state as a logout; the UI waits for resolution.
+supabase.auth.onAuthStateChange((event,session)=>{
+  // During a hard refresh Supabase may emit INITIAL_SESSION with null before
+  // its persisted session has finished hydrating. Never translate that
+  // transient state into a logout. getSession() is the authoritative
+  // hydration boundary; subsequent events are authoritative after it resolves.
+  if(!authHydrationResolved){
+    pendingAuthSession=session||null;
+    return;
+  }
   void syncSession(session, true);
 });
 
@@ -51,8 +60,22 @@ window.mtaAuth=Object.freeze({
 void (async()=>{
   try{
     const initial=await getSessionWithTimeout();
+    authHydrationResolved=true;
+    // Prefer the persisted session returned by getSession(). A transient
+    // INITIAL_SESSION callback must never override it with null.
     await syncSession(initial.data.session, true);
-  }catch(_){
-    await syncSession(null, true);
+    pendingAuthSession=null;
+  }catch(err){
+    // A timeout/network error is not evidence of an explicit logout.
+    // Keep the auth boundary unresolved rather than forcing the login gate.
+    console.warn('[MTA] auth session hydration deferred',err);
+    authHydrationResolved=true;
+    if(pendingAuthSession){
+      await syncSession(pendingAuthSession, true);
+      pendingAuthSession=null;
+    }else{
+      window.__mtaAuthState=Object.freeze({resolved:false,authenticated:false,user:null});
+      window.dispatchEvent(new CustomEvent('mta-auth-state',{detail:{resolved:false,authenticated:false,user:null}}));
+    }
   }
 })();
