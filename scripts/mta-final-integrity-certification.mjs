@@ -1,5 +1,6 @@
 import fs from 'node:fs';
 import vm from 'node:vm';
+import { webcrypto } from 'node:crypto';
 
 const kernelSource=fs.readFileSync('web/mta-state-kernel-v1.js','utf8');
 const source=fs.readFileSync('web/mta-unified-shell-v2.js','utf8');
@@ -37,7 +38,7 @@ class LS{constructor(v){this.v=new Map([['mta-deteni-demo-v2',JSON.stringify(v)]
 const localStorage=new LS(state),listeners=new Map();
 const window={addEventListener(t,f){listeners.set(t,f)},dispatchEvent(e){listeners.get(e.type)?.(e);return true}};
 const document={readyState:'loading',getElementById:id=>({id,innerHTML:'',style:{},classList:{toggle(){}}}),querySelector:()=>null,querySelectorAll:()=>[],addEventListener(){},createElement:()=>({dataset:{},setAttribute(){},appendChild(){}}),head:{appendChild(){}}};
-const context={window,document,localStorage,console,Date,Math,JSON,Map,Set,Array,Object,String,Number,Boolean,RegExp,Promise,structuredClone,CustomEvent:class CustomEvent{constructor(type,init={}){this.type=type;Object.assign(this,init)}},setTimeout,clearTimeout};
+const context={window,document,localStorage,console,crypto:webcrypto,Date,Math,JSON,Map,Set,Array,Object,String,Number,Boolean,RegExp,Promise,structuredClone,CustomEvent:class CustomEvent{constructor(type,init={}){this.type=type;Object.assign(this,init)}},setTimeout,clearTimeout};
 context.globalThis=context; context.db=structuredClone(state); context.KEY='mta-deteni-demo-v2';
 context.save=function save(){localStorage.setItem(KEY,JSON.stringify(db));window.dispatchEvent(new CustomEvent('mta:data-changed'))};
 context.window.mtaQrCameraV2={open(){},close(){}};
