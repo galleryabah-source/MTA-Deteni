@@ -114,7 +114,7 @@
         // Do not depend solely on Supabase's asynchronous auth event.
         // Complete the UI handoff directly from the successful sign-in response.
         const authDetail={authenticated:true,user:r.data.user||r.data.session.user||null};
-        await update({detail:authDetail});
+        update({detail:authDetail});
         await loadCoreDashboard();
         window.dispatchEvent(new CustomEvent('mta-auth-state',{detail:authDetail}));
       }catch(err){
@@ -135,12 +135,24 @@
       if(app)app.style.removeProperty('display');
       gate.classList.remove('open');
       renderHeader(true,event.detail.user);
-      try{
-        const me=await window.mtaProductionApi?.get('me');
-        const box=document.getElementById('mtaAuthUi');
-        const state=box?.querySelector('.pill');
-        if(state&&me?.role)state.textContent=me.role;
-      }catch(_){}
+      // /api/mta/me is supplementary RBAC metadata. Never block the
+      // authentication -> dashboard handoff on this request.
+      void (async()=>{
+        try{
+          const controller=new AbortController();
+          const timer=setTimeout(()=>controller.abort(),3000);
+          const response=await fetch('/api/mta/me',{
+            headers:window.mtaProductionApi?.config?.supabasePublishableKey
+              ? {'Content-Type':'application/json'}
+              : {}
+          });
+          clearTimeout(timer);
+          const me=response.ok ? await response.json() : null;
+          const box=document.getElementById('mtaAuthUi');
+          const state=box?.querySelector('.pill');
+          if(state&&me?.role)state.textContent=me.role;
+        }catch(_){}
+      })();
     }else{
       document.body.classList.remove('mta-auth-ready');
       document.body.classList.add('mta-auth-locked');
