@@ -362,8 +362,8 @@ async function boot(){
   window.MTA_DETENI_MODULE_LOAD_REPORT=loaded;
   setTimeout(()=>{
     if(window.__mtaAuthState?.authenticated){
-      if(typeof window.render==='function')window.render();
-      window.show('monitor');
+      const targetView=window.__mtaUnifiedCurrentView||'dashboard';
+      if(typeof window.show==='function')window.show(targetView);
     }
   },80);
   window.dispatchEvent(new CustomEvent('mta:unified-ready',{detail:{version:VERSION,loaded}}));
