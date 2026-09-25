@@ -261,7 +261,10 @@ try {
   });
   if (!leaveState.id || leaveState.status !== 'DRAFT') throw new Error(`leave create mutation failed: ${JSON.stringify(leaveState)}`);
   for (const expected of ['SUBMITTED', 'APPROVED', 'DEPARTED', 'RETURNED', 'COMPLETED']) {
-    await page.getByRole('button', { name: new RegExp(expected === 'SUBMITTED' ? 'SUBMIT' : expected === 'APPROVED' ? 'APPROVE' : expected === 'DEPARTED' ? 'DEPART' : expected === 'RETURNED' ? 'RETURN' : 'COMPLETE') }).click();
+    const actionLabel = expected === 'SUBMITTED' ? 'SUBMIT' : expected === 'APPROVED' ? 'APPROVE' : expected === 'DEPARTED' ? 'DEPART' : expected === 'RETURNED' ? 'RETURN' : 'COMPLETE';
+    const actionButton = page.locator('#appView button').filter({ hasText: actionLabel }).first();
+    await actionButton.waitFor({ state: 'visible', timeout: 5000 });
+    await actionButton.click();
     await page.waitForFunction(({id,expected}) => {
       const d = JSON.parse(localStorage.getItem('mta-deteni-demo-v2') || '{}');
       return (d.leaves || []).some(l => l.id === id && l.status === expected);
