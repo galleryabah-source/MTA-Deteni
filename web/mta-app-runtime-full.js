@@ -327,7 +327,7 @@ async function loadAuthenticatedRuntime(){
     '/mobile-shell-v1.js?v=3',
     '/daily-guard-report-v2.js',
     '/daily-guard-report-d57.js',
-    '/admin-settings-v9.js?v=3',
+    '/admin-settings-v9.js?v=4',
     '/mta-unified-shell-v2.js?v=10',
     '/mta-system-audit-v1.js?v=2'
   ];
