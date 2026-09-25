@@ -130,6 +130,7 @@ jobs:
             await page.addScriptTag({url:'http://127.0.0.1:4173/mta-app-runtime.js?v=10'});
             await page.waitForFunction(()=>typeof window.show==='function' && typeof window.mtaUnifiedResolve==='function',null,{timeout:10000});
             for(const s of ['offline-queue-v1.js','qr-camera-v2.js','preview-v5.js','preview-v6.js','preview-v10.js']) await page.addScriptTag({url:`http://127.0.0.1:4173/${s}`});
+            await page.addScriptTag({url:'http://127.0.0.1:4173/mta-unified-shell-v2.js?v=10'});
             await page.addStyleTag({url:'http://127.0.0.1:4173/desktop-shell-v2.css'});
             await page.addScriptTag({url:'http://127.0.0.1:4173/desktop-shell-v2.js'});
             await page.addScriptTag({url:'http://127.0.0.1:4173/mobile-shell-v1.js'});
