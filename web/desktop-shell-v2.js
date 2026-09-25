@@ -60,7 +60,7 @@
     if(!toggle){
       toggle=document.createElement('button');
       toggle.type='button';
-      toggle.id='mtaSidebarToggle';
+      toggle.id='mtaResponsiveNavToggle';
       toggle.className='mta-nav-toggle';
       side.insertBefore(toggle,side.firstChild);
     }
