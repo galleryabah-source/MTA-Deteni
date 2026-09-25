@@ -36,6 +36,21 @@ function applyWebBranding(){
     const small=brand.querySelector('small');if(small&&b.subtitle)small.textContent=b.subtitle;
   }
   const title=b.title||'MTA DETENI Digital';document.title=title;
+  let favicon=document.querySelector('link[data-mta-brand-favicon]');
+  if(!favicon){favicon=document.createElement('link');favicon.rel='icon';favicon.dataset.mtaBrandFavicon='1';document.head.appendChild(favicon)}
+  favicon.href=b.iconData||'/favicon.ico';
+  const top=document.querySelector('.top');
+  if(top){
+    if(b.headerData){
+      top.style.backgroundImage='linear-gradient(90deg,rgba(255,255,255,.97) 0%,rgba(255,255,255,.92) 55%,rgba(255,255,255,.70) 100%),url("'+b.headerData+'")';
+      top.style.backgroundSize='cover';
+      top.style.backgroundPosition='right center';
+    }else{
+      top.style.backgroundImage='';
+      top.style.backgroundSize='';
+      top.style.backgroundPosition='';
+    }
+  }
 }
 function readImage(file,cb){
   if(!file){return}
