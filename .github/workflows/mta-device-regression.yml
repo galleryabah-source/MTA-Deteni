@@ -103,7 +103,26 @@ jobs:
             const page=await browser.newPage({viewport:{width:Number(process.env.WIDTH),height:Number(process.env.HEIGHT)}});
             const errors=[];
             page.on('pageerror',e=>errors.push(e.message));
-            await page.goto('http://127.0.0.1:4173/',{waitUntil:'networkidle'});
+            await page.route('https://esm.sh/@supabase/supabase-js@2',async route=>{
+              await route.fulfill({
+                status:200,
+                contentType:'application/javascript',
+                body:`export function createClient(){
+                  let session=null;
+                  const user={id:'synthetic-user',email:'synthetic@example.test'};
+                  const auth={
+                    async getSession(){return {data:{session},error:null};},
+                    onAuthStateChange(cb){setTimeout(()=>cb('SIGNED_OUT',null),0);return {data:{subscription:{unsubscribe(){}}}};},
+                    async signInWithPassword(){session={access_token:'synthetic-browser-token',user};return {data:{session,user},error:null};},
+                    async signOut(){session=null;return {error:null};},
+                    async getUser(){return {data:{user:session?.user||null},error:null};}
+                  };
+                  return {auth};
+                }`
+              });
+            });
+            await page.goto('http://127.0.0.1:4173/',{waitUntil:'domcontentloaded'});
+            await page.waitForTimeout(300);
             await page.evaluate(()=>{window.__MTA_TEST_MODE__=true});
             for(const s of ['offline-queue-v1.js','qr-camera-v2.js','preview-v5.js','preview-v6.js','preview-v10.js']) await page.addScriptTag({url:`http://127.0.0.1:4173/${s}`});
             await page.addStyleTag({url:'http://127.0.0.1:4173/desktop-shell-v2.css'});
