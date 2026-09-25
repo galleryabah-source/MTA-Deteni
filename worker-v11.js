@@ -2,6 +2,10 @@ export default {
   async fetch(request, env) {
     const url = new URL(request.url);
     if (url.pathname.startsWith('/api/mta/')) {
+      const authorization = request.headers.get('Authorization') || '';
+      if (!/^Bearer\s+\S+$/i.test(authorization)) {
+        return Response.json({ok:false,error:'AUTH_REQUIRED'}, {status:401,headers:{'Cache-Control':'no-store'}});
+      }
       const upstream = new URL('https://tmmhxqgzelgrsrxbbfzh.supabase.co/functions/v1/mta-api');
       upstream.pathname += url.pathname.slice('/api/mta'.length);
       upstream.search = url.search;
