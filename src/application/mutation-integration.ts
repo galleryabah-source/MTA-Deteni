@@ -17,6 +17,11 @@ export type MutationAuditRecord = Readonly<{
 export type MutationIntegrationStores = Readonly<{
   findIdempotency: (key: string) => IdempotencyRecord | undefined;
   saveIdempotency: (record: IdempotencyRecord) => void;
+  /**
+   * Optional atomic reservation hook. Production stores should implement this
+   * with a unique constraint/transaction so concurrent requests cannot both execute.
+   */
+  claimIdempotency?: (record: IdempotencyRecord) => "CLAIMED" | "EXISTING";
   appendAudit: (record: MutationAuditRecord) => void;
   appendPending: (event: OutboxEventContract) => Promise<"ADMIT" | "REPLAY" | "CONFLICT">;
 }>;
@@ -52,6 +57,13 @@ export async function executeCriticalMutation<T>(
 
   return runCriticalTransaction(transactionRunner, context as TransactionContext, async () => {
     const inProgress = createIdempotencyRecord({ idempotencyKey: context.idempotencyKey, commandType: input.commandType, requestHash: input.requestHash, status: "IN_PROGRESS", createdAt: input.occurredAt });
+    const claim = stores.claimIdempotency?.(inProgress);
+    if (claim === "EXISTING") {
+      const raced = stores.findIdempotency(context.idempotencyKey);
+      if (raced && raced.requestHash !== input.requestHash) throw new Error("IDEMPOTENCY_KEY_REUSED_WITH_DIFFERENT_REQUEST");
+      if (raced?.status === "COMPLETED") return Object.freeze({ outcome: "REPLAYED" as const, value: undefined });
+      throw new Error("IDEMPOTENCY_CONCURRENT_EXECUTION_BLOCKED");
+    }
     stores.saveIdempotency(inProgress);
     const value = await input.runDomainMutation();
     const completed = createIdempotencyRecord({ ...inProgress, status: "COMPLETED", responseFingerprint: input.responseFingerprint, completedAt: input.occurredAt });
