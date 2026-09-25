@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import { createExecutionContext } from "../src/application/execution-context-contract.js";
 import { certifyObservabilityTrace } from "../src/application/observability-certification.js";
+import type { ObservabilityEvent } from "../src/application/observability-contract.js";
 
 const context = createExecutionContext({
   requestId: "REQ-OBS-1",
@@ -54,6 +55,10 @@ test("observability rejects stage order drift and duplicate event ids", () => {
 
 test("observability blocks sensitive metadata from logs", () => {
   const events = trace();
-  events[3] = { ...events[3], event: { ...events[3].event, metadata: { source: "SYNTHETIC", token: "SECRET" } as Record<string, string> } };
+  const sensitiveMetadata: ObservabilityEvent["metadata"] = {
+    source: "SYNTHETIC",
+    token: "SECRET",
+  };
+  events[3] = { ...events[3], event: { ...events[3].event, metadata: sensitiveMetadata } };
   assert.throws(() => certifyObservabilityTrace({ context, trace: events }), /OBSERVABILITY_SENSITIVE_METADATA_BLOCKED/);
 });
