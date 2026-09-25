@@ -752,6 +752,157 @@ The first system/engine audit remediation pass is implemented. A unified State K
 This is an implementation milestone, not final certification. Deployment and browser journey verification remain mandatory before PASS can be declared.
 
 
+## 26. Locked Mobile Field Evidence Intake & Daily Report Supply — 25 September 2026
+
+MTA DETENI menetapkan **Mobile Field Evidence Intake → Daily Report Assembly** sebagai bagian inti dari rancangan operasional dan AI Document Automation. Fitur ini harus segera diimplementasikan sebagai pemasok data aktual untuk Laporan Harian dan dokumen operasional lain yang membutuhkan evidence lapangan.
+
+### 26.1 Prinsip
+
+Petugas lapangan tidak dituntut menyusun laporan lengkap dari smartphone. Petugas melakukan capture sesingkat mungkin:
+
+```
+FOTO → CATAT → VOICE (opsional) → SIMPAN/SYNC
+```
+
+MTA DETENI mengubah capture tersebut menjadi evidence terstruktur, menggabungkannya ke Daily Dataset, melakukan validasi/AI assistance bila tersedia, lalu mengisi template laporan yang telah disetujui.
+
+### 26.2 Mobile Field Capture
+
+Mobile UI harus dirancang sebagai **field capture interface**, bukan sekadar desktop UI yang diperkecil.
+
+Minimum capture:
+
+- foto langsung dari kamera;
+- catatan singkat;
+- quick category/event type;
+- waktu capture;
+- actor/petugas;
+- lokasi/ruang bila tersedia dan diizinkan;
+- voice note/transcription assistance bila diaktifkan;
+- attachment/evidence lain yang disahkan;
+- status sinkronisasi.
+
+Input harus meminimalkan typing dan menyediakan quick selection.
+
+### 26.3 Evidence Model
+
+Setiap capture menjadi evidence item yang memiliki konteks:
+
+```
+Evidence
+ ├─ event/type
+ ├─ actor
+ ├─ captured_at
+ ├─ location/context bila diizinkan
+ ├─ raw note
+ ├─ photo(s)
+ ├─ voice/source bila ada
+ ├─ provenance
+ ├─ verification status
+ └─ sync status
+```
+
+Foto adalah **first-class evidence**, bukan attachment tanpa konteks.
+
+### 26.4 Offline-First
+
+Field capture harus tetap dapat dilakukan ketika jaringan tidak tersedia.
+
+```
+SMARTPHONE
+   ↓
+LOCAL OUTBOX
+   ↓
+NETWORK AVAILABLE?
+   ├─ NO  → retain safely
+   └─ YES → SYNC API → SERVER → ACK
+```
+
+Sinkronisasi harus idempotent, dapat dilanjutkan setelah reconnect, dan tidak boleh membuat duplicate core transaction.
+
+### 26.5 Daily Dataset
+
+Evidence dikumpulkan menjadi dataset laporan harian:
+
+```
+Field Evidence
+      ↓
+Validation
+      ↓
+Daily Dataset
+      ↓
+AI Assistance (optional)
+      ↓
+Human Verification
+      ↓
+Approved Dataset
+      ↓
+Approved Daily Report Template
+      ↓
+Document Engine
+      ↓
+DOCX / PDF
+```
+
+AI dapat membantu pengelompokan kegiatan, normalisasi catatan, draft caption, identifikasi evidence terkait, dan mendeteksi data yang belum lengkap. Raw evidence tetap dipertahankan dan AI tidak menjadi sumber kebenaran tunggal.
+
+### 26.6 Photo-to-Report Contract
+
+Saat capture, petugas dapat menandai foto untuk laporan dan/atau mengaitkannya dengan event. Foto dapat memiliki:
+
+- report inclusion flag;
+- event reference;
+- image slot candidate;
+- caption draft;
+- sequence/order;
+- source reference;
+- verification status.
+
+Dengan demikian petugas tidak perlu mencari ulang foto dari galeri ketika laporan dibuat.
+
+### 26.7 Daily Report Inbox
+
+Mobile interface menyediakan ringkasan hari berjalan:
+
+- jumlah evidence;
+- jumlah foto;
+- jumlah event;
+- jumlah data;
+- unsynced items;
+- incomplete items;
+- timeline kegiatan;
+- action **Tambah Capture**;
+- action **Sinkronkan**;
+- action **Preview Laporan** bila role/workflow mengizinkan.
+
+### 26.8 Separation of Concerns
+
+```
+FIELD EVIDENCE
+      ↓
+REPORT DATASET
+      ↓
+APPROVED TEMPLATE
+      ↓
+DOCUMENT ENGINE
+```
+
+Data aktual tidak mencampuri desain template. Template tidak menjadi tempat penyimpanan evidence mentah. Document Engine tidak mengambil keputusan substantif.
+
+### 26.9 Implementation Priority
+
+This capability is now a **near-term implementation priority** and must be integrated with the existing MTA DETENI runtime rather than built as a disconnected application.
+
+Implementation must preserve:
+
+- existing State Kernel/canonical persistence boundary;
+- RBAC/ABAC;
+- audit/evidence chain;
+- offline/local continuity contracts;
+- migration freeze until schema/data contract gates are cleared;
+- AI failure isolation;
+- synthetic-only controlled testing before production.
+
 ## 25. Deep Cohesion Remediation — 25 September 2026
 
 The stabilization work continued beyond the first persistence/navigation consolidation. The application now has one authoritative Detainee CRUD owner in the core runtime, authoritative synthetic Master Room references in the seed, compatibility normalization for older synthetic local states, canonical State Kernel audit creation across operational modules, stronger kernel/system contract checks, and browser acceptance coverage for the real Detainee Add → Edit → Archive journey. UI design remains frozen. Database schema and migrations remain frozen. Final certification is still gated on CI, deployed preview, browser journey, security, evidence, F0–F5, and P13 verification.
