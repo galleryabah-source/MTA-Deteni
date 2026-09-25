@@ -321,7 +321,7 @@ async function loadAuthenticatedRuntime(){
     '/qr-print-clean-v3.js?v=5',
     '/room-ops-v9.js?v=10',
     '/movement-v9.js?v=10',
-    '/master-room-guard-v10.js?v=11',
+    '/master-room-guard-v10.js?v=12',
     '/preview-v10.js?v=11',
     '/desktop-shell-v2.js?v=7',
     '/mobile-shell-v1.js?v=3',
