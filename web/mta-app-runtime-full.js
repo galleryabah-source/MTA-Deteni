@@ -1,8 +1,34 @@
-const KEY='mta-deteni-demo-v2';
+const KEY='mta-deteni-demo-v2'; const BRANDING_KEY='mta-deteni-branding-v1';
 const seed={meta:{version:2,createdAt:new Date().toISOString()},detainees:[{id:'DET-001',code:'DET-2026-001',name:'SYNTHETIC A',nationality:'Contoh',status:'AKTIF',placement:'Blok A / Kamar 01',createdAt:'2026-09-16T07:00:00Z'},{id:'DET-002',code:'DET-2026-002',name:'SYNTHETIC B',nationality:'Contoh',status:'AKTIF',placement:'Blok B / Kamar 02',createdAt:'2026-09-16T07:10:00Z'}],placements:[{id:'PLC-001',detaineeId:'DET-001',block:'Blok A',room:'Kamar 01',since:'2026-09-16T07:20:00Z'},{id:'PLC-002',detaineeId:'DET-002',block:'Blok B',room:'Kamar 02',since:'2026-09-16T07:25:00Z'}],movements:[],leaves:[],documents:[],audit:[]};
 let db=null; let current='dashboard';
-function load(){try{const x=JSON.parse(localStorage.getItem(KEY));return x&&x.detainees?x:structuredClone(seed)}catch{return structuredClone(seed)}}
-function save(){localStorage.setItem(KEY,JSON.stringify(db));window.dispatchEvent(new CustomEvent('mta:data-changed'))}
+function load(){
+  try{
+    const x=JSON.parse(localStorage.getItem(KEY));
+    const state=x&&x.detainees?x:structuredClone(seed);
+    try{
+      const branding=JSON.parse(localStorage.getItem(BRANDING_KEY));
+      if(branding&&state.adminSettings)state.adminSettings.branding=branding;
+    }catch{}
+    return state;
+  }catch{return structuredClone(seed)}
+}
+function save(){
+  try{
+    // Keep potentially large uploaded branding assets outside the operational state
+    // so detainee create/edit cannot fail because of localStorage quota.
+    const branding=db?.adminSettings?.branding;
+    const persist=structuredClone(db);
+    if(persist.adminSettings)delete persist.adminSettings.branding;
+    localStorage.setItem(KEY,JSON.stringify(persist));
+    if(branding)localStorage.setItem(BRANDING_KEY,JSON.stringify(branding));
+    window.dispatchEvent(new CustomEvent('mta:data-changed'));
+    return true;
+  }catch(err){
+    console.error('[MTA] save failed',err);
+    toast('Gagal menyimpan data: '+(err?.message||'STORAGE_ERROR'));
+    return false;
+  }
+}
 function uid(prefix){return prefix+'-'+Math.random().toString(36).slice(2,8).toUpperCase()}
 function now(){return new Date().toISOString()}
 function validateRuntimeState(x){if(!x||typeof x!=='object')throw new Error('STATE_INVALID');const roots=['detainees','placements','movements','leaves','documents','audit','rooms','blocks'];for(const k of roots)if(!Array.isArray(x[k]))throw new Error('STATE_ARRAY_REQUIRED:'+k);for(const k of roots){const ids=x[k].map(v=>v?.id).filter(Boolean);if(new Set(ids).size!==ids.length)throw new Error('STATE_DUPLICATE_ID:'+k)}if(x.audit.some(a=>!a?.id||!a?.action||!a?.resourceType||!a?.occurredAt))throw new Error('AUDIT_INVALID');const roomIds=new Set(x.rooms.map(r=>r.id));if(x.placements.some(p=>p.roomId&&!roomIds.has(p.roomId)))throw new Error('PLACEMENT_MASTER_ROOM_MISSING');const detaineeIds=new Set(x.detainees.map(d=>d.id));if(x.movements.some(m=>m.detaineeId&&!detaineeIds.has(m.detaineeId)))throw new Error('MOVEMENT_DETAINEE_MISSING');if(x.leaves.some(l=>l.detaineeId&&!detaineeIds.has(l.detaineeId)))throw new Error('LEAVE_DETAINEE_MISSING');return true}
@@ -63,7 +89,7 @@ function addDetainee(existing){
           audit('PLACEMENT_ASSIGN','PLACEMENT',p.id);
         }
       }
-      save();closeModal();render();toast('Data tersimpan');
+      if(!save())return;closeModal();render();toast('Data tersimpan');
     }catch(err){console.error('[MTA] detainee save failed',err);toast('Gagal menyimpan data: '+(err?.message||'ERROR'))}
   };
 }
