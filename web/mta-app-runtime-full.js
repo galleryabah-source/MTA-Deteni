@@ -5,6 +5,10 @@ function load(){
   try{
     const x=JSON.parse(localStorage.getItem(KEY));
     const state=x&&x.detainees?x:structuredClone(seed);
+    if(state.adminSettings?.branding){
+      try{localStorage.setItem(BRANDING_KEY,JSON.stringify(state.adminSettings.branding));}catch{}
+      delete state.adminSettings.branding;
+    }
     try{
       const branding=JSON.parse(localStorage.getItem(BRANDING_KEY));
       if(branding&&state.adminSettings)state.adminSettings.branding=branding;
