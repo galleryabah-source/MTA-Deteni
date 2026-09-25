@@ -119,7 +119,7 @@
         msg.textContent='Dashboard terbuka. Runtime operasional sedang dimuat...';
         // Notify the rest of the application only after the core shell is visible.
         window.dispatchEvent(new CustomEvent('mta-auth-state',{detail:authDetail}));
-        void loadCoreDashboard().catch(err=>console.warn('[MTA] operational runtime handoff failed',err));
+        // Runtime loading is owned by index.html's single authenticated loader.
       }catch(err){
         msg.className='mta-auth-message error';
         msg.textContent='Email atau password tidak valid, atau autentikasi belum dapat diproses.';
@@ -138,22 +138,7 @@
       if(app)app.style.removeProperty('display');
       gate.classList.remove('open');
       renderHeader(true,event.detail.user);
-      // /api/mta/me is supplementary RBAC metadata. Never block the
-      // authentication -> dashboard handoff on this request.
-      void (async()=>{
-        try{
-          const controller=new AbortController();
-          const timer=setTimeout(()=>controller.abort(),3000);
-          const token=window.__mtaAuthState?.user ? null : null;
-          const response=await fetch('/api/mta/me',{headers:{'Content-Type':'application/json'},signal:controller.signal});
-          clearTimeout(timer);
-          const me=response.ok ? await response.json() : null;
-          const box=document.getElementById('mtaAuthUi');
-          const state=box?.querySelector('.pill');
-          if(state&&me?.role)state.textContent=me.role;
-        }catch(_){}
-      })();
-    }else{
+      // Protected API metadata is resolved by the authenticated runtime using the bearer token.\n    }else{
       document.body.classList.remove('mta-auth-ready');
       document.body.classList.add('mta-auth-locked');
       const app=document.querySelector('.app');
@@ -186,27 +171,6 @@
         '</section>';
     }
     renderHeader(true,user||null);
-  }
-
-  function loadCoreDashboard(){
-    if(window.__mtaCoreDashboardLoading)return window.__mtaCoreDashboardLoading;
-    if(window.__mtaCoreBooted)return Promise.resolve();
-    window.__mtaCoreDashboardLoading=new Promise((resolve,reject)=>{
-      const existing=document.querySelector('script[data-mta-core-dashboard]');
-      if(existing){
-        existing.addEventListener('load',()=>resolve(),{once:true});
-        existing.addEventListener('error',()=>reject(new Error('CORE_DASHBOARD_LOAD_FAILED')),{once:true});
-        return;
-      }
-      const s=document.createElement('script');
-      s.src='/mta-app-runtime.js?v=3';
-      s.async=true;
-      s.dataset.mtaCoreDashboard='1';
-      s.onload=()=>resolve();
-      s.onerror=()=>reject(new Error('CORE_DASHBOARD_LOAD_FAILED'));
-      document.body.appendChild(s);
-    }).finally(()=>{window.__mtaCoreDashboardLoading=null});
-    return window.__mtaCoreDashboardLoading;
   }
 
   function loadAuthModule(){
