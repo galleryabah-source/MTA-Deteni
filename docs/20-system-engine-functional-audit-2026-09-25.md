@@ -121,3 +121,13 @@ The Final Integrity Gate no longer depends on an exact source-code string inside
 **Browser journey verification:** PENDING.
 
 Therefore these changes must not yet be labeled final certification PASS. The next gate is deployment followed by browser regression against the real preview runtime.
+
+
+## 10. CI feedback incorporated
+The repository CI immediately detected two stale assumptions introduced/exposed by the consolidation:
+- Static/settings regression expected Unified Shell cache `v=8`; the runtime now intentionally uses `v=10`. The CI contract was updated to the current version.
+- Device regression treated the 768px tablet profile as requiring the mobile bottom shell. The approved UI baseline is desktop-first with desktop target >=1025px; the regression boundary was corrected so the mobile-shell assertion applies to the phone profile rather than forcing a mobile redesign at tablet width.
+
+The source parser check was independently executed against the changed JavaScript modules through the GitHub source and all changed JS files parsed successfully after the master-room guard closure correction.
+
+Latest CI runs for the current remediation commit are still in progress; therefore no final runtime certification is claimed yet.
