@@ -244,7 +244,7 @@ async function loadAuthenticatedRuntime(){
     '/daily-guard-report-v2.js',
     '/daily-guard-report-d57.js',
     '/admin-settings-v9.js',
-    '/mta-unified-shell-v2.js?v=7'
+    '/mta-unified-shell-v2.js?v=8'
   ];
   window.__mtaRuntimeLoading=(async()=>{
     for(const src of scripts){
