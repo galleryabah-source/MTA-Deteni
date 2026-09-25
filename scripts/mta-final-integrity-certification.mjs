@@ -1,6 +1,7 @@
 import fs from 'node:fs';
 import vm from 'node:vm';
 
+const kernelSource=fs.readFileSync('web/mta-state-kernel-v1.js','utf8');
 const source=fs.readFileSync('web/mta-unified-shell-v2.js','utf8');
 const state={
   detainees:[
@@ -45,7 +46,7 @@ context.window.MTADeteniOfflineQueue={}; context.window.p9refreshRooms=()=>{}; c
 context.window.buildReportEvidence=r=>r.evidence;
 context.validateReportEvidence=function validateReportEvidence(r){const e=r?.evidence;if(!e||!Array.isArray(e.sourceRecords)||!Array.isArray(e.auditIds))throw Error('REPORT_EVIDENCE_REQUIRED');for(const s of e.sourceRecords){const a={DETAINEE:db.detainees,MOVEMENT:db.movements,LEAVE:db.leaves,PLACEMENT:db.placements,ROOM:db.rooms}[s.type];if(!(a||[]).some(v=>v?.id===s.id))throw Error('REPORT_SOURCE_MISSING:'+s.type+':'+s.id)}return true};
 context.window.validateReportEvidence=context.validateReportEvidence;
-vm.createContext(context); vm.runInContext(source,context,{filename:'web/mta-unified-shell-v2.js'});
+vm.createContext(context); vm.runInContext(kernelSource,context,{filename:'web/mta-state-kernel-v1.js'}); vm.runInContext(source,context,{filename:'web/mta-unified-shell-v2.js'});
 if(typeof context.window.mtaUnifiedFinalIntegrityGate!=='function')throw Error('FINAL_GATE_NOT_EXPOSED');
 const result=context.window.mtaUnifiedFinalIntegrityGate();
 const evidence={version:'F5.4',certification:'DIRECT_FINAL_INTEGRITY_CERTIFICATION',executionId:process.env.GITHUB_RUN_ID??'local',commitSha:process.env.GITHUB_SHA??'local',syntheticOnly:true,productionAccessAuthorized:false,migrationExecuted:false,aiEnabled:false,finalGate:result};
