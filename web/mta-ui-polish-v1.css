@@ -136,3 +136,34 @@ body{color:var(--mta-text);background:linear-gradient(180deg,#f7f9fc 0%,#eef3f8 
   .side{padding-left:8px;padding-right:8px}
   .nav button{min-height:40px}
 }
+
+/* Command Center dashboard — operational, not generic admin */
+.mta-command-hero{position:relative;display:grid;grid-template-columns:minmax(0,1fr) 260px;gap:20px;min-height:220px;padding:28px 30px;border:1px solid #dbe5f0;border-radius:20px;overflow:hidden;background:linear-gradient(135deg,#ffffff 0%,#f5f9ff 58%,#eaf3ff 100%);box-shadow:0 14px 40px rgba(15,43,80,.08)}
+.mta-command-hero:after{content:"";position:absolute;right:-90px;top:-100px;width:300px;height:300px;border-radius:50%;background:radial-gradient(circle,rgba(43,124,220,.14),transparent 66%);pointer-events:none}
+.mta-command-copy{position:relative;z-index:2;align-self:center}.mta-eyebrow,.mta-section-kicker{display:block;color:#47719f;font-size:9px;font-weight:800;letter-spacing:.16em;text-transform:uppercase}
+.mta-command-copy h1{margin:6px 0 7px;font-size:32px;letter-spacing:-.04em;color:#10233b}.mta-command-copy p{max-width:760px;margin:0;color:#617086;font-size:13px;line-height:1.65}
+.mta-hero-actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:18px}.mta-hero-actions .btn{min-height:38px}
+.mta-hero-visual{position:relative;min-height:160px;display:flex;align-items:center;justify-content:center;z-index:1}
+.mta-core-mark{width:88px;height:88px;border-radius:28px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:38px;font-weight:800;background:linear-gradient(145deg,#2182e8,#0754ae);box-shadow:0 18px 35px rgba(7,84,174,.28),0 0 0 8px rgba(33,130,232,.08)}
+.mta-core-pulse{position:absolute;width:116px;height:116px;border:1px solid rgba(33,130,232,.22);border-radius:50%}.mta-orbit{position:absolute;border:1px dashed rgba(33,130,232,.2);border-radius:50%}.mta-orbit-a{width:170px;height:170px}.mta-orbit-b{width:220px;height:90px;transform:rotate(-24deg)}
+.mta-kpi-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px;margin-top:14px}
+.mta-kpi-card{display:flex;align-items:center;gap:12px;min-height:94px;padding:14px 15px;background:#fff;border:1px solid #dfe7ef;border-radius:14px;box-shadow:0 7px 22px rgba(15,23,42,.045)}
+.mta-kpi-card.accent{border-color:#c9def7;background:linear-gradient(145deg,#fff,#f4f9ff)}
+.mta-kpi-icon{width:38px;height:38px;flex:0 0 38px;border-radius:11px;display:flex;align-items:center;justify-content:center;background:#edf5ff;color:#0b63ce;font-size:19px;font-weight:800}
+.mta-kpi-card small{display:block;color:#7a8798;font-size:10px}.mta-kpi-card strong{display:block;margin-top:2px;color:#152238;font-size:23px;letter-spacing:-.03em}.mta-kpi-card em{display:inline-block;margin-top:3px;color:#16803c;font-size:9px;font-style:normal;font-weight:700}
+.mta-dashboard-grid{display:grid;grid-template-columns:minmax(0,1.75fr) minmax(300px,.8fr);gap:14px;margin-top:14px}
+.mta-panel{padding:18px;border:1px solid #dfe7ef;border-radius:16px;background:rgba(255,255,255,.97);box-shadow:0 8px 26px rgba(15,23,42,.045)}
+.mta-panel-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:14px}.mta-panel-head h2{margin:3px 0 0;font-size:17px;color:#1b2a3f}
+.mta-panel-badge,.mta-live-dot{white-space:nowrap;padding:5px 8px;border-radius:999px;font-size:9px;font-weight:800}.mta-panel-badge{background:#eef5ff;color:#28649b}.mta-live-dot{background:#edf9f1;color:#16803c}
+.mta-action-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px}
+.mta-action-tile{min-height:92px;padding:12px;text-align:left;border:1px solid #e3e9f0;border-radius:12px;background:#fbfcfe;cursor:pointer;transition:.15s ease;display:flex;flex-direction:column;align-items:flex-start}
+.mta-action-tile:hover{background:#f3f8ff;border-color:#c8ddf6;transform:translateY(-1px);box-shadow:0 7px 18px rgba(15,23,42,.06)}
+.mta-action-tile span{width:30px;height:30px;display:flex;align-items:center;justify-content:center;border-radius:9px;background:#eaf3ff;color:#0b63ce;font-weight:800;font-size:16px}.mta-action-tile b{margin-top:7px;font-size:12px;color:#27364b}.mta-action-tile small{margin-top:2px;color:#7a8798;font-size:9px}
+.mta-status-list{display:grid;gap:8px}.mta-status-list div{display:flex;justify-content:space-between;gap:10px;padding:10px 11px;border-radius:10px;background:#f7f9fc;border:1px solid #edf1f5}.mta-status-list span{color:#6b788b;font-size:11px}.mta-status-list b{color:#26384f;font-size:10px}
+.mta-governance-note{display:grid;gap:3px;margin-top:12px;padding:11px;border-left:3px solid #0b63ce;border-radius:9px;background:#f3f8ff}.mta-governance-note strong{font-size:11px;color:#214c78}.mta-governance-note span{font-size:9px;line-height:1.45;color:#6a7890}
+.mta-roadmap-panel{margin-top:14px;padding:18px;border:1px solid #dfe7ef;border-radius:16px;background:linear-gradient(180deg,#fff,#f8fbfe);box-shadow:0 8px 26px rgba(15,23,42,.04)}
+.mta-panel-muted{font-size:9px;color:#8290a1;text-align:right;max-width:460px;line-height:1.4}.mta-roadmap{display:grid;grid-template-columns:1fr 28px 1fr 28px 1fr 28px 1fr 28px 1fr 28px 1fr;align-items:center;gap:0}
+.mta-roadmap>div{text-align:center}.mta-roadmap span{display:flex;width:30px;height:30px;margin:0 auto 6px;align-items:center;justify-content:center;border-radius:50%;background:#edf2f7;color:#65758a;font-size:9px;font-weight:800}.mta-roadmap .done span{background:#e6f2ff;color:#0b63ce}.mta-roadmap b{display:block;font-size:10px;color:#314158}.mta-roadmap small{display:block;margin-top:2px;color:#8995a5;font-size:8px}.mta-roadmap i{height:1px;background:#dce5ee;display:block}.mta-roadmap .done+i{background:linear-gradient(90deg,#9fc8ef,#dce5ee)}
+@media(max-width:1200px){.mta-kpi-grid{grid-template-columns:repeat(3,minmax(0,1fr))}.mta-command-hero{grid-template-columns:minmax(0,1fr) 190px}.mta-action-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:760px){.mta-command-hero{grid-template-columns:1fr;min-height:auto;padding:21px 18px}.mta-hero-visual{display:none}.mta-command-copy h1{font-size:27px}.mta-kpi-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}.mta-kpi-card{min-height:86px;padding:11px}.mta-kpi-card strong{font-size:21px}.mta-dashboard-grid{grid-template-columns:1fr}.mta-action-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.mta-panel{padding:14px}.mta-roadmap{grid-template-columns:repeat(3,1fr);gap:12px}.mta-roadmap i{display:none}.mta-panel-muted{display:none}}
+@media(max-width:430px){.mta-kpi-grid{grid-template-columns:1fr}.mta-action-grid{grid-template-columns:1fr}.mta-command-copy h1{font-size:24px}}
