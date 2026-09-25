@@ -35,11 +35,12 @@ function audit(state,action,resourceType,resourceId,result='SUCCESS',meta={}){
   state.audit.unshift(event);
   return event;
 }
+function contractTest(){const probeKey='__mta_state_kernel_probe__';const state=read();const branding=state.adminSettings?.branding;const copy=clone(state);if(copy.adminSettings)delete copy.adminSettings.branding;const serialized=JSON.stringify(copy);localStorage.setItem(probeKey,serialized);const ok=localStorage.getItem(probeKey)===serialized;localStorage.removeItem(probeKey);return {ok,checks:[{name:'KERNEL_READ',ok:typeof read==='function'},{name:'KERNEL_WRITE',ok:typeof write==='function'},{name:'KERNEL_SERIALIZATION_READBACK',ok}]};}
 function transact(mutator){
   const state=read();
   const value=mutator(state);
   write(state);
   return value===undefined?state:value;
 }
-window.MTADeteniStateKernel=Object.freeze({version:'1.0.0',key:KEY,brandingKey:BRANDING_KEY,read,write,persist,transact,audit,uid,now});
+window.MTADeteniStateKernel=Object.freeze({version:'1.1.0',key:KEY,brandingKey:BRANDING_KEY,read,write,persist,transact,audit,uid,now,contractTest});
 })();
