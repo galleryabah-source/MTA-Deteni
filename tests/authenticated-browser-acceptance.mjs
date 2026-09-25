@@ -140,8 +140,8 @@ try {
   await page.waitForFunction(() => /Scanner Kamera/i.test(document.getElementById('appView')?.textContent || ''), null, { timeout: 5000 });
   const qrSeed = await page.evaluate(() => {
     const d = JSON.parse(localStorage.getItem('mta-deteni-demo-v2') || '{}');
-    const x = d.detainees?.find(v => v.status === 'AKTIF');
-    if (!x) return null;
+    d.detainees = d.detainees || [{ id: 'DET-BROWSER-001', code: 'DET-BROWSER-001', name: 'SYNTHETIC BROWSER', nationality: 'Contoh', status: 'AKTIF', placement: 'Blok A / Kamar 01' }];
+    const x = d.detainees.find(v => v.status === 'AKTIF');
     d.qr = d.qr || { detainee: {}, room: {}, leave: {} };
     d.qr.detainee = d.qr.detainee || {};
     const q = d.qr.detainee[x.id] || {
