@@ -129,8 +129,16 @@
   }
 
   async function update(event){
+    const resolved=event?.detail?.resolved!==false;
     const authenticated=!!event?.detail?.authenticated;
     const gate=makeGate();
+    // Keep the authenticated shell hidden while Supabase restores the persisted
+    // session. A transient null auth event during hydration must never look like logout.
+    if(!resolved){
+      document.body.classList.add('mta-auth-locked');
+      gate.classList.remove('open');
+      return;
+    }
     if(authenticated){
       document.body.classList.remove('mta-auth-locked');
       document.body.classList.add('mta-auth-ready');
@@ -180,7 +188,7 @@
     window.__mtaAuthModuleLoading=new Promise((resolve,reject)=>{
       const s=document.createElement('script');
       s.type='module';
-      s.src='/mta-auth.js?v=2';
+      s.src='/mta-auth.js?v=3';
       s.onload=()=>resolve();
       s.onerror=()=>reject(new Error('AUTH_MODULE_LOAD_FAILED'));
       document.head.appendChild(s);
@@ -196,6 +204,9 @@
     makeGate();
     bindForm();
     window.addEventListener('mta-auth-state',update);
+    if(window.__mtaAuthState?.resolved){
+      update({detail:window.__mtaAuthState});
+    }
     // Never block the first paint on the authentication provider.
     const startAuth=()=>void loadAuthModule().catch(()=>{});
     if('requestIdleCallback' in window){
