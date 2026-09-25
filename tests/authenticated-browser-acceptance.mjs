@@ -58,7 +58,7 @@ let stage = 'init';
 page.on('pageerror', error => errors.push(error.message));
 
 try {
-  await page.route('https://esm.sh/@supabase/supabase-js@2', route =>
+  await page.route('https://esm.sh/@supabase/supabase-js@2.117.1', route =>
     route.fulfill({ status: 200, contentType: 'application/javascript', body: SUPABASE_STUB })
   );
   await page.route('https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.js', route =>
