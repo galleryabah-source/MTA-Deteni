@@ -683,3 +683,10 @@ Priority findings currently requiring remediation are: multiple direct localStor
 The required direction is consolidation: one authoritative persistence boundary, one Detainee CRUD owner, one navigation dispatcher, server-side secret handling for production AI, behavior-based integrity assertions, and browser/runtime verification for every critical journey.
 
 The UI freeze remains active. No redesign is authorized during this audit unless required to correct functional behavior, accessibility, responsive correctness, icon correctness, or system integration.
+
+
+## 24. System Consolidation Remediation — 25 September 2026
+
+The first system/engine audit remediation pass is implemented. A unified State Kernel now owns synthetic operational persistence/read-back verification and canonical audit event creation. Detainee CRUD ownership has been returned to the core runtime; Master Room Guard is a validation/occupancy guard rather than a second CRUD owner. Movement, Room Ops, Preview V5 and Preview V6 no longer override `window.show`; their views are exposed to the Unified Shell dispatcher. Browser-side AI API-key persistence has been removed, and the Final Integrity Gate now uses a behavior-based persistence contract instead of a brittle source-string assertion.
+
+This is an implementation milestone, not final certification. Deployment and browser journey verification remain mandatory before PASS can be declared.
