@@ -3,7 +3,6 @@
 if(window.MTADeteniStateKernel)return;
 const KEY='mta-deteni-demo-v2';
 const BRANDING_KEY='mta-deteni-branding-v1';
-let writeChain=Promise.resolve();
 const clone=v=>JSON.parse(JSON.stringify(v));
 const uid=p=>p+'-'+crypto.randomUUID().slice(0,10).toUpperCase();
 const now=()=>new Date().toISOString();
@@ -29,11 +28,7 @@ function persist(state){
   window.dispatchEvent(new CustomEvent('mta:data-changed',{detail:{source:'state-kernel'}}));
   return true;
 }
-function write(state){
-  let result;
-  writeChain=writeChain.then(()=>{result=persist(state);return result},()=>{result=persist(state);return result});
-  return result===true?true:(persist(state),true);
-}
+function write(state){return persist(state)}
 function audit(state,action,resourceType,resourceId,result='SUCCESS',meta={}){
   state.audit=Array.isArray(state.audit)?state.audit:[];
   const event={id:uid('AUD'),action,resourceType,resourceId:resourceId||'',result,occurredAt:now(),actor:meta.actor||'DEMO-OPERATOR',requestId:meta.requestId||uid('REQ'),correlationId:meta.correlationId||uid('COR'),policyVersion:meta.policyVersion||'AUTHZ-1.0'};
