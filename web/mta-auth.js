@@ -12,9 +12,20 @@ async function syncSession(session){
   window.__mtaAuthState=Object.freeze({resolved:true,authenticated,user:session?.user||null});
   window.dispatchEvent(new CustomEvent('mta-auth-state',{detail:{authenticated,user:session?.user||null}}));
 }
-supabase.auth.onAuthStateChange((_event,session)=>syncSession(session));
-const initial=await supabase.auth.getSession();
-await syncSession(initial.data.session);
+
+const getSessionWithTimeout=async()=>{
+  let timer;
+  try{
+    return await Promise.race([
+      supabase.auth.getSession(),
+      new Promise((_,reject)=>{timer=setTimeout(()=>reject(new Error('AUTH_SESSION_TIMEOUT')),8000)})
+    ]);
+  }finally{
+    clearTimeout(timer);
+  }
+};
+
+supabase.auth.onAuthStateChange((_event,session)=>{void syncSession(session)});
 
 window.mtaAuth=Object.freeze({
   client:supabase,
@@ -24,3 +35,12 @@ window.mtaAuth=Object.freeze({
   async session(){return supabase.auth.getSession()},
   async user(){const r=await supabase.auth.getUser();return r.data.user||null}
 });
+
+void (async()=>{
+  try{
+    const initial=await getSessionWithTimeout();
+    await syncSession(initial.data.session);
+  }catch(_){
+    await syncSession(null);
+  }
+})();
