@@ -251,7 +251,7 @@ try {
     return { detaineeId: active.id, beforeMovements: (d.movements || []).length, beforeLeaves: (d.leaves || []).length, beforeAudit: (d.audit || []).length };
   });
 
-  await page.evaluate(() => window.show('movement'));
+  await page.evaluate(() => { window.show('movement'); window.MTAMovementView?.render?.(); });
   await page.locator('#p9moveForm').waitFor({ state: 'visible', timeout: 5000 });
   const movementMutation = await page.evaluate(() => {
     const form = document.getElementById('p9moveForm');
