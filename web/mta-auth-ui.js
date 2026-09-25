@@ -149,13 +149,29 @@
     }
   }
 
+  function loadAuthModule(){
+    if(window.__mtaAuthModuleLoading)return window.__mtaAuthModuleLoading;
+    if(window.mtaAuth)return Promise.resolve();
+    window.__mtaAuthModuleLoading=new Promise((resolve,reject)=>{
+      const s=document.createElement('script');
+      s.type='module';
+      s.src='/mta-auth.js?v=2';
+      s.onload=()=>resolve();
+      s.onerror=()=>reject(new Error('AUTH_MODULE_LOAD_FAILED'));
+      document.head.appendChild(s);
+    }).catch(err=>{
+      window.__mtaAuthModuleLoading=null;
+      const msg=document.getElementById('mtaAuthMessage');
+      if(msg){msg.textContent='Authentication service belum dapat dimuat. Silakan refresh.';msg.className='mta-auth-message error'}
+      throw err;
+    });
+    return window.__mtaAuthModuleLoading;
+  }
   function init(){
     makeGate();
     bindForm();
     window.addEventListener('mta-auth-state',update);
-    if(window.__mtaAuthState?.resolved){
-      update({detail:{authenticated:!!window.__mtaAuthState.authenticated,user:window.__mtaAuthState.user||null}});
-    }
+    void loadAuthModule().catch(()=>{});
   }
 
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
