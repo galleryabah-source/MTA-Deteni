@@ -14,21 +14,20 @@ const context = createExecutionContext({
 const stages = ["SCAN","RESOLVE","AUTHORIZATION","ACTION","MUTATION","IDEMPOTENCY","AUDIT","OUTBOX","EVIDENCE","REPORT","DOCUMENT","RECOVERY"] as const;
 
 function trace(overrides: { correlationId?: string } = {}) {
-  return stages.map((stage, index) => ({
-    stage,
-    event: {
+  return stages.map((stage, index) => {
+    const event: ObservabilityEvent = {
       eventId: "OBS-" + index,
       eventType: "MTA_" + stage,
-      level: "INFO" as const,
+      level: "INFO",
       timestamp: "2026-09-26T00:00:00.000Z",
-      correlationId: context.correlationId,
+      correlationId: index === 0 && overrides.correlationId ? overrides.correlationId : context.correlationId,
       requestId: context.requestId,
       transactionId: context.transactionId,
-      outcome: index === stages.length - 1 ? "SUCCEEDED" as const : "STARTED" as const,
+      outcome: index === stages.length - 1 ? "SUCCEEDED" : "STARTED",
       metadata: { source: "SYNTHETIC" },
-      ...(index === 0 ? overrides : {}),
-    },
-  }));
+    };
+    return { stage, event };
+  });
 }
 
 test("observability certifies one correlation across the complete operational chain", () => {
