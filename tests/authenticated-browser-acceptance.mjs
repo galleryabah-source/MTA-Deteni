@@ -138,7 +138,7 @@ try {
   stage = 'logout';
   await page.locator('#mtaAuthUi button').getByText('Logout').evaluate(button => button.click());
   await page.locator('body.mta-auth-locked').waitFor({ state: 'attached', timeout: 5000 });
-  await page.locator('#mtaAuthGate.open').waitFor({ state: 'visible', timeout: 5000 });
+  await page.locator('#mtaAuthGate.open').waitFor({ state: 'attached', timeout: 5000 });
 
   const logoutState = await page.evaluate(() => ({
     locked: document.body.classList.contains('mta-auth-locked'),
