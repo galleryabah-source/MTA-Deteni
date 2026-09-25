@@ -45,14 +45,24 @@ Audit identified an important persistence boundary problem: uploaded branding as
 
 **Required verification after deployment:** Add, Edit, refresh, and re-open Data Deteni must all preserve the changed record. If Save still fails after this boundary fix, browser-console/runtime evidence is required before another functional mutation is made.
 
-### 8. Runtime / governance observations
+### 8. Persistence hardening — source audit result
+A source-level cross-audit found that the core runtime, Admin Settings, Unified Shell, and Room Ops all participate in the same `mta-deteni-demo-v2` local-storage state. The core Save path has therefore been hardened to:
+- serialize operational state with JSON rather than relying on `structuredClone`;
+- normalize the expected operational collections (`detainees`, `placements`, `movements`, `leaves`, `documents`, `audit`, `rooms`, `blocks`) when loading;
+- keep branding assets in the dedicated `mta-deteni-branding-v1` key;
+- verify that the exact serialized operational payload can be read back immediately after `localStorage.setItem`;
+- emit a `mta:data-changed` event only after the persistence write and verification succeed.
+
+This is source-level hardening only; it does not alter database schema, migrations, RBAC, or the locked UI.
+
+### 9. Runtime / governance observations
 - Runtime is synthetic/local and database is not connected in the current preview baseline.
 - AI is OFF.
 - Migration/schema changes are not part of these UI fixes.
 - Authentication/session persistence was separately hardened to survive F5 and Ctrl+Shift+R.
 - UI changes must not alter RBAC, QR resolution, audit/evidence chain, document workflow, or database schema without an explicit separate decision.
 
-### 9. Audit findings
+### 10. Audit findings
 **PASS / baseline**
 - Locked visual direction documented.
 - Desktop shell documented.
@@ -70,14 +80,14 @@ Audit identified an important persistence boundary problem: uploaded branding as
 - Admin branding should be tested for persistence without affecting operational save.
 - Browser hard-refresh should preserve authenticated session and current UI state where intended.
 
-### 10. Change-control rule
+### 11. Change-control rule
 This document is a current implementation reference. Future UI work should preserve the locked visual direction and these table/action contracts. Improvements are allowed for correctness, accessibility, responsive desktop behavior, icon fidelity, spacing, performance, and functional integration. A new visual direction requires an explicit superseding design decision.
 
-### 11. Canonical references
+### 12. Canonical references
 - `docs/18-desktop-ui-design-system-v1.0-LOCKED.md`
 - `docs/03-implementation/UI-DESIGN-DECISION-2026-09-25.md`
 - `docs/00-master-blueprint/MASTER-BLUEPRINT.md`
 - `web/desktop-shell-v2.css`
 - `web/desktop-shell-v2.js`
 - `web/admin-settings-v9.js`
-- `web/mta-app-runtime-full.js`
+- `web/mta-app-runtime-full.js` — persistence hardening commit `4267e6cfaa7f27661547b629cfe142d2dcdd5b87`
