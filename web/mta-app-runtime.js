@@ -1,7 +1,7 @@
 (function(){
   'use strict';
-  if(window.__mtaCoreBooted)return;
-  window.__mtaCoreBooted=true;
+  if(window.__mtaCoreShellBooted)return;
+  window.__mtaCoreShellBooted=true;
 
   const view=document.getElementById('appView');
   const app=document.querySelector('.app');
