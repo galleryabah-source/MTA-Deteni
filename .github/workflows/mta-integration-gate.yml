@@ -19,7 +19,9 @@ jobs:
         run: |
           set -e
           checks=(
-          "mta-unified-shell-v2.js?v=5|web/index.html"
+          "mta-app-runtime.js|web/index.html"
+          "mta-app-runtime-full.js|web/mta-app-runtime.js"
+          "mta-unified-shell-v2.js?v=7|web/mta-app-runtime-full.js"
           "mtaUnifiedResolve|web/mta-unified-shell-v2.js"
           "mta:qr-detected|web/mta-unified-shell-v2.js"
           "mtaUnifiedScannerContractTest|web/mta-unified-shell-v2.js"
