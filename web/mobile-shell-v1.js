@@ -9,7 +9,7 @@
     if(document.getElementById(STYLE_ID)) return;
     const s=document.createElement('style');s.id=STYLE_ID;s.textContent=`
       .mta-mobile-bottom,.mta-mobile-menu,.mta-mobile-records{display:none}
-      @media (max-width:760px){
+      @media (max-width:1024px){
         :root{--mta-mobile-bottom:82px;--mta-mobile-safe:max(12px,env(safe-area-inset-bottom))}
         html,body{width:100%;max-width:100%;overflow-x:hidden!important}body{padding-bottom:0!important}.app{grid-template-rows:56px 1fr 0!important;min-height:100dvh!important}.layout{display:block!important;min-height:calc(100dvh - 56px)!important}.side{display:none!important}
         .main{padding:14px 14px calc(var(--mta-mobile-bottom) + var(--mta-mobile-safe) + 18px)!important;overflow-x:hidden!important;overflow-y:auto!important;min-width:0!important;width:100%!important}.view{width:100%!important;max-width:none!important;margin:0!important;min-width:0!important}.top{height:56px!important;min-height:56px!important;padding:0 12px!important;z-index:100!important}
