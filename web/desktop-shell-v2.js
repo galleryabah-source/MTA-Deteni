@@ -47,6 +47,37 @@
     });
     nav.dataset.desktopGrouped='1';
   }
+  function installSidebarToggle(){
+    const side=document.querySelector('.side');
+    const layout=document.querySelector('.layout');
+    if(!side||!layout)return;
+    if(document.getElementById('mtaSidebarToggle'))return;
+    const toggle=document.createElement('button');
+    toggle.type='button';
+    toggle.id='mtaSidebarToggle';
+    toggle.className='mta-nav-toggle';
+    toggle.setAttribute('aria-controls','nav');
+    toggle.setAttribute('aria-label','Minimalkan sidebar');
+    toggle.title='Minimalkan sidebar';
+    toggle.innerHTML='<span aria-hidden="true">‹</span>';
+    side.insertBefore(toggle,side.firstChild);
+    const key='mta-deteni-sidebar-collapsed';
+    const applyCollapsed=(collapsed,save=true)=>{
+      side.classList.toggle('mta-collapsed',collapsed);
+      layout.classList.toggle('mta-sidebar-collapsed',collapsed);
+      toggle.classList.toggle('is-collapsed',collapsed);
+      toggle.setAttribute('aria-expanded',collapsed?'false':'true');
+      toggle.setAttribute('aria-label',collapsed?'Tampilkan sidebar':'Minimalkan sidebar');
+      toggle.title=collapsed?'Tampilkan sidebar':'Minimalkan sidebar';
+      toggle.innerHTML='<span aria-hidden="true">'+(collapsed?'›':'‹')+'</span>';
+      if(save)try{localStorage.setItem(key,collapsed?'1':'0')}catch{}
+    };
+    toggle.addEventListener('click',e=>{e.preventDefault();e.stopPropagation();applyCollapsed(!side.classList.contains('mta-collapsed'))});
+    let collapsed=false;
+    try{collapsed=localStorage.getItem(key)==='1'}catch{}
+    applyCollapsed(collapsed,false);
+  }
+
   function statusStrip(){
     if(document.querySelector('.mta-desktop-status'))return;
     const view=document.querySelector('.view');
@@ -60,7 +91,7 @@
     document.body.classList.toggle('mta-desktop-enhanced',desktop);
     const nav=document.getElementById('nav');
     if(!desktop||!nav)return;
-    groupNav(nav);syncA11y(nav);statusStrip();
+    groupNav(nav);syncA11y(nav);installSidebarToggle();statusStrip();
   }
   function setup(){
     if(window.__mtaDesktopShellV2Setup)return;
