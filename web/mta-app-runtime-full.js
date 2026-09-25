@@ -1,8 +1,9 @@
-const KEY='mta-deteni-demo-v2'; const BRANDING_KEY='mta-deteni-branding-v1'; const STATE_KERNEL=window.MTADeteniStateKernel;
+const KEY='mta-deteni-demo-v2'; const BRANDING_KEY='mta-deteni-branding-v1'; const stateKernel=()=>window.MTADeteniStateKernel;
 const seed={meta:{version:2,createdAt:new Date().toISOString()},detainees:[{id:'DET-001',code:'DET-2026-001',name:'SYNTHETIC A',nationality:'Contoh',status:'AKTIF',placement:'Blok A / Kamar 01',createdAt:'2026-09-16T07:00:00Z'},{id:'DET-002',code:'DET-2026-002',name:'SYNTHETIC B',nationality:'Contoh',status:'AKTIF',placement:'Blok B / Kamar 02',createdAt:'2026-09-16T07:10:00Z'}],placements:[{id:'PLC-001',detaineeId:'DET-001',block:'Blok A',room:'Kamar 01',since:'2026-09-16T07:20:00Z'},{id:'PLC-002',detaineeId:'DET-002',block:'Blok B',room:'Kamar 02',since:'2026-09-16T07:25:00Z'}],movements:[],leaves:[],documents:[],audit:[]};
 let db=null; let current='dashboard';
 function load(){
   try{
+    const STATE_KERNEL=stateKernel();
     if(STATE_KERNEL){
       const state=STATE_KERNEL.read();
       if(state&&Array.isArray(state.detainees)&&state.detainees.length)return state;
@@ -16,6 +17,7 @@ function load(){
 function save(){
   try{
     if(!db||typeof db!=='object')throw new Error('STATE_NOT_READY');
+    const STATE_KERNEL=stateKernel();
     if(STATE_KERNEL)return STATE_KERNEL.write(db);
     const branding=db.adminSettings?.branding;
     const persist=JSON.parse(JSON.stringify(db));
