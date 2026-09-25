@@ -188,7 +188,7 @@
     window.__mtaAuthModuleLoading=new Promise((resolve,reject)=>{
       const s=document.createElement('script');
       s.type='module';
-      s.src='/mta-auth.js?v=3';
+      s.src='/mta-auth.js?v=5';
       s.onload=()=>resolve();
       s.onerror=()=>reject(new Error('AUTH_MODULE_LOAD_FAILED'));
       document.head.appendChild(s);
@@ -207,13 +207,10 @@
     if(window.__mtaAuthState?.resolved){
       update({detail:window.__mtaAuthState});
     }
-    // Never block the first paint on the authentication provider.
-    const startAuth=()=>void loadAuthModule().catch(()=>{});
-    if('requestIdleCallback' in window){
-      window.requestIdleCallback(startAuth,{timeout:1500});
-    }else{
-      window.setTimeout(startAuth,50);
-    }
+    // Authentication is a hard security boundary. Do not defer the auth
+    // module until idle: on a hard refresh the persisted session must be
+    // hydrated before any transient auth state can be interpreted as logout.
+    void loadAuthModule().catch(()=>{});
   }
 
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
