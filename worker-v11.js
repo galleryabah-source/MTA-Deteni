@@ -42,9 +42,9 @@ export default {
       securedHeaders.set('Referrer-Policy','strict-origin-when-cross-origin');
       securedHeaders.set('Permissions-Policy','camera=(self), microphone=(), geolocation=()');
       securedHeaders.set('Cross-Origin-Opener-Policy','same-origin');
-      return new HTMLRewriter().on('body',{element(element){
-      element.append('<script src="/offline-v1.js?v=2"></script><script src="/offline-queue-v1.js?v=2"></script><script src="/qr-camera-v2.js?v=4"></script><script src="/qr-context-v1.js?v=2"></script><script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.js"></script><script src="/preview-v5.js?v=11"></script><script src="/preview-v6.js?v=8"></script><script src="/qr-print-clean-v3.js?v=5"></script><script src="/room-ops-v9.js?v=10"></script><script src="/movement-v9.js?v=10"></script><script src="/master-room-guard-v10.js?v=11"></script><script src="/preview-v10.js?v=11"></script><script src="/desktop-shell-v2.js?v=3"></script><script src="/mobile-shell-v1.js?v=2"></script>',{html:true});
-    }}).transform(new Response(response.body,{status:response.status,statusText:response.statusText,headers:securedHeaders}));
+      // Do not inject application scripts into the initial document.
+      // Login must be able to first-paint before any operational runtime is loaded.
+      return new Response(response.body,{status:response.status,statusText:response.statusText,headers:securedHeaders});
     }
     return response;
   }
