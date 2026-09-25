@@ -690,3 +690,8 @@ The UI freeze remains active. No redesign is authorized during this audit unless
 The first system/engine audit remediation pass is implemented. A unified State Kernel now owns synthetic operational persistence/read-back verification and canonical audit event creation. Detainee CRUD ownership has been returned to the core runtime; Master Room Guard is a validation/occupancy guard rather than a second CRUD owner. Movement, Room Ops, Preview V5 and Preview V6 no longer override `window.show`; their views are exposed to the Unified Shell dispatcher. Browser-side AI API-key persistence has been removed, and the Final Integrity Gate now uses a behavior-based persistence contract instead of a brittle source-string assertion.
 
 This is an implementation milestone, not final certification. Deployment and browser journey verification remain mandatory before PASS can be declared.
+
+
+## 25. Deep Cohesion Remediation — 25 September 2026
+
+The stabilization work continued beyond the first persistence/navigation consolidation. The application now has one authoritative Detainee CRUD owner in the core runtime, authoritative synthetic Master Room references in the seed, compatibility normalization for older synthetic local states, canonical State Kernel audit creation across operational modules, stronger kernel/system contract checks, and browser acceptance coverage for the real Detainee Add → Edit → Archive journey. UI design remains frozen. Database schema and migrations remain frozen. Final certification is still gated on CI, deployed preview, browser journey, security, evidence, F0–F5, and P13 verification.
