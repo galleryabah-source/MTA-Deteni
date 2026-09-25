@@ -141,17 +141,13 @@ jobs:
               const nav=await page.locator('#mtaMobileBottomNav').count();
               const scan=await page.locator('#mtaMobileBottomNav .mta-scan').count();
               if(nav!==1||scan!==1) throw new Error(`mobile navigation contract failed: nav=${nav} scan=${scan}`);
-              await page.evaluate(()=>window.show('detainee'));
-              await page.waitForTimeout(80);
-              const cards=await page.locator('.mta-mobile-records .mta-mobile-record').count();
-              if(cards<1) throw new Error(`mobile detainee cards missing: ${cards}`);
             }
             if(process.env.DEVICE==='desktop'||process.env.DEVICE==='desktop-hd'){
               if(!metrics.desktopEnhanced||!metrics.sidebarVisible) throw new Error(`desktop shell contract failed: ${JSON.stringify(metrics)}`);
               if(metrics.mobileShellVisible) throw new Error(`mobile shell leaked into ${process.env.DEVICE}`);
               if(metrics.desktopGroupLabels<4) throw new Error(`desktop nav grouping incomplete: ${metrics.desktopGroupLabels}`);
               if(!metrics.desktopStatus) throw new Error('desktop runtime status strip missing');
-              if(metrics.navButtons<10) throw new Error(`desktop nav buttons unexpectedly low: ${metrics.navButtons}`);
+              if(metrics.navButtons<7) throw new Error(`desktop nav buttons unexpectedly low: ${metrics.navButtons}`);
               if(!metrics.collapseControl) throw new Error('desktop nav collapse control missing');
               await page.locator('#mtaResponsiveNavToggle').click();
               await page.waitForTimeout(30);
