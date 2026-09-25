@@ -153,8 +153,9 @@
     makeGate();
     bindForm();
     window.addEventListener('mta-auth-state',update);
-    const reconcile=async()=>{try{if(window.mtaAuth){const r=await window.mtaAuth.session();update({detail:{authenticated:!!r?.data?.session,user:r?.data?.session?.user||null}});return true}}catch(_){}return false};
-    reconcile().then(ok=>{if(!ok){let n=0;const timer=setInterval(async()=>{if(await reconcile()||++n>=40)clearInterval(timer)},50)}});
+    if(window.__mtaAuthState?.resolved){
+      update({detail:{authenticated:!!window.__mtaAuthState.authenticated,user:window.__mtaAuthState.user||null}});
+    }
   }
 
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
