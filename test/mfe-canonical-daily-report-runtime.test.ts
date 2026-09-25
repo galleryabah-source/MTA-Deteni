@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs/promises';
 import vm from 'node:vm';
 import { webcrypto } from 'node:crypto';
-import { collectMfeEvidenceToCanonicalDataset, canonicalDatasetToDailyGuardSnapshot, canonicalDatasetToDailyGuardWebReportInput, renderCanonicalDatasetWithExistingDailyGuardRenderer } from '../src/application/mfe-canonical-daily-report-runtime-adapter.js';
+import { collectMfeEvidenceQueueToCanonicalDataset, collectMfeEvidenceToCanonicalDataset, canonicalDatasetToDailyGuardSnapshot, canonicalDatasetToDailyGuardWebReportInput, renderCanonicalDatasetWithExistingDailyGuardRenderer } from '../src/application/mfe-canonical-daily-report-runtime-adapter.js';
 import { validateCanonicalDailyDataset } from '../src/application/canonical-daily-dataset-validation.js';
 import type { FieldEvidence } from '../src/application/canonical-daily-dataset-contract.js';
 
@@ -58,4 +58,58 @@ test('approved canonical dataset binds directly to the existing Daily Guard web 
   assert.match(html, /Pemeriksaan blok A selesai/);
   assert.match(html, /MFE-E-001/);
   assert.match(html, /Halaman 11 \/ 11/);
+});
+
+test('actual MFE web runtime queue → canonical dataset → existing Daily Guard renderer', async () => {
+  const queueRows: any[] = [];
+  const queue = {
+    async put(row: any) { queueRows.push(row); return row; },
+    async all() { return [...queueRows]; },
+    async remove(key: string) {
+      const index = queueRows.findIndex(row => row.idempotencyKey === key);
+      if (index >= 0) queueRows.splice(index, 1);
+    },
+  };
+  const source = await fs.readFile(new URL('../web/mfe-evidence-v1.js', import.meta.url), 'utf8');
+  const window: Record<string, unknown> = {};
+  vm.runInNewContext(source, {
+    window,
+    crypto: webcrypto,
+    TextEncoder,
+    Date,
+  });
+  const runtime = window.MTAFieldEvidence as {
+    capture: (input: unknown) => Promise<any>;
+    list: () => Promise<any[]>;
+  };
+  const contextWindow = window as any;
+  contextWindow.MTADeteniOfflineQueue = queue;
+  // Re-evaluate after installing the real queue dependency so the runtime resolves it.
+  vm.runInNewContext(source, {
+    window: contextWindow,
+    crypto: webcrypto,
+    TextEncoder,
+    Date,
+  });
+  const mfe = contextWindow.MTAFieldEvidence as typeof runtime;
+  await mfe.capture({ evidenceId:'MFE-RUNTIME-001', eventType:'PEMERIKSAAN', capturedAt:'2026-09-26T12:00:00.000Z', actorId:'PETUGAS-RUNTIME', rawNote:'Runtime capture pertama', sourceKind:'NOTE', includeInReport:true, photoRefs:[], sequence:1 });
+  await mfe.capture({ evidenceId:'MFE-RUNTIME-002', eventType:'KEAMANAN', capturedAt:'2026-09-26T12:05:00.000Z', actorId:'PETUGAS-RUNTIME', rawNote:'Runtime capture kedua', sourceKind:'NOTE', includeInReport:true, photoRefs:[], sequence:2 });
+  const records = await mfe.list();
+  assert.equal(records.length, 2);
+  const dataset = collectMfeEvidenceQueueToCanonicalDataset({
+    datasetId:'DSET-RUNTIME-001',
+    reportDate:'2026-09-26',
+    shiftId:'SHIFT-SIANG',
+    groupId:'BRAVO',
+    queueRecords:records,
+  });
+  const renderer = await loadExistingDailyGuardRenderer();
+  const input = canonicalDatasetToDailyGuardWebReportInput(dataset);
+  assert.equal(renderer.validate(input), true);
+  const prepared = await renderer.prepare(input);
+  const html = renderer.render(prepared);
+  assert.equal((html.match(/class="mta-report-page"/g) || []).length, 11);
+  assert.match(html,/Runtime capture pertama/);
+  assert.match(html,/MFE-RUNTIME-001/);
+  assert.match(html,/Halaman 11 \/ 11/);
 });
