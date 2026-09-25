@@ -96,18 +96,22 @@ body{color:var(--mta-text);background:linear-gradient(180deg,#f7f9fc 0%,#eef3f8 
 @media(min-width:1500px){.main{padding-left:32px;padding-right:32px}}
 @media(max-width:1050px){:root{--mta-sidebar:236px}.main{padding:18px}.stats{grid-template-columns:repeat(3,minmax(0,1fr))!important}}
 @media(max-width:760px){
-  :root{--mta-sidebar:230px;--mta-header:58px}
-  .app{grid-template-rows:var(--mta-header) minmax(0,1fr) 28px}
-  .top{height:var(--mta-header);padding:0 11px}.brand small{display:none}.brand strong{font-size:13px}
-  .topright .pill{display:none}.topright .btn{min-height:32px;padding:6px 8px}
-  .layout{grid-template-columns:var(--mta-sidebar) minmax(0,1fr)!important}
-  .side{width:var(--mta-sidebar);padding:10px 7px;height:calc(100dvh - var(--mta-header) - 28px);max-height:none}
-  .nav button{min-height:40px;font-size:12px;padding:8px 9px}
-  .mta-desktop-group-label{margin:13px 7px 4px!important;font-size:8px!important}
-  .main{padding:12px 10px}.hero{padding:17px!important}.hero h1{font-size:22px}
-  .stats{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:9px!important}
-  .stats .card{min-height:94px!important;padding:13px!important}.value{font-size:22px}
-  .card{padding:13px}.toolbar{margin:11px 0}
+  /* Smartphone is a separate interaction model. Mobile shell owns navigation/layout. */
+  :root{--mta-header:56px}
+  .app{grid-template-rows:56px 1fr 0!important}
+  .top{height:56px;padding:0 10px}
+  .brand{gap:9px}
+  .brand strong{font-size:13px}
+  .brand small{display:block}
+  .main{padding:14px 10px 110px!important}
+  .hero{padding:16px!important;border-radius:18px!important}
+  .hero h1{font-size:24px}
+  .stats{gap:10px!important}
+  .stats .card{min-height:96px!important;padding:13px!important}
+  .card{padding:14px!important;border-radius:16px!important}
+  .toolbar{gap:8px}
+  .toolbar .btn,.toolbar>button,.toolbar>input,.toolbar>select{min-height:42px}
+  .tablewrap{overflow:visible}
 }
 @media(max-width:430px){
   :root{--mta-sidebar:214px}
