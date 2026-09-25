@@ -253,7 +253,7 @@ try {
     const d = JSON.parse(localStorage.getItem('mta-deteni-demo-v2') || '{}');
     const l = (d.leaves || []).find(x => x.detaineeId === id && x.destination === 'Synthetic Destination');
     return { id: l?.id, status: l?.status, auditCount: d.audit.length };
-  });
+  }, { id: mutationBaseline.detaineeId });
   if (!leaveState.id || leaveState.status !== 'DRAFT') throw new Error(`leave create mutation failed: ${JSON.stringify(leaveState)}`);
   for (const expected of ['SUBMITTED', 'APPROVED', 'DEPARTED', 'RETURNED', 'COMPLETED']) {
     const actionLabel = expected === 'SUBMITTED' ? 'SUBMIT' : expected === 'APPROVED' ? 'APPROVE' : expected === 'DEPARTED' ? 'DEPART' : expected === 'RETURNED' ? 'RETURN' : 'COMPLETE';
