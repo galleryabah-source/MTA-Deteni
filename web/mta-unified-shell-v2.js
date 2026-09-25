@@ -3,7 +3,7 @@
 if(window.__mtaUnifiedShellBooted)return;
 window.__mtaUnifiedShellBooted=true;
 const VERSION='mta-unified-shell-v2-single-load';
-const BASE=['/desktop-shell-v2.css?v=3','/responsive-v11.css?v=13'];
+const BASE=['/desktop-shell-v2.css?v=4','/responsive-v11.css?v=14','/mta-ui-polish-v1.css?v=1'];
 const SCRIPTS=[];
 const DB_DISCONNECTED='DB_DISCONNECTED';
 const MIGRATION_FREEZE='MIGRATION_FREEZE';
