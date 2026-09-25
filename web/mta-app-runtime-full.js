@@ -1,6 +1,6 @@
 const KEY='mta-deteni-demo-v2'; const BRANDING_KEY='mta-deteni-branding-v1'; const stateKernel=()=>window.MTADeteniStateKernel;
-const seed={meta:{version:2,createdAt:new Date().toISOString()},detainees:[{id:'DET-001',code:'DET-2026-001',name:'SYNTHETIC A',nationality:'Contoh',status:'AKTIF',placement:'Blok A / Kamar 01',createdAt:'2026-09-16T07:00:00Z'},{id:'DET-002',code:'DET-2026-002',name:'SYNTHETIC B',nationality:'Contoh',status:'AKTIF',placement:'Blok B / Kamar 02',createdAt:'2026-09-16T07:10:00Z'}],placements:[{id:'PLC-001',detaineeId:'DET-001',block:'Blok A',room:'Kamar 01',since:'2026-09-16T07:20:00Z'},{id:'PLC-002',detaineeId:'DET-002',block:'Blok B',room:'Kamar 02',since:'2026-09-16T07:25:00Z'}],movements:[],leaves:[],documents:[],audit:[]};
-let db=null; let current='dashboard';
+const seed={meta:{version:2,createdAt:new Date().toISOString()},blocks:[{id:'BLK-001',name:'Blok A',status:'ACTIVE',source:'SYNTHETIC_SEED'},{id:'BLK-002',name:'Blok B',status:'ACTIVE',source:'SYNTHETIC_SEED'}],rooms:[{id:'ROOM-001',blockId:'BLK-001',block:'Blok A',room:'Kamar 01',capacity:8,status:'ACTIVE',type:'STANDARD',gender:'UMUM',source:'SYNTHETIC_SEED',version:1},{id:'ROOM-002',blockId:'BLK-002',block:'Blok B',room:'Kamar 02',capacity:8,status:'ACTIVE',type:'STANDARD',gender:'UMUM',source:'SYNTHETIC_SEED',version:1}],detainees:[{id:'DET-001',code:'DET-2026-001',name:'SYNTHETIC A',nationality:'Contoh',status:'AKTIF',placement:'Blok A / Kamar 01',createdAt:'2026-09-16T07:00:00Z'},{id:'DET-002',code:'DET-2026-002',name:'SYNTHETIC B',nationality:'Contoh',status:'AKTIF',placement:'Blok B / Kamar 02',createdAt:'2026-09-16T07:10:00Z'}],placements:[{id:'PLC-001',detaineeId:'DET-001',roomId:'ROOM-001',blockId:'BLK-001',block:'Blok A',room:'Kamar 01',since:'2026-09-16T07:20:00Z',source:'SYNTHETIC_SEED'},{id:'PLC-002',detaineeId:'DET-002',roomId:'ROOM-002',blockId:'BLK-002',block:'Blok B',room:'Kamar 02',since:'2026-09-16T07:25:00Z',source:'SYNTHETIC_SEED'}],movements:[],leaves:[],documents:[],audit:[]};
+let db=null; let current='dashboard'; window.MTA_DETAINEE_CRUD_OWNER='CORE_RUNTIME_V2';
 function load(){
   try{
     const STATE_KERNEL=stateKernel();
@@ -35,8 +35,15 @@ function now(){return new Date().toISOString()}
 function validateRuntimeState(x){if(!x||typeof x!=='object')throw new Error('STATE_INVALID');const roots=['detainees','placements','movements','leaves','documents','audit','rooms','blocks'];for(const k of roots)if(!Array.isArray(x[k]))throw new Error('STATE_ARRAY_REQUIRED:'+k);for(const k of roots){const ids=x[k].map(v=>v?.id).filter(Boolean);if(new Set(ids).size!==ids.length)throw new Error('STATE_DUPLICATE_ID:'+k)}if(x.audit.some(a=>!a?.id||!a?.action||!a?.resourceType||!a?.occurredAt))throw new Error('AUDIT_INVALID');const roomIds=new Set(x.rooms.map(r=>r.id));if(x.placements.some(p=>p.roomId&&!roomIds.has(p.roomId)))throw new Error('PLACEMENT_MASTER_ROOM_MISSING');const detaineeIds=new Set(x.detainees.map(d=>d.id));if(x.movements.some(m=>m.detaineeId&&!detaineeIds.has(m.detaineeId)))throw new Error('MOVEMENT_DETAINEE_MISSING');if(x.leaves.some(l=>l.detaineeId&&!detaineeIds.has(l.detaineeId)))throw new Error('LEAVE_DETAINEE_MISSING');return true}
 function esc(v=''){return String(v).replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]))}
 function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2200)}
-function appendAudit(state,action,resourceType,resourceId,result='SUCCESS',correlationId){state.audit=state.audit||[];state.audit.unshift({id:uid('AUD'),action,resourceType,resourceId:resourceId||'',result,occurredAt:now(),actor:'DEMO-OPERATOR',requestId:uid('REQ'),correlationId:correlationId||uid('COR'),policyVersion:'AUTHZ-1.0'})}
-function audit(action,resourceType,resourceId,result='SUCCESS',correlationId){appendAudit(db,action,resourceType,resourceId,result,correlationId)}
+function appendAudit(state,action,resourceType,resourceId,result='SUCCESS',correlationId){
+  const kernel=stateKernel();
+  if(kernel?.audit)return kernel.audit(state,action,resourceType,resourceId,result,{actor:'DEMO-OPERATOR',correlationId});
+  state.audit=state.audit||[];
+  const event={id:uid('AUD'),action,resourceType,resourceId:resourceId||'',result,occurredAt:now(),actor:'DEMO-OPERATOR',requestId:uid('REQ'),correlationId:correlationId||uid('COR'),policyVersion:'AUTHZ-1.0'};
+  state.audit.unshift(event);
+  return event;
+}
+function audit(action,resourceType,resourceId,result='SUCCESS',correlationId){return appendAudit(db,action,resourceType,resourceId,result,correlationId)}
 function openModal(html){document.getElementById('dialog').innerHTML=html;document.getElementById('modal').classList.add('open')}
 function closeModal(){document.getElementById('modal').classList.remove('open')}
 document.getElementById('modal').addEventListener('click',e=>{if(e.target.id==='modal')closeModal()});
