@@ -96,6 +96,15 @@ jobs:
       - name: Backup and recovery continuity evidence
         run: npx tsx scripts/mta-backup-recovery-continuity-evidence.ts
 
+      - name: Backup Restore Disaster Recovery Certification
+        run: npx tsx scripts/mta-backup-restore-dr-certification.ts
+
+      - name: Verify Backup Restore Disaster Recovery certification
+        if: always()
+        run: |
+          test -s artifacts/mta-evidence/backup-restore-dr-certification.json
+          node -e "const x=require('./artifacts/mta-evidence/backup-restore-dr-certification.json'); if(x.result!=='PASS'||x.disasterRecoveryCertified!==true||x.backupIntegrityCertified!==true||x.restoreIntegrityCertified!==true||x.rpoCertified!==true||x.rtoCertified!==true) process.exit(1); console.log('BACKUP_RESTORE_DR='+x.result)"
+
       - name: Runtime device handoff evidence
         run: npx tsx scripts/mta-runtime-device-handoff-evidence.ts
 
