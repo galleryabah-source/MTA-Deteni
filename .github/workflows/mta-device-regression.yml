@@ -6,6 +6,9 @@ on:
     branches: [main]
     paths:
       - 'web/**'
+      - 'test/**'
+      - 'tests/**'
+      - 'scripts/**'
       - '.github/workflows/mta-device-regression.yml'
 
 permissions:
