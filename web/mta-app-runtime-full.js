@@ -57,7 +57,7 @@ function addDetainee(existing){
     <div class="field"><label>Nama (synthetic)</label><input name="name" required value="${esc(d.name)}"></div>
     <div class="field"><label>Kebangsaan</label><input name="nationality" value="${esc(d.nationality)}"></div>
     <div class="field"><label>Status</label><select name="status"><option value="AKTIF" ${d.status==='AKTIF'?'selected':''}>AKTIF</option><option value="NONAKTIF" ${d.status==='NONAKTIF'?'selected':''}>NONAKTIF</option></select></div>
-    <div class="field full"><label>Penempatan Awal</label><select name="placementId"><option value="">Tanpa Penempatan</option>${roomOptions}</select></div>
+    <div class="field full"><label>${existing?'Penempatan Saat Ini':'Penempatan Awal'}</label>${existing?`<div class="notice">${esc(d.placement||'Belum terpetakan')}<br><span class="p6mini">Perubahan kamar dilakukan melalui modul Pergerakan → Transfer Kamar.</span></div>`:`<select name="placementId"><option value="">Pilih kamar</option>${roomOptions}</select>`}</div>
     <div class="actions full"><button type="button" class="btn" onclick="closeModal()">Batal</button><button type="submit" class="btn primary">Simpan</button></div>
   </form>`);
   const form=document.getElementById('dForm');
@@ -74,9 +74,11 @@ function addDetainee(existing){
       if(db.detainees.some(x=>String(x.code||'').trim().toLowerCase()===code.toLowerCase()&&(!existing||x.id!==existing.id))){toast('Kode deteni sudah terdaftar.');return}
       const room=placementId?(db.rooms||[]).find(r=>r.id===placementId&&r.status==='ACTIVE'):null;
       if(placementId&&!room){toast('Penempatan tidak valid atau kamar tidak aktif.');return}
+      if(!existing&&status==='AKTIF'&&!room){toast('Deteni AKTIF wajib memiliki penempatan awal.');return}
+      if(!existing&&room){const guard=window.MTA_DETENI_MASTER_ROOM_GUARD?.validateDetaineeRoom?.(db,room.id,null);if(guard&&!guard.ok){toast(guard.code==='ROOM_FULL'?'Kamar sudah penuh.':'Kamar tujuan tidak valid.');return}}
       if(existing){
         Object.assign(existing,{code,name,nationality,status});
-        if(room) existing.placement=room.block+' / '+room.room; else if(!placementId) existing.placement='';
+        /* Placement is immutable through Detainee Edit; room changes belong to Movement. */
         audit('DETAINEE_UPDATE','DETAINEE',existing.id);
       }else{
         const x={id:uid('DET'),code,name,nationality,status,placement:room?room.block+' / '+room.room:'',createdAt:now()};
