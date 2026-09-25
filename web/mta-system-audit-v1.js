@@ -16,7 +16,7 @@ function run(){
   results.push(check('MOVEMENT_VIEW_ADAPTER',!!window.MTAMovementView?.render));
   results.push(check('ROOM_OPS_VIEW_ADAPTER',!!window.MTARoomOpsView?.render));
   results.push(check('MASTER_ROOM_GUARD',!!window.MTA_DETENI_MASTER_ROOM_GUARD?.validateDetaineeRoom));
-  results.push(check('DETAINEE_CRUD_OWNER',typeof window.addDetainee==='function'&&typeof window.editDetainee==='function'));
+  results.push(check('DETAINEE_CRUD_OWNER',window.MTA_DETAINEE_CRUD_OWNER==='CORE_RUNTIME_V2'&&typeof window.addDetainee==='function'&&typeof window.editDetainee==='function'));
   const state=k?.read?.()||{};
   results.push(check('STATE_ARRAYS',['detainees','placements','movements','leaves','documents','audit','rooms','blocks'].every(x=>Array.isArray(state[x]))));
   results.push(check('AI_SECRET_NOT_PERSISTED',!state.adminSettings?.aiSettings?.apiKey));
