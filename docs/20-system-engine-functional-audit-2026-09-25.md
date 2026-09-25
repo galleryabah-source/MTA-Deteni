@@ -159,19 +159,21 @@ A deeper source audit identified and corrected additional cohesion defects that 
 
 ### 11.5 Cache/version integrity
 The authenticated runtime cache chain was refreshed after source changes:
-- full runtime: v18
-- State Kernel: v3
+- full runtime: v20
+- State Kernel: v4
 - Master Room Guard: v12
 - Preview V5: v13
 - Preview V6: v9
 - Room Ops: v11
 - Movement: v11
 - QR Print: v6
-- Admin Settings: v3
+- Admin Settings: v4
 - System Audit: v2
 
 ### 11.6 Current certification status
 Source-level remediation: **IMPLEMENTED**.
+
+Additional room-integrity hardening: occupied rooms can no longer be changed to INACTIVE/MAINTENANCE through Administrator Settings; detainees must be transferred first.
 
 JavaScript source parsing: **PASS** for the changed runtime modules.
 
