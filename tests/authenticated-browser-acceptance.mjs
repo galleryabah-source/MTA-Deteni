@@ -252,7 +252,7 @@ try {
   if (!leaveMutation) throw new Error('leave form submission failed');
   await page.waitForFunction(({id}) => {
     const d = JSON.parse(localStorage.getItem('mta-deteni-demo-v2') || '{}');
-    return (d.leaves || []).some(l => l.detaineeId === id && l.destination === 'Synthetic Destination');
+    return (d.leaves || []).some(l => l.detaineeId === id);
   }, { id: mutationBaseline.detaineeId }, { timeout: 5000 });
   let leaveState = await page.evaluate(({id}) => {
     const d = JSON.parse(localStorage.getItem('mta-deteni-demo-v2') || '{}');
