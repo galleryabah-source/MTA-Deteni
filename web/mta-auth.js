@@ -7,8 +7,10 @@ const supabase=createClient(
 
 async function syncSession(session){
   const token=session?.access_token||null;
+  const authenticated=!!session;
   window.mtaProductionApi?.setAccessToken(token);
-  window.dispatchEvent(new CustomEvent('mta-auth-state',{detail:{authenticated:!!session,user:session?.user||null}}));
+  window.__mtaAuthState=Object.freeze({resolved:true,authenticated,user:session?.user||null});
+  window.dispatchEvent(new CustomEvent('mta-auth-state',{detail:{authenticated,user:session?.user||null}}));
 }
 supabase.auth.onAuthStateChange((_event,session)=>syncSession(session));
 const initial=await supabase.auth.getSession();
