@@ -51,5 +51,22 @@ button,input,select,textarea{max-width:100%;min-width:0}
 @media(min-width:761px){
   .layout{grid-template-columns:var(--mta-sidebar) minmax(0,1fr)}
   .side.mta-collapsed{width:var(--mta-sidebar-mini)}
+  /* Collapsed sidebar must reclaim its grid track; otherwise the main
+     content remains offset by the full sidebar width. */
+  .layout.mta-sidebar-collapsed{
+    grid-template-columns:var(--mta-sidebar-mini) minmax(0,1fr)!important;
+    width:100%!important;
+    min-width:0!important;
+  }
+  .layout.mta-sidebar-collapsed>.main{
+    width:100%!important;
+    min-width:0!important;
+  }
+  .layout.mta-sidebar-collapsed>.main>.view{
+    width:100%!important;
+    max-width:none!important;
+    margin-left:0!important;
+    margin-right:0!important;
+  }
 }
 @media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;transition:none!important}}
