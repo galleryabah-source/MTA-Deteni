@@ -60,6 +60,9 @@ jobs:
       - name: P9.5 audit integrity contract tests
         run: node test/p9.5-audit-integrity.test.mjs
 
+      - name: Security adversarial boundary certification
+        run: npx tsx test/security-adversarial-certification.test.ts
+
       - name: QR scan verification tests
         run: npx tsx test/qr-scan-result.test.ts
 
