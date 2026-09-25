@@ -1,7 +1,22 @@
 (()=>{
 const K='mta-deteni-demo-v2';
-const get=()=>JSON.parse(localStorage.getItem(K)||'{}');
-const put=d=>{localStorage.setItem(K,JSON.stringify(d));window.dispatchEvent(new CustomEvent('mta:data-changed'))};
+const BRANDING_KEY='mta-deteni-branding-v1';
+const get=()=>{
+  const d=JSON.parse(localStorage.getItem(K)||'{}');
+  try{
+    const b=JSON.parse(localStorage.getItem(BRANDING_KEY)||'null');
+    if(b)d.adminSettings=d.adminSettings||{},d.adminSettings.branding=b;
+  }catch{}
+  return d;
+};
+const put=d=>{
+  const branding=d?.adminSettings?.branding;
+  const persist=JSON.parse(JSON.stringify(d||{}));
+  if(persist.adminSettings)delete persist.adminSettings.branding;
+  localStorage.setItem(K,JSON.stringify(persist));
+  if(branding)localStorage.setItem(BRANDING_KEY,JSON.stringify(branding));
+  window.dispatchEvent(new CustomEvent('mta:data-changed'));
+};
 const E=s=>String(s??'').replace(/[&<>\"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;',"'":'&#39;'}[c]));
 const uid=p=>p+'-'+crypto.randomUUID().slice(0,10).toUpperCase();
 const now=()=>new Date().toISOString();
