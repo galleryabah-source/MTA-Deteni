@@ -128,9 +128,9 @@ jobs:
             echo "SINGLE_DETAINEE_CRUD_OWNER_FAIL"
             exit 1
           fi
-          grep -Fq "mta-state-kernel-v1.js?v=3" web/mta-app-runtime-full.js
-          grep -Fq "mta-app-runtime-full.js?v=18" web/mta-app-runtime.js
-          grep -Fq "admin-settings-v9.js?v=3" web/mta-app-runtime-full.js
+          grep -Fq "mta-state-kernel-v1.js?v=4" web/mta-app-runtime-full.js
+          grep -Fq "mta-app-runtime-full.js?v=20" web/mta-app-runtime.js
+          grep -Fq "admin-settings-v9.js?v=4" web/mta-app-runtime-full.js
           grep -Fq "mta-system-audit-v1.js?v=2" web/mta-app-runtime-full.js
           echo "SINGLE_DETAINEE_CRUD_OWNER: PASS"
           echo "RUNTIME_CACHE_CONTRACT: PASS"
