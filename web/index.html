@@ -45,7 +45,7 @@ body:not(.mta-auth-ready) .app{display:none!important}body.mta-auth-ready .app{d
 <div class="layout"><aside class="side"><nav class="nav" id="nav"><button class="active" data-view="dashboard">Dashboard</button><button data-view="detainee">Data Deteni</button><button data-view="placement">Penempatan</button><button data-view="movement">Pergerakan</button><button data-view="leave">Izin</button><button data-view="documents">Dokumen</button><button data-view="audit">Audit Trail</button></nav></aside><main class="main"><div id="appView" class="view"></div></main></div>
 <footer class="footer"><span>MTA DETENI Digital · Synthetic functional runtime · No operational detainee data</span><span id="clock"></span></footer>
 </div><div id="modal" class="modal"><div class="dialog" id="dialog"></div></div><div id="toast" class="toast"></div>
-<script src="/mta-production-api.js"></script><script src="/mta-auth-ui.js"></script><script type="module" src="/mta-auth.js"></script><script src="/daily-guard-report-v2.js"></script><script src="/daily-guard-report-d57.js"></script><script src="/admin-settings-v9.js"></script>\n<script src="/mta-unified-shell-v2.js?v=6"></script>
+<script src="/mta-production-api.js"></script><script src="/mta-auth-ui.js"></script><script type="module" src="/mta-auth.js"></script>
 <script>
 const KEY='mta-deteni-demo-v2';
 const seed={meta:{version:2,createdAt:new Date().toISOString()},detainees:[{id:'DET-001',code:'DET-2026-001',name:'SYNTHETIC A',nationality:'Contoh',status:'AKTIF',placement:'Blok A / Kamar 01',createdAt:'2026-09-16T07:00:00Z'},{id:'DET-002',code:'DET-2026-002',name:'SYNTHETIC B',nationality:'Contoh',status:'AKTIF',placement:'Blok B / Kamar 02',createdAt:'2026-09-16T07:10:00Z'}],placements:[{id:'PLC-001',detaineeId:'DET-001',block:'Blok A',room:'Kamar 01',since:'2026-09-16T07:20:00Z'},{id:'PLC-002',detaineeId:'DET-002',block:'Blok B',room:'Kamar 02',since:'2026-09-16T07:25:00Z'}],movements:[],leaves:[],documents:[],audit:[]};
@@ -273,7 +273,44 @@ document.getElementById('backupBtn').onclick=()=>{audit('EXPORT_DOWNLOAD','BACKU
 document.getElementById('importBtn').onclick=()=>document.getElementById('importFile').click();
 document.getElementById('importFile').onchange=e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{try{const x=JSON.parse(r.result);validateRuntimeState(x);db=x;appendAudit(db,'BACKUP_RESTORE','BACKUP','synthetic');db.lastMutation={key:'BACKUP_RESTORE:'+now(),action:'BACKUP_RESTORE',completedAt:now()};save();render();toast('Backup dipulihkan')}catch(err){toast('Backup tidak valid: '+err.message)}};r.readAsText(f)};
 setInterval(()=>document.getElementById('clock').textContent=new Date().toLocaleString('id-ID'),1000);
-function bootMtaApp(){if(window.__mtaAppBooted)return;if(!window.__mtaAuthState?.resolved||!window.__mtaAuthState?.authenticated)return;if(!document.body.classList.contains('mta-auth-ready'))return;db=load();window.__mtaAppBooted=true;render();}
-window.addEventListener('mta-auth-state',bootMtaApp);
-bootMtaApp();
+async function loadAuthenticatedRuntime(){
+  if(window.__mtaRuntimeLoading)return window.__mtaRuntimeLoading;
+  const scripts=['/daily-guard-report-v2.js','/daily-guard-report-d57.js','/admin-settings-v9.js','/mta-unified-shell-v2.js?v=7'];
+  window.__mtaRuntimeLoading=(async()=>{
+    for(const src of scripts){
+      await new Promise((resolve,reject)=>{
+        const existing=document.querySelector('script[data-mta-auth-runtime="'+src.split('?')[0]+'"]');
+        if(existing)return resolve();
+        const s=document.createElement('script');
+        s.src=src;
+        s.async=false;
+        s.dataset.mtaAuthRuntime=src.split('?')[0];
+        s.onload=()=>resolve();
+        s.onerror=()=>reject(new Error('AUTH_RUNTIME_LOAD_FAILED:'+src));
+        document.body.appendChild(s);
+      });
+    }
+  })().catch(err=>{
+    console.error('[MTA] authenticated runtime failed to load',err);
+    const msg=document.getElementById('mtaAuthMessage');
+    if(msg){msg.textContent='Runtime aplikasi gagal dimuat. Silakan refresh halaman.';msg.className='mta-auth-message error'}
+    window.__mtaRuntimeLoading=null;
+    throw err;
+  });
+  return window.__mtaRuntimeLoading;
+}
+async function bootMtaApp(){
+  if(window.__mtaAppBooted)return;
+  if(!window.__mtaAuthState?.resolved||!window.__mtaAuthState?.authenticated)return;
+  if(!document.body.classList.contains('mta-auth-ready'))return;
+  try{
+    await loadAuthenticatedRuntime();
+    if(window.__mtaAppBooted)return;
+    db=load();
+    window.__mtaAppBooted=true;
+    render();
+  }catch(_){}
+}
+window.addEventListener('mta-auth-state',()=>{void bootMtaApp()});
+void bootMtaApp();
 </script></body></html>
