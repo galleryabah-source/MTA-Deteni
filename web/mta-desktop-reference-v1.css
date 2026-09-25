@@ -1,0 +1,266 @@
+/* MTA DETENI — Desktop Reference Design v1
+   Source of truth: supplied desktop design board.
+   Scope: desktop/web >= 1025px. No domain logic, schema, migration, RBAC or runtime mutation.
+*/
+@media (min-width:1025px){
+  :root{
+    --mta-ref-blue:#1769e0;
+    --mta-ref-blue-dark:#0b3f8f;
+    --mta-ref-bg:#f4f7fb;
+    --mta-ref-surface:#ffffff;
+    --mta-ref-line:#e4eaf2;
+    --mta-ref-text:#152033;
+    --mta-ref-muted:#6b778c;
+    --mta-ref-shadow:0 8px 26px rgba(18,42,76,.055);
+    --mta-ref-sidebar:248px;
+    --mta-ref-header:64px;
+  }
+
+  html,body{background:var(--mta-ref-bg)!important;color:var(--mta-ref-text)}
+  body{font-family:"Segoe UI",Inter,system-ui,-apple-system,BlinkMacSystemFont,sans-serif}
+
+  .app{
+    grid-template-rows:var(--mta-ref-header) minmax(0,1fr) 30px!important;
+    background:linear-gradient(180deg,#f8fafc 0%,#f0f4f9 100%);
+  }
+
+  /* Header */
+  .top{
+    height:var(--mta-ref-header)!important;
+    padding:0 18px!important;
+    background:rgba(255,255,255,.94)!important;
+    border-bottom:1px solid var(--mta-ref-line)!important;
+    box-shadow:0 1px 10px rgba(15,23,42,.035)!important;
+    z-index:30;
+  }
+  .brand{gap:10px!important}
+  .logo{
+    width:42px!important;height:42px!important;border-radius:11px!important;
+    background:linear-gradient(145deg,#1769e0,#0b3f8f)!important;
+    box-shadow:0 5px 14px rgba(23,105,224,.18)!important;
+  }
+  .brand strong{font-size:15px!important;font-weight:800!important;letter-spacing:-.02em}
+  .brand small{font-size:9px!important;color:#78859a!important}
+  .topright{gap:9px!important}
+  .topright .pill{
+    height:30px!important;padding:0 10px!important;
+    background:#edf8f1!important;border:1px solid #d6eddd!important;
+    color:#16803c!important;font-size:10px!important;font-weight:700!important;
+  }
+  .topright .btn{min-height:32px!important}
+
+  /* Search-like input in existing toolbar/header surfaces */
+  .mta-ref-search,
+  input[placeholder*="Cari"]{
+    background:#f6f8fb!important;
+    border:1px solid #e8edf3!important;
+    border-radius:999px!important;
+  }
+
+  /* Shell */
+  .layout{
+    grid-template-columns:var(--mta-ref-sidebar) minmax(0,1fr)!important;
+    background:transparent!important;
+  }
+  .side{
+    width:var(--mta-ref-sidebar)!important;
+    padding:13px 10px 18px!important;
+    background:rgba(255,255,255,.93)!important;
+    border-right:1px solid var(--mta-ref-line)!important;
+    overflow:auto!important;
+  }
+  .nav{gap:3px!important}
+  .nav button{
+    min-height:41px!important;
+    padding:9px 12px!important;
+    border-radius:8px!important;
+    color:#263449!important;
+    font-size:12px!important;
+    font-weight:550!important;
+    border:1px solid transparent!important;
+  }
+  .nav button:hover{
+    background:#f4f7fb!important;
+    border-color:#e7edf4!important;
+  }
+  .nav button.active{
+    color:#0754ae!important;
+    background:#dcecff!important;
+    border-color:#c9defb!important;
+    box-shadow:none!important;
+    font-weight:750!important;
+  }
+  .nav button.active::before{
+    left:-2px!important;top:8px!important;bottom:8px!important;width:3px!important;
+    background:var(--mta-ref-blue)!important;
+  }
+
+  .main{
+    padding:18px 20px 22px!important;
+    overflow:auto!important;
+  }
+  .view{
+    width:100%!important;
+    max-width:1500px!important;
+    margin:0 auto!important;
+  }
+
+  /* Dashboard hero: light modern + hero image treatment without changing markup */
+  .view>.hero:first-child{
+    position:relative!important;
+    min-height:164px!important;
+    padding:27px 310px 24px 24px!important;
+    overflow:hidden!important;
+    border:1px solid #dfe7f0!important;
+    border-radius:15px!important;
+    background:
+      linear-gradient(90deg,rgba(255,255,255,.98) 0%,rgba(255,255,255,.95) 48%,rgba(231,241,252,.72) 100%),
+      linear-gradient(135deg,#fff,#edf5ff)!important;
+    box-shadow:var(--mta-ref-shadow)!important;
+  }
+  .view>.hero:first-child:after{
+    content:"";
+    position:absolute;right:0;top:0;width:42%;height:100%;
+    background:
+      linear-gradient(90deg,rgba(255,255,255,.98),rgba(255,255,255,.15)),
+      radial-gradient(circle at 70% 35%,rgba(75,145,222,.22),transparent 55%),
+      linear-gradient(135deg,#dbe9f7,#b8d1e8 52%,#dce9f4);
+    opacity:.9;
+    pointer-events:none;
+  }
+  .view>.hero:first-child:before{
+    content:"MTA DETENI";
+    position:absolute;right:34px;bottom:20px;z-index:1;
+    color:rgba(11,63,143,.18);font-size:31px;font-weight:900;letter-spacing:.08em;
+  }
+  .view>.hero:first-child>*{position:relative;z-index:2}
+  .hero h1,.view>.hero:first-child h1{
+    font-size:26px!important;line-height:1.15!important;
+    color:#101b2d!important;letter-spacing:-.035em!important;
+  }
+  .hero .sub{font-size:12px!important;line-height:1.55!important;color:#59677c!important}
+
+  /* KPI cards */
+  .stats{
+    grid-template-columns:repeat(4,minmax(0,1fr))!important;
+    gap:10px!important;margin-top:11px!important;
+  }
+  .stats .card{
+    min-height:92px!important;
+    padding:14px 15px!important;
+    border:1px solid #e2e8f0!important;
+    border-radius:11px!important;
+    box-shadow:0 5px 18px rgba(18,42,76,.045)!important;
+    background:rgba(255,255,255,.98)!important;
+  }
+  .stats .label{font-size:10px!important;color:#69778c!important}
+  .stats .value{font-size:24px!important;line-height:1!important;margin-top:6px!important;color:#111c2e!important}
+  .stats .status{font-size:9px!important;margin-top:7px!important}
+
+  /* Generic cards / panels */
+  .card{
+    border:1px solid #e1e8f0!important;
+    border-radius:12px!important;
+    background:rgba(255,255,255,.98)!important;
+    box-shadow:var(--mta-ref-shadow)!important;
+  }
+  .card h2{font-size:15px!important;color:#172235!important}
+
+  /* Two-column operational area */
+  .view>.grid[style*="2fr 1fr"]{
+    grid-template-columns:minmax(0,1.55fr) minmax(340px,.85fr)!important;
+    gap:11px!important;
+    margin-top:11px!important;
+  }
+
+  /* Tables */
+  .tablewrap{
+    border:1px solid #e0e7ef!important;
+    border-radius:11px!important;
+    box-shadow:0 4px 15px rgba(18,42,76,.035)!important;
+  }
+  .table{
+    min-width:820px!important;
+  }
+  .table th{
+    background:#f7f9fc!important;
+    color:#738096!important;
+    font-size:9px!important;
+    letter-spacing:.07em!important;
+    padding:10px 11px!important;
+  }
+  .table td{
+    padding:10px 11px!important;
+    font-size:11px!important;
+  }
+  .table tbody tr:hover{background:#f6faff!important}
+
+  /* Buttons */
+  .btn{
+    min-height:34px!important;
+    padding:7px 11px!important;
+    border-radius:8px!important;
+    border-color:#d8e0e9!important;
+    font-size:11px!important;
+  }
+  .btn.primary{
+    background:var(--mta-ref-blue)!important;
+    border-color:var(--mta-ref-blue)!important;
+    box-shadow:0 3px 10px rgba(23,105,224,.15)!important;
+  }
+  .btn.primary:hover{background:#0754ae!important;border-color:#0754ae!important}
+
+  /* Forms */
+  .field input,.field select,.field textarea{
+    min-height:36px!important;
+    padding:8px 10px!important;
+    border-radius:8px!important;
+    border-color:#d8e0e9!important;
+    font-size:11px!important;
+  }
+  .field label{font-size:10px!important;color:#66758a!important}
+
+  /* Modal */
+  .modal{backdrop-filter:blur(4px)!important;background:rgba(15,23,42,.34)!important}
+  .dialog{
+    border:1px solid #dfe6ee!important;
+    border-radius:14px!important;
+    box-shadow:0 24px 70px rgba(15,23,42,.2)!important;
+  }
+
+  /* Footer */
+  .footer{
+    height:30px!important;
+    padding:7px 14px!important;
+    background:rgba(255,255,255,.92)!important;
+    border-top:1px solid var(--mta-ref-line)!important;
+    font-size:9px!important;
+  }
+
+  /* Detainee / operational toolbars */
+  .detainee-toolbar{
+    background:rgba(255,255,255,.72)!important;
+    border:1px solid #e3e9f0!important;
+    border-radius:11px!important;
+    padding:9px!important;
+  }
+  .detainee-toolbar input,
+  .detainee-toolbar select{
+    min-height:36px!important;
+    border:1px solid #d9e1ea!important;
+    border-radius:8px!important;
+  }
+  .detainee-tablewrap{
+    border-radius:12px!important;
+    box-shadow:var(--mta-ref-shadow)!important;
+  }
+
+  /* Keep the supplied design desktop-first. */
+  @media(min-width:1440px){
+    .main{padding-left:24px!important;padding-right:24px!important}
+    .view{max-width:1560px!important}
+  }
+  @media(min-width:1750px){
+    .view{max-width:1660px!important}
+  }
+}
