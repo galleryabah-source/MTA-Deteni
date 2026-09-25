@@ -8,6 +8,7 @@ test("QR camera is wired to the operational Scan Center", async () => {
   const camera = await read("qr-camera-v2.js");
   const preview = await read("preview-v5.js");
   const runtime = await read("mta-app-runtime-full.js");
+  const runtime = await read("mta-app-runtime-full.js");
   const print = await read("qr-print-clean-v3.js");
 
   assert.match(camera, /querySelector\('#p5scanin'\)/);
