@@ -32,7 +32,7 @@
 
   // Operational runtime is deliberately non-blocking.
   const s=document.createElement('script');
-  s.src='/mta-app-runtime-full.js?v=1';
+  s.src='/mta-app-runtime-full.js?v=2';
   s.async=true;
   s.dataset.mtaOperationalRuntime='1';
   s.onload=()=>console.info('[MTA] operational runtime loaded');
