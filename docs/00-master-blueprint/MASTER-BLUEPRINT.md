@@ -667,3 +667,8 @@ This UI decision changes presentation only. It does not authorize changes to dat
 The visual direction is frozen. Future UI work may improve implementation fidelity, accessibility, responsive desktop breakpoints, icon correctness, spacing, performance, and functional integration. A new visual direction requires an explicit superseding design decision.
 
 See: docs/18-desktop-ui-design-system-v1.0-LOCKED.md and docs/03-implementation/UI-DESIGN-DECISION-2026-09-25.md.
+
+
+## 22. Current UI Implementation Review — 25 September 2026
+
+The current implementation baseline and audit findings are recorded in `docs/19-current-ui-review-audit-2026-09-25.md`. This document is the current implementation reference for the locked desktop UI, Data Deteni table contract, QR actions, Admin Settings layout, and known persistence verification items. It does not supersede the locked design decision in Section 21.
