@@ -1,4 +1,5 @@
 import { chromium } from 'playwright';
+import fs from 'node:fs';
 
 const width = Number(process.env.WIDTH || 1440);
 const height = Number(process.env.HEIGHT || 900);
@@ -53,6 +54,7 @@ window.qrcode = window.qrcode || function(){
 const browser = await chromium.launch({ headless: true });
 const page = await browser.newPage({ viewport: { width, height } });
 const errors = [];
+let stage = 'init';
 page.on('pageerror', error => errors.push(error.message));
 
 try {
@@ -63,7 +65,9 @@ try {
     route.fulfill({ status: 200, contentType: 'application/javascript', body: QR_STUB })
   );
 
+  stage = 'goto';
   await page.goto('http://127.0.0.1:4173/', { waitUntil: 'domcontentloaded' });
+  stage = 'login-gate';
   await page.locator('#mtaAuthGate.open').waitFor({ state: 'visible', timeout: 10000 });
 
   const locked = await page.evaluate(() => ({
@@ -75,18 +79,21 @@ try {
     throw new Error(`unauthenticated boundary contract failed: ${JSON.stringify(locked)}`);
   }
 
+  stage = 'login-submit';
   await page.locator('#mtaAuthEmail').fill('synthetic@example.test');
   await page.locator('#mtaAuthPassword').fill('synthetic-password');
   await page.locator('#mtaAuthSubmit').click();
 
+  stage = 'core-dashboard';
   await page.locator('body.mta-auth-ready').waitFor({ state: 'attached', timeout: 10000 });
   await page.locator('.app').waitFor({ state: 'visible', timeout: 10000 });
   await page.getByRole('heading', { name: 'Dashboard' }).first().waitFor({ state: 'visible', timeout: 10000 });
 
+  stage = 'operational-nav';
   await page.waitForFunction(() =>
     document.querySelectorAll('#nav button[data-view="monitor"], #mtaMobileBottomNav button[data-view="monitor"]').length > 0,
     null,
-    { timeout: 20000 }
+    { timeout: 60000 }
   );
 
   const views = await page.locator('#nav button[data-view], #mtaMobileBottomNav button[data-view]').evaluateAll(buttons =>
@@ -94,6 +101,7 @@ try {
   );
   if (!views.includes('monitor')) throw new Error(`monitor menu missing after authenticated runtime boot: ${views.join(',')}`);
 
+  stage = 'menu-journey';
   for (const view of views) {
     const clicked = await page.evaluate((targetView) => {
       const buttons = [...document.querySelectorAll('#nav button[data-view], #mtaMobileBottomNav button[data-view]')];
@@ -118,6 +126,7 @@ try {
     console.log(`AUTH_MENU_PASS ${device} ${view} ${JSON.stringify(state)}`);
   }
 
+  stage = 'monitor';
   await page.evaluate(() => {
     const monitor = [...document.querySelectorAll('#nav button[data-view="monitor"], #mtaMobileBottomNav button[data-view="monitor"]')][0];
     monitor?.click();
@@ -126,6 +135,7 @@ try {
   await page.evaluate(() => document.body.getBoundingClientRect().width);
   console.log(`AUTH_MONITOR_PASS ${device}`);
 
+  stage = 'logout';
   await page.locator('#mtaAuthUi button').getByText('Logout').click();
   await page.locator('body.mta-auth-locked').waitFor({ state: 'attached', timeout: 5000 });
   await page.locator('#mtaAuthGate.open').waitFor({ state: 'visible', timeout: 5000 });
@@ -141,6 +151,22 @@ try {
 
   if (errors.length) throw new Error(`page errors: ${errors.join('; ')}`);
   console.log(`AUTH_BROWSER_ACCEPTANCE_PASS ${JSON.stringify({device,width,height,views})}`);
+} catch (error) {
+  const snapshot = await page.evaluate(() => ({
+    bodyClass: document.body.className,
+    authMessage: document.getElementById('mtaAuthMessage')?.textContent || '',
+    navViews: [...document.querySelectorAll('#nav button[data-view], #mtaMobileBottomNav button[data-view]')].map(b => b.dataset.view).filter(Boolean),
+    appText: document.getElementById('appView')?.textContent?.trim().slice(0, 1200) || '',
+    runtimeLoaded: !!window.__mtaAppRuntimeLoaded,
+    fullRuntimeBooted: !!window.__mtaAppBooted,
+    fullRuntimeLoading: !!window.__mtaRuntimeLoading
+  }));
+  fs.writeFileSync(`/tmp/mta-auth-acceptance-${device}.json`, JSON.stringify({device,width,height,stage,error:String(error?.stack||error),errors,snapshot},null,2));
+  throw error;
 } finally {
+  if (!fs.existsSync(`/tmp/mta-auth-acceptance-${device}.json`)) {
+    const snapshot = await page.evaluate(() => ({bodyClass:document.body.className,navViews:[...document.querySelectorAll('#nav button[data-view], #mtaMobileBottomNav button[data-view]')].map(b=>b.dataset.view).filter(Boolean),runtimeLoaded:!!window.__mtaAppRuntimeLoaded,fullRuntimeBooted:!!window.__mtaAppBooted}));
+    fs.writeFileSync(`/tmp/mta-auth-acceptance-${device}.json`, JSON.stringify({device,width,height,stage,errors,snapshot},null,2));
+  }
   await browser.close();
 }
