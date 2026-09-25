@@ -1,3 +1,15 @@
+## 2026-09-25 — Mobile Field Evidence Intake & Daily Report Supply Locked
+
+- Locked **Mobile Field Evidence Intake → Daily Report Assembly** as a core MTA DETENI capability.
+- Defined smartphone-first field capture for photos, quick event/data input, notes, optional voice input, provenance and synchronization status.
+- Established first-class evidence semantics for photographs, including event linkage, report inclusion, ordering, caption and image-slot mapping.
+- Required offline-first capture and idempotent reconnect synchronization using the existing local continuity/runtime contracts.
+- Added a Daily Report Inbox and timeline concept so officers can see evidence, photos, incomplete items and synchronization state from mobile.
+- Connected field evidence to Daily Dataset → AI Assistance → Human Verification → approved report template → deterministic Document Engine.
+- Added dedicated roadmap `docs/10-roadmap/MOBILE-FIELD-EVIDENCE-DAILY-REPORT-ROADMAP-v1.0.md`.
+- This capability is a near-term implementation priority and must integrate with the existing MTA DETENI runtime rather than become a separate application.
+- No schema migration, production AI activation or real detainee data was introduced.
+
 ## 2026-09-25 — AI Document Template Intelligence & Replication Locked
 
 - Locked AI Document Template Intelligence & Replication as an official MTA DETENI AI use case.
