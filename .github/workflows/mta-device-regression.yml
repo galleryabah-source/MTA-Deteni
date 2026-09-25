@@ -63,6 +63,8 @@ jobs:
           }
 
           walk(root);
+          // Dynamic module loaded by mta-auth-ui.js; classify it as ESM for syntax checking.
+          moduleSources.add(path.resolve('web/mta-auth.js'));
           const failures=[];
           for(const file of files){
             const source=fs.readFileSync(file,'utf8');
