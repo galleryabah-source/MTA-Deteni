@@ -279,7 +279,7 @@ async function loadAuthenticatedRuntime(){
     '/qr-camera-v2.js?v=4',
     '/qr-context-v1.js?v=2',
     'https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.js',
-    '/preview-v5.js?v=11',
+    '/preview-v5.js?v=12',
     '/preview-v6.js?v=8',
     '/qr-print-clean-v3.js?v=5',
     '/room-ops-v9.js?v=10',
