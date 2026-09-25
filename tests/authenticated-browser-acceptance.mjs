@@ -154,8 +154,11 @@ try {
     d.leaves = d.leaves || [];
     d.documents = d.documents || [];
     d.audit = d.audit || [];
-    d.rooms = d.rooms || [{ id: 'ROOM-BROWSER-001', block: 'Blok A', room: 'Kamar 01', capacity: 8, status: 'ACTIVE' }];
-    d.blocks = d.blocks || [{ id: 'BLOCK-BROWSER-001', name: 'Blok A', status: 'ACTIVE' }];
+    d.rooms = Array.isArray(d.rooms) ? d.rooms : [];
+    if (!d.rooms.some(r => r.id === 'ROOM-BROWSER-001')) d.rooms.push({ id: 'ROOM-BROWSER-001', block: 'Blok A', room: 'Kamar 01', capacity: 8, status: 'ACTIVE' });
+    if (!d.rooms.some(r => r.id === 'ROOM-BROWSER-002')) d.rooms.push({ id: 'ROOM-B', block: 'Blok A', room: 'Kamar 02', capacity: 8, status: 'ACTIVE' });
+    d.blocks = Array.isArray(d.blocks) ? d.blocks : [];
+    if (!d.blocks.some(b => b.id === 'BLOCK-BROWSER-001')) d.blocks.push({ id: 'BLOCK-BROWSER-001', name: 'Blok A', status: 'ACTIVE' });
     const x = d.detainees.find(v => v.status === 'AKTIF');
     d.qr = d.qr || { detainee: {}, room: {}, leave: {} };
     d.qr.detainee = d.qr.detainee || {};
@@ -180,6 +183,135 @@ try {
   const auditCount = await page.evaluate(() => (JSON.parse(localStorage.getItem('mta-deteni-demo-v2') || '{}').audit || []).filter(x => /QR_(RESOLVE|ACTION)/.test(x.action)).length);
   if (auditCount < 2) throw new Error('QR resolve/action audit evidence missing');
   console.log(`AUTH_QR_JOURNEY_PASS ${device} ${qrSeed.id} audit=${auditCount}`);
+
+  // Browser Mutation Journey Certification:
+  // UI mutation → shared synthetic state → audit → monitor → document evidence.
+  stage = 'browser-mutation-journey';
+  const mutationBaseline = await page.evaluate(() => {
+    const d = JSON.parse(localStorage.getItem('mta-deteni-demo-v2') || '{}');
+    const active = (d.detainees || []).find(x => x.status === 'AKTIF');
+    if (!active) throw new Error('active synthetic detainee missing');
+    if (!Array.isArray(d.placements)) d.placements = [];
+    if (!d.placements.some(p => p.detaineeId === active.id)) {
+      d.placements.unshift({ id: 'PLC-BROWSER-001', detaineeId: active.id, roomId: 'ROOM-BROWSER-001', block: 'Blok A', room: 'Kamar 01', since: new Date().toISOString(), source: 'BROWSER_SEED' });
+      active.placement = 'Blok A / Kamar 01';
+    }
+    localStorage.setItem('mta-deteni-demo-v2', JSON.stringify(d));
+    return { detaineeId: active.id, beforeMovements: (d.movements || []).length, beforeLeaves: (d.leaves || []).length, beforeAudit: (d.audit || []).length };
+  });
+
+  await page.evaluate(() => window.show('movement'));
+  await page.waitForFunction(() => /Simpan Perpindahan/i.test(document.getElementById('appView')?.textContent || ''), null, { timeout: 5000 });
+  const movementMutation = await page.evaluate(() => {
+    const form = document.getElementById('p9moveForm');
+    if (!form) throw new Error('movement form missing');
+    const detainee = form.elements.detaineeId;
+    const room = form.elements.roomId;
+    if (!detainee?.options?.length || !room?.options?.length) throw new Error('movement selectors missing');
+    detainee.value = detainee.options[1]?.value || '';
+    detainee.dispatchEvent(new Event('change', { bubbles: true }));
+    const target = [...room.options].find(o => o.value && !o.disabled);
+    if (!target) throw new Error('no valid target room available');
+    room.value = target.value;
+    form.elements.type.value = 'TRANSFER_KAMAR';
+    form.elements.occurredAt.value = new Date(Date.now() - 60000).toISOString().slice(0,16);
+    form.elements.note.value = 'Synthetic browser mutation certification';
+    form.requestSubmit();
+    return { targetRoomId: target.value };
+  });
+  await page.waitForFunction(({id}) => {
+    const d = JSON.parse(localStorage.getItem('mta-deteni-demo-v2') || '{}');
+    return (d.movements || []).some(m => m.source === 'ROOM_TRANSFER' && m.detaineeId === id);
+  }, { id: mutationBaseline.detaineeId }, { timeout: 5000 });
+  const movementState = await page.evaluate(({id}) => {
+    const d = JSON.parse(localStorage.getItem('mta-deteni-demo-v2') || '{}');
+    const m = (d.movements || []).find(x => x.detaineeId === id && x.source === 'ROOM_TRANSFER');
+    const p = (d.placements || []).find(x => x.movementId === m?.id);
+    const audits = (d.audit || []).filter(x => x.resourceId === m?.id || x.resourceId === p?.id);
+    return { movementId: m?.id, placementId: p?.id, movementCount: d.movements.length, auditCount: d.audit.length, audits: audits.map(x => x.action), toRoomId: m?.toRoomId };
+  });
+  if (!movementState.movementId || !movementState.placementId || movementState.auditCount < mutationBaseline.beforeAudit + 2 || movementState.audits.length < 2) {
+    throw new Error(`browser movement mutation evidence failed: ${JSON.stringify(movementState)}`);
+  }
+  console.log(`AUTH_MOVEMENT_MUTATION_PASS ${device} movement=${movementState.movementId} placement=${movementState.placementId} audit=${movementState.auditCount}`);
+
+  await page.evaluate(() => window.show('leave'));
+  await page.waitForFunction(() => /Buat Izin/i.test(document.getElementById('appView')?.textContent || ''), null, { timeout: 5000 });
+  await page.getByRole('button', { name: /Buat Izin/i }).click();
+  await page.locator('#lForm').waitFor({ state: 'visible', timeout: 5000 });
+  const leaveMutation = await page.evaluate(({id}) => {
+    const form = document.getElementById('lForm');
+    if (!form) throw new Error('leave form missing');
+    form.elements.detaineeId.value = id;
+    form.elements.destination.value = 'Synthetic Destination';
+    form.elements.startAt.value = new Date(Date.now() - 3600000).toISOString().slice(0,16);
+    form.elements.purpose.value = 'Synthetic browser mutation certification';
+    form.requestSubmit();
+    return true;
+  }, mutationBaseline.detaineeId);
+  if (!leaveMutation) throw new Error('leave form submission failed');
+  await page.waitForFunction(({id}) => {
+    const d = JSON.parse(localStorage.getItem('mta-deteni-demo-v2') || '{}');
+    return (d.leaves || []).some(l => l.detaineeId === id && l.destination === 'Synthetic Destination');
+  }, { id: mutationBaseline.detaineeId }, { timeout: 5000 });
+  let leaveState = await page.evaluate(({id}) => {
+    const d = JSON.parse(localStorage.getItem('mta-deteni-demo-v2') || '{}');
+    const l = (d.leaves || []).find(x => x.detaineeId === id && x.destination === 'Synthetic Destination');
+    return { id: l?.id, status: l?.status, auditCount: d.audit.length };
+  });
+  if (!leaveState.id || leaveState.status !== 'DRAFT') throw new Error(`leave create mutation failed: ${JSON.stringify(leaveState)}`);
+  for (const expected of ['SUBMITTED', 'APPROVED', 'DEPARTED', 'RETURNED', 'COMPLETED']) {
+    await page.getByRole('button', { name: new RegExp(expected === 'SUBMITTED' ? 'SUBMIT' : expected === 'APPROVED' ? 'APPROVE' : expected === 'DEPARTED' ? 'DEPART' : expected === 'RETURNED' ? 'RETURN' : 'COMPLETE') }).click();
+    await page.waitForFunction(({id,expected}) => {
+      const d = JSON.parse(localStorage.getItem('mta-deteni-demo-v2') || '{}');
+      return (d.leaves || []).some(l => l.id === id && l.status === expected);
+    }, { id: leaveState.id, expected }, { timeout: 5000 });
+  }
+  leaveState = await page.evaluate(({id}) => {
+    const d = JSON.parse(localStorage.getItem('mta-deteni-demo-v2') || '{}');
+    const l = (d.leaves || []).find(x => x.id === id);
+    const audits = (d.audit || []).filter(x => x.resourceId === id);
+    return { status: l?.status, auditCount: d.audit.length, leaveAuditActions: audits.map(x => x.action), lastMutation: d.lastMutation };
+  }, { id: leaveState.id });
+  if (leaveState.status !== 'COMPLETED' || leaveState.auditCount < mutationBaseline.beforeAudit + 8 || leaveState.leaveAuditActions.length < 6) {
+    throw new Error(`leave workflow evidence failed: ${JSON.stringify(leaveState)}`);
+  }
+  console.log(`AUTH_LEAVE_MUTATION_PASS ${device} leave=${leaveState.status} audit=${leaveState.leaveAuditActions.length}`);
+
+  await page.evaluate(() => window.show('monitor'));
+  await page.waitForFunction(() => /Operational Monitor/i.test(document.getElementById('appView')?.textContent || ''), null, { timeout: 5000 });
+  const monitorAfterMutation = await page.evaluate(() => {
+    const d = JSON.parse(localStorage.getItem('mta-deteni-demo-v2') || '{}');
+    return {
+      movements: d.movements.length,
+      leaves: d.leaves.length,
+      audits: d.audit.length,
+      monitorText: document.getElementById('appView')?.textContent || ''
+    };
+  });
+  if (monitorAfterMutation.movements <= mutationBaseline.beforeMovements || monitorAfterMutation.leaves <= mutationBaseline.beforeLeaves || monitorAfterMutation.audits <= mutationBaseline.beforeAudit) {
+    throw new Error(`monitor did not reflect browser mutations: ${JSON.stringify(monitorAfterMutation)}`);
+  }
+
+  await page.evaluate(() => window.show('documents'));
+  await page.waitForFunction(() => /Dokumen|Draft Laporan Harian/i.test(document.getElementById('appView')?.textContent || ''), null, { timeout: 5000 });
+  const reportButton = page.getByRole('button', { name: /Buat Draft|Draft Laporan Harian/i }).first();
+  await reportButton.waitFor({ state: 'visible', timeout: 5000 });
+  await reportButton.click();
+  await page.locator('#rForm').waitFor({ state: 'visible', timeout: 5000 });
+  await page.locator('#rForm input[name="time"]').fill('07.00–14.00 WIB');
+  await page.locator('#rForm textarea[name="note"]').fill('Synthetic browser mutation evidence');
+  await page.locator('#rForm').getByRole('button', { name: 'Buat Draft' }).click();
+  await page.waitForFunction(() => /Draft dibuat|VALIDATED|Dokumen/i.test(document.getElementById('appView')?.textContent || ''), null, { timeout: 5000 });
+  const reportEvidence = await page.evaluate(() => {
+    const d = JSON.parse(localStorage.getItem('mta-deteni-demo-v2') || '{}');
+    const r = (d.documents || [])[0];
+    return { id: r?.documentId || r?.id, status: r?.status, sourceCount: r?.evidence?.sourceRecordCount, auditEventCount: r?.evidence?.auditEventCount, hasMovement: (r?.sourceRecordIds || []).some(id => id && (d.movements || []).some(m => m.id === id)), hasLeave: (r?.sourceRecordIds || []).some(id => id && (d.leaves || []).some(l => l.id === id)) };
+  });
+  if (!reportEvidence.id || !reportEvidence.sourceCount || !reportEvidence.auditEventCount || !reportEvidence.hasMovement || !reportEvidence.hasLeave) {
+    throw new Error(`report evidence does not reflect browser mutations: ${JSON.stringify(reportEvidence)}`);
+  }
+  console.log(`AUTH_REPORT_EVIDENCE_PASS ${device} document=${reportEvidence.id} sources=${reportEvidence.sourceCount} audits=${reportEvidence.auditEventCount}`);
 
   // Core operational surfaces must expose an actionable control, not just a non-empty shell.
   const surfaceContracts = {
