@@ -1,7 +1,7 @@
 (()=>{
 const K='mta-deteni-demo-v2';
 const get=()=>window.MTADeteniStateKernel?window.MTADeteniStateKernel.read():JSON.parse(localStorage.getItem(K)||'{}');
-const put=d=>window.MTADeteniStateKernel?window.MTADeteniStateKernel.write(d):(localStorage.setItem(K,JSON.stringify(d)),true);
+const put=d=>{const result=window.MTADeteniStateKernel?window.MTADeteniStateKernel.write(d):(localStorage.setItem(K,JSON.stringify(d)),true);window.dispatchEvent(new CustomEvent('mta:data-changed',{detail:{source:'room-ops-v9'}}));return result};
 const E=s=>String(s??'').replace(/[&<>\"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;',"'":'&#39;'}[c]));
 const uid=p=>p+'-'+crypto.randomUUID().slice(0,10).toUpperCase();
 const now=()=>new Date().toISOString();
