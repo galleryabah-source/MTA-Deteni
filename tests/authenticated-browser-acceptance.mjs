@@ -141,6 +141,13 @@ try {
   const qrSeed = await page.evaluate(() => {
     const d = JSON.parse(localStorage.getItem('mta-deteni-demo-v2') || '{}');
     d.detainees = d.detainees || [{ id: 'DET-BROWSER-001', code: 'DET-BROWSER-001', name: 'SYNTHETIC BROWSER', nationality: 'Contoh', status: 'AKTIF', placement: 'Blok A / Kamar 01' }];
+    d.placements = d.placements || [];
+    d.movements = d.movements || [];
+    d.leaves = d.leaves || [];
+    d.documents = d.documents || [];
+    d.audit = d.audit || [];
+    d.rooms = d.rooms || [{ id: 'ROOM-BROWSER-001', block: 'Blok A', room: 'Kamar 01', capacity: 8, status: 'ACTIVE' }];
+    d.blocks = d.blocks || [{ id: 'BLOCK-BROWSER-001', name: 'Blok A', status: 'ACTIVE' }];
     const x = d.detainees.find(v => v.status === 'AKTIF');
     d.qr = d.qr || { detainee: {}, room: {}, leave: {} };
     d.qr.detainee = d.qr.detainee || {};
