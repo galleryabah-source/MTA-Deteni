@@ -47,7 +47,7 @@ body:not(.mta-auth-ready) .app{display:none!important}body.mta-auth-ready .app{d
 <div class="layout"><aside class="side"><nav class="nav" id="nav"><button class="active" data-view="dashboard">Dashboard</button><button data-view="detainee">Data Deteni</button><button data-view="placement">Penempatan</button><button data-view="movement">Pergerakan</button><button data-view="leave">Izin</button><button data-view="documents">Dokumen</button><button data-view="audit">Audit Trail</button></nav></aside><main class="main"><div id="appView" class="view"></div></main></div>
 <footer class="footer"><span>MTA DETENI Digital · Synthetic functional runtime · No operational detainee data</span><span id="clock"></span></footer>
 </div><div id="modal" class="modal"><div class="dialog" id="dialog"></div></div><div id="toast" class="toast"></div>
-<script defer src="/mta-production-api.js"></script><script defer src="/mta-auth-ui.js?v=3"></script>
+<script defer src="/mta-production-api.js"></script><script defer src="/mta-auth-ui.js?v=4"></script>
 <script>
 (function(){
   function loadRuntime(){
@@ -55,7 +55,7 @@ body:not(.mta-auth-ready) .app{display:none!important}body.mta-auth-ready .app{d
     if(window.__mtaAppRuntimeLoaded || document.querySelector('script[data-mta-app-runtime]')) return Promise.resolve();
     window.__mtaAppRuntimeLoading=new Promise(function(resolve,reject){
       var s=document.createElement('script');
-      s.src='/mta-app-runtime.js?v=4';
+      s.src='/mta-app-runtime.js?v=5';
       s.async=false;
       s.dataset.mtaAppRuntime='1';
       s.onload=function(){window.__mtaAppRuntimeLoaded=true;resolve()};
