@@ -134,6 +134,48 @@ try {
   await page.waitForFunction(() => /Monitor|Operational/i.test(document.getElementById('appView')?.textContent || ''), null, { timeout: 5000 });
   await page.evaluate(() => document.body.getBoundingClientRect().width);
   console.log(`AUTH_MONITOR_PASS ${device}`);
+  // Functional journey: QR Scan → Resolve → Data/Action → Audit.
+  stage = 'qr-functional-journey';
+  await page.evaluate(() => window.show('scan-center'));
+  await page.waitForFunction(() => /Scanner Kamera/i.test(document.getElementById('appView')?.textContent || ''), null, { timeout: 5000 });
+  const qrSeed = await page.evaluate(() => {
+    const d = JSON.parse(localStorage.getItem('mta-deteni-demo-v2') || '{}');
+    const x = d.detainees?.find(v => v.status === 'AKTIF');
+    const q = x && d.qr?.detainee?.[x.id];
+    return x && q ? { id: x.id, payload: 'mta://detainee/' + x.id + '/' + q.token } : null;
+  });
+  if (!qrSeed) throw new Error('synthetic QR seed unavailable');
+  await page.locator('#mtaUnifiedQrInput').fill(qrSeed.payload);
+  await page.getByRole('button', { name: 'Resolve' }).click();
+  await page.waitForFunction(() => /ACCEPTED/i.test(document.getElementById('mtaUnifiedScanResult')?.textContent || ''), null, { timeout: 5000 });
+  const qrResult = await page.locator('#mtaUnifiedScanResult').innerText();
+  if (!/Lanjutkan Action/i.test(qrResult)) throw new Error('QR accepted result missing operational action');
+  await page.getByRole('button', { name: /Lanjutkan Action/i }).click();
+  await page.waitForFunction(() => /Operational Action/i.test(document.getElementById('mtaUnifiedScanResult')?.textContent || ''), null, { timeout: 5000 });
+  const auditCount = await page.evaluate(() => (JSON.parse(localStorage.getItem('mta-deteni-demo-v2') || '{}').audit || []).filter(x => /QR_(RESOLVE|ACTION)/.test(x.action)).length);
+  if (auditCount < 2) throw new Error('QR resolve/action audit evidence missing');
+  console.log(`AUTH_QR_JOURNEY_PASS ${device} ${qrSeed.id} audit=${auditCount}`);
+
+  // Core operational surfaces must expose an actionable control, not just a non-empty shell.
+  const surfaceContracts = {
+    dashboard: /Dashboard/i,
+    detainee: /Tambah Deteni/i,
+    placement: /Penempatan/i,
+    movement: /Catat Pergerakan/i,
+    leave: /Buat Izin/i,
+    documents: /Draft Laporan Harian/i,
+    audit: /Verifikasi Chain/i,
+    monitor: /Operational Monitor/i,
+    'ops-queue': /Operational Queue/i,
+    'qr-center': /QR Center/i,
+    'camera-scan': /Scanner Kamera/i,
+    reports: /Laporan/i
+  };
+  for (const [surface, pattern] of Object.entries(surfaceContracts)) {
+    await page.evaluate(view => window.show(view), surface);
+    await page.waitForFunction(([p]) => new RegExp(p, 'i').test(document.getElementById('appView')?.textContent || ''), [pattern.source], { timeout: 5000 });
+  }
+  console.log(`AUTH_FUNCTIONAL_SURFACES_PASS ${device}`);
 
   stage = 'logout';
   await page.locator('#mtaAuthUi button').getByText('Logout').evaluate(button => button.click());
