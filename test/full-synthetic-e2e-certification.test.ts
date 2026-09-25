@@ -218,15 +218,43 @@ test("failure matrix: offline queue survives disconnect and reconnect without du
 });
 
 
-test("failure matrix: concurrent duplicate mutation is blocked at idempotency reservation", async () => {
-  const { runFullSyntheticE2E } = await import("../src/application/full-synthetic-e2e-certification.js");
-  const [first, second] = await Promise.allSettled([
-    runFullSyntheticE2E({ ...base, journeyId: "E2E-CONCURRENT-A", idempotencyKey: "IDEM-CONCURRENT-1", correlationId: "CORR-CONCURRENT-1", requestId: "REQ-CONCURRENT-1", transactionId: "TX-CONCURRENT-1" }),
-    runFullSyntheticE2E({ ...base, journeyId: "E2E-CONCURRENT-B", idempotencyKey: "IDEM-CONCURRENT-1", correlationId: "CORR-CONCURRENT-2", requestId: "REQ-CONCURRENT-2", transactionId: "TX-CONCURRENT-2" }),
+test("failure matrix: concurrent duplicate mutation is blocked at atomic idempotency reservation", async () => {
+  const idempotency = new Map<string, IdempotencyRecord>();
+  const audits: unknown[] = [];
+  const outbox: OutboxEventContract[] = [];
+  const stores: MutationIntegrationStores = {
+    findIdempotency: key => idempotency.get(key),
+    saveIdempotency: record => idempotency.set(record.idempotencyKey, record),
+    claimIdempotency: record => {
+      if (idempotency.has(record.idempotencyKey)) return "EXISTING";
+      idempotency.set(record.idempotencyKey, record);
+      return "CLAIMED";
+    },
+    appendAudit: record => audits.push(record),
+    appendPending: async event => { outbox.push(event); return "ADMIT"; },
+  };
+  const input = (transactionId: string) => ({
+    context: { requestId: "REQ-CONCURRENT", correlationId: "CORR-CONCURRENT", transactionId, idempotencyKey: "IDEM-CONCURRENT" },
+    commandType: "CONCURRENT_SYNTHETIC",
+    aggregateId: "SYN-DET-0001",
+    requestHash: "REQHASH-CONCURRENT",
+    auditId: "AUDIT-" + transactionId,
+    eventId: "OUTBOX-" + transactionId,
+    occurredAt: base.now,
+    payload: { syntheticOnly: true },
+    payloadFingerprint: "PF-CONCURRENT",
+    responseFingerprint: "RF-CONCURRENT",
+    runDomainMutation: async () => "COMMITTED",
+  });
+  const runner: TransactionRunner = async (_ctx, work) => work();
+  const results = await Promise.allSettled([
+    executeCriticalMutation(input("TX-A"), stores, runner),
+    executeCriticalMutation(input("TX-B"), stores, runner),
   ]);
-  const fulfilled = [first, second].filter(x => x.status === "fulfilled");
-  const rejected = [first, second].filter(x => x.status === "rejected");
-  assert.equal(fulfilled.length, 1);
-  assert.equal(rejected.length, 1);
-  assert.match(String((rejected[0] as PromiseRejectedResult).reason), /IDEMPOTENCY_CONCURRENT_EXECUTION_BLOCKED|IDEMPOTENCY_KEY_REUSED_WITH_DIFFERENT_REQUEST/);
+  assert.equal(results.filter(r => r.status === "fulfilled").length, 1);
+  assert.equal(results.filter(r => r.status === "rejected").length, 1);
+  assert.match(String(results.find(r => r.status === "rejected")?.reason), /IDEMPOTENCY_CONCURRENT_EXECUTION_BLOCKED/);
+  assert.equal(audits.length, 1);
+  assert.equal(outbox.length, 1);
 });
+
