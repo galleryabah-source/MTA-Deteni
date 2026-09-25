@@ -9,7 +9,7 @@ const runtime=fs.readFileSync("web/mta-app-runtime-full.js","utf8");
 test("settings navigation handler is exposed before unified shell routing",()=>{
   assert.match(admin,/window\.p9openSettings=\(\)=>settings\(\)/);
   assert.match(runtime,/admin-settings-v9\.js/);
-  assert.match(runtime,/mta-unified-shell-v2\.js\?v=8/);
+  assert.match(runtime,/mta-unified-shell-v2\\.js\\?v=10/);
 });
 
 test("unified shell preserves administrator settings route",()=>{
