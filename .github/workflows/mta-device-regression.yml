@@ -126,7 +126,7 @@ jobs:
             });
             await page.goto('http://127.0.0.1:4173/',{waitUntil:'domcontentloaded'});
             await page.waitForTimeout(300);
-            await page.evaluate(()=>{window.__MTA_TEST_MODE__=true});
+            await page.evaluate(()=>{window.__MTA_TEST_MODE__=true;window.__mtaAuthState=Object.freeze({resolved:true,authenticated:true,user:{id:'synthetic-user',email:'synthetic@example.test'}});document.body.classList.add('mta-auth-ready');});
             await page.addScriptTag({url:'http://127.0.0.1:4173/mta-app-runtime.js?v=10'});
             await page.waitForFunction(()=>typeof window.show==='function' && typeof window.mtaUnifiedResolve==='function',null,{timeout:10000});
             for(const s of ['offline-queue-v1.js','qr-camera-v2.js','preview-v5.js','preview-v6.js','preview-v10.js']) await page.addScriptTag({url:`http://127.0.0.1:4173/${s}`});
