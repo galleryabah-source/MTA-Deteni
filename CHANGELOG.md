@@ -149,3 +149,15 @@
 - Preserved single-report DOCUMENT_DOWNLOAD audit behavior.
 - Actual ZIP generation remains gated on governed storage/PDF adapters.
 - Migration freeze and synthetic-only boundaries remain intact.
+
+
+## 2026-09-25 — AI-Independent Report Continuity Locked
+
+- Locked requirement that MTA DETENI must not depend on external AI APIs for operational report generation.
+- Added AI-ON / AI-OFF contractual equivalence model.
+- Added Canonical Daily Dataset as the convergence boundary before deterministic rendering.
+- Added deterministic fallbacks for classification, mapping, captions, narrative patterns, validation, pagination, photo placement, and integrity.
+- Added explicit handling for AI disconnect, timeout, HTTP 429, quota exhaustion, provider outage, and all-provider failure.
+- Confirmed approved Laporan Harian templates remain operational without live AI.
+- Added synthetic acceptance requirements for AI-OFF deterministic regeneration and AI-ON/OFF structural comparison.
+- No production AI activation, schema migration, external data transfer authorization, or real detainee data introduced.
