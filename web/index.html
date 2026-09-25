@@ -49,7 +49,7 @@ body:not(.mta-auth-ready) .app{display:none!important}body.mta-auth-ready .app{d
 <script>
 const KEY='mta-deteni-demo-v2';
 const seed={meta:{version:2,createdAt:new Date().toISOString()},detainees:[{id:'DET-001',code:'DET-2026-001',name:'SYNTHETIC A',nationality:'Contoh',status:'AKTIF',placement:'Blok A / Kamar 01',createdAt:'2026-09-16T07:00:00Z'},{id:'DET-002',code:'DET-2026-002',name:'SYNTHETIC B',nationality:'Contoh',status:'AKTIF',placement:'Blok B / Kamar 02',createdAt:'2026-09-16T07:10:00Z'}],placements:[{id:'PLC-001',detaineeId:'DET-001',block:'Blok A',room:'Kamar 01',since:'2026-09-16T07:20:00Z'},{id:'PLC-002',detaineeId:'DET-002',block:'Blok B',room:'Kamar 02',since:'2026-09-16T07:25:00Z'}],movements:[],leaves:[],documents:[],audit:[]};
-let db=load(); let current='dashboard';
+let db=null; let current='dashboard';
 function load(){try{const x=JSON.parse(localStorage.getItem(KEY));return x&&x.detainees?x:structuredClone(seed)}catch{return structuredClone(seed)}}
 function save(){localStorage.setItem(KEY,JSON.stringify(db));window.dispatchEvent(new CustomEvent('mta:data-changed'))}
 function uid(prefix){return prefix+'-'+Math.random().toString(36).slice(2,8).toUpperCase()}
@@ -273,7 +273,7 @@ document.getElementById('backupBtn').onclick=()=>{audit('EXPORT_DOWNLOAD','BACKU
 document.getElementById('importBtn').onclick=()=>document.getElementById('importFile').click();
 document.getElementById('importFile').onchange=e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{try{const x=JSON.parse(r.result);validateRuntimeState(x);db=x;appendAudit(db,'BACKUP_RESTORE','BACKUP','synthetic');db.lastMutation={key:'BACKUP_RESTORE:'+now(),action:'BACKUP_RESTORE',completedAt:now()};save();render();toast('Backup dipulihkan')}catch(err){toast('Backup tidak valid: '+err.message)}};r.readAsText(f)};
 setInterval(()=>document.getElementById('clock').textContent=new Date().toLocaleString('id-ID'),1000);
-function bootMtaApp(){if(window.__mtaAppBooted)return;if(!window.__mtaAuthState?.resolved||!window.__mtaAuthState?.authenticated)return;if(!document.body.classList.contains('mta-auth-ready'))return;window.__mtaAppBooted=true;render();}
+function bootMtaApp(){if(window.__mtaAppBooted)return;if(!window.__mtaAuthState?.resolved||!window.__mtaAuthState?.authenticated)return;if(!document.body.classList.contains('mta-auth-ready'))return;db=load();window.__mtaAppBooted=true;render();}
 window.addEventListener('mta-auth-state',bootMtaApp);
 bootMtaApp();
 </script></body></html>
