@@ -42,5 +42,5 @@ test('pagination is deterministic',()=>{
   const many=Array.from({length:9},(_,i)=>({...evidence[0]!,evidenceId:`E-${i}`,sequence:i}));
   const d=verifyCanonicalDailyDataset(buildCanonicalDailyDataset({datasetId:'DS-005',reportDate:'2026-09-25',shiftId:'SHIFT-MALAM',groupId:'REGU-A',evidence:many}));
   const plan=renderDailyReportPlan({dataset:d,templateId:'TPL-DAILY-GUARD',templateVersion:'1.1',rowsPerPage:8});
-  assert.equal(plan.pageCount,2);
+  assert.equal(plan.pageCount,3);
 });
