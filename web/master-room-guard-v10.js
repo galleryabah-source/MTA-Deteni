@@ -31,4 +31,5 @@ window.addDetainee=existing=>{
 */
 const patchRoomEdit=()=>{if(typeof window.p9editRoom!=='function'||window.MTA_DETENI_ROOM_EDIT_GUARD)return;const original=window.p9editRoom;window.p9editRoom=id=>{const before=get(),prior=before.qr?.room?.[id]?.status;original(id);const form=document.querySelector('#p9roomForm');form?.addEventListener('submit',()=>setTimeout(()=>{const d=get();d.qr=d.qr||{detainee:{},room:{},leave:{}};d.qr.room=d.qr.room||{};if(prior){d.qr.room[id]=d.qr.room[id]||{token:uid('RMQR'),status:prior};d.qr.room[id].status=prior;put(d)}},0),{once:true});};window.MTA_DETENI_ROOM_EDIT_GUARD='v10';};
 patchRoomEdit();
-// Navigation ownership belongs to the unified shell; this guard does not override window.show.\n})();
+// Navigation ownership belongs to the unified shell; this guard does not override window.show.
+})();
