@@ -8,8 +8,49 @@ const now=()=>new Date().toISOString();
 const audit=(a,t,i,r='SUCCESS',state=null)=>{const d=state||get();d.audit=d.audit||[];d.audit.unshift({id:uid('AUD'),action:a,resourceType:t,resourceId:i||'',result:r,occurredAt:now(),actor:'DEMO-ADMIN',requestId:uid('REQ'),correlationId:uid('COR'),policyVersion:'AUTHZ-1.0'});if(!state)put(d);};
 function ensure(){const d=get();let changed=false;if(!d.adminSettings){d.adminSettings={role:'ADMIN',facilityName:'MTA DETENI Digital',timezone:'Asia/Jakarta',qrPolicy:'OPAQUE_TOKEN',migrationFreeze:true,ai:'OFF'};changed=true}if(!d.blocks){d.blocks=[];changed=true}if(!d.rooms){d.rooms=[];changed=true}if(!d.qr){d.qr={detainee:{},room:{},leave:{}};changed=true}d.qr.detainee=d.qr.detainee||{};d.qr.leave=d.qr.leave||{};if(!d.qr.room){d.qr.room={};changed=true}if(!d.adminCatalogs){d.adminCatalogs={};changed=true}const defaults={dutyGroups:['REGU A','REGU B','REGU C','REGU D'],shifts:['PAGI','SIANG','MALAM'],movementTypes:['INTERNAL','TRANSFER_KAMAR','KLINIK','SIDANG','LAINNYA'],leaveTypes:['IZIN SEMENTARA','PEMERIKSAAN KESEHATAN','PENGAWALAN','LAINNYA'],documentTypes:['LAPORAN HARIAN','BERITA ACARA','SURAT TUGAS','SURAT PENGANTAR','LAINNYA'],classifications:['INTERNAL','TERBATAS','RAHASIA'],roomTypes:['STANDARD','ISOLATION','OBSERVATION','MEDICAL','TRANSIT'],roomCategories:['UMUM','PRIA','WANITA','KHUSUS']};for(const [k,v] of Object.entries(defaults)){if(!(Array.isArray(d.adminCatalogs[k])&&d.adminCatalogs[k].length)){d.adminCatalogs[k]=v;changed=true}}d.rooms.forEach(r=>{if(!r.blockId){const b=d.blocks.find(b=>String(b.name).toLowerCase()===String(r.block).toLowerCase());if(b){r.blockId=b.id;changed=true}}if(!d.qr.room[r.id]){d.qr.room[r.id]={token:uid('RMQR'),status:r.status==='ACTIVE'?'ACTIVE':'SUSPENDED'};changed=true}});if(changed)put(d);return d}
 function nav(){const n=document.querySelector('#nav');if(!n||document.querySelector('#p9settings'))return;const b=document.createElement('button');b.id='p9settings';b.dataset.view='p9settings';b.textContent='Pengaturan';b.onclick=e=>{e.stopPropagation();settings()};n.appendChild(b)}
+function installSettingsStyle(){
+  if(document.getElementById('mta-admin-settings-style'))return;
+  const s=document.createElement('style');s.id='mta-admin-settings-style';
+  s.textContent=`
+  .mta-admin-tabs{display:flex;gap:7px;overflow-x:auto;padding:6px;margin:14px 0 12px;background:#f7f9fc;border:1px solid #e2e8f0;border-radius:12px;scrollbar-width:none}
+  .mta-admin-tabs::-webkit-scrollbar{display:none}
+  .mta-admin-tab{flex:0 0 auto;border:1px solid transparent;background:transparent;color:#526176;padding:9px 13px;border-radius:9px;font-size:11px;font-weight:700;cursor:pointer;white-space:nowrap}
+  .mta-admin-tab:hover{background:#fff;border-color:#dbe4ef;color:#175cd3}
+  .mta-admin-tab.active{background:#0b63ce;color:#fff;border-color:#0b63ce;box-shadow:0 2px 7px rgba(11,99,206,.18)}
+  .mta-admin-panel{display:none}.mta-admin-panel.active{display:block}
+  .mta-brand-preview{display:flex;align-items:center;gap:12px;padding:14px;border:1px dashed #cbd5e1;border-radius:12px;background:#f8fafc;margin-top:10px}
+  .mta-brand-preview img{width:42px;height:42px;object-fit:contain;border-radius:9px;border:1px solid #dbe4ef;background:#fff}
+  .mta-brand-preview .title{font-weight:800;color:#172033}.mta-brand-preview .sub{font-size:10px;color:#667085}
+  .mta-upload-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+  @media(max-width:900px){.mta-upload-grid{grid-template-columns:1fr}}
+  `;
+  document.head.appendChild(s);
+}
+function applyWebBranding(){
+  const d=ensure(),b=d.adminSettings?.branding||{};
+  const brand=document.querySelector('.brand');
+  if(brand){
+    const logo=brand.querySelector('.logo');
+    if(logo){if(b.logoData){logo.textContent='';logo.style.backgroundImage='url("'+b.logoData+'")';logo.style.backgroundSize='contain';logo.style.backgroundPosition='center';logo.style.backgroundRepeat='no-repeat'}else{logo.textContent='M';logo.style.backgroundImage='none'}}
+    const strong=brand.querySelector('strong');if(strong&&b.title)strong.textContent=b.title;
+    const small=brand.querySelector('small');if(small&&b.subtitle)small.textContent=b.subtitle;
+  }
+  const title=b.title||'MTA DETENI Digital';document.title=title;
+}
+function readImage(file,cb){
+  if(!file){return}
+  if(!/^image\/(png|jpeg|jpg|webp|svg\+xml)$/.test(file.type)){toast('Gunakan PNG, JPG, WEBP, atau SVG.');return}
+  if(file.size>2*1024*1024){toast('Ukuran gambar maksimal 2 MB.');return}
+  const fr=new FileReader();fr.onload=()=>cb(String(fr.result||''));fr.readAsDataURL(file);
+}
+function settingsTab(id){
+  document.querySelectorAll('.mta-admin-tab').forEach(x=>x.classList.toggle('active',x.dataset.tab===id));
+  document.querySelectorAll('.mta-admin-panel').forEach(x=>x.classList.toggle('active',x.dataset.panel===id));
+  try{sessionStorage.setItem('mta-admin-settings-tab',id)}catch{}
+}
 function settings(){
   const d=ensure();
+  installSettingsStyle();
   const app=document.querySelector('#appView');
   if(!app)return;
   if(d.adminSettings.role!=='ADMIN'){
@@ -51,34 +92,52 @@ function settings(){
       rows+'</tbody></table></div></div>';
   }).join('');
 
+  const b=d.adminSettings.branding||{};
+  const ai=d.adminSettings.aiSettings||{provider:'Gemini',endpoint:'',model:'',apiKey:'',enabled:false};
+  const tabs=[
+    ['system','System'],['security','Security & Governance'],['blocks','Master Blok'],['rooms','Master Kamar'],
+    ['catalog','Master Data'],['roomparams','Room Parameter'],['ai','API AI'],['design','Desain Web']
+  ];
+  const tabHtml='<div class="mta-admin-tabs" role="tablist">'+tabs.map((x,i)=>'<button type="button" class="mta-admin-tab '+(i===0?'active':'')+'" data-tab="'+x[0]+'" onclick="window.p9settingsTab(\''+x[0]+'\')">'+x[1]+'</button>').join('')+'</div>';
+
   const body=
-    '<div class="p6grid">'+
-      '<div class="p6card"><h2>System</h2><div class="formgrid">'+
-        '<div class="field"><label>Nama fasilitas</label><input id="p9facility" value="'+E(d.adminSettings.facilityName)+'"></div>'+
-        '<div class="field"><label>Zona waktu</label><select id="p9tz">'+
-          '<option '+(d.adminSettings.timezone==='Asia/Jakarta'?'selected':'')+'>Asia/Jakarta</option>'+
-          '<option '+(d.adminSettings.timezone==='Asia/Makassar'?'selected':'')+'>Asia/Makassar</option>'+
-          '<option '+(d.adminSettings.timezone==='Asia/Jayapura'?'selected':'')+'>Asia/Jayapura</option>'+
-        '</select></div>'+
-        '<div class="field"><label>AI Runtime</label><input value="OFF" disabled></div>'+
-        '<div class="field"><label>Migration Freeze</label><input value="'+(d.adminSettings.migrationFreeze?'TRUE':'FALSE')+'" disabled></div>'+
-      '</div><div class="actions"><button class="btn primary" onclick="window.p9saveSystem()">Simpan System</button></div></div>'+
-      '<div class="p6card"><h2>Security &amp; Governance</h2><div class="notice">Role synthetic: <b>'+E(d.adminSettings.role)+
-        '</b><br>QR Policy: <b>'+E(d.adminSettings.qrPolicy)+'</b><br>Real data: <b>DISALLOWED IN PREVIEW</b></div>'+
-        '<p class="p6mini">User, role, permission, scope, duty assignment, dan policy produksi tetap mengikuti authorization boundary; password/secret tidak disimpan di runtime preview.</p></div>'+
-    '</div>'+
-    '<div class="p6card" style="margin-top:12px"><div class="toolbar"><h2 style="margin-right:auto">Master Blok</h2>'+
-      '<button class="btn primary" onclick="window.p9addBlock()">+ Tambah Blok</button></div>'+
-      '<div class="tablewrap"><table class="table"><thead><tr><th>Blok</th><th>Status</th><th>Jumlah Kamar</th><th>Aksi</th></tr></thead><tbody>'+
-      (blockRows||'<tr><td colspan="4" class="empty">Belum ada blok.</td></tr>')+'</tbody></table></div></div>'+
-    '<div class="p6card" style="margin-top:12px"><div class="toolbar"><h2 style="margin-right:auto">Master Kamar</h2>'+
-      '<button class="btn primary" onclick="window.p9addRoom()">+ Tambah Kamar</button></div>'+
-      '<div class="tablewrap"><table class="table"><thead><tr><th>Blok</th><th>Kamar</th><th>Occupancy</th><th>Tipe</th><th>Kategori</th><th>Status</th><th>Aksi</th></tr></thead><tbody>'+
-      (roomRows||'<tr><td colspan="7" class="empty">Belum ada master kamar.</td></tr>')+'</tbody></table>'+
-      '<div class="notice" style="margin-top:10px">Kamar hanya dibuat/diubah di sini. Modul Data Deteni, Penempatan, dan Pergerakan hanya memilih Room ID dari master.</div></div></div>'+
-    '<div class="p6grid" style="margin-top:12px">'+catalogCards+'</div>'+
-    '<div class="p6card" style="margin-top:12px"><h2>Master Room Parameter</h2><div class="notice">Tipe: '+
-      d.adminCatalogs.roomTypes.map(E).join(' · ')+'<br>Kategori: '+d.adminCatalogs.roomCategories.map(E).join(' · ')+'</div></div>';
+    tabHtml+
+    '<div class="mta-admin-panel active" data-panel="system"><div class="p6card"><h2>System</h2><div class="formgrid">'+
+      '<div class="field"><label>Nama fasilitas</label><input id="p9facility" value="'+E(d.adminSettings.facilityName)+'"></div>'+
+      '<div class="field"><label>Zona waktu</label><select id="p9tz"><option '+(d.adminSettings.timezone==='Asia/Jakarta'?'selected':'')+'>Asia/Jakarta</option><option '+(d.adminSettings.timezone==='Asia/Makassar'?'selected':'')+'>Asia/Makassar</option><option '+(d.adminSettings.timezone==='Asia/Jayapura'?'selected':'')+'>Asia/Jayapura</option></select></div>'+
+      '<div class="field"><label>AI Runtime</label><input value="'+E(d.adminSettings.ai||'OFF')+'" disabled></div>'+
+      '<div class="field"><label>Migration Freeze</label><input value="'+(d.adminSettings.migrationFreeze?'TRUE':'FALSE')+'" disabled></div>'+
+    '</div><div class="actions"><button class="btn primary" onclick="window.p9saveSystem()">Simpan System</button></div></div></div>'+
+
+    '<div class="mta-admin-panel" data-panel="security"><div class="p6card"><h2>Security &amp; Governance</h2><div class="notice">Role synthetic: <b>'+E(d.adminSettings.role)+
+      '</b><br>QR Policy: <b>'+E(d.adminSettings.qrPolicy)+'</b><br>Real data: <b>DISALLOWED IN PREVIEW</b></div><p class="p6mini">User, role, permission, scope, duty assignment, dan policy produksi tetap mengikuti authorization boundary; password/secret produksi tidak disimpan di runtime preview.</p></div></div>'+
+
+    '<div class="mta-admin-panel" data-panel="blocks"><div class="p6card"><div class="toolbar"><h2 style="margin-right:auto">Master Blok</h2><button class="btn primary" onclick="window.p9addBlock()">+ Tambah Blok</button></div><div class="tablewrap"><table class="table"><thead><tr><th>Blok</th><th>Status</th><th>Jumlah Kamar</th><th>Aksi</th></tr></thead><tbody>'+
+      (blockRows||'<tr><td colspan="4" class="empty">Belum ada blok.</td></tr>')+'</tbody></table></div></div></div>'+
+
+    '<div class="mta-admin-panel" data-panel="rooms"><div class="p6card"><div class="toolbar"><h2 style="margin-right:auto">Master Kamar</h2><button class="btn primary" onclick="window.p9addRoom()">+ Tambah Kamar</button></div><div class="tablewrap"><table class="table"><thead><tr><th>Blok</th><th>Kamar</th><th>Occupancy</th><th>Tipe</th><th>Kategori</th><th>Status</th><th>Aksi</th></tr></thead><tbody>'+
+      (roomRows||'<tr><td colspan="7" class="empty">Belum ada master kamar.</td></tr>')+'</tbody></table><div class="notice" style="margin-top:10px">Kamar hanya dibuat/diubah di sini. Modul Data Deteni, Penempatan, dan Pergerakan hanya memilih Room ID dari master.</div></div></div></div>'+
+
+    '<div class="mta-admin-panel" data-panel="catalog"><div class="p6grid">'+catalogCards+'</div></div>'+
+
+    '<div class="mta-admin-panel" data-panel="roomparams"><div class="p6card"><h2>Master Room Parameter</h2><div class="notice">Tipe: '+d.adminCatalogs.roomTypes.map(E).join(' · ')+'<br>Kategori: '+d.adminCatalogs.roomCategories.map(E).join(' · ')+'</div></div></div>'+
+
+    '<div class="mta-admin-panel" data-panel="ai"><div class="p6card"><h2>Pengaturan API AI</h2><p class="p6mini">Konfigurasi disiapkan pada control plane. Runtime AI tetap <b>OFF</b> sampai integrasi AI resmi diaktifkan. Jangan menaruh API key produksi pada browser/localStorage.</p><div class="formgrid">'+
+      '<div class="field"><label>Provider</label><select id="p9aiProvider"><option '+(ai.provider==='Gemini'?'selected':'')+'>Gemini</option><option '+(ai.provider==='OpenAI'?'selected':'')+'>OpenAI</option><option '+(ai.provider==='Anthropic'?'selected':'')+'>Anthropic</option><option '+(ai.provider==='Custom'?'selected':'')+'>Custom</option></select></div>'+
+      '<div class="field"><label>Model</label><input id="p9aiModel" value="'+E(ai.model||'')+'" placeholder="Nama model"></div>'+
+      '<div class="field full"><label>Endpoint API</label><input id="p9aiEndpoint" value="'+E(ai.endpoint||'')+'" placeholder="https://..."></div>'+
+      '<div class="field full"><label>API Key (preview)</label><input id="p9aiKey" type="password" value="'+E(ai.apiKey||'')+'" autocomplete="off" placeholder="Tidak disarankan untuk produksi"></div>'+
+      '<div class="field"><label>Status konfigurasi</label><select id="p9aiEnabled"><option value="false" '+(!ai.enabled?'selected':'')+'>OFF</option><option value="true" '+(ai.enabled?'selected':'')+'>ON (config only)</option></select></div>'+
+    '</div><div class="actions"><button class="btn primary" onclick="window.p9saveAI()">Simpan API AI</button></div></div></div>'+
+
+    '<div class="mta-admin-panel" data-panel="design"><div class="p6card"><h2>Pengaturan Desain Web</h2><p class="p6mini">Upload aset branding untuk header aplikasi. Format PNG/JPG/WEBP/SVG, maksimal 2 MB per file. Perubahan hanya branding; tidak mengubah locked design system.</p><div class="mta-upload-grid">'+
+      '<div class="field"><label>Icon / Favicon</label><input id="p9iconFile" type="file" accept="image/png,image/jpeg,image/webp,image/svg+xml"><button class="btn" type="button" onclick="window.p9uploadAsset(\'icon\')">Upload Icon</button></div>'+
+      '<div class="field"><label>Logo Header</label><input id="p9logoFile" type="file" accept="image/png,image/jpeg,image/webp,image/svg+xml"><button class="btn" type="button" onclick="window.p9uploadAsset(\'logo\')">Upload Logo</button></div>'+
+      '<div class="field"><label>Gambar Header / Judul</label><input id="p9headerFile" type="file" accept="image/png,image/jpeg,image/webp,image/svg+xml"><button class="btn" type="button" onclick="window.p9uploadAsset(\'header\')">Upload Gambar</button></div>'+
+    '</div><div class="formgrid" style="margin-top:12px"><div class="field"><label>Judul Header</label><input id="p9brandTitle" value="'+E(b.title||'MTA DETENI Digital')+'"></div><div class="field"><label>Subjudul Header</label><input id="p9brandSubtitle" value="'+E(b.subtitle||'Manajemen Terpadu Administrasi Deteni')+'"></div></div>'+
+    '<div class="actions"><button class="btn primary" onclick="window.p9saveDesign()">Simpan Desain</button></div>'+
+    '<div class="mta-brand-preview"><img id="p9brandPreview" src="'+E(b.headerData||b.logoData||'')+'" onerror="this.style.display=\'none\'"><div><div class="title">'+E(b.title||'MTA DETENI Digital')+'</div><div class="sub">'+E(b.subtitle||'Manajemen Terpadu Administrasi Deteni')+'</div></div></div>'+
+    '</div></div>';
 
   app.innerHTML=shell(
     'Pengaturan Administrator',
@@ -87,6 +146,35 @@ function settings(){
   );
 }
 window.p9openSettings=()=>settings();
+window.p9settingsTab=settingsTab;
+window.p9saveAI=()=>{
+  const d=ensure();
+  d.adminSettings.aiSettings={
+    provider:document.querySelector('#p9aiProvider')?.value||'Gemini',
+    model:(document.querySelector('#p9aiModel')?.value||'').trim(),
+    endpoint:(document.querySelector('#p9aiEndpoint')?.value||'').trim(),
+    apiKey:(document.querySelector('#p9aiKey')?.value||'').trim(),
+    enabled:document.querySelector('#p9aiEnabled')?.value==='true'
+  };
+  // Preview only: this does not activate the AI runtime.
+  audit('ADMIN_AI_API_CONFIG_UPDATE','AI_CONFIG','ADMIN','SUCCESS',d);put(d);toast('Konfigurasi API AI tersimpan (preview/config only).');
+};
+window.p9saveDesign=()=>{
+  const d=ensure();d.adminSettings.branding=d.adminSettings.branding||{};
+  d.adminSettings.branding.title=(document.querySelector('#p9brandTitle')?.value||'MTA DETENI Digital').trim();
+  d.adminSettings.branding.subtitle=(document.querySelector('#p9brandSubtitle')?.value||'Manajemen Terpadu Administrasi Deteni').trim();
+  audit('ADMIN_WEB_DESIGN_UPDATE','WEB_BRANDING','ADMIN','SUCCESS',d);put(d);applyWebBranding();settings();toast('Pengaturan desain web tersimpan.');
+};
+window.p9uploadAsset=kind=>{
+  const map={icon:'p9iconFile',logo:'p9logoFile',header:'p9headerFile'};
+  const file=document.querySelector('#'+map[kind])?.files?.[0];if(!file)return toast('Pilih file terlebih dahulu.');
+  readImage(file,data=>{
+    const d=ensure();d.adminSettings.branding=d.adminSettings.branding||{};
+    d.adminSettings.branding[kind==='icon'?'iconData':kind==='logo'?'logoData':'headerData']=data;
+    audit('ADMIN_WEB_ASSET_UPLOAD','WEB_BRANDING_'+kind.toUpperCase(),'ADMIN','SUCCESS',d);put(d);
+    applyWebBranding();settings();toast('Aset '+kind+' berhasil diunggah.');
+  });
+};
 function shell(t,desc,b){return `<section class="hero"><h1>${t}</h1><p class="sub">${desc}</p></section>${b}`}
 window.p9saveSystem=()=>{const d=ensure();d.adminSettings.facilityName=(document.querySelector('#p9facility')?.value||d.adminSettings.facilityName).trim();d.adminSettings.timezone=document.querySelector('#p9tz')?.value||d.adminSettings.timezone;audit('ADMIN_SETTINGS_UPDATE','SYSTEM','ADMIN','SUCCESS',d);put(d);settings();toast('Pengaturan system tersimpan.')};
 window.p9addCatalog=(key,label)=>{openModal(`<div class="dialoghead"><h2>Tambah ${E(label)}</h2><button class="x" onclick="closeModal()">×</button></div><div class="field"><label>Nilai</label><input id="p9cat" placeholder="Masukkan nilai master"></div><div class="actions"><button class="btn" onclick="closeModal()">Batal</button><button class="btn primary" onclick="window.p9saveCatalog('${E(key)}')">Simpan</button></div>`) };
@@ -105,6 +193,7 @@ window.addDetainee=existing=>{const d=ensure(),rooms=d.rooms.filter(r=>r.status=
 function bootAdminSettings(){
   nav();
   ensure();
+  applyWebBranding();
 }
 if(window.__mtaAuthState?.resolved){
   if(window.__mtaAuthState.authenticated)bootAdminSettings();
