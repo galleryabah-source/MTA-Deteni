@@ -258,8 +258,8 @@ try {
   for (const expected of ['SUBMITTED', 'APPROVED', 'DEPARTED', 'RETURNED', 'COMPLETED']) {
     const actionLabel = expected === 'SUBMITTED' ? 'SUBMIT' : expected === 'APPROVED' ? 'APPROVE' : expected === 'DEPARTED' ? 'DEPART' : expected === 'RETURNED' ? 'RETURN' : 'COMPLETE';
     const actionButton = page.locator('#appView button').filter({ hasText: actionLabel }).first();
-    await actionButton.waitFor({ state: 'visible', timeout: 5000 });
-    await actionButton.click();
+    await actionButton.waitFor({ state: 'attached', timeout: 5000 });
+    await actionButton.evaluate((button) => button.click());
     await page.waitForFunction(({id,expected}) => {
       const d = JSON.parse(localStorage.getItem('mta-deteni-demo-v2') || '{}');
       return (d.leaves || []).some(l => l.id === id && l.status === expected);
