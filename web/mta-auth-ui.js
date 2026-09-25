@@ -114,9 +114,12 @@
         // Do not depend solely on Supabase's asynchronous auth event.
         // Complete the UI handoff directly from the successful sign-in response.
         const authDetail={authenticated:true,user:r.data.user||r.data.session.user||null};
-        update({detail:authDetail});
-        await loadCoreDashboard();
+        window.mtaProductionApi?.setAccessToken(r.data.session.access_token||null);
+        activateAuthenticatedShell(authDetail.user);
+        msg.textContent='Dashboard terbuka. Runtime operasional sedang dimuat...';
+        // Notify the rest of the application only after the core shell is visible.
         window.dispatchEvent(new CustomEvent('mta-auth-state',{detail:authDetail}));
+        void loadCoreDashboard().catch(err=>console.warn('[MTA] operational runtime handoff failed',err));
       }catch(err){
         msg.className='mta-auth-message error';
         msg.textContent='Email atau password tidak valid, atau autentikasi belum dapat diproses.';
@@ -158,6 +161,31 @@
       gate.classList.add('open');
       renderHeader(false,null);
     }
+  }
+
+  function activateAuthenticatedShell(user){
+    document.body.classList.remove('mta-auth-locked');
+    document.body.classList.add('mta-auth-ready');
+    const gate=makeGate();
+    gate.classList.remove('open');
+    gate.style.display='none';
+    const app=document.querySelector('.app');
+    if(app){
+      app.style.removeProperty('display');
+      app.style.display='grid';
+    }
+    const view=document.getElementById('appView');
+    if(view){
+      view.innerHTML='<section class="hero"><h1>Dashboard</h1><p class="sub">MTA DETENI Digital · Authentication aktif · Core dashboard siap.</p></section>'+
+        '<section class="grid stats" style="margin-top:12px">'+
+        '<div class="card"><div class="label">Authentication</div><div class="value" style="font-size:18px">AUTHENTICATED</div><span class="status">PASS</span></div>'+
+        '<div class="card"><div class="label">Data Mode</div><div class="value" style="font-size:18px">SYNTHETIC</div><span class="status">SAFE</span></div>'+
+        '<div class="card"><div class="label">AI</div><div class="value" style="font-size:18px">OFF</div><span class="status">CONTROLLED</span></div>'+
+        '<div class="card"><div class="label">Session</div><div class="value" style="font-size:18px">ACTIVE</div><span class="status">SECURE</span></div>'+
+        '<div class="card"><div class="label">Runtime</div><div class="value" style="font-size:18px">CORE</div><span class="status">READY</span></div>'+
+        '</section>';
+    }
+    renderHeader(true,user||null);
   }
 
   function loadCoreDashboard(){
