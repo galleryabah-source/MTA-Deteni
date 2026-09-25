@@ -672,3 +672,14 @@ See: docs/18-desktop-ui-design-system-v1.0-LOCKED.md and docs/03-implementation/
 ## 22. Current UI Implementation Review — 25 September 2026
 
 The current implementation baseline and audit findings are recorded in `docs/19-current-ui-review-audit-2026-09-25.md`. This document is the current implementation reference for the locked desktop UI, Data Deteni table contract, QR actions, Admin Settings layout, and known persistence verification items. It does not supersede the locked design decision in Section 21.
+
+
+## 23. System / Engine / Functional Audit Handoff — 25 September 2026
+
+The approved desktop UI is now frozen as the visual baseline. The next workstream is system correctness rather than visual redesign. Source audit baseline is recorded in `docs/20-system-engine-functional-audit-2026-09-25.md`.
+
+Priority findings currently requiring remediation are: multiple direct localStorage mutation writers, duplicate Detainee CRUD ownership, multiple `window.show` wrappers, browser-side AI API-key persistence, a stale source-string assertion in the Final Integrity Gate, and contract tests that do not always exercise the real UI mutation path.
+
+The required direction is consolidation: one authoritative persistence boundary, one Detainee CRUD owner, one navigation dispatcher, server-side secret handling for production AI, behavior-based integrity assertions, and browser/runtime verification for every critical journey.
+
+The UI freeze remains active. No redesign is authorized during this audit unless required to correct functional behavior, accessibility, responsive correctness, icon correctness, or system integration.
