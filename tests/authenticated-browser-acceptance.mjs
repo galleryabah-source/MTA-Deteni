@@ -141,8 +141,18 @@ try {
   const qrSeed = await page.evaluate(() => {
     const d = JSON.parse(localStorage.getItem('mta-deteni-demo-v2') || '{}');
     const x = d.detainees?.find(v => v.status === 'AKTIF');
-    const q = x && d.qr?.detainee?.[x.id];
-    return x && q ? { id: x.id, payload: 'mta://detainee/' + x.id + '/' + q.token } : null;
+    if (!x) return null;
+    d.qr = d.qr || { detainee: {}, room: {}, leave: {} };
+    d.qr.detainee = d.qr.detainee || {};
+    const q = d.qr.detainee[x.id] || {
+      token: 'SYNTH-BROWSER-QR-' + x.id,
+      status: 'ACTIVE',
+      issuedAt: x.createdAt || new Date().toISOString(),
+      expiresAt: null
+    };
+    d.qr.detainee[x.id] = q;
+    localStorage.setItem('mta-deteni-demo-v2', JSON.stringify(d));
+    return { id: x.id, payload: 'mta://detainee/' + x.id + '/' + q.token };
   });
   if (!qrSeed) throw new Error('synthetic QR seed unavailable');
   await page.locator('#mtaUnifiedQrInput').fill(qrSeed.payload);
