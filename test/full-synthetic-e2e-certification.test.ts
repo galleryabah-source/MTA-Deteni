@@ -216,3 +216,17 @@ test("failure matrix: offline queue survives disconnect and reconnect without du
   const conflict = { ...mutation, payloadFingerprint: "OFF-PF-CONFLICT" };
   assert.throws(() => queue.enqueue(conflict), /Offline mutation conflict/);
 });
+
+
+test("failure matrix: concurrent duplicate mutation is blocked at idempotency reservation", async () => {
+  const { runFullSyntheticE2E } = await import("../src/application/full-synthetic-e2e-certification.js");
+  const [first, second] = await Promise.allSettled([
+    runFullSyntheticE2E({ ...base, journeyId: "E2E-CONCURRENT-A", idempotencyKey: "IDEM-CONCURRENT-1", correlationId: "CORR-CONCURRENT-1", requestId: "REQ-CONCURRENT-1", transactionId: "TX-CONCURRENT-1" }),
+    runFullSyntheticE2E({ ...base, journeyId: "E2E-CONCURRENT-B", idempotencyKey: "IDEM-CONCURRENT-1", correlationId: "CORR-CONCURRENT-2", requestId: "REQ-CONCURRENT-2", transactionId: "TX-CONCURRENT-2" }),
+  ]);
+  const fulfilled = [first, second].filter(x => x.status === "fulfilled");
+  const rejected = [first, second].filter(x => x.status === "rejected");
+  assert.equal(fulfilled.length, 1);
+  assert.equal(rejected.length, 1);
+  assert.match(String((rejected[0] as PromiseRejectedResult).reason), /IDEMPOTENCY_CONCURRENT_EXECUTION_BLOCKED|IDEMPOTENCY_KEY_REUSED_WITH_DIFFERENT_REQUEST/);
+});
