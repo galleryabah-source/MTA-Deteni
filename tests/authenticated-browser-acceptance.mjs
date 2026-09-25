@@ -184,6 +184,56 @@ try {
   if (auditCount < 2) throw new Error('QR resolve/action audit evidence missing');
   console.log(`AUTH_QR_JOURNEY_PASS ${device} ${qrSeed.id} audit=${auditCount}`);
 
+  // Real UI Detainee CRUD certification: add -> persist -> edit -> archive.
+  stage = 'browser-detainee-crud';
+  await page.evaluate(() => window.show('detainee'));
+  await page.getByRole('button', { name: /Tambah Deteni/i }).click();
+  await page.locator('#dForm').waitFor({ state: 'visible', timeout: 5000 });
+  const crudCode = 'DET-BROWSER-' + Date.now();
+  await page.locator('#dForm [name="code"]').fill(crudCode);
+  await page.locator('#dForm [name="name"]').fill('SYNTHETIC CRUD TEST');
+  await page.locator('#dForm [name="nationality"]').fill('Contoh');
+  const placementSelect = page.locator('#dForm [name="placementId"]');
+  if (await placementSelect.count()) {
+    const options = await placementSelect.locator('option').evaluateAll(nodes => nodes.map(n => ({value:n.value,text:n.textContent||''})).filter(x=>x.value));
+    if (!options.length) throw new Error('detainee create form has no active master room options');
+    await placementSelect.selectOption(options[0].value);
+  }
+  await page.locator('#dForm').evaluate(form => form.requestSubmit());
+  await page.waitForFunction(code => {
+    const d = JSON.parse(localStorage.getItem('mta-deteni-demo-v2') || '{}');
+    return (d.detainees || []).some(x => x.code === code);
+  }, crudCode, { timeout: 5000 });
+  let crudState = await page.evaluate(code => {
+    const d = JSON.parse(localStorage.getItem('mta-deteni-demo-v2') || '{}');
+    const x = (d.detainees || []).find(v => v.code === code);
+    return { id:x?.id, name:x?.name, placement:x?.placement, audits:(d.audit||[]).filter(a=>a.resourceId===x?.id).map(a=>a.action) };
+  }, crudCode);
+  if (!crudState.id || crudState.name !== 'SYNTHETIC CRUD TEST' || !crudState.placement || !crudState.audits.includes('DETAINEE_CREATE')) {
+    throw new Error('browser detainee create persistence/audit failed: '+JSON.stringify(crudState));
+  }
+  await page.getByRole('button', { name: 'Edit' }).last().click();
+  await page.locator('#dForm').waitFor({ state: 'visible', timeout: 5000 });
+  await page.locator('#dForm [name="name"]').fill('SYNTHETIC CRUD EDITED');
+  await page.locator('#dForm').evaluate(form => form.requestSubmit());
+  await page.waitForFunction(({id}) => {
+    const d = JSON.parse(localStorage.getItem('mta-deteni-demo-v2') || '{}');
+    return (d.detainees || []).some(x => x.id === id && x.name === 'SYNTHETIC CRUD EDITED');
+  }, { id: crudState.id }, { timeout: 5000 });
+  await page.evaluate(id => window.archiveDetainee(id), crudState.id);
+  await page.waitForFunction(({id}) => {
+    const d = JSON.parse(localStorage.getItem('mta-deteni-demo-v2') || '{}');
+    return (d.detainees || []).some(x => x.id === id && x.status === 'NONAKTIF');
+  }, { id: crudState.id }, { timeout: 5000 });
+  crudState = await page.evaluate(id => {
+    const d = JSON.parse(localStorage.getItem('mta-deteni-demo-v2') || '{}');
+    return { status:d.detainees.find(x=>x.id===id)?.status, audits:(d.audit||[]).filter(a=>a.resourceId===id).map(a=>a.action) };
+  }, crudState.id);
+  if (crudState.status !== 'NONAKTIF' || !crudState.audits.includes('DETAINEE_UPDATE') || !crudState.audits.includes('DETAINEE_ARCHIVE')) {
+    throw new Error('browser detainee edit/archive evidence failed: '+JSON.stringify(crudState));
+  }
+  console.log(`AUTH_DETAINEE_CRUD_PASS ${device} detainee=${crudState.status}`);
+
   // Browser Mutation Journey Certification:
   // UI mutation → shared synthetic state → audit → monitor → document evidence.
   stage = 'browser-mutation-journey';
