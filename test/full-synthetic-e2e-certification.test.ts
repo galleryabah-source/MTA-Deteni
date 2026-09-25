@@ -11,6 +11,7 @@ import { executeCriticalMutation, type MutationIntegrationStores } from "../src/
 import { LocalRuntimeOfflineMutationQueue } from "../src/application/local-runtime-offline-mutation-queue.js";
 import type { IdempotencyRecord } from "../src/application/idempotency-contract.js";
 import type { OutboxEventContract } from "../src/application/outbox-runtime-contract.js";
+import type { TransactionRunner } from "../src/application/transaction-contract.js";
 
 const base = {
   journeyId: "E2E-SYN-0001",
