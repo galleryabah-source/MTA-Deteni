@@ -24,7 +24,7 @@ export function deterministicAiAccelerator(input: Readonly<{
   location?: string;
   rawNote?: string;
 }>): readonly AiAcceleratorSuggestion[] {
-  const eventLabel = EVENT_LABELS[input.eventType] ?? EVENT_LABELS.LAINNYA;
+  const eventLabel = EVENT_LABELS[input.eventType] ?? 'Lainnya';
   const suggestions: AiAcceleratorSuggestion[] = [
     { field: 'eventLabel', value: eventLabel, source: 'DETERMINISTIC', confidence: 1 },
     { field: 'capturedAt', value: input.capturedAt, source: 'DETERMINISTIC', confidence: 1 },
