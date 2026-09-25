@@ -184,14 +184,6 @@ jobs:
         run: |
           echo "MTA_DEVICE_REGRESSION_COMMIT=${MTA_TEST_COMMIT_SHA}"
           node tests/authenticated-browser-acceptance.mjs
-      - name: Legacy acceptance invocation guard
-        if: false
-        run: node tests/authenticated-browser-acceptance.mjs
-        env:
-          WIDTH: ${{ matrix.viewport.width }}
-          HEIGHT: ${{ matrix.viewport.height }}
-          DEVICE: ${{ matrix.viewport.name }}
-        run: node tests/authenticated-browser-acceptance.mjs
       - name: Upload regression diagnostics
         if: always()
         uses: actions/upload-artifact@v4
