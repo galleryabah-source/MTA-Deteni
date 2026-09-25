@@ -8,6 +8,7 @@ import { assertFullSyntheticE2EReady, runFullSyntheticE2E } from "../src/applica
 import { AiGateway } from "../src/application/ai-gateway.js";
 import { enrichEvidenceOptionally } from "../src/application/ai-optional-enrichment.js";
 import { executeCriticalMutation, type MutationIntegrationStores } from "../src/application/mutation-integration.js";
+import { LocalRuntimeOfflineMutationQueue } from "../src/application/local-runtime-offline-mutation-queue.js";
 import type { IdempotencyRecord } from "../src/application/idempotency-contract.js";
 import type { OutboxEventContract } from "../src/application/outbox-runtime-contract.js";
 
@@ -187,4 +188,31 @@ test("failure matrix: renderer failure cannot invalidate the canonical dataset",
   assert.equal(result.dataset.status, "APPROVED");
   assert.equal(result.dataset.verification, "VERIFIED");
   assert.equal(result.reportInput.sourceRecordIds[0], "MFE-E2E-SYN-0001");
+});
+
+
+test("failure matrix: offline queue survives disconnect and reconnect without duplicate effect", () => {
+  const queue = new LocalRuntimeOfflineMutationQueue();
+  const mutation = {
+    mutationId: "OFF-E2E-0001",
+    idempotencyKey: "OFF-IDEM-E2E-0001",
+    aggregateType: "DETAINEE",
+    aggregateId: "SYN-DET-0001",
+    operation: "REGISTER_SCAN",
+    payload: { correlationId: base.correlationId, syntheticOnly: true },
+    baseVersion: "v1",
+    payloadFingerprint: "OFF-PF-001",
+    status: "QUEUED" as const,
+    createdAt: base.now,
+    syntheticOnly: true as const,
+  };
+  const first = queue.enqueue(mutation);
+  assert.equal(first.effectApplied, false);
+  assert.equal(queue.enqueue(mutation).status, "REPLAYED");
+  assert.equal(queue.admit(mutation, "v1").status, "REPLAYED");
+  const receipt = queue.markApplied(mutation.idempotencyKey, "v2", base.now);
+  assert.equal(receipt.effectApplied, true);
+  assert.equal(queue.admit(mutation, "v1").status, "REPLAYED");
+  const conflict = { ...mutation, payloadFingerprint: "OFF-PF-CONFLICT" };
+  assert.throws(() => queue.enqueue(conflict), /Offline mutation conflict/);
 });
