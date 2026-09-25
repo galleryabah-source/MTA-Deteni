@@ -12,7 +12,7 @@ const context = createExecutionContext({
 
 const stages = ["SCAN","RESOLVE","AUTHORIZATION","ACTION","MUTATION","IDEMPOTENCY","AUDIT","OUTBOX","EVIDENCE","REPORT","DOCUMENT","RECOVERY"] as const;
 
-function trace(overrides: Record<string, unknown> = {}) {
+function trace(overrides: { correlationId?: string } = {}) {
   return stages.map((stage, index) => ({
     stage,
     event: {
