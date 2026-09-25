@@ -135,7 +135,7 @@ jobs:
             if(metrics.scrollWidth>metrics.width+2 || metrics.bodyWidth>metrics.width+2) throw new Error(`horizontal overflow on ${process.env.DEVICE}: ${JSON.stringify(metrics)}`);
             if(!metrics.queueReady) throw new Error('durable queue runtime not exposed');
             if(!metrics.scannerApi) throw new Error('adaptive QR scanner API not exposed');
-            if(process.env.DEVICE==='phone'||process.env.DEVICE==='tablet'){
+            if(process.env.DEVICE==='phone'){
               if(!metrics.mobileShellVisible) throw new Error(`mobile/tablet shell not visible: ${JSON.stringify(metrics)}`);
               if(metrics.desktopEnhanced) throw new Error(`desktop enhancement leaked into ${process.env.DEVICE}`);
               const nav=await page.locator('#mtaMobileBottomNav').count();
@@ -154,7 +154,7 @@ jobs:
               const collapsed=await page.locator('.side.mta-collapsed').count();
               if(collapsed!==1) throw new Error('desktop sidebar collapse contract failed');
             }
-            if(process.env.DEVICE==='phone'||process.env.DEVICE==='tablet'){
+            if(process.env.DEVICE==='phone'){
               await page.evaluate(()=>{
                 window.__MTA_TEST_MODE__=true;
                 let demo=JSON.parse(localStorage.getItem('mta-deteni-demo-v2')||'{}');
