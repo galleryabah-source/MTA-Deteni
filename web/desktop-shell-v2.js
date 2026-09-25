@@ -75,7 +75,7 @@
         try{groupNav(nav);syncA11y(nav)}finally{syncing=false}
       };
       nav.addEventListener('click',()=>setTimeout(sync,0),true);
-      new MutationObserver(sync).observe(nav,{subtree:true,childList:true,attributes:true,attributeFilter:['class']});
+      new MutationObserver(sync).observe(nav,{subtree:true,attributes:true,attributeFilter:['class']});
     }
     window.addEventListener('resize',apply,{passive:true});
   }
