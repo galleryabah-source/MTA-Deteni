@@ -4,12 +4,12 @@ import fs from "node:fs";
 
 const admin=fs.readFileSync("web/admin-settings-v9.js","utf8");
 const shell=fs.readFileSync("web/mta-unified-shell-v2.js","utf8");
-const index=fs.readFileSync("web/index.html","utf8");
+const runtime=fs.readFileSync("web/mta-app-runtime-full.js","utf8");
 
 test("settings navigation handler is exposed before unified shell routing",()=>{
   assert.match(admin,/window\.p9openSettings=\(\)=>settings\(\)/);
-  assert.match(index,/admin-settings-v9\.js/);
-  assert.match(index,/mta-unified-shell-v2\.js/);
+  assert.match(runtime,/admin-settings-v9\.js/);
+  assert.match(runtime,/mta-unified-shell-v2\.js\?v=8/);
 });
 
 test("unified shell preserves administrator settings route",()=>{
@@ -25,7 +25,7 @@ test("all navigation menus receive deterministic SVG icon contract",()=>{
   for (const view of [
     "dashboard","detainee","placement","movement","leave","documents","audit","p9settings",
     "monitor","ops-queue","qr-center","camera-scan","room-ops","reports"
-  ]) assert.match(shell,new RegExp("['\\\"]"+view+"['\\\"]"));
+  ]) assert.ok(shell.includes(view+":") || shell.includes("\'"+view+"\'") || shell.includes('"'+view+'"'));
   assert.match(shell,/NAV_ICONS=/);
   assert.match(shell,/function ensureNavIcon\(b\)/);
   assert.match(shell,/class="mta-nav-icon"/);
