@@ -77,3 +77,47 @@ A source-level PASS is not a runtime PASS. Each critical function requires: impl
 
 ## 7. UI freeze handoff
 The current UI is sufficiently close to the approved baseline and is therefore frozen. Subsequent work must not redesign it. UI changes are allowed only when required to correct functional behavior, accessibility, responsive correctness, icon correctness, or system integration.
+
+## 8. Remediation performed in this audit pass
+
+### Persistence consolidation
+Added `web/mta-state-kernel-v1.js` as the unified synthetic-state persistence boundary. Core runtime, movement, room operations, preview modules, unified shell, administrator settings, and QR print audit now route operational state writes through the kernel when loaded.
+
+The kernel provides:
+- normalized state reads;
+- JSON serialization and read-back verification;
+- dedicated branding storage;
+- canonical audit event creation;
+- a behavior-based persistence contract;
+- a single `mta:data-changed` propagation point.
+
+### Detainee CRUD ownership
+The core runtime is now the authoritative owner of `addDetainee()`. The master-room guard no longer overrides Detainee CRUD. It exposes room validation/occupancy guards instead.
+
+The core Detainee form now:
+- requires an active room for a new ACTIVE detainee;
+- checks room capacity;
+- does not allow room changes through Edit;
+- routes room changes to Movement;
+- suspends detainee QR state when archiving.
+
+### Navigation ownership
+Movement, Room Ops, Preview V5 and Preview V6 no longer replace `window.show`. They expose view handlers to the unified shell. The unified shell remains the navigation dispatcher.
+
+### AI secret handling
+Administrator AI configuration no longer persists an entered API key in localStorage. Legacy stored `apiKey` values are scrubbed on settings normalization and represented only by a non-secret configuration flag. AI runtime remains OFF.
+
+### Integrity contract
+The Final Integrity Gate no longer depends on an exact source-code string inside `save()`. It now uses the State Kernel behavior contract.
+
+## 9. Verification status
+
+**Source remediation:** IMPLEMENTED.
+
+**Static/runtime contract verification:** PARTIAL — source-level contracts were updated, but a deployed browser run has not yet been executed in this pass.
+
+**Deployment verification:** PENDING.
+
+**Browser journey verification:** PENDING.
+
+Therefore these changes must not yet be labeled final certification PASS. The next gate is deployment followed by browser regression against the real preview runtime.
