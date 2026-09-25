@@ -119,6 +119,22 @@ jobs:
             fi
           done
           test "$(grep -c 'function detected' web/qr-camera-v2.js)" -eq 1
+      - name: Enforce unified runtime ownership contracts
+        shell: bash
+        run: |
+          set -e
+          grep -Fq "MTA_DETAINEE_CRUD_OWNER='CORE_RUNTIME_V2'" web/mta-app-runtime-full.js
+          if grep -Eq '^window\.addDetainee[[:space:]]*=' web/master-room-guard-v10.js web/admin-settings-v9.js; then
+            echo "SINGLE_DETAINEE_CRUD_OWNER_FAIL"
+            exit 1
+          fi
+          grep -Fq "mta-state-kernel-v1.js?v=3" web/mta-app-runtime-full.js
+          grep -Fq "mta-app-runtime-full.js?v=18" web/mta-app-runtime.js
+          grep -Fq "admin-settings-v9.js?v=3" web/mta-app-runtime-full.js
+          grep -Fq "mta-system-audit-v1.js?v=2" web/mta-app-runtime-full.js
+          echo "SINGLE_DETAINEE_CRUD_OWNER: PASS"
+          echo "RUNTIME_CACHE_CONTRACT: PASS"
+
       - name: Enforce authentication and security contracts
         shell: bash
         run: |
