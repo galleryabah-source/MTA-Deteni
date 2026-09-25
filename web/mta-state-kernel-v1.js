@@ -25,6 +25,13 @@ function normalize(state){
       state.rooms.push({id:'ROOM-SYN-'+String(i+1).padStart(3,'0'),blockId:b.id,block,room,capacity:8,status:'ACTIVE',type:'STANDARD',gender:'UMUM',source:'SYNTHETIC_NORMALIZATION',version:1});
     });
   }
+  state.rooms.forEach((r,i)=>{
+    if(r?.block&&!r.blockId){
+      let b=state.blocks.find(x=>x.name===r.block);
+      if(!b){b={id:'BLK-SYN-R'+String(i+1).padStart(3,'0'),name:r.block,status:'ACTIVE',source:'SYNTHETIC_NORMALIZATION'};state.blocks.push(b)}
+      r.blockId=b.id;
+    }
+  });
   const roomByLabel=new Map(state.rooms.map(r=>[String(r.block||'')+' / '+String(r.room||''),r]));
   state.placements.forEach(p=>{
     if(!p?.roomId){
