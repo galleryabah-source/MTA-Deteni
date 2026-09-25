@@ -2,8 +2,9 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { collectMfeEvidenceToCanonicalDataset, canonicalDatasetToDailyGuardSnapshot, renderCanonicalDatasetWithExistingDailyGuardRenderer } from '../src/application/mfe-canonical-daily-report-runtime-adapter.js';
 import { validateCanonicalDailyDataset } from '../src/application/canonical-daily-dataset-validation.js';
+import type { FieldEvidence } from '../src/application/canonical-daily-dataset-contract.js';
 
-const evidence = [
+const evidence: FieldEvidence[] = [
   { evidenceId:'MFE-E-001', eventType:'PEMERIKSAAN', capturedAt:'2026-09-26T07:10:00.000Z', actorId:'PETUGAS-01', rawNote:'Pemeriksaan blok A selesai.', sourceKind:'NOTE', includeInReport:true, photoRefs:['PHOTO-001'], sequence:1, syntheticOnly:true as const },
   { evidenceId:'MFE-E-002', eventType:'PERGERAKAN', capturedAt:'2026-09-26T08:20:00.000Z', actorId:'PETUGAS-02', location:'Blok A / Kamar 01', rawNote:'Pergerakan internal tercatat.', sourceKind:'DATA', includeInReport:true, photoRefs:[], sequence:2, syntheticOnly:true as const },
   { evidenceId:'MFE-E-003', eventType:'KEAMANAN', capturedAt:'2026-09-26T09:30:00.000Z', actorId:'PETUGAS-01', rawNote:'Kontrol keamanan rutin.', sourceKind:'VOICE', includeInReport:true, photoRefs:['PHOTO-002'], sequence:3, syntheticOnly:true as const },
