@@ -59,7 +59,7 @@ export type AuditIntegrityVerification = Readonly<{
   lastHash: string | null;
 }>;
 
-export function verifySyntheticAuditChain(events: readonly ChainedAuditEvent[]): AuditIntegrityVerification {
+export function verifySyntheticAuditChain(events: readonly ChainedAuditEvent[], expectedLastHash?: string | null): AuditIntegrityVerification {
   let previousHash: string | null = null;
   let checked = 0;
   for (const event of events) {
@@ -73,5 +73,6 @@ export function verifySyntheticAuditChain(events: readonly ChainedAuditEvent[]):
     }
     previousHash = event.eventHash;
   }
+  if (expectedLastHash !== undefined && expectedLastHash !== previousHash) return Object.freeze({ ok: false, status: "INTEGRITY_COMPROMISED", checked, eventId: events[events.length - 1]?.id, lastHash: previousHash });
   return Object.freeze({ ok: true, status: "INTEGRITY_VERIFIED", checked, lastHash: previousHash });
 }
