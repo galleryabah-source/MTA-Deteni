@@ -239,17 +239,12 @@ try {
   await page.waitForFunction(() => /Buat Izin/i.test(document.getElementById('appView')?.textContent || ''), null, { timeout: 5000 });
   await page.getByRole('button', { name: /Buat Izin/i }).click();
   await page.locator('#lForm').waitFor({ state: 'visible', timeout: 5000 });
-  const leaveMutation = await page.evaluate(({id}) => {
-    const form = document.getElementById('lForm');
-    if (!form) throw new Error('leave form missing');
-    form.elements.detaineeId.value = id;
-    form.elements.destination.value = 'Synthetic Destination';
-    form.elements.startAt.value = new Date(Date.now() - 3600000).toISOString().slice(0,16);
-    form.elements.purpose.value = 'Synthetic browser mutation certification';
-    form.requestSubmit();
-    return true;
-  }, mutationBaseline.detaineeId);
-  if (!leaveMutation) throw new Error('leave form submission failed');
+  const leaveForm = page.locator('#lForm');
+  await leaveForm.locator('[name="detaineeId"]').selectOption(mutationBaseline.detaineeId);
+  await leaveForm.locator('[name="destination"]').fill('Synthetic Destination');
+  await leaveForm.locator('[name="startAt"]').fill(new Date(Date.now() - 3600000).toISOString().slice(0,16));
+  await leaveForm.locator('[name="purpose"]').fill('Synthetic browser mutation certification');
+  await leaveForm.getByRole('button', { name: /Buat/i }).click();
   await page.waitForFunction(({id}) => {
     const d = JSON.parse(localStorage.getItem('mta-deteni-demo-v2') || '{}');
     return (d.leaves || []).some(l => l.detaineeId === id);
