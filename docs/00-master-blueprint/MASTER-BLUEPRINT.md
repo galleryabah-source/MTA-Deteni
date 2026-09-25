@@ -381,14 +381,64 @@ Jika integrasi pesan digunakan, gunakan **official WhatsApp Business Platform/Cl
 
 ## 12. AI Policy
 
-AI bersifat assistive:
+AI bersifat assistive dan salah satu use case resmi yang dikunci adalah **AI Document Template Intelligence & Replication**.
+
+AI dapat digunakan untuk:
+- menganalisis dokumen contoh yang diunggah;
+- mengenali struktur, field, tabel, gambar, layout, typography, header/footer, caption, dan aturan pagination;
+- mengusulkan placeholder dan mapping ke data MTA DETENI;
+- mengusulkan image/photo slots dan mapping ke input aktual;
+- membantu membuat draft template blueprint;
+- membantu validasi kesesuaian data/template;
 - extraction;
 - classification;
 - summarization;
 - anomaly/exception suggestion;
 - draft recommendation.
 
-AI tidak boleh menjadi pengambil keputusan administratif final. Setiap output AI yang memengaruhi record harus memiliki provenance, confidence, dan human verification.
+Untuk dokumen contoh yang telah disetujui, **desain, struktur, layout, tabel, gambar, dan elemen visual menjadi template contract**. Data aktual, tanggal, angka, identitas, foto, dan informasi aktual dapat berubah sesuai input terbaru tanpa mengubah identitas template yang digunakan.
+
+AI tidak boleh menjadi pengambil keputusan administratif final, mengubah record substantif secara langsung, menerbitkan dokumen final tanpa workflow, atau mengaktifkan/mengubah template ACTIVE tanpa otorisasi. Setiap output AI yang memengaruhi record atau template harus memiliki provenance, confidence bila relevan, verification status, actor/time, dan human verification/approval sesuai policy.
+
+### 12.1 Canonical AI document flow
+
+```text
+Reference Document (.docx/.pdf/supported format)
+        ↓
+AI Document Analysis
+        ↓
+Template Blueprint + Field/Data/Image Mapping
+        ↓
+Human Review / Correction
+        ↓
+Template Approval
+        ↓
+Template Registry (versioned)
+        ↓
+MTA DETENI Actual Data + Actual Images
+        ↓
+Deterministic Document Engine
+        ↓
+DOCX / PDF Output
+        ↓
+Validation → Approval → Issue → Register → Audit → Archive
+```
+
+### 12.2 Fidelity requirement
+
+Target output is not merely semantic equivalence. The generator must preserve the approved reference template's **document identity and visual structure** as far as the selected output format/engine permits: page composition, typography, tables, borders, images, image sizing/cropping rules, captions, headers/footers, spacing, alignment, numbering, and multi-page behavior. Where exact pixel fidelity is technically impossible in a given format, the deviation must be detected/flagged and remain subject to human review.
+
+### 12.3 Core example — Laporan Harian
+
+An uploaded approved Laporan Harian example becomes a reusable template. Subsequent reports replace only the governed variable content: date, shift/group, operational figures, narrative entries, tables, actual photos, captions, and other approved fields. The output must retain the example's approved design and structure rather than generating a new visual design from scratch.
+
+### 12.4 Separation of responsibilities
+
+- **AI:** understand, extract, map, propose, validate.
+- **Template Registry:** govern versions, ownership, status, effective date, approval and provenance.
+- **Document Engine:** render deterministically and preserve template structure.
+- **Workflow/Approval:** authorize review, issue and distribution.
+- **Audit:** record source template, version, actor, time, input references, output identity and integrity hash.
 
 ---
 
@@ -564,14 +614,24 @@ Gunakan synthetic fixtures dan contoh template non-rahasia.
 - **D2:** Architecture & Security Foundation
 - **D3:** Core Administration
 - **D4:** Movement, Identification & Temporary Exit
-- **D5:** Document Engine
-- **D6:** Workflow & Approval
-- **D7:** Intelligent Intake
-- **D8:** Reporting & Operational Intelligence
+- **D5:** Document Engine + AI Template Intelligence foundation
+- **D6:** Workflow & Approval + Human Template Approval
+- **D7:** Intelligent Intake + AI Document Analysis/Mapping
+- **D8:** Reporting & Operational Intelligence + Automated Report Generation
 - **D9:** Pilot & Hardening
 - **D10:** Production & Institutionalization
 
-Document Engine diprioritaskan tinggi karena dua output Word merupakan kebutuhan operasional sekaligus bukti perubahan yang mudah diukur.
+Document Engine diprioritaskan tinggi karena output Word dan laporan operasional merupakan kebutuhan operasional sekaligus bukti perubahan yang mudah diukur.
+
+### 8.6 AI Document Template Intelligence & Replication — LOCKED CONCEPT
+
+MTA DETENI menetapkan **AI Document Template Intelligence & Replication** sebagai salah satu use case resmi AI. Cakupannya tidak terbatas pada Surat Perintah atau Surat Tugas, tetapi mencakup seluruh dokumen operasional yang memiliki contoh/template yang dapat diunggah ke aplikasi, termasuk **Laporan Harian** dengan teks, tabel, gambar/foto, desain, layout, header/footer, caption, dan elemen visual lainnya.
+
+Prinsipnya adalah **reference document → template understanding → human approval → template registry → deterministic document generation**. AI menganalisis contoh dokumen untuk mengidentifikasi struktur, field, data mapping, layout, gambar/image slots, typography, tabel, pagination rules, dan elemen visual. Hasil analisis menjadi proposed template dan wajib melalui review/approval sebelum ACTIVE.
+
+Pada saat generasi, data dan gambar aktual diganti berdasarkan input terbaru yang sah, sementara struktur dan desain template dipertahankan. AI tidak boleh mendesain ulang secara bebas setiap kali dokumen dibuat. Rendering final dilakukan oleh Document Engine secara deterministik berdasarkan template/version yang telah disetujui.
+
+Use case minimum meliputi: Surat Perintah, Surat Tugas Pengawalan, Surat Izin Keluar Sementara, Laporan Harian, laporan berkala, berita acara, dan dokumen operasional lain yang disahkan. Dokumen final wajib terikat pada template version, provenance, lifecycle, audit trail, dan integrity hash. AI tetap assistive dan tidak menjadi pengambil keputusan administratif final.
 
 ---
 
