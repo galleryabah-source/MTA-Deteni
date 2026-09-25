@@ -108,7 +108,9 @@ export function certifyBackupRestoreDisasterRecovery(input: {
   current: BackupArtifact;
   restored: RestoreResult;
   payload: string;
+  lastSourceChangeAt: string;
   backupCreatedAt: string;
+  restoreStartedAt: string;
   recoveryCompletedAt: string;
   rpoTargetMinutes: number;
   rtoTargetMinutes: number;
@@ -125,8 +127,8 @@ export function certifyBackupRestoreDisasterRecovery(input: {
   if (fingerprintPayload(input.payload) !== input.current.payloadHash) throw new Error("BACKUP_DR_SOURCE_PAYLOAD_MISMATCH");
   if (![input.rpoTargetMinutes, input.rtoTargetMinutes].every((value) => Number.isFinite(value) && value >= 0)) throw new Error("BACKUP_DR_TARGET_INVALID");
 
-  const rpoMinutes = minutesBetween(input.backupCreatedAt, input.recoveryCompletedAt);
-  const rtoMinutes = minutesBetween(input.backupCreatedAt, input.recoveryCompletedAt);
+  const rpoMinutes = minutesBetween(input.lastSourceChangeAt, input.backupCreatedAt);
+  const rtoMinutes = minutesBetween(input.restoreStartedAt, input.recoveryCompletedAt);
   if (rpoMinutes > input.rpoTargetMinutes) throw new Error("BACKUP_DR_RPO_BREACH");
   if (rtoMinutes > input.rtoTargetMinutes) throw new Error("BACKUP_DR_RTO_BREACH");
 
