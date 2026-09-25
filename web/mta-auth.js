@@ -15,6 +15,7 @@ const supabase=createClient(
 
 let authHydrationResolved=false;
 let pendingAuthSession=null;
+let authHydrationPromise=null;
 
 async function syncSession(session, resolved=true){
   const token=session?.access_token||null;
@@ -36,16 +37,43 @@ const getSessionWithTimeout=async()=>{
   }
 };
 
+const hydrateAuthSession=async()=>{
+  if(authHydrationPromise)return authHydrationPromise;
+  authHydrationPromise=(async()=>{
+    // INITIAL_SESSION can arrive before the persisted storage adapter has
+    // completed hydration. Never treat that transient null as a logout.
+    for(let attempt=0;attempt<3;attempt++){
+      try{
+        const result=await getSessionWithTimeout();
+        const session=result?.data?.session||null;
+        if(session){
+          authHydrationResolved=true;
+          pendingAuthSession=null;
+          await syncSession(session,true);
+          return session;
+        }
+        if(attempt<2) await new Promise(r=>setTimeout(r,350));
+      }catch(err){
+        if(attempt===2) throw err;
+        await new Promise(r=>setTimeout(r,350));
+      }
+    }
+    authHydrationResolved=true;
+    pendingAuthSession=null;
+    await syncSession(null,true);
+    return null;
+  })();
+  return authHydrationPromise;
+};
+
 supabase.auth.onAuthStateChange((event,session)=>{
-  // During a hard refresh Supabase may emit INITIAL_SESSION with null before
-  // its persisted session has finished hydrating. Never translate that
-  // transient state into a logout. getSession() is the authoritative
-  // hydration boundary; subsequent events are authoritative after it resolves.
   if(!authHydrationResolved){
-    pendingAuthSession=session||null;
+    // Keep INITIAL_SESSION/null entirely inside the hydration boundary.
+    // Only a real session is retained as a candidate for the final state.
+    if(session)pendingAuthSession=session;
     return;
   }
-  void syncSession(session, true);
+  void syncSession(session,true);
 });
 
 window.mtaAuth=Object.freeze({
@@ -57,25 +85,11 @@ window.mtaAuth=Object.freeze({
   async user(){const r=await supabase.auth.getUser();return r.data.user||null}
 });
 
-void (async()=>{
-  try{
-    const initial=await getSessionWithTimeout();
-    authHydrationResolved=true;
-    // Prefer the persisted session returned by getSession(). A transient
-    // INITIAL_SESSION callback must never override it with null.
-    await syncSession(initial.data.session, true);
-    pendingAuthSession=null;
-  }catch(err){
-    // A timeout/network error is not evidence of an explicit logout.
-    // Keep the auth boundary unresolved rather than forcing the login gate.
-    console.warn('[MTA] auth session hydration deferred',err);
-    authHydrationResolved=true;
-    if(pendingAuthSession){
-      await syncSession(pendingAuthSession, true);
-      pendingAuthSession=null;
-    }else{
-      window.__mtaAuthState=Object.freeze({resolved:false,authenticated:false,user:null});
-      window.dispatchEvent(new CustomEvent('mta-auth-state',{detail:{resolved:false,authenticated:false,user:null}}));
-    }
-  }
-})();
+void hydrateAuthSession().catch(err=>{
+  // A provider/network timeout is not an explicit logout. Keep the shell
+  // locked until the browser receives a definitive auth state.
+  console.warn('[MTA] auth session hydration deferred',err);
+  authHydrationResolved=false;
+  window.__mtaAuthState=Object.freeze({resolved:false,authenticated:false,user:null});
+  window.dispatchEvent(new CustomEvent('mta-auth-state',{detail:{resolved:false,authenticated:false,user:null}}));
+});
