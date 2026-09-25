@@ -263,4 +263,82 @@
   @media(min-width:1750px){
     .view{max-width:1660px!important}
   }
+
+  /* Desktop sidebar refinement — LOCKED visual direction, no redesign.
+     Goal: fit the complete information architecture in the normal desktop viewport
+     without exposing a sidebar scrollbar. */
+  .side{
+    height:100%!important;
+    min-height:0!important;
+    overflow:hidden!important;
+    overflow-y:hidden!important;
+    box-sizing:border-box!important;
+    padding:10px 9px 12px!important;
+  }
+  .nav{
+    height:100%!important;
+    min-height:0!important;
+    overflow:hidden!important;
+    display:flex!important;
+    flex-direction:column!important;
+    gap:1px!important;
+    padding:0!important;
+  }
+  .nav button{
+    flex:0 0 34px!important;
+    min-height:34px!important;
+    height:34px!important;
+    padding:7px 10px!important;
+    margin:0!important;
+    border-radius:8px!important;
+    line-height:1.1!important;
+    font-size:11.5px!important;
+    white-space:nowrap!important;
+    box-sizing:border-box!important;
+  }
+  .nav button.active::before{
+    top:7px!important;
+    bottom:7px!important;
+    width:3px!important;
+  }
+  /* Runtime-generated section headings/items, if present. */
+  .side .nav-group,
+  .side .nav-section,
+  .side [class*="nav-section"],
+  .side [class*="nav-group"]{
+    margin:5px 0 2px!important;
+    padding:0 8px!important;
+    flex:0 0 auto!important;
+  }
+  .side .nav-group-title,
+  .side .nav-section-title,
+  .side [class*="nav-section"] > :first-child,
+  .side [class*="nav-group"] > :first-child{
+    font-size:9px!important;
+    line-height:1.15!important;
+    letter-spacing:.12em!important;
+    margin:0 0 2px!important;
+  }
+  .side .nav-group button,
+  .side .nav-section button,
+  .side [class*="nav-section"] button,
+  .side [class*="nav-group"] button{
+    flex-basis:33px!important;
+    min-height:33px!important;
+    height:33px!important;
+    padding:6px 9px!important;
+    margin:0!important;
+  }
+  /* Never render a second scrollbar inside the sidebar. */
+  .side::-webkit-scrollbar,
+  .nav::-webkit-scrollbar{
+    width:0!important;
+    height:0!important;
+    display:none!important;
+  }
+  .side{
+    scrollbar-width:none!important;
+    -ms-overflow-style:none!important;
+  }
+
 }
