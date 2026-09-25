@@ -54,6 +54,6 @@ test("observability rejects stage order drift and duplicate event ids", () => {
 
 test("observability blocks sensitive metadata from logs", () => {
   const events = trace();
-  events[3] = { ...events[3], event: { ...events[3].event, metadata: { source: "SYNTHETIC", token: "SECRET" } } };
+  events[3] = { ...events[3], event: { ...events[3].event, metadata: { source: "SYNTHETIC", token: "SECRET" } as Record<string, string> } };
   assert.throws(() => certifyObservabilityTrace({ context, trace: events }), /OBSERVABILITY_SENSITIVE_METADATA_BLOCKED/);
 });
