@@ -596,3 +596,74 @@ MTA DETENI belum dianggap selesai hanya karena aplikasi dapat dibuka. Sistem har
 16. rencana institutionalization.
 
 **Status baseline:** blueprint adalah living document. Setiap perubahan besar terhadap proses, kewenangan, data, dokumen, atau security harus memperbarui blueprint dan roadmap terlebih dahulu.
+
+## 21. Locked Desktop UI Blueprint — Approved 25 September 2026
+
+The approved desktop/web visual design is now part of the MTA DETENI blueprint and is a **design freeze**.
+
+### 21.1 Visual baseline
+
+The approved direction is a light modern enterprise/government interface combining Modern Professional, Light Modern Minimal, and Hero + Cards characteristics.
+
+### 21.2 Fixed desktop composition
+
+```text
+┌──────────────────────────────────────────────────────────────────────┐
+│ MTA DETENI │ Global Search │ System Status │ Notification │ Profile │
+├────────────┼─────────────────────────────────────────────────────────┤
+│            │ HERO — MTA DETENI / RUDENIM                            │
+│ UTAMA      │ KPI: Total | Dalam Detensi | Izin | Deportasi          │
+│ Dashboard  │ Quick Actions: Data | Placement | Movement | Docs | QR │
+│            │ Status Deteni        │ Tren Jumlah Deteni              │
+│ DATA &     │ Aktivitas Terbaru    │ Deteni Terbaru                  │
+│ PENEMPATAN │                                                         │
+│ OPERASIONAL│                                                         │
+│ MONITORING │                                                         │
+│ QR &       │                                                         │
+│ PEMINDAIAN │                                                         │
+│ REKAM &    │                                                         │
+│ KEPATUHAN  │                                                         │
+│ FASILITAS  │                                                         │
+│ PENGATURAN │                                                         │
+└────────────┴─────────────────────────────────────────────────────────┘
+```
+
+### 21.3 Locked sidebar information architecture
+
+- **UTAMA:** Dashboard
+- **DATA & PENEMPATAN:** Data Deteni, Penempatan
+- **OPERASIONAL:** Pergerakan, Izin
+- **MONITORING:** Operational Monitor, Operational Queue
+- **QR & PEMINDAIAN:** QR Center, Scan Center, Leave QR, Camera Scan
+- **REKAM & KEPATUHAN:** Dokumen, Audit Trail, Laporan
+- **FASILITAS:** Room Ops
+- **PENGATURAN:** Pengaturan
+
+Sidebar requirements:
+- exactly one icon per menu item;
+- consistent icon family, size, stroke/fill treatment and alignment;
+- no duplicate icon caused by nested wrappers, pseudo-elements, or text glyphs;
+- no emoji icons;
+- active item uses blue selected state;
+- section labels use compact uppercase muted typography;
+- normal desktop dashboard must not expose an unnecessary sidebar scrollbar.
+
+### 21.4 Locked dashboard components
+
+1. Hero banner with Rudenim/building visual.
+2. Four KPI cards.
+3. Six quick-action cards.
+4. Status Deteni visualization.
+5. Tren Jumlah Deteni visualization.
+6. Aktivitas Terbaru.
+7. Daftar Deteni Terbaru.
+
+### 21.5 Non-negotiable system boundary
+
+This UI decision changes presentation only. It does not authorize changes to database schema, migrations, RBAC, authentication, QR resolution, operational mutations, audit/evidence chain, or document workflow.
+
+### 21.6 Change control
+
+The visual direction is frozen. Future UI work may improve implementation fidelity, accessibility, responsive desktop breakpoints, icon correctness, spacing, performance, and functional integration. A new visual direction requires an explicit superseding design decision.
+
+See: docs/18-desktop-ui-design-system-v1.0-LOCKED.md and docs/03-implementation/UI-DESIGN-DECISION-2026-09-25.md.
