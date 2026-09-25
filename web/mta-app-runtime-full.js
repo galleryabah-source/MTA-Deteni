@@ -1,51 +1,32 @@
-const KEY='mta-deteni-demo-v2'; const BRANDING_KEY='mta-deteni-branding-v1';
+const KEY='mta-deteni-demo-v2'; const BRANDING_KEY='mta-deteni-branding-v1'; const STATE_KERNEL=window.MTADeteniStateKernel;
 const seed={meta:{version:2,createdAt:new Date().toISOString()},detainees:[{id:'DET-001',code:'DET-2026-001',name:'SYNTHETIC A',nationality:'Contoh',status:'AKTIF',placement:'Blok A / Kamar 01',createdAt:'2026-09-16T07:00:00Z'},{id:'DET-002',code:'DET-2026-002',name:'SYNTHETIC B',nationality:'Contoh',status:'AKTIF',placement:'Blok B / Kamar 02',createdAt:'2026-09-16T07:10:00Z'}],placements:[{id:'PLC-001',detaineeId:'DET-001',block:'Blok A',room:'Kamar 01',since:'2026-09-16T07:20:00Z'},{id:'PLC-002',detaineeId:'DET-002',block:'Blok B',room:'Kamar 02',since:'2026-09-16T07:25:00Z'}],movements:[],leaves:[],documents:[],audit:[]};
 let db=null; let current='dashboard';
 function load(){
   try{
+    if(STATE_KERNEL){
+      const state=STATE_KERNEL.read();
+      if(state&&Array.isArray(state.detainees)&&state.detainees.length)return state;
+    }
     const x=JSON.parse(localStorage.getItem(KEY)||'null');
     const state=x&&Array.isArray(x.detainees)?x:JSON.parse(JSON.stringify(seed));
-    // Normalize operational collections without changing the persisted schema.
-    for(const k of ['detainees','placements','movements','leaves','documents','audit','rooms','blocks']){
-      if(!Array.isArray(state[k]))state[k]=[];
-    }
-    if(state.adminSettings?.branding){
-      try{localStorage.setItem(BRANDING_KEY,JSON.stringify(state.adminSettings.branding));}catch{}
-      delete state.adminSettings.branding;
-    }
-    try{
-      const branding=JSON.parse(localStorage.getItem(BRANDING_KEY)||'null');
-      if(branding){
-        state.adminSettings=state.adminSettings||{};
-        state.adminSettings.branding=branding;
-      }
-    }catch{}
+    for(const k of ['detainees','placements','movements','leaves','documents','audit','rooms','blocks'])if(!Array.isArray(state[k]))state[k]=[];
     return state;
-  }catch(err){
-    console.error('[MTA] load failed',err);
-    return JSON.parse(JSON.stringify(seed));
-  }
+  }catch(err){console.error('[MTA] load failed',err);return JSON.parse(JSON.stringify(seed))}
 }
 function save(){
   try{
     if(!db||typeof db!=='object')throw new Error('STATE_NOT_READY');
-    // Persistence boundary: operational state is saved atomically as JSON.
-    // Branding remains in its dedicated key so large image data cannot block CRUD.
+    if(STATE_KERNEL)return STATE_KERNEL.write(db);
     const branding=db.adminSettings?.branding;
     const persist=JSON.parse(JSON.stringify(db));
     if(persist.adminSettings)delete persist.adminSettings.branding;
     const serialized=JSON.stringify(persist);
     localStorage.setItem(KEY,serialized);
-    const verified=localStorage.getItem(KEY);
-    if(verified!==serialized)throw new Error('STORAGE_VERIFY_FAILED');
+    if(localStorage.getItem(KEY)!==serialized)throw new Error('STORAGE_VERIFY_FAILED');
     if(branding)localStorage.setItem(BRANDING_KEY,JSON.stringify(branding));
     window.dispatchEvent(new CustomEvent('mta:data-changed',{detail:{source:'core-save'}}));
     return true;
-  }catch(err){
-    console.error('[MTA] save failed',err);
-    toast('Gagal menyimpan data: '+(err?.message||'STORAGE_ERROR'));
-    return false;
-  }
+  }catch(err){console.error('[MTA] save failed',err);toast('Gagal menyimpan data: '+(err?.message||'STORAGE_ERROR'));return false}
 }
 function uid(prefix){return prefix+'-'+Math.random().toString(36).slice(2,8).toUpperCase()}
 function now(){return new Date().toISOString()}
