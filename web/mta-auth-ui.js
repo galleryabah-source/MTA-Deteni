@@ -171,7 +171,13 @@
     makeGate();
     bindForm();
     window.addEventListener('mta-auth-state',update);
-    void loadAuthModule().catch(()=>{});
+    // Never block the first paint on the authentication provider.
+    const startAuth=()=>void loadAuthModule().catch(()=>{});
+    if('requestIdleCallback' in window){
+      window.requestIdleCallback(startAuth,{timeout:1500});
+    }else{
+      window.setTimeout(startAuth,50);
+    }
   }
 
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
