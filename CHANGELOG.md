@@ -1,3 +1,14 @@
+## 2026-09-25 — AI Document Template Intelligence & Replication Locked
+
+- Locked AI Document Template Intelligence & Replication as an official MTA DETENI AI use case.
+- Scope covers uploaded reference documents beyond Surat Perintah, including Laporan Harian and other approved reports/documents containing text, tables, images/photos, captions, layout and visual design.
+- Defined the canonical flow: reference document → AI analysis → template blueprint → human review/approval → versioned Template Registry → current data/images → deterministic Document Engine → DOCX/PDF → workflow/audit.
+- Established document fidelity as a requirement: approved structure and visual identity must be preserved while variable actual data and images are replaced.
+- Added dedicated design and roadmap documents under `docs/09-documents/` and `docs/10-roadmap/`.
+- AI remains assistive; it does not directly mutate authoritative records, activate templates, issue final documents, or become the final renderer.
+- Existing AI failure-resilience, migration freeze, security, approval, provenance and production gates remain applicable.
+- No schema migration, production AI activation, or real detainee data was introduced.
+
 ## 2026-09-22 — Local Runtime Recovery Evidence Closure
 
 - Fixed the local runtime recovery evidence harness to model admission, local persistence and deterministic replay in the correct order.
