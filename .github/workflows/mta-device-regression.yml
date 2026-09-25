@@ -170,8 +170,7 @@ jobs:
                 demo.qr.detainee=demo.qr.detainee||{};
                 demo.qr.detainee['D-QR-TEST']={token:'DTQR-TEST',status:'ACTIVE'};
                 localStorage.setItem('mta-deteni-demo-v2',JSON.stringify(demo));
-                window.show('scan-center');
-                if(!document.querySelector('#p5out')) window.MTAPreviewV5Views.render('p5scan');
+                window.MTAPreviewV5Views.render('p5scan');
               });
               await page.locator('#p5out').waitFor({state:'visible',timeout:5000});
               await page.evaluate(()=>{ window.mtaQrCameraV2.simulateDecode?.('mta://detainee/D-QR-TEST/DTQR-TEST'); });
