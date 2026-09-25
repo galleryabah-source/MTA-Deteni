@@ -149,8 +149,8 @@ jobs:
               if(!metrics.desktopStatus) throw new Error('desktop runtime status strip missing');
               if(metrics.navButtons<7) throw new Error(`desktop nav buttons unexpectedly low: ${metrics.navButtons}`);
               if(!metrics.collapseControl) throw new Error('desktop nav collapse control missing');
-              await page.locator('#mtaResponsiveNavToggle').click();
-              await page.waitForTimeout(30);
+              await page.locator('#mtaResponsiveNavToggle').evaluate(button => button.click());
+              await page.waitForTimeout(100);
               const collapsed=await page.locator('.side.mta-collapsed').count();
               if(collapsed!==1) throw new Error('desktop sidebar collapse contract failed');
             }
