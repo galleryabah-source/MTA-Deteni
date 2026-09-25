@@ -23,7 +23,50 @@ function dashboard(v){
 }
 function detainee(v){const rows=db.detainees.map(d=>`<tr><td><b>${esc(d.code)}</b></td><td>${esc(d.name)}</td><td>${esc(d.nationality)}</td><td><span class="detainee-status-badge ${d.status==='AKTIF'?'is-active':''}">${esc(d.status)}</span></td><td>${esc(d.placement||'-')}</td><td><button class="btn small" onclick="editDetainee('${d.id}')">Edit</button> <button class="btn small danger" onclick="archiveDetainee('${d.id}')">Arsip</button></td></tr>`).join('');v.innerHTML=shell('Data Deteni','Master data sintetis dengan audit event. Penghapusan permanen tidak tersedia pada demo.',`<div class="toolbar detainee-toolbar"><button class="btn primary" onclick="addDetainee()">+ Tambah Deteni</button><input id="dSearch" placeholder="Cari kode/nama" oninput="filterDetainee()" style="padding:8px;border:1px solid var(--line);border-radius:9px"><div class="detainee-desktop-filters"><select id="dStatusFilter" onchange="filterDetainee()" aria-label="Filter status"><option value="">Semua Status</option><option value="AKTIF">AKTIF</option><option value="NONAKTIF">NONAKTIF</option></select><select id="dPlacementFilter" onchange="filterDetainee()" aria-label="Filter penempatan"><option value="">Semua Penempatan</option>${[...new Set(db.detainees.map(x=>x.placement).filter(Boolean))].map(x=>`<option value="${esc(x)}">${esc(x)}</option>`).join('')}</select><button class="btn" onclick="filterDetainee()">Filter</button><button class="btn" onclick="render()">↻ Refresh</button></div></div><div class="tablewrap detainee-tablewrap"><table class="table detainee-table"><thead><tr><th>Kode</th><th>Nama</th><th>Kebangsaan</th><th>Status</th><th>Penempatan</th><th>Aksi</th></tr></thead><tbody id="dRows">${rows}</tbody></table><div class="detainee-desktop-footer"><span id="detaineeCount">Menampilkan ${db.detainees.length ? 1 : 0} - ${db.detainees.length} dari ${db.detainees.length} data</span><div class="detainee-pagination"><button class="btn small" disabled>‹</button><button class="btn small page-current">1</button><button class="btn small" disabled>›</button></div></div></div>`)}
 function filterDetainee(){const q=(document.getElementById('dSearch')?.value||'').toLowerCase();const status=document.getElementById('dStatusFilter')?.value||'';const placement=document.getElementById('dPlacementFilter')?.value||'';document.querySelectorAll('#dRows tr').forEach(r=>{const text=r.textContent.toLowerCase();const cells=r.cells;const rowStatus=(cells[4]?.textContent||'').trim();const rowPlacement=(cells[5]?.textContent||'').trim();const ok=text.includes(q)&&(!status||rowStatus.includes(status))&&(!placement||rowPlacement===placement);r.style.display=ok?'':'none'});const visible=[...document.querySelectorAll('#dRows tr')].filter(r=>r.style.display!=='none').length;const count=document.getElementById('detaineeCount');if(count)count.textContent=visible?`Menampilkan 1 - ${visible} dari ${document.querySelectorAll('#dRows tr').length} data`:'Menampilkan 0 dari 0 data'}
-function addDetainee(existing){const d=existing||{id:'',code:'',name:'',nationality:'Contoh',status:'AKTIF',placement:''};openModal(`<div class="dialoghead"><h2>${existing?'Edit':'Tambah'} Deteni</h2><button class="x" onclick="closeModal()">×</button></div><form id="dForm" class="formgrid"><div class="field"><label>Kode</label><input name="code" required value="${esc(d.code)}" placeholder="DET-2026-003"></div><div class="field"><label>Nama (synthetic)</label><input name="name" required value="${esc(d.name)}"></div><div class="field"><label>Kebangsaan</label><input name="nationality" value="${esc(d.nationality)}"></div><div class="field"><label>Status</label><select name="status"><option ${d.status==='AKTIF'?'selected':''}>AKTIF</option><option ${d.status==='NONAKTIF'?'selected':''}>NONAKTIF</option></select></div><div class="field full"><label>Penempatan</label><input name="placement" value="${esc(d.placement)}"></div><div class="actions full"><button type="button" class="btn" onclick="closeModal()">Batal</button><button class="btn primary">Simpan</button></div></form>`);document.getElementById('dForm').onsubmit=e=>{e.preventDefault();const f=new FormData(e.target);if(existing){Object.assign(existing,{code:f.get('code'),name:f.get('name'),nationality:f.get('nationality'),status:f.get('status'),placement:f.get('placement')});audit('DETAINEE_UPDATE','DETAINEE',existing.id)}else{const code=String(f.get('code')||'').trim();if(db.detainees.some(x=>String(x.code||'').toLowerCase()===code.toLowerCase())){toast('Kode deteni sudah terdaftar.');return}const x={id:uid('DET'),code,name:f.get('name'),nationality:f.get('nationality'),status:f.get('status'),placement:f.get('placement'),createdAt:now()};db.detainees.unshift(x);audit('DETAINEE_CREATE','DETAINEE',x.id)}save();closeModal();render();toast('Data tersimpan')}}
+function addDetainee(existing){
+  const d=existing||{id:'',code:'',name:'',nationality:'Contoh',status:'AKTIF',placement:''};
+  const roomOptions=(db.rooms||[]).filter(r=>r.status==='ACTIVE').map(r=>`<option value="${esc(r.id)}" ${d.placement===r.block+' / '+r.room?'selected':''}>${esc(r.block+' / '+r.room)} — O/${esc(r.capacity)}</option>`).join('');
+  openModal(`<div class="dialoghead"><h2>${existing?'Edit':'Tambah'} Deteni</h2><button class="x" onclick="closeModal()">×</button></div>
+  <form id="dForm" class="formgrid">
+    <div class="field"><label>Kode</label><input name="code" required value="${esc(d.code)}" placeholder="DET-2026-003"></div>
+    <div class="field"><label>Nama (synthetic)</label><input name="name" required value="${esc(d.name)}"></div>
+    <div class="field"><label>Kebangsaan</label><input name="nationality" value="${esc(d.nationality)}"></div>
+    <div class="field"><label>Status</label><select name="status"><option value="AKTIF" ${d.status==='AKTIF'?'selected':''}>AKTIF</option><option value="NONAKTIF" ${d.status==='NONAKTIF'?'selected':''}>NONAKTIF</option></select></div>
+    <div class="field full"><label>Penempatan Awal</label><select name="placementId"><option value="">Tanpa Penempatan</option>${roomOptions}</select></div>
+    <div class="actions full"><button type="button" class="btn" onclick="closeModal()">Batal</button><button type="submit" class="btn primary">Simpan</button></div>
+  </form>`);
+  const form=document.getElementById('dForm');
+  form.onsubmit=e=>{
+    e.preventDefault();
+    try{
+      const f=new FormData(form);
+      const code=String(f.get('code')||'').trim();
+      const name=String(f.get('name')||'').trim();
+      const nationality=String(f.get('nationality')||'').trim();
+      const status=String(f.get('status')||'AKTIF');
+      const placementId=String(f.get('placementId')||'');
+      if(!code||!name){toast('Kode dan nama wajib diisi.');return}
+      if(db.detainees.some(x=>String(x.code||'').trim().toLowerCase()===code.toLowerCase()&&(!existing||x.id!==existing.id))){toast('Kode deteni sudah terdaftar.');return}
+      const room=placementId?(db.rooms||[]).find(r=>r.id===placementId&&r.status==='ACTIVE'):null;
+      if(placementId&&!room){toast('Penempatan tidak valid atau kamar tidak aktif.');return}
+      if(existing){
+        Object.assign(existing,{code,name,nationality,status});
+        if(room) existing.placement=room.block+' / '+room.room; else if(!placementId) existing.placement='';
+        audit('DETAINEE_UPDATE','DETAINEE',existing.id);
+      }else{
+        const x={id:uid('DET'),code,name,nationality,status,placement:room?room.block+' / '+room.room:'',createdAt:now()};
+        db.detainees.unshift(x);
+        audit('DETAINEE_CREATE','DETAINEE',x.id);
+        if(room){
+          const p={id:uid('PLC'),detaineeId:x.id,roomId:room.id,blockId:room.blockId,block:room.block,room:room.room,since:now(),source:'MASTER_ROOM',requestKey:'PLACEMENT:'+x.id+':'+room.id};
+          db.placements.unshift(p);
+          audit('PLACEMENT_ASSIGN','PLACEMENT',p.id);
+        }
+      }
+      save();closeModal();render();toast('Data tersimpan');
+    }catch(err){console.error('[MTA] detainee save failed',err);toast('Gagal menyimpan data: '+(err?.message||'ERROR'))}
+  };
+}
 function editDetainee(id){addDetainee(db.detainees.find(x=>x.id===id))}
 function archiveDetainee(id){const d=db.detainees.find(x=>x.id===id);if(!d)return;d.status='NONAKTIF';audit('DETAINEE_ARCHIVE','DETAINEE',id);save();render();toast('Deteni diarsipkan')}
 function placement(v){const rows=db.placements.map(p=>{const d=db.detainees.find(x=>x.id===p.detaineeId);return `<tr><td>${esc(p.id)}</td><td>${esc(d?.code||p.detaineeId)}</td><td>${esc(d?.name||'-')}</td><td>${esc(p.block)}</td><td>${esc(p.room)}</td><td>${new Date(p.since).toLocaleString('id-ID')}</td></tr>`}).join('');v.innerHTML=shell('Penempatan','Riwayat penempatan sintetis dan assignment terkini.',`<div class="toolbar"><button class="btn primary" onclick="addPlacement()">+ Assign Penempatan</button></div><div class="tablewrap"><table class="table"><thead><tr><th>ID</th><th>Kode</th><th>Nama</th><th>Blok</th><th>Kamar</th><th>Mulai</th></tr></thead><tbody>${rows||'<tr><td colspan="6" class="empty">Belum ada data</td></tr>'}</tbody></table></div>`)}
