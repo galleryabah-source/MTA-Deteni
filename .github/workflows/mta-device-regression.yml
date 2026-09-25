@@ -175,9 +175,8 @@ jobs:
                 return {decision:resolved?.decision||null,kind:resolved?.kind||null,id:resolved?.id||null,text:document.getElementById('mtaUnifiedScanResult')?.textContent||''};
               });
               if(qrResult.decision!=='ACCEPTED'||qrResult.kind!=='detainee'||qrResult.id!=='D-QR-TEST') throw new Error('QR Scan → Resolve contract failed: '+JSON.stringify(qrResult));
-              await page.waitForFunction(()=>/Operational Action/i.test(document.getElementById('mtaUnifiedScanResult')?.textContent||''),null,{timeout:5000});
-              const actionText=await page.evaluate(()=>document.getElementById('mtaUnifiedScanResult')?.textContent||'');
-              if(!/Operational Action/i.test(actionText)) throw new Error('QR Resolve → Action contract failed: '+actionText);
+              const actionEvidence=await page.evaluate(()=>{const d=JSON.parse(localStorage.getItem('mta-deteni-demo-v2')||'{}');return (d.audit||[]).filter(x=>x.action==='QR_ACTION_OPEN'&&x.resourceId==='D-QR-TEST').length;});
+              if(actionEvidence<1) throw new Error('QR Resolve → Action audit evidence missing: '+actionEvidence);
             }
             if(errors.length) throw new Error(`page errors: ${errors.join('; ')}`);
             await browser.close();
