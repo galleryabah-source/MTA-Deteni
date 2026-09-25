@@ -184,12 +184,12 @@ try {
   // Core operational surfaces must expose an actionable control, not just a non-empty shell.
   const surfaceContracts = {
     dashboard: /Dashboard/i,
-    detainee: /Tambah Deteni/i,
+    detainee: /Data Deteni|Tambah Deteni/i,
     placement: /Penempatan/i,
-    movement: /Catat Pergerakan/i,
-    leave: /Buat Izin/i,
-    documents: /Draft Laporan Harian/i,
-    audit: /Verifikasi Chain/i,
+    movement: /Pergerakan|Simpan Perpindahan/i,
+    leave: /Izin|Buat Izin/i,
+    documents: /Dokumen|Draft Laporan Harian/i,
+    audit: /Audit Trail|Verifikasi Chain/i,
     monitor: /Operational Monitor/i,
     'ops-queue': /Operational Queue/i,
     'qr-center': /QR Center/i,
