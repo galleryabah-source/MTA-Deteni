@@ -906,3 +906,34 @@ Implementation must preserve:
 ## 25. Deep Cohesion Remediation — 25 September 2026
 
 The stabilization work continued beyond the first persistence/navigation consolidation. The application now has one authoritative Detainee CRUD owner in the core runtime, authoritative synthetic Master Room references in the seed, compatibility normalization for older synthetic local states, canonical State Kernel audit creation across operational modules, stronger kernel/system contract checks, and browser acceptance coverage for the real Detainee Add → Edit → Archive journey. UI design remains frozen. Database schema and migrations remain frozen. Final certification is still gated on CI, deployed preview, browser journey, security, evidence, F0–F5, and P13 verification.
+
+
+## 27. Locked AI-Independent Report Continuity — 25 September 2026
+
+MTA DETENI tidak boleh bergantung pada API AI untuk menghasilkan laporan operasional. Ketika AI disconnected, timeout, HTTP 429/rate limit, quota exhausted, provider unavailable, atau seluruh provider gagal, core workflow dan Document Engine tetap harus berjalan.
+
+Prinsip utama adalah **contractual equivalence**: jalur AI-ON dan AI-OFF harus bertemu pada **Canonical Daily Dataset** sebelum rendering. AI boleh membantu memahami, mengelompokkan, menormalisasi, membuat draft caption/narasi, atau memberi peringatan; tetapi authoritative data, template, layout, image placement, pagination, validation, lifecycle, audit, dan integrity output ditentukan secara deterministik.
+
+```text
+FIELD EVIDENCE
+      ↓
+CANONICAL DAILY DATASET
+      ↓
+VALIDATION / HUMAN VERIFICATION
+      ↓
+APPROVED TEMPLATE
+      ↓
+DETERMINISTIC DOCUMENT ENGINE
+      ↓
+DOCX / PDF
+```
+
+AI menjadi optional accelerator, bukan runtime dependency. Tidak boleh ada state inti WAITING_FOR_AI. Jika AI gagal, sistem langsung menggunakan deterministic fallback dan/atau human input tanpa membuat fakta baru.
+
+Fallback minimum mencakup controlled event taxonomy, canonical IDs, schema/type validation, explicit photo-event references, controlled caption patterns, required-field validation, cross-field consistency checks, explicit field-to-slot mapping, deterministic pagination, dan deterministic integrity hashing.
+
+Target equivalence wajib untuk template/version, struktur, authoritative data, images, ordering, validation, lifecycle, audit/provenance, dan integrity metadata. Perbedaan yang diperbolehkan hanya pada optional AI enrichment, dan enrichment tersebut tetap melewati human verification.
+
+Laporan Harian yang template-nya telah ACTIVE harus tetap dapat dibuat tanpa AI. Analisis AI terhadap reference document adalah capability authoring/assistance, bukan syarat untuk operational generation setelah template disetujui.
+
+Referensi implementasi: `docs/10-roadmap/AI-OFFLINE-EQUIVALENCE-AND-DETERMINISTIC-REPORT-ROADMAP-v1.0.md`.
