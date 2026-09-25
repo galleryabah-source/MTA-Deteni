@@ -148,8 +148,9 @@ try {
   await page.waitForFunction(() => /Scanner Kamera/i.test(document.getElementById('appView')?.textContent || ''), null, { timeout: 5000 });
   const qrSeed = await page.evaluate(() => {
     const d = JSON.parse(localStorage.getItem('mta-deteni-demo-v2') || '{}');
-    d.detainees = d.detainees || [{ id: 'DET-BROWSER-001', code: 'DET-BROWSER-001', name: 'SYNTHETIC BROWSER', nationality: 'Contoh', status: 'AKTIF', placement: 'Blok A / Kamar 01' }];
-    d.placements = d.placements || [];
+    d.detainees = Array.isArray(d.detainees) ? d.detainees : [];
+    if (!d.detainees.some(v => v && v.status === 'AKTIF')) d.detainees.push({ id: 'DET-BROWSER-001', code: 'DET-BROWSER-001', name: 'SYNTHETIC BROWSER', nationality: 'Contoh', status: 'AKTIF', placement: 'Blok A / Kamar 01' });
+    d.placements = Array.isArray(d.placements) ? d.placements : [];
     d.movements = d.movements || [];
     d.leaves = d.leaves || [];
     d.documents = d.documents || [];
