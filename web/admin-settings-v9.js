@@ -2,26 +2,19 @@
 const K='mta-deteni-demo-v2';
 const BRANDING_KEY='mta-deteni-branding-v1';
 const get=()=>{
-  const d=JSON.parse(localStorage.getItem(K)||'{}');
+  const d=window.MTADeteniStateKernel?window.MTADeteniStateKernel.read():JSON.parse(localStorage.getItem(K)||'{}');
   try{
     const b=JSON.parse(localStorage.getItem(BRANDING_KEY)||'null');
     if(b)d.adminSettings=d.adminSettings||{},d.adminSettings.branding=b;
   }catch{}
   return d;
 };
-const put=d=>{
-  const branding=d?.adminSettings?.branding;
-  const persist=JSON.parse(JSON.stringify(d||{}));
-  if(persist.adminSettings)delete persist.adminSettings.branding;
-  localStorage.setItem(K,JSON.stringify(persist));
-  if(branding)localStorage.setItem(BRANDING_KEY,JSON.stringify(branding));
-  window.dispatchEvent(new CustomEvent('mta:data-changed'));
-};
+const put=d=>window.MTADeteniStateKernel?window.MTADeteniStateKernel.write(d):localStorage.setItem(K,JSON.stringify(d));
 const E=s=>String(s??'').replace(/[&<>\"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;',"'":'&#39;'}[c]));
 const uid=p=>p+'-'+crypto.randomUUID().slice(0,10).toUpperCase();
 const now=()=>new Date().toISOString();
 const audit=(a,t,i,r='SUCCESS',state=null)=>{const d=state||get();d.audit=d.audit||[];d.audit.unshift({id:uid('AUD'),action:a,resourceType:t,resourceId:i||'',result:r,occurredAt:now(),actor:'DEMO-ADMIN',requestId:uid('REQ'),correlationId:uid('COR'),policyVersion:'AUTHZ-1.0'});if(!state)put(d);};
-function ensure(){const d=get();let changed=false;if(!d.adminSettings){d.adminSettings={role:'ADMIN',facilityName:'MTA DETENI Digital',timezone:'Asia/Jakarta',qrPolicy:'OPAQUE_TOKEN',migrationFreeze:true,ai:'OFF'};changed=true}if(!d.blocks){d.blocks=[];changed=true}if(!d.rooms){d.rooms=[];changed=true}if(!d.qr){d.qr={detainee:{},room:{},leave:{}};changed=true}d.qr.detainee=d.qr.detainee||{};d.qr.leave=d.qr.leave||{};if(!d.qr.room){d.qr.room={};changed=true}if(!d.adminCatalogs){d.adminCatalogs={};changed=true}const defaults={dutyGroups:['REGU A','REGU B','REGU C','REGU D'],shifts:['PAGI','SIANG','MALAM'],movementTypes:['INTERNAL','TRANSFER_KAMAR','KLINIK','SIDANG','LAINNYA'],leaveTypes:['IZIN SEMENTARA','PEMERIKSAAN KESEHATAN','PENGAWALAN','LAINNYA'],documentTypes:['LAPORAN HARIAN','BERITA ACARA','SURAT TUGAS','SURAT PENGANTAR','LAINNYA'],classifications:['INTERNAL','TERBATAS','RAHASIA'],roomTypes:['STANDARD','ISOLATION','OBSERVATION','MEDICAL','TRANSIT'],roomCategories:['UMUM','PRIA','WANITA','KHUSUS']};for(const [k,v] of Object.entries(defaults)){if(!(Array.isArray(d.adminCatalogs[k])&&d.adminCatalogs[k].length)){d.adminCatalogs[k]=v;changed=true}}d.rooms.forEach(r=>{if(!r.blockId){const b=d.blocks.find(b=>String(b.name).toLowerCase()===String(r.block).toLowerCase());if(b){r.blockId=b.id;changed=true}}if(!d.qr.room[r.id]){d.qr.room[r.id]={token:uid('RMQR'),status:r.status==='ACTIVE'?'ACTIVE':'SUSPENDED'};changed=true}});if(changed)put(d);return d}
+function ensure(){const d=get();let changed=false;if(!d.adminSettings){d.adminSettings={role:'ADMIN',facilityName:'MTA DETENI Digital',timezone:'Asia/Jakarta',qrPolicy:'OPAQUE_TOKEN',migrationFreeze:true,ai:'OFF'};changed=true}const aiSecret=d.adminSettings.aiSettings;if(aiSecret&&Object.prototype.hasOwnProperty.call(aiSecret,'apiKey')){aiSecret.secretConfigured=!!String(aiSecret.apiKey||'').trim();delete aiSecret.apiKey;changed=true}if(!d.blocks){d.blocks=[];changed=true}if(!d.rooms){d.rooms=[];changed=true}if(!d.qr){d.qr={detainee:{},room:{},leave:{}};changed=true}d.qr.detainee=d.qr.detainee||{};d.qr.leave=d.qr.leave||{};if(!d.qr.room){d.qr.room={};changed=true}if(!d.adminCatalogs){d.adminCatalogs={};changed=true}const defaults={dutyGroups:['REGU A','REGU B','REGU C','REGU D'],shifts:['PAGI','SIANG','MALAM'],movementTypes:['INTERNAL','TRANSFER_KAMAR','KLINIK','SIDANG','LAINNYA'],leaveTypes:['IZIN SEMENTARA','PEMERIKSAAN KESEHATAN','PENGAWALAN','LAINNYA'],documentTypes:['LAPORAN HARIAN','BERITA ACARA','SURAT TUGAS','SURAT PENGANTAR','LAINNYA'],classifications:['INTERNAL','TERBATAS','RAHASIA'],roomTypes:['STANDARD','ISOLATION','OBSERVATION','MEDICAL','TRANSIT'],roomCategories:['UMUM','PRIA','WANITA','KHUSUS']};for(const [k,v] of Object.entries(defaults)){if(!(Array.isArray(d.adminCatalogs[k])&&d.adminCatalogs[k].length)){d.adminCatalogs[k]=v;changed=true}}d.rooms.forEach(r=>{if(!r.blockId){const b=d.blocks.find(b=>String(b.name).toLowerCase()===String(r.block).toLowerCase());if(b){r.blockId=b.id;changed=true}}if(!d.qr.room[r.id]){d.qr.room[r.id]={token:uid('RMQR'),status:r.status==='ACTIVE'?'ACTIVE':'SUSPENDED'};changed=true}});if(changed)put(d);return d}
 function nav(){const n=document.querySelector('#nav');if(!n||document.querySelector('#p9settings'))return;const b=document.createElement('button');b.id='p9settings';b.dataset.view='p9settings';b.textContent='Pengaturan';b.onclick=e=>{e.stopPropagation();settings()};n.appendChild(b)}
 function installSettingsStyle(){
   if(document.getElementById('mta-admin-settings-style'))return;
@@ -156,7 +149,7 @@ function settings(){
       '<div class="field"><label>Provider</label><select id="p9aiProvider"><option '+(ai.provider==='Gemini'?'selected':'')+'>Gemini</option><option '+(ai.provider==='OpenAI'?'selected':'')+'>OpenAI</option><option '+(ai.provider==='Anthropic'?'selected':'')+'>Anthropic</option><option '+(ai.provider==='Custom'?'selected':'')+'>Custom</option></select></div>'+
       '<div class="field"><label>Model</label><input id="p9aiModel" value="'+E(ai.model||'')+'" placeholder="Nama model"></div>'+
       '<div class="field full"><label>Endpoint API</label><input id="p9aiEndpoint" value="'+E(ai.endpoint||'')+'" placeholder="https://..."></div>'+
-      '<div class="field full"><label>API Key (preview)</label><input id="p9aiKey" type="password" value="'+E(ai.apiKey||'')+'" autocomplete="off" placeholder="Tidak disarankan untuk produksi"></div>'+
+      '<div class="field full"><label>API Key (tidak disimpan di browser)</label><input id="p9aiKey" type="password" value="" autocomplete="new-password" placeholder="Masukkan hanya untuk integrasi server-side"></div>'+
       '<div class="field"><label>Status konfigurasi</label><select id="p9aiEnabled"><option value="false" '+(!ai.enabled?'selected':'')+'>OFF</option><option value="true" '+(ai.enabled?'selected':'')+'>ON (config only)</option></select></div>'+
     '</div><div class="actions"><button class="btn primary" onclick="window.p9saveAI()">Simpan API AI</button></div></div></div>'+
 
@@ -178,16 +171,17 @@ function settings(){
 window.p9openSettings=()=>settings();
 window.p9settingsTab=settingsTab;
 window.p9saveAI=()=>{
-  const d=ensure();
+  const d=ensure(),entered=(document.querySelector('#p9aiKey')?.value||'').trim();
   d.adminSettings.aiSettings={
     provider:document.querySelector('#p9aiProvider')?.value||'Gemini',
     model:(document.querySelector('#p9aiModel')?.value||'').trim(),
     endpoint:(document.querySelector('#p9aiEndpoint')?.value||'').trim(),
-    apiKey:(document.querySelector('#p9aiKey')?.value||'').trim(),
-    enabled:document.querySelector('#p9aiEnabled')?.value==='true'
+    secretConfigured:!!entered,
+    enabled:false
   };
-  // Preview only: this does not activate the AI runtime.
-  audit('ADMIN_AI_API_CONFIG_UPDATE','AI_CONFIG','ADMIN','SUCCESS',d);put(d);toast('Konfigurasi API AI tersimpan (preview/config only).');
+  audit('ADMIN_AI_API_CONFIG_UPDATE','AI_CONFIG','ADMIN','SUCCESS',d);put(d);
+  document.querySelector('#p9aiKey').value='';
+  toast(entered?'Konfigurasi tersimpan; API key tidak disimpan di browser.':'Konfigurasi tersimpan tanpa API key.');
 };
 window.p9saveDesign=()=>{
   const d=ensure();d.adminSettings.branding=d.adminSettings.branding||{};
