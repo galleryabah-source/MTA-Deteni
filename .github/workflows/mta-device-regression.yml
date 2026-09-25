@@ -165,7 +165,7 @@ jobs:
                 demo.qr.detainee['D-QR-TEST']={token:'DTQR-TEST',status:'ACTIVE'};
                 localStorage.setItem('mta-deteni-demo-v2',JSON.stringify(demo));
                 const token='DTQR-TEST';
-                window.show('p5scan');
+                window.show('scan-center');
               });
             }
             if(process.env.DEVICE==='phone'||process.env.DEVICE==='tablet'){
