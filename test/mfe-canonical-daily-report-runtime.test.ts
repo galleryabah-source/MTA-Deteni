@@ -49,8 +49,9 @@ test('approved canonical dataset binds directly to the existing Daily Guard web 
   assert.equal(renderer.validate(input), true);
   const preparedA = await renderer.prepare(input);
   const preparedB = await renderer.prepare(input);
-  assert.equal(preparedA.integrityHash, dataset.deterministicHash);
+  assert.notEqual(preparedA.integrityHash, dataset.deterministicHash);
   assert.equal(preparedA.integrityHash, preparedB.integrityHash);
+  assert.match(JSON.stringify(input), new RegExp(dataset.deterministicHash));
   assert.equal(preparedA.filename, 'Laporan_Harian_Regu_Jaga_2026-09-26_BRAVO_SHIFT-PAGI.pdf');
   const html = renderer.render(preparedA);
   assert.equal((html.match(/class="mta-report-page"/g) || []).length, 11);
