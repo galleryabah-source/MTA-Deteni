@@ -252,7 +252,7 @@ try {
   });
 
   await page.evaluate(() => window.show('movement'));
-  await page.waitForFunction(() => /Simpan Perpindahan/i.test(document.getElementById('appView')?.textContent || ''), null, { timeout: 5000 });
+  await page.locator('#p9moveForm').waitFor({ state: 'visible', timeout: 5000 });
   const movementMutation = await page.evaluate(() => {
     const form = document.getElementById('p9moveForm');
     if (!form) throw new Error('movement form missing');
