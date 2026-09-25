@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { AiGateway } from '../src/application/ai-gateway.js';
 import { deterministicAiAccelerator } from '../src/application/ai-accelerator.js';
+import { enrichEvidenceOptionally } from '../src/application/ai-optional-enrichment.js';
 
 function failure(code: string, status?: number) {
   const e = new Error(code) as Error & { code?: string; status?: number };
@@ -79,4 +80,15 @@ test('deterministic AI accelerator remains usable with AI completely unavailable
   });
   assert.equal(suggestions.every(x => x.source === 'DETERMINISTIC' && x.confidence === 1), true);
   assert.equal(suggestions.find(x => x.field === 'eventLabel')?.value, 'Pemeriksaan');
+});
+
+test('optional enrichment never becomes a core dependency', async () => {
+  const result = await enrichEvidenceOptionally({
+    aiEnabled: false,
+    idempotencyKey:'ENRICH-OFF-001',
+    evidence:{ eventType:'PEMERIKSAAN', capturedAt:'2026-09-26T12:00:00.000Z', actorId:'PETUGAS-01', rawNote:'Fallback governed' },
+  });
+  assert.equal(result.source,'DETERMINISTIC');
+  assert.equal(result.aiStatus,'DISABLED');
+  assert.equal(result.suggestions[0]?.source,'DETERMINISTIC');
 });
