@@ -136,7 +136,7 @@ try {
   console.log(`AUTH_MONITOR_PASS ${device}`);
 
   stage = 'logout';
-  await page.locator('#mtaAuthUi button').getByText('Logout').click();
+  await page.locator('#mtaAuthUi button').getByText('Logout').evaluate(button => button.click());
   await page.locator('body.mta-auth-locked').waitFor({ state: 'attached', timeout: 5000 });
   await page.locator('#mtaAuthGate.open').waitFor({ state: 'visible', timeout: 5000 });
 
