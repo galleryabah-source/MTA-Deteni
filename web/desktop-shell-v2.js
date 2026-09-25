@@ -1,5 +1,7 @@
 (()=>{
   'use strict';
+  if(window.__mtaDesktopShellV2Booted)return;
+  window.__mtaDesktopShellV2Booted=true;
   const STYLE_ID='mta-desktop-shell-v2-style';
   const CSS='/desktop-shell-v2.css?v=2';
   const GROUPS={
@@ -61,11 +63,19 @@
     groupNav(nav);syncA11y(nav);statusStrip();
   }
   function setup(){
+    if(window.__mtaDesktopShellV2Setup)return;
+    window.__mtaDesktopShellV2Setup=true;
     loadCss();apply();
     const nav=document.getElementById('nav');
     if(nav){
-      nav.addEventListener('click',()=>setTimeout(()=>{groupNav(nav);syncA11y(nav)},0),true);
-      new MutationObserver(()=>{groupNav(nav);syncA11y(nav)}).observe(nav,{subtree:true,childList:true,attributes:true,attributeFilter:['class']});
+      let syncing=false;
+      const sync=()=>{
+        if(syncing)return;
+        syncing=true;
+        try{groupNav(nav);syncA11y(nav)}finally{syncing=false}
+      };
+      nav.addEventListener('click',()=>setTimeout(sync,0),true);
+      new MutationObserver(sync).observe(nav,{subtree:true,childList:true,attributes:true,attributeFilter:['class']});
     }
     window.addEventListener('resize',apply,{passive:true});
   }
