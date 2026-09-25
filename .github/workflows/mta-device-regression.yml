@@ -156,23 +156,23 @@ jobs:
               const collapsed=await page.locator('.side.mta-collapsed').count();
               if(collapsed!==1) throw new Error('desktop sidebar collapse contract failed');
             }
-            if(process.env.DEVICE==='phone'){
+            if(process.env.DEVICE==='phone'||process.env.DEVICE==='tablet'){
               await page.evaluate(()=>{
                 window.__MTA_TEST_MODE__=true;
-                let demo=JSON.parse(localStorage.getItem('mta-deteni-demo-v2')||'{}');
-                demo.detainees=demo.detainees||[{id:'D-QR-TEST',code:'DET-QR-TEST',name:'QR Test',nationality:'ID',status:'AKTIF',placement:'Blok A / Kamar 01'}];
+                const demo=JSON.parse(localStorage.getItem('mta-deteni-demo-v2')||'{}');
+                demo.detainees=Array.isArray(demo.detainees)?demo.detainees:[];
+                if(!demo.detainees.some(x=>x&&x.status==='AKTIF')) demo.detainees.push({id:'D-QR-TEST',code:'DET-QR-TEST',name:'QR Test',nationality:'ID',status:'AKTIF',placement:'Blok A / Kamar 01'});
                 demo.qr=demo.qr||{detainee:{},room:{},leave:{}};
+                demo.qr.detainee=demo.qr.detainee||{};
                 demo.qr.detainee['D-QR-TEST']={token:'DTQR-TEST',status:'ACTIVE'};
                 localStorage.setItem('mta-deteni-demo-v2',JSON.stringify(demo));
-                const token='DTQR-TEST';
                 window.show('scan-center');
               });
-            }
-            if(process.env.DEVICE==='phone'||process.env.DEVICE==='tablet'){
               await page.locator('#p5out').waitFor({state:'visible',timeout:5000});
-              await page.evaluate((token)=>window.mtaQrCameraV2.simulateDecode?.('mta://detainee/'+token), token);
+              await page.evaluate(()=>window.mtaQrCameraV2.simulateDecode?.('mta://detainee/D-QR-TEST/DTQR-TEST'));
+              await page.waitForFunction(()=>/DETAINEE|Buka Data Deteni|Catat Pergerakan/i.test(document.querySelector('#p5out')?.textContent||''),null,{timeout:5000});
               const result=await page.locator('#p5out').innerText();
-              if(!result.includes('DETAINEE')||!result.includes('Buka Data Deteni')||!result.includes('Catat Pergerakan')) throw new Error(`QR Scan → Data → Action contract failed: ${result}`);
+              if(!result.includes('DETAINEE')||!result.includes('Buka Data Deteni')||!result.includes('Catat Pergerakan')) throw new Error('QR Scan → Data → Action contract failed: '+result);
             }
             if(errors.length) throw new Error(`page errors: ${errors.join('; ')}`);
             await browser.close();
