@@ -2,15 +2,23 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
 const supabase=createClient(
   'https://tmmhxqgzelgrsrxbbfzh.supabase.co',
-  'sb_publishable_EZD9g_MMeXKiEzKJOqH_oQ_0gIEk9ur'
+  'sb_publishable_EZD9g_MMeXKiEzKJOqH_oQ_0gIEk9ur',
+  {
+    auth:{
+      persistSession:true,
+      autoRefreshToken:true,
+      detectSessionInUrl:true,
+      storageKey:'mta-deteni-auth-session'
+    }
+  }
 );
 
-async function syncSession(session){
+async function syncSession(session, resolved=true){
   const token=session?.access_token||null;
   const authenticated=!!session;
   window.mtaProductionApi?.setAccessToken(token);
-  window.__mtaAuthState=Object.freeze({resolved:true,authenticated,user:session?.user||null});
-  window.dispatchEvent(new CustomEvent('mta-auth-state',{detail:{authenticated,user:session?.user||null}}));
+  window.__mtaAuthState=Object.freeze({resolved:!!resolved,authenticated,user:session?.user||null});
+  window.dispatchEvent(new CustomEvent('mta-auth-state',{detail:{resolved:!!resolved,authenticated,user:session?.user||null}}));
 }
 
 const getSessionWithTimeout=async()=>{
@@ -25,7 +33,11 @@ const getSessionWithTimeout=async()=>{
   }
 };
 
-supabase.auth.onAuthStateChange((_event,session)=>{void syncSession(session)});
+supabase.auth.onAuthStateChange((_event,session)=>{
+  // Auth events may arrive before getSession() finishes hydration. Do not
+  // interpret that transient state as a logout; the UI waits for resolution.
+  void syncSession(session, true);
+});
 
 window.mtaAuth=Object.freeze({
   client:supabase,
@@ -39,8 +51,8 @@ window.mtaAuth=Object.freeze({
 void (async()=>{
   try{
     const initial=await getSessionWithTimeout();
-    await syncSession(initial.data.session);
+    await syncSession(initial.data.session, true);
   }catch(_){
-    await syncSession(null);
+    await syncSession(null, true);
   }
 })();
