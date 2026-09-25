@@ -128,7 +128,7 @@ jobs:
             await page.waitForTimeout(300);
             await page.evaluate(()=>{window.__MTA_TEST_MODE__=true;window.__mtaAuthState=Object.freeze({resolved:true,authenticated:true,user:{id:'synthetic-user',email:'synthetic@example.test'}});document.body.classList.add('mta-auth-ready');});
             await page.addScriptTag({url:'http://127.0.0.1:4173/mta-app-runtime.js?v=10'});
-            await page.waitForFunction(()=>typeof window.show==='function' && typeof window.mtaUnifiedResolve==='function',null,{timeout:10000});
+            await page.waitForFunction(()=>typeof window.show==='function' && typeof window.mtaUnifiedResolve==='function' && typeof window.MTAPreviewV5Views?.render==='function',null,{timeout:10000});
             for(const s of ['offline-queue-v1.js','qr-camera-v2.js','preview-v5.js','preview-v6.js','preview-v10.js']) await page.addScriptTag({url:`http://127.0.0.1:4173/${s}`});
             await page.addScriptTag({url:'http://127.0.0.1:4173/mta-unified-shell-v2.js?v=10'});
             await page.addStyleTag({url:'http://127.0.0.1:4173/desktop-shell-v2.css'});
@@ -171,6 +171,7 @@ jobs:
                 demo.qr.detainee['D-QR-TEST']={token:'DTQR-TEST',status:'ACTIVE'};
                 localStorage.setItem('mta-deteni-demo-v2',JSON.stringify(demo));
                 window.show('scan-center');
+                if(!document.querySelector('#p5out')) window.MTAPreviewV5Views.render('p5scan');
               });
               await page.locator('#p5out').waitFor({state:'visible',timeout:5000});
               await page.evaluate(()=>{ window.mtaQrCameraV2.simulateDecode?.('mta://detainee/D-QR-TEST/DTQR-TEST'); });
