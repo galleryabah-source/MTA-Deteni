@@ -136,7 +136,7 @@ try {
   console.log(`AUTH_MONITOR_PASS ${device}`);
   // Functional journey: QR Scan → Resolve → Data/Action → Audit.
   stage = 'qr-functional-journey';
-  await page.evaluate(() => window.show('scan-center'));
+  await page.evaluate(() => window.show('camera-scan'));
   await page.waitForFunction(() => /Scanner Kamera/i.test(document.getElementById('appView')?.textContent || ''), null, { timeout: 5000 });
   const qrSeed = await page.evaluate(() => {
     const d = JSON.parse(localStorage.getItem('mta-deteni-demo-v2') || '{}');
