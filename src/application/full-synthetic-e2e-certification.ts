@@ -60,6 +60,11 @@ function createHarness(context: ExecutionContext): Harness {
   const stores: MutationIntegrationStores = {
     findIdempotency: (key) => idempotency.get(key),
     saveIdempotency: (record) => idempotency.set(record.idempotencyKey, record),
+    claimIdempotency: (record) => {
+      if (idempotency.has(record.idempotencyKey)) return "EXISTING";
+      idempotency.set(record.idempotencyKey, record);
+      return "CLAIMED";
+    },
     appendAudit: (record) => audits.push(record),
     appendPending: async (event) => {
       if (outbox.some((existing) => existing.eventId === event.eventId)) return "CONFLICT";
