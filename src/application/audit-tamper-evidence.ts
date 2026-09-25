@@ -74,7 +74,8 @@ export function verifySyntheticAuditChain(events: readonly ChainedAuditEvent[], 
     previousHash = event.eventHash;
   }
   if (expectedLastHash !== undefined && expectedLastHash !== previousHash) {
-    const lastEventId = events.length > 0 ? events[events.length - 1].id : undefined;
+    const lastEvent = events.at(-1);
+    const lastEventId = lastEvent?.id;
     return lastEventId
       ? Object.freeze({ ok: false, status: "INTEGRITY_COMPROMISED", checked, eventId: lastEventId, lastHash: previousHash })
       : Object.freeze({ ok: false, status: "INTEGRITY_COMPROMISED", checked, lastHash: previousHash });
