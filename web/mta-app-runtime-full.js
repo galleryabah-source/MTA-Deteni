@@ -3,29 +3,43 @@ const seed={meta:{version:2,createdAt:new Date().toISOString()},detainees:[{id:'
 let db=null; let current='dashboard';
 function load(){
   try{
-    const x=JSON.parse(localStorage.getItem(KEY));
-    const state=x&&x.detainees?x:structuredClone(seed);
+    const x=JSON.parse(localStorage.getItem(KEY)||'null');
+    const state=x&&Array.isArray(x.detainees)?x:JSON.parse(JSON.stringify(seed));
+    // Normalize operational collections without changing the persisted schema.
+    for(const k of ['detainees','placements','movements','leaves','documents','audit','rooms','blocks']){
+      if(!Array.isArray(state[k]))state[k]=[];
+    }
     if(state.adminSettings?.branding){
       try{localStorage.setItem(BRANDING_KEY,JSON.stringify(state.adminSettings.branding));}catch{}
       delete state.adminSettings.branding;
     }
     try{
-      const branding=JSON.parse(localStorage.getItem(BRANDING_KEY));
-      if(branding&&state.adminSettings)state.adminSettings.branding=branding;
+      const branding=JSON.parse(localStorage.getItem(BRANDING_KEY)||'null');
+      if(branding){
+        state.adminSettings=state.adminSettings||{};
+        state.adminSettings.branding=branding;
+      }
     }catch{}
     return state;
-  }catch{return structuredClone(seed)}
+  }catch(err){
+    console.error('[MTA] load failed',err);
+    return JSON.parse(JSON.stringify(seed));
+  }
 }
 function save(){
   try{
-    // Keep potentially large uploaded branding assets outside the operational state
-    // so detainee create/edit cannot fail because of localStorage quota.
-    const branding=db?.adminSettings?.branding;
-    const persist=structuredClone(db);
+    if(!db||typeof db!=='object')throw new Error('STATE_NOT_READY');
+    // Persistence boundary: operational state is saved atomically as JSON.
+    // Branding remains in its dedicated key so large image data cannot block CRUD.
+    const branding=db.adminSettings?.branding;
+    const persist=JSON.parse(JSON.stringify(db));
     if(persist.adminSettings)delete persist.adminSettings.branding;
-    localStorage.setItem(KEY,JSON.stringify(persist));
+    const serialized=JSON.stringify(persist);
+    localStorage.setItem(KEY,serialized);
+    const verified=localStorage.getItem(KEY);
+    if(verified!==serialized)throw new Error('STORAGE_VERIFY_FAILED');
     if(branding)localStorage.setItem(BRANDING_KEY,JSON.stringify(branding));
-    window.dispatchEvent(new CustomEvent('mta:data-changed'));
+    window.dispatchEvent(new CustomEvent('mta:data-changed',{detail:{source:'core-save'}}));
     return true;
   }catch(err){
     console.error('[MTA] save failed',err);
