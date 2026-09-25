@@ -307,6 +307,17 @@ function waitForAuthBoundary(){
 }
 async function boot(){
   if(bootStarted)return;
+  if(document.readyState!=='loading' && !window.__mtaAuthState?.resolved){
+    document.documentElement.dataset.mtaUnifiedShell='waiting-auth';
+    const resolved=await new Promise(resolve=>{
+      let done=false;
+      const finish=value=>{if(done)return;done=true;clearTimeout(timer);window.removeEventListener('mta-auth-state',onState);resolve(value)};
+      const onState=e=>finish(!!e?.detail);
+      const timer=setTimeout(()=>finish(null),3000);
+      window.addEventListener('mta-auth-state',onState);
+    });
+    if(!resolved)return;
+  }
   const authenticated=await waitForAuthBoundary();
   if(!authenticated){
     document.documentElement.dataset.mtaUnifiedShell='blocked-unauthenticated';
