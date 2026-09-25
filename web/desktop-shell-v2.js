@@ -51,16 +51,21 @@
     const side=document.querySelector('.side');
     const layout=document.querySelector('.layout');
     if(!side||!layout)return;
-    if(document.getElementById('mtaSidebarToggle'))return;
-    const toggle=document.createElement('button');
-    toggle.type='button';
-    toggle.id='mtaSidebarToggle';
-    toggle.className='mta-nav-toggle';
+
+    // Normalize any stale/duplicate toggle left by an earlier shell build.
+    side.querySelectorAll('button:not([data-view])').forEach(b=>b.remove());
+    document.querySelectorAll('.mta-nav-toggle').forEach((b,i)=>{if(i>0)b.remove()});
+
+    let toggle=document.getElementById('mtaSidebarToggle');
+    if(!toggle){
+      toggle=document.createElement('button');
+      toggle.type='button';
+      toggle.id='mtaSidebarToggle';
+      toggle.className='mta-nav-toggle';
+      side.insertBefore(toggle,side.firstChild);
+    }
     toggle.setAttribute('aria-controls','nav');
-    toggle.setAttribute('aria-label','Minimalkan sidebar');
-    toggle.title='Minimalkan sidebar';
-    toggle.innerHTML='<span aria-hidden="true">‹</span>';
-    side.insertBefore(toggle,side.firstChild);
+
     const key='mta-deteni-sidebar-collapsed';
     const applyCollapsed=(collapsed,save=true)=>{
       side.classList.toggle('mta-collapsed',collapsed);
@@ -72,7 +77,14 @@
       toggle.innerHTML='<span aria-hidden="true">'+(collapsed?'›':'‹')+'</span>';
       if(save)try{localStorage.setItem(key,collapsed?'1':'0')}catch{}
     };
-    toggle.addEventListener('click',e=>{e.preventDefault();e.stopPropagation();applyCollapsed(!side.classList.contains('mta-collapsed'))});
+
+    if(!toggle.dataset.mtaBound){
+      toggle.dataset.mtaBound='1';
+      toggle.addEventListener('click',e=>{
+        e.preventDefault();e.stopPropagation();
+        applyCollapsed(!side.classList.contains('mta-collapsed'));
+      });
+    }
     let collapsed=false;
     try{collapsed=localStorage.getItem(key)==='1'}catch{}
     applyCollapsed(collapsed,false);
