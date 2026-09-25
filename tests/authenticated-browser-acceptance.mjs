@@ -244,7 +244,9 @@ try {
   await leaveForm.locator('[name="destination"]').fill('Synthetic Destination');
   await leaveForm.locator('[name="startAt"]').fill(new Date(Date.now() - 3600000).toISOString().slice(0,16));
   await leaveForm.locator('[name="purpose"]').fill('Synthetic browser mutation certification');
-  await leaveForm.getByRole('button', { name: /Buat/i }).click();
+  const leaveSubmit = leaveForm.locator('button[type="submit"]');
+  await leaveSubmit.scrollIntoViewIfNeeded();
+  await leaveSubmit.click();
   await page.waitForFunction(({id}) => {
     const d = JSON.parse(localStorage.getItem('mta-deteni-demo-v2') || '{}');
     return (d.leaves || []).some(l => l.detaineeId === id);
