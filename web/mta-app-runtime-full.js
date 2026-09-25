@@ -244,7 +244,7 @@ async function loadAuthenticatedRuntime(){
     '/master-room-guard-v10.js?v=11',
     '/preview-v10.js?v=11',
     '/desktop-shell-v2.js?v=3',
-    '/mobile-shell-v1.js?v=2',
+    '/mobile-shell-v1.js?v=3',
     '/daily-guard-report-v2.js',
     '/daily-guard-report-d57.js',
     '/admin-settings-v9.js',
