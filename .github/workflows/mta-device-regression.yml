@@ -166,10 +166,11 @@ jobs:
                 localStorage.setItem('mta-deteni-demo-v2',JSON.stringify(demo));
                 const token='DTQR-TEST';
                 window.show('p5scan');
-                window.mtaQrCameraV2.simulateDecode?.('mta://detainee/'+token);
               });
             }
             if(process.env.DEVICE==='phone'||process.env.DEVICE==='tablet'){
+              await page.locator('#p5out').waitFor({state:'visible',timeout:5000});
+              await page.evaluate((token)=>window.mtaQrCameraV2.simulateDecode?.('mta://detainee/'+token), token);
               const result=await page.locator('#p5out').innerText();
               if(!result.includes('DETAINEE')||!result.includes('Buka Data Deteni')||!result.includes('Catat Pergerakan')) throw new Error(`QR Scan → Data → Action contract failed: ${result}`);
             }
