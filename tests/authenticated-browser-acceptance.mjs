@@ -213,7 +213,7 @@ try {
   if (!crudState.id || crudState.name !== 'SYNTHETIC CRUD TEST' || !crudState.placement || !crudState.audits.includes('DETAINEE_CREATE')) {
     throw new Error('browser detainee create persistence/audit failed: '+JSON.stringify(crudState));
   }
-  await page.getByRole('button', { name: 'Edit' }).last().click();
+  await page.evaluate(id => window.editDetainee(id), crudState.id);
   await page.locator('#dForm').waitFor({ state: 'visible', timeout: 5000 });
   await page.locator('#dForm [name="name"]').fill('SYNTHETIC CRUD EDITED');
   await page.locator('#dForm').evaluate(form => form.requestSubmit());
