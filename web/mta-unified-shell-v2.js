@@ -1,4 +1,7 @@
-(()=>{'use strict';
+(()=>{
+'use strict';
+if(window.__mtaUnifiedShellBooted)return;
+window.__mtaUnifiedShellBooted=true;
 const VERSION='mta-unified-shell-v2-single-load';
 const BASE=['/desktop-shell-v2.css?v=3','/responsive-v11.css?v=13'];
 const SCRIPTS=[];
@@ -57,7 +60,8 @@ function installNavIconStyle(){
   const s=document.createElement('style');s.id='mta-unified-nav-icons';s.textContent='.nav button{display:flex;align-items:center;gap:11px}.mta-nav-icon{width:18px;height:18px;flex:0 0 18px;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}.mta-nav-label{min-width:0}.nav button.active .mta-nav-icon{stroke-width:2.1}.nav button:hover .mta-nav-icon{transform:translateX(1px)}';document.head.appendChild(s);
 }
 function nav(v,l,i){const n=document.getElementById('nav');if(!n||n.querySelector('[data-view="'+v+'"]'))return;const b=document.createElement('button');b.type='button';b.dataset.view=v;b.dataset.icon=i;b.textContent=l||v;b.onclick=e=>{e.stopPropagation();window.show(v)};n.appendChild(b);ensureNavIcon(b)}
-function installNav(){installNavIconStyle();nav('monitor','Operational Monitor','monitor');nav('ops-queue','Operational Queue','queue');nav('qr-center','QR Center','qr');nav('scan-center','Scan Center','scan');nav('leave-qr','Leave QR','leave');nav('camera-scan','Camera Scan','camera');nav('room-ops','Room Ops','room');nav('reports','Laporan','report');const n=document.getElementById('nav');if(!n)return;n.querySelectorAll('button[data-view]').forEach(b=>{b.type='button';b.setAttribute('role','button');b.style.pointerEvents='auto';ensureNavIcon(b);b.onclick=e=>{e.preventDefault();e.stopPropagation();const view=b.dataset.view;if(typeof window.show==='function')window.show(view)}});if(n.dataset.mtaNavRouter!=='1'){n.dataset.mtaNavRouter='1';n.addEventListener('click',e=>{const b=e.target&&e.target.closest?e.target.closest('button[data-view]'):null;if(!b||!n.contains(b))return;const view=b.dataset.view;if(!view)return;e.preventDefault();e.stopImmediatePropagation();if(typeof window.show==='function'){window.show(view)}else{console.error('[MTA] navigation unavailable: window.show is not a function')}},true)}}
+function installNav(){installNavIconStyle();nav('monitor','Operational Monitor','monitor');nav('ops-queue','Operational Queue','queue');nav('qr-center','QR Center','qr');nav('scan-center','Scan Center','scan');nav('leave-qr','Leave QR','leave');nav('camera-scan','Camera Scan','camera');nav('room-ops','Room Ops','room');nav('reports','Laporan','report');const n=document.getElementById('nav');if(!n)return;n.querySelectorAll('button[data-view]').forEach(b=>{b.type='button';b.setAttribute('role','button');b.style.pointerEvents='auto';ensureNavIcon(b);b.onclick=e=>{e.preventDefault();e.stopPropagation();const view=b.dataset.view;if(typeof window.show==='function')window.show(view)}})}
+
 function buildOperationalQueue(d){
   const audit=Array.isArray(d?.audit)?d.audit:[];
   const material=audit.filter(x=>x&&x.action&&x.resourceType&&x.occurredAt);
