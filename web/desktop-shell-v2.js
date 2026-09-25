@@ -3,7 +3,7 @@
   if(window.__mtaDesktopShellV2Booted)return;
   window.__mtaDesktopShellV2Booted=true;
   const STYLE_ID='mta-desktop-shell-v2-style';
-  const CSS='/desktop-shell-v2.css?v=2';
+  const CSS='/desktop-shell-v2.css?v=3';
   const GROUPS={
     dashboard:'UTAMA',
     detainee:'DATA & PENEMPATAN',placement:'DATA & PENEMPATAN',
