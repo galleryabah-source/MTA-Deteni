@@ -108,13 +108,13 @@
         const password=document.getElementById('mtaAuthPassword').value;
         const r=await window.mtaAuth.signIn(email,password);
         if(r?.error) throw r.error;
-        if(signup && !r?.data?.session){
-          msg.className='mta-auth-message ok';
-          msg.textContent='Akun berhasil dibuat. Periksa email konfirmasi sebelum login.';
-        }else{
-          msg.className='mta-auth-message ok';
-          msg.textContent='Login berhasil. Membuka aplikasi...';
-        }
+        if(!r?.data?.session) throw new Error('AUTH_SESSION_NOT_RETURNED');
+        msg.className='mta-auth-message ok';
+        msg.textContent='Login berhasil. Membuka aplikasi...';
+        // Do not depend solely on Supabase's asynchronous auth event.
+        // Complete the UI handoff directly from the successful sign-in response.
+        await update({detail:{authenticated:true,user:r.data.user||r.data.session.user||null}});
+        window.dispatchEvent(new CustomEvent('mta-auth-state',{detail:{authenticated:true,user:r.data.user||r.data.session.user||null}}));
       }catch(err){
         msg.className='mta-auth-message error';
         msg.textContent='Email atau password tidak valid, atau autentikasi belum dapat diproses.';
