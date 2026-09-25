@@ -138,7 +138,8 @@
       if(app)app.style.removeProperty('display');
       gate.classList.remove('open');
       renderHeader(true,event.detail.user);
-      // Protected API metadata is resolved by the authenticated runtime using the bearer token.\n    }else{
+      // Protected API metadata is resolved by the authenticated runtime using the bearer token.
+    }else{
       document.body.classList.remove('mta-auth-ready');
       document.body.classList.add('mta-auth-locked');
       const app=document.querySelector('.app');
