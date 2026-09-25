@@ -62,7 +62,12 @@ export function createSyntheticBackupArtifact(input: {
   evidenceCount: number;
 }): BackupArtifact {
   assertBackupManifest(input.manifest);
-  for (const [name, value] of [["auditCount", input.auditCount], ["outboxCount", input.outboxCount], ["evidenceCount", input.evidenceCount] as const]) {
+  const cardinalities = [
+    ["auditCount", input.auditCount],
+    ["outboxCount", input.outboxCount],
+    ["evidenceCount", input.evidenceCount],
+  ] as const;
+  for (const [name, value] of cardinalities) {
     if (!Number.isInteger(value) || value < 0) throw new Error(`BACKUP_DR_INVALID_CARDINALITY:${name}`);
   }
   return Object.freeze({
