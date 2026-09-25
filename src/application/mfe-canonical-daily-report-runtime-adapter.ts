@@ -50,6 +50,35 @@ export type DailyGuardWebReportInput = Readonly<{
   integrityHash: string;
 }>;
 
+export function collectMfeEvidenceQueueToCanonicalDataset(input: Readonly<{
+  datasetId: string;
+  reportDate: string;
+  shiftId: string;
+  groupId: string;
+  queueRecords: readonly (MfeEvidenceInput & Readonly<{
+    operation?: string;
+    idempotencyKey?: string;
+    correlationId?: string;
+  }>)[];
+}>): CanonicalDailyDataset {
+  const evidence = input.queueRecords.map((record) => {
+    if (record.operation !== 'MFE_EVIDENCE_CAPTURE') {
+      throw new Error('MFE_QUEUE_OPERATION_INVALID');
+    }
+    if (record.syntheticOnly !== true) {
+      throw new Error('MFE_QUEUE_NON_SYNTHETIC_RECORD');
+    }
+    const expectedKey = 'MFE:EVIDENCE:' + record.evidenceId;
+    if (record.idempotencyKey !== expectedKey || record.correlationId !== record.evidenceId) {
+      throw new Error('MFE_QUEUE_PROVENANCE_INVALID');
+    }
+    return record;
+  });
+  const unique = new Set(evidence.map((record) => record.evidenceId));
+  if (unique.size !== evidence.length) throw new Error('MFE_QUEUE_DUPLICATE_EVIDENCE');
+  return collectMfeEvidenceToCanonicalDataset({ ...input, evidence });
+}
+
 export function collectMfeEvidenceToCanonicalDataset(input: Readonly<{
   datasetId: string;
   reportDate: string;
