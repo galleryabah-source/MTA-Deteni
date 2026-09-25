@@ -32,6 +32,15 @@ test("all navigation menus receive deterministic SVG icon contract",()=>{
   assert.match(shell,/installNavIconStyle\(\)/);
 });
 
+test("detainee CRUD has one authoritative runtime owner",()=>{
+  const core=fs.readFileSync("web/mta-app-runtime-full.js","utf8");
+  const guard=fs.readFileSync("web/master-room-guard-v10.js","utf8");
+  const admin=fs.readFileSync("web/admin-settings-v9.js","utf8");
+  assert.match(core,/MTA_DETAINEE_CRUD_OWNER='CORE_RUNTIME_V2'/);
+  assert.doesNotMatch(guard,/^\s*window\.addDetainee\s*=/m);
+  assert.doesNotMatch(admin,/^\s*window\.addDetainee\s*=/m);
+});
+
 test("sidebar navigation is canonical and duplicate-free by source contract",()=>{
   const roomOps=fs.readFileSync("web/room-ops-v9.js","utf8");
   const preview5=fs.readFileSync("web/preview-v5.js","utf8");
