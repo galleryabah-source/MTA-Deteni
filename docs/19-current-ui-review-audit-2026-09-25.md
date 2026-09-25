@@ -59,7 +59,7 @@ This is source-level hardening only; it does not alter database schema, migratio
 - Runtime is synthetic/local and database is not connected in the current preview baseline.
 - AI is OFF.
 - Migration/schema changes are not part of these UI fixes.
-- Authentication/session persistence was separately hardened to survive F5 and Ctrl+Shift+R.
+- Authentication/session persistence is under active hardening for F5 and Ctrl+Shift+R. The Supabase browser client is pinned to `@supabase/supabase-js@2.117.1`; this version includes an auth fix that returns the stored session when a refresh loses to another tab. Source-level hydration also suppresses transient `INITIAL_SESSION` null states. Browser deployment verification remains required.
 - UI changes must not alter RBAC, QR resolution, audit/evidence chain, document workflow, or database schema without an explicit separate decision.
 
 ### 10. Audit findings
@@ -78,7 +78,7 @@ This is source-level hardening only; it does not alter database schema, migratio
 - Add/Edit Detainee Save must be validated end-to-end in the deployed preview.
 - QR preview/print/download should be validated against the existing clean-print contract.
 - Admin branding should be tested for persistence without affecting operational save.
-- Browser hard-refresh should preserve authenticated session and current UI state where intended.
+- Browser hard-refresh should preserve authenticated session and current UI state where intended; current source fix is deployed only after explicit preview verification.
 
 ### 11. Change-control rule
 This document is a current implementation reference. Future UI work should preserve the locked visual direction and these table/action contracts. Improvements are allowed for correctness, accessibility, responsive desktop behavior, icon fidelity, spacing, performance, and functional integration. A new visual direction requires an explicit superseding design decision.
@@ -91,3 +91,17 @@ This document is a current implementation reference. Future UI work should prese
 - `web/desktop-shell-v2.js`
 - `web/admin-settings-v9.js`
 - `web/mta-app-runtime-full.js` — persistence hardening commit `4267e6cfaa7f27661547b629cfe142d2dcdd5b87`
+
+
+### 13. Authentication refresh investigation — 25 September 2026
+A second source/research audit identified that relying on a floating `@supabase/supabase-js@2` CDN version is unsafe for a certification baseline. Supabase's current changelog records 2.117.1 (23 September 2026) with an auth fix to return the stored session when a refresh loses to another tab. The application therefore pins the browser client to `@supabase/supabase-js@2.117.1` rather than a floating major version. Supabase also documents `persistSession: true` as the browser local-storage persistence mechanism and `onAuthStateChange` as the auth-event subscription boundary.
+
+The application-side mitigation remains intentionally narrow:
+- keep the existing Supabase storage key and persistence model;
+- do not alter schema, RBAC, operational state, QR resolution, audit chain, or UI design;
+- do not interpret transient initialization `null` as explicit logout;
+- hydrate the persisted session before exposing the login gate as a definitive unauthenticated state;
+- keep the explicit `SIGNED_OUT` event authoritative for logout;
+- pin the dependency version to eliminate CDN floating-version drift.
+
+**Verification status:** SOURCE FIXED / DEPLOYMENT + BROWSER REGRESSION REQUIRED. A successful source change is not treated as a runtime PASS until the deployed preview survives F5 and Ctrl+Shift+R after login and still returns to the login gate after an explicit Logout.
