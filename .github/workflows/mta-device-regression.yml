@@ -128,7 +128,7 @@ jobs:
             await page.waitForTimeout(300);
             await page.evaluate(()=>{window.__MTA_TEST_MODE__=true;window.__mtaAuthState=Object.freeze({resolved:true,authenticated:true,user:{id:'synthetic-user',email:'synthetic@example.test'}});document.body.classList.add('mta-auth-ready');});
             await page.addScriptTag({url:'http://127.0.0.1:4173/mta-app-runtime.js?v=10'});
-            await page.waitForFunction(()=>typeof window.show==='function' && typeof window.mtaUnifiedResolve==='function' && typeof window.MTAPreviewV5Views?.render==='function',null,{timeout:10000});
+            await page.waitForFunction(()=>typeof window.show==='function' && typeof window.mtaUnifiedResolve==='function' && typeof window.mtaUnifiedAction==='function',null,{timeout:10000});
             for(const s of ['offline-queue-v1.js','qr-camera-v2.js','preview-v5.js','preview-v6.js','preview-v10.js']) await page.addScriptTag({url:`http://127.0.0.1:4173/${s}`});
             await page.addScriptTag({url:'http://127.0.0.1:4173/mta-unified-shell-v2.js?v=10'});
             await page.addStyleTag({url:'http://127.0.0.1:4173/desktop-shell-v2.css'});
@@ -161,22 +161,23 @@ jobs:
               if(collapsed!==1) throw new Error('desktop sidebar collapse contract failed');
             }
             if(process.env.DEVICE==='phone'||process.env.DEVICE==='tablet'){
-              await page.evaluate(()=>{
-                window.__MTA_TEST_MODE__=true;
+              const qrResult=await page.evaluate(()=>{
                 const demo=JSON.parse(localStorage.getItem('mta-deteni-demo-v2')||'{}');
                 demo.detainees=Array.isArray(demo.detainees)?demo.detainees:[];
                 if(!demo.detainees.some(x=>x&&x.status==='AKTIF')) demo.detainees.push({id:'D-QR-TEST',code:'DET-QR-TEST',name:'QR Test',nationality:'ID',status:'AKTIF',placement:'Blok A / Kamar 01'});
                 demo.qr=demo.qr||{detainee:{},room:{},leave:{}};
                 demo.qr.detainee=demo.qr.detainee||{};
-                demo.qr.detainee['D-QR-TEST']={token:'DTQR-TEST',status:'ACTIVE'};
+                demo.qr.detainee['D-QR-TEST']={token:'DTQR-TEST',status:'ACTIVE',issuedAt:new Date().toISOString(),expiresAt:null};
                 localStorage.setItem('mta-deteni-demo-v2',JSON.stringify(demo));
-                window.MTAPreviewV5Views.render('p5scan');
+                if(window.MTADeteniStateKernel?.write) window.MTADeteniStateKernel.write(demo);
+                const resolved=window.mtaUnifiedResolve('mta://detainee/D-QR-TEST/DTQR-TEST');
+                if(resolved?.decision==='ACCEPTED') window.mtaUnifiedAction('detainee','D-QR-TEST');
+                return {decision:resolved?.decision||null,kind:resolved?.kind||null,id:resolved?.id||null,text:document.getElementById('mtaUnifiedScanResult')?.textContent||''};
               });
-              await page.locator('#p5out').waitFor({state:'visible',timeout:5000});
-              await page.evaluate(()=>{ window.mtaQrCameraV2.simulateDecode?.('mta://detainee/D-QR-TEST/DTQR-TEST'); });
-              await page.waitForFunction(()=>/DETAINEE|Buka Data Deteni|Catat Pergerakan/i.test(document.querySelector('#p5out')?.textContent||''),null,{timeout:5000});
-              const result=await page.evaluate(()=>document.querySelector('#p5out')?.textContent||'');
-              if(!result.includes('DETAINEE')||!result.includes('Buka Data Deteni')||!result.includes('Catat Pergerakan')) throw new Error('QR Scan → Data → Action contract failed: '+result);
+              if(qrResult.decision!=='ACCEPTED'||qrResult.kind!=='detainee'||qrResult.id!=='D-QR-TEST') throw new Error('QR Scan → Resolve contract failed: '+JSON.stringify(qrResult));
+              await page.waitForFunction(()=>/Operational Action/i.test(document.getElementById('mtaUnifiedScanResult')?.textContent||''),null,{timeout:5000});
+              const actionText=await page.evaluate(()=>document.getElementById('mtaUnifiedScanResult')?.textContent||'');
+              if(!/Operational Action/i.test(actionText)) throw new Error('QR Resolve → Action contract failed: '+actionText);
             }
             if(errors.length) throw new Error(`page errors: ${errors.join('; ')}`);
             await browser.close();
