@@ -299,6 +299,7 @@ if(!window.__mtaRuntimeClockTimer){window.__mtaRuntimeClockTimer=setInterval(()=
 async function loadAuthenticatedRuntime(){
   if(window.__mtaRuntimeLoading)return window.__mtaRuntimeLoading;
   const scripts=[
+    '/mta-state-kernel-v1.js?v=2',
     '/offline-v1.js?v=2',
     '/offline-queue-v1.js?v=2',
     '/qr-camera-v2.js?v=4',
@@ -316,7 +317,7 @@ async function loadAuthenticatedRuntime(){
     '/daily-guard-report-v2.js',
     '/daily-guard-report-d57.js',
     '/admin-settings-v9.js?v=2',
-    '/mta-unified-shell-v2.js?v=9'
+    '/mta-unified-shell-v2.js?v=10'
   ];
   window.__mtaRuntimeLoading=(async()=>{
     for(const src of scripts){
