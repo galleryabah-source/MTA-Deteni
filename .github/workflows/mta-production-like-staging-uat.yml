@@ -1,0 +1,154 @@
+name: MTA DETENI Production-like Staging UAT
+
+on:
+  push:
+    branches: [gate/production-readiness]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  DEPLOY_WORKER_NAME: mta-deteni-staging
+  BASE_URL: https://mta-deteni-staging.galleryabah.workers.dev
+  MTA_EXECUTION_ENV: controlled-nonprod
+  AI_ENABLED: false
+
+jobs:
+  staging:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout release candidate
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Install Wrangler
+        run: npm install --global wrangler@4.132.0
+
+      - name: Validate staging release boundary
+        run: |
+          set -euo pipefail
+          test -f wrangler.staging.toml
+          test -f worker-v11.js
+          test -d web
+          node --check worker-v11.js
+          node - <<'NODE'
+          const fs=require('fs');
+          const s=fs.readFileSync('worker-v11.js','utf8');
+          const required=[
+            /dataMode:\s*['"]SYNTHETIC_ONLY['"]/,
+            /productionAccessAuthorized:\s*false/,
+            /livePostgresqlExecution:\s*false/,
+            /realDetaineeDataAllowed:\s*false/,
+            /externalTransportAllowed:\s*false/,
+            /durablePublicationAllowed:\s*false/,
+            /migrationFreeze:\s*true/,
+            /ai:\s*['"]OFF['"]/
+          ];
+          for(const x of required) if(!x.test(s)) throw new Error('Missing staging governance invariant: '+x);
+          console.log('STAGING RELEASE BOUNDARY: PASS');
+          NODE
+
+      - name: Verify Cloudflare credentials
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          set -euo pipefail
+          test -n "${CLOUDFLARE_API_TOKEN:-}"
+          test -n "${CLOUDFLARE_ACCOUNT_ID:-}"
+          CLOUDFLARE_ACCOUNT_ID="$(printf '%s' "$CLOUDFLARE_ACCOUNT_ID" | tr -d '[:space:]')"
+          printf '%s' "$CLOUDFLARE_ACCOUNT_ID" | grep -Eq '^[A-Za-z0-9_-]+$'
+          CLOUDFLARE_API_TOKEN="$CLOUDFLARE_API_TOKEN" CLOUDFLARE_ACCOUNT_ID="$CLOUDFLARE_ACCOUNT_ID" wrangler whoami
+
+      - name: Deploy release candidate to staging
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          set -euo pipefail
+          wrangler deploy --config wrangler.staging.toml --name "$DEPLOY_WORKER_NAME"
+
+      - name: Verify staging health and bind release
+        run: |
+          set -euo pipefail
+          for i in $(seq 1 12); do
+            if curl --fail --silent --show-error --max-time 10 "$BASE_URL/api/health" > staging-health.json; then break; fi
+            sleep 5
+          done
+          test -s staging-health.json
+          node - <<'NODE'
+          const fs=require('fs');
+          const x=JSON.parse(fs.readFileSync('staging-health.json','utf8'));
+          const required={
+            ok:true, app:'MTA DETENI', dataMode:'SYNTHETIC_ONLY',
+            productionAccessAuthorized:false, livePostgresqlExecution:false,
+            realDetaineeDataAllowed:false, externalTransportAllowed:false,
+            durablePublicationAllowed:false, migrationFreeze:true, ai:'OFF'
+          };
+          for(const [k,v] of Object.entries(required)){
+            if(x[k]!==v) throw new Error('STAGING HEALTH INVARIANT FAILED '+k+': '+JSON.stringify(x[k]));
+          }
+          console.log(JSON.stringify({status:'PASS',runtime:x.runtime,version:x.version||null,governance:required},null,2));
+          NODE
+
+      - name: Install Playwright
+        run: |
+          npm install --no-save playwright@1.55.0
+          npx playwright install --with-deps chromium
+
+      - name: Execute authenticated staging UAT
+        env:
+          BASE_URL: ${{ env.BASE_URL }}
+        run: |
+          set -euo pipefail
+          mkdir -p artifacts/staging-uat
+          for spec in "phone 390 844" "tablet 768 1024" "desktop 1440 900"; do
+            set -- $spec
+            DEVICE="$1" WIDTH="$2" HEIGHT="$3" BASE_URL="$BASE_URL" node tests/authenticated-browser-acceptance.mjs
+            cp "/tmp/mta-auth-journey-$1.json" "artifacts/staging-uat/$1-journey.json"
+          done
+
+      - name: Build release-bound staging UAT evidence
+        if: always()
+        run: |
+          node - <<'NODE'
+          const fs=require('fs');
+          const path=require('path');
+          const files=fs.existsSync('artifacts/staging-uat') ? fs.readdirSync('artifacts/staging-uat').filter(x=>x.endsWith('.json')) : [];
+          const journeys=files.map(f=>JSON.parse(fs.readFileSync(path.join('artifacts/staging-uat',f),'utf8')));
+          const health=fs.existsSync('staging-health.json') ? JSON.parse(fs.readFileSync('staging-health.json','utf8')) : null;
+          const pass=!!health && health.ok===true && health.dataMode==='SYNTHETIC_ONLY' && health.productionAccessAuthorized===false && health.livePostgresqlExecution===false && health.realDetaineeDataAllowed===false && health.migrationFreeze===true && health.ai==='OFF' && journeys.length===3 && journeys.every(x=>x.syntheticOnly===true && x.productionAccessAuthorized===false && x.migrationExecuted===false && x.aiEnabled===false);
+          const evidence={
+            certificationId:'MTA-STAGING-UAT-CERT-2026-09-26-01',
+            commitSha:process.env.GITHUB_SHA,
+            environment:'cloudflare-production-like-staging',
+            baseUrl:process.env.BASE_URL,
+            deploymentTarget:process.env.DEPLOY_WORKER_NAME,
+            status:pass?'CERTIFIED':'NOT_CERTIFIED',
+            health,
+            journeys,
+            governance:{syntheticOnly:true,productionAccessAuthorized:false,livePostgresqlExecution:false,realDetaineeDataAllowed:false,migrationExecuted:false,aiEnabled:false,migrationFreeze:true},
+            timestamp:new Date().toISOString()
+          };
+          fs.mkdirSync('artifacts/staging-uat',{recursive:true});
+          fs.writeFileSync('artifacts/staging-uat/staging-uat-certification.json',JSON.stringify(evidence,null,2));
+          if(!pass) process.exit(1);
+          NODE
+
+      - name: Upload release-bound staging UAT evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: mta-staging-uat-certification-${{ github.sha }}
+          path: artifacts/staging-uat
+          if-no-files-found: error
+          retention-days: 30
