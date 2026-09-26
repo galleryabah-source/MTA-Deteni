@@ -28,13 +28,13 @@ The executable preflight intentionally reports NO_GO because mandatory productio
 
 ### Blockers
 
-1. **P9.13 Kernel Certification** — The canonical P9.13 document states CONTRACT COMPLETE / IMPLEMENTATION NOT VERIFIED / CERTIFICATION NOT STARTED. A production readiness gate must not silently convert NOT_STARTED into PASS.
+1. **Production-like staging/UAT deployment permission** — The executable staging/UAT workflow reached Cloudflare authentication (`wrangler whoami` PASS) but the Worker asset upload was rejected with `No access to the specified resource` for `/workers/scripts/mta-deteni-staging/assets-upload-session`. Therefore release-bound staging deployment and authenticated UAT remain unverified.
 
 2. **Production deployment gate** — The production deployment workflow exists and is manually gated. Current gate evidence does not contain a successful production deployment plus live-health certification for this release candidate. Therefore this prerequisite remains unverified.
 
 3. **Real User Acceptance** — Cross-device and synthetic E2E evidence are certified. Real user acceptance on authorized real data has not been executed in this gate. Therefore this prerequisite remains unverified.
 
-4. **Production-like staging/UAT** — The repository contains controlled staging deployment and UAT workflows. An executed, release-bound staging/UAT certification artifact is not present in the current gate evidence. Therefore this prerequisite remains unverified.
+4. **Real User Acceptance** — Cross-device and synthetic E2E evidence are certified. Real user acceptance on authorized real data has not been executed in this gate. Therefore this prerequisite remains unverified.
 
 ## What is already green
 
@@ -62,6 +62,7 @@ No production deployment, migration, real detainee data, or AI activation is per
 
 ```text
 P9.13 Kernel Certification
+        🟢 CERTIFIED
         ↓
 Production-like Staging Deployment
         ↓
@@ -76,6 +77,6 @@ Real User Acceptance
 Production Readiness PASS
 ```
 
-The next engineering action is therefore not to bypass the NO-GO. It is to close the first unresolved mandatory prerequisite: **P9.13 Kernel Certification**, followed by executed staging/UAT evidence.
+The next action is to correct the Cloudflare staging deployment permission and rerun the existing executable staging/UAT gate. P9.13 is already certified and must not be reopened.
 
 **Final decision: NO-GO — correctly fail-closed.**
