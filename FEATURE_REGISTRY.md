@@ -48,7 +48,7 @@
 | ID | Tanggal | Fitur | Area | Status | Bukti / Acceptance |
 |---|---|---|---|---|---|
 | MTA-F-20260926-001 | 2026-09-26 | **Feature Registry & Verification Tracking** | Governance / Project Control | ☑ VERIFIED | Registry dibuat di repository; aturan pencatatan dan status verifikasi dikunci. |
-| MTA-F-20260926-002 | 2026-09-26 | **Detail Data Deteni + Histori + QR + Dokumen** | Data Deteni / Individual Record | ☑ IMPLEMENTED | Nama deteni dapat dibuka ke halaman detail; identitas lengkap, penempatan, histori masuk→penahanan→pergerakan→deportasi bila tersedia, QR, dokumen terkait, download Word-compatible, dan cetak dokumen terformat. | `web/detainee-detail-v1.js`, `web/index.html`, `test/detainee-detail-feature.test.mjs`; Static Integration Gate PASS; browser/runtime verification masih menjadi tahap berikutnya. |
+| MTA-F-20260926-002 | 2026-09-26 | **Detail Data Deteni + Histori + QR + Dokumen** | Data Deteni / Individual Record | ☑ IMPLEMENTED | Nama deteni dapat dibuka ke halaman detail; identitas lengkap, penempatan, histori masuk→penahanan→pergerakan→deportasi bila tersedia, **QR canonical yang sama dengan QR saat input pertama dan tidak berubah**, dokumen terkait, download Word-compatible, dan cetak dokumen terformat. | `web/detainee-detail-v1.js`, `web/index.html`, `test/detainee-detail-feature.test.mjs`; Static Integration Gate PASS; browser/runtime verification masih menjadi tahap berikutnya. |
 
 ## Incoming Feature Queue
 
@@ -102,3 +102,7 @@ Untuk setiap permintaan fitur berikutnya:
 ```
 
 **Prinsip:** tidak ada fitur "dianggap selesai" tanpa evidence.
+
+### QR Identity Integrity Rule
+
+Untuk `MTA-F-20260926-002`, QR Deteni adalah **single immutable identity artifact**. QR wajib berasal dari record QR yang dibuat pada input/registrasi Deteni pertama kali. Halaman detail, cetak, download, scan, dan aksi berikutnya hanya boleh menggunakan payload/token QR yang sudah tersimpan; tidak boleh membuat token/QR identity baru. Perubahan data profil, status, penempatan, pergerakan, izin, dokumen, atau deportasi tidak boleh mengubah QR Deteni.
