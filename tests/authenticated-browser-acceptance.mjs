@@ -4,6 +4,7 @@ import fs from 'node:fs';
 const width = Number(process.env.WIDTH || 1440);
 const height = Number(process.env.HEIGHT || 900);
 const device = process.env.DEVICE || 'desktop';
+const BASE_URL = process.env.BASE_URL || 'http://127.0.0.1:4173/';
 
 const SUPABASE_STUB = `
 let session = null;
@@ -66,7 +67,7 @@ try {
   );
 
   stage = 'goto';
-  await page.goto('http://127.0.0.1:4173/', { waitUntil: 'domcontentloaded' });
+  await page.goto(BASE_URL, { waitUntil: 'domcontentloaded' });
   stage = 'login-gate';
   await page.locator('#mtaAuthGate.open').waitFor({ state: 'visible', timeout: 10000 });
 
