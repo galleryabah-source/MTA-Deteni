@@ -1,0 +1,114 @@
+name: MTA DETENI End-to-End Journey Certification
+
+on:
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: mta-e2e-cert-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  MTA_EXECUTION_ENV: controlled-nonprod
+  CI: true
+
+jobs:
+  application-journey:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+      - name: Setup Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: '24'
+      - name: Install dependencies
+        run: npm install
+      - name: Execute application E2E journey
+        run: npx tsx scripts/mta-e2e-application-journey.ts
+      - name: Upload application journey evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: e2e-application-journey
+          path: artifacts/mta-evidence/e2e-application-journey.json
+          if-no-files-found: error
+
+  browser-journey:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - device: phone
+            width: 390
+            height: 844
+          - device: tablet
+            width: 768
+            height: 1024
+          - device: desktop
+            width: 1440
+            height: 900
+          - device: desktop-hd
+            width: 1920
+            height: 1080
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+      - name: Setup Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: '24'
+      - name: Prepare browser runtime
+        run: |
+          npm init -y
+          npm install --no-save playwright@1.55.0 http-server@14.1.1
+          npx playwright install --with-deps chromium
+      - name: Start static runtime
+        run: npx http-server web -p 4173 > /tmp/mta-http.log 2>&1 &
+      - name: Wait for static runtime
+        run: |
+          for i in $(seq 1 30); do
+            if curl -fsS http://127.0.0.1:4173/ >/dev/null; then exit 0; fi
+            sleep 1
+          done
+          cat /tmp/mta-http.log || true
+          exit 1
+      - name: Browser E2E journey
+        env:
+          DEVICE: ${{ matrix.device }}
+          WIDTH: ${{ matrix.width }}
+          HEIGHT: ${{ matrix.height }}
+        run: node tests/authenticated-browser-acceptance.mjs
+      - name: Upload browser journey evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: e2e-browser-${{ matrix.device }}
+          path: /tmp/mta-auth-journey-${{ matrix.device }}.json
+          if-no-files-found: error
+
+  certify:
+    needs: [application-journey, browser-journey]
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+      - name: Download application evidence
+        uses: actions/download-artifact@v4
+        with:
+          name: e2e-application-journey
+          path: artifacts/application
+      - name: Download browser evidence
+        uses: actions/download-artifact@v4
+        with:
+          pattern: e2e-browser-*
+          path: artifacts/browser
+          merge-multiple: true
+      - name: Verify E2E certification evidence
+        run: node .github/scripts/mta-e2e-certification-validator.mjs

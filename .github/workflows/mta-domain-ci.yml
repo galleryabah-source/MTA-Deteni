@@ -84,6 +84,32 @@ jobs:
       - name: TypeScript domain tests
         run: npm run test:unit
 
+      - name: P9.13 Kernel Certification
+        run: node scripts/mta-p9.13-kernel-certification.mjs
+
+      - name: Verify P9.13 certification evidence
+        if: always()
+        run: |
+          test -s artifacts/mta-evidence/p9.13-kernel-certification.json
+          node - <<'NODE'
+          const fs=require('fs');
+          const x=JSON.parse(fs.readFileSync('artifacts/mta-evidence/p9.13-kernel-certification.json','utf8'));
+          if(x.status!=='CERTIFIED') process.exit(1);
+          if(x.environment!=='controlled-nonprod') process.exit(1);
+          if(x.productionAccessAuthorized!==false || x.migrationExecuted!==false || x.aiEnabled!==false || x.syntheticOnly!==true) process.exit(1);
+          for(const [id,status] of Object.entries(x.controls)) if(status!=='PASS') process.exit(1);
+          console.log('P9.13 KERNEL CERTIFICATION: PASS');
+          NODE
+
+      - name: Upload P9.13 certification evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: mta-p9.13-kernel-certification-$GITHUB_SHA
+          path: artifacts/mta-evidence/p9.13-kernel-certification.json
+          if-no-files-found: error
+          retention-days: 30
+
       - name: Integrated acceptance runtime evidence
         run: npx tsx scripts/mta-integrated-acceptance-runtime.ts
 
