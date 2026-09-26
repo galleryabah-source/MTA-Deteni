@@ -45,7 +45,8 @@ Deno.serve(async(req)=>{
         const listed=await admin.auth.admin.listUsers({page:1,perPage:1000});
         if(listed.error) return json(req,{ok:false,error:"ADMIN_AUTH_USERS_READ_FAILED"},500);
         const emails=new Map((listed.data.users||[]).map(u=>[u.id,u.email||null]));
-        const data=(profiles||[]).map(p=>({...p,email:emails.get(p.id)||null}));
+        const authUsers=new Map((listed.data.users||[]).map(u=>[u.id,u]));
+        const data=(profiles||[]).map(p=>{const au=authUsers.get(p.id);return {...p,email:emails.get(p.id)||null,permissions:Array.isArray(au?.user_metadata?.mta_permissions)?au.user_metadata.mta_permissions:[]};});
         return json(req,{ok:true,resource,data});
       }
       if(req.method==="POST"){
@@ -53,12 +54,13 @@ Deno.serve(async(req)=>{
         const email=String(body.email||"").trim().toLowerCase();
         const password=String(body.password||"");
         const displayName=String(body.display_name||"").trim();
+        const permissions=Array.isArray(body.permissions)?[...new Set(body.permissions.map((p)=>String(p||"").trim()).filter(Boolean))].slice(0,200):[];
         const requestedRole=String(body.role||"VIEWER").toUpperCase();
         if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return json(req,{ok:false,error:"USER_EMAIL_INVALID"},400);
         if(password.length<12) return json(req,{ok:false,error:"USER_PASSWORD_TOO_WEAK"},400);
         const allowedRoles=role==="OWNER"?new Set(["OWNER","ADMIN","EDITOR","REVIEWER","AUDITOR","VIEWER"]):new Set(["EDITOR","REVIEWER","AUDITOR","VIEWER"]);
         if(!allowedRoles.has(requestedRole)) return json(req,{ok:false,error:"USER_ROLE_NOT_ALLOWED"},403);
-        const created=await admin.auth.admin.createUser({email,password,email_confirm:true,user_metadata:{full_name:displayName}});
+        const created=await admin.auth.admin.createUser({email,password,email_confirm:true,user_metadata:{full_name:displayName,mta_permissions:permissions}});
         if(created.error||!created.data.user) return json(req,{ok:false,error:"ADMIN_USER_CREATE_FAILED"},400);
         const uid=created.data.user.id;
         const prof=await admin.from("mta_profiles").insert({id:uid,role:requestedRole,display_name:displayName||email,active:true}).select("id,role,display_name,active,created_at,updated_at").single();
@@ -84,12 +86,22 @@ Deno.serve(async(req)=>{
         if(body.role!==undefined)patch.role=nextRole;
         if(body.display_name!==undefined)patch.display_name=String(body.display_name||"").trim()||target.data.display_name;
         if(body.active!==undefined)patch.active=!!body.active;
+        const hasPermissions=Array.isArray(body.permissions);
+        const permissions=hasPermissions?[...new Set(body.permissions.map((p)=>String(p||"").trim()).filter(Boolean))].slice(0,200):null;
         if(!Object.keys(patch).length)return json(req,{ok:false,error:"USER_UPDATE_EMPTY"},400);
         const updated=await admin.from("mta_profiles").update(patch).eq("id",id).select("id,role,display_name,active,created_at,updated_at").single();
         if(updated.error)return json(req,{ok:false,error:"ADMIN_USER_UPDATE_FAILED"},400);
+        if(hasPermissions){
+          const targetAuth=await admin.auth.admin.getUserById(id);
+          if(targetAuth.error||!targetAuth.data.user)return json(req,{ok:false,error:"ADMIN_AUTH_USER_READ_FAILED"},500);
+          const metadata={...(targetAuth.data.user.user_metadata||{}),mta_permissions:permissions};
+          const metaUpdate=await admin.auth.admin.updateUserById(id,{user_metadata:metadata});
+          if(metaUpdate.error)return json(req,{ok:false,error:"ADMIN_USER_PERMISSION_UPDATE_FAILED"},500);
+        }
         if(patch.active===false)await admin.auth.admin.signOut(id,"global").catch(()=>{});
         await admin.from("mta_audit_events").insert({action:"USER_UPDATE",resource_type:"USER",resource_id:id,result:"SUCCESS",actor_user_id:user.id,request_id:requestId,correlation_id:correlationId,metadata:{changedFields:Object.keys(patch),role:nextRole,active:patch.active}});
-        return json(req,{ok:true,resource,data:updated.data});
+        const currentAuth=await admin.auth.admin.getUserById(id);
+        return json(req,{ok:true,resource,data:{...updated.data,permissions:Array.isArray(currentAuth.data?.user?.user_metadata?.mta_permissions)?currentAuth.data.user.user_metadata.mta_permissions:[]}});
       }
       return json(req,{ok:false,error:"METHOD_NOT_ALLOWED"},405);
     }catch(e){
