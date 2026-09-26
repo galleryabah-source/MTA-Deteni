@@ -56,6 +56,8 @@ jobs:
 
       - name: Settings navigation regression tests
         run: node test/settings-navigation-regression.test.mjs
+      - name: Mobile modal layout regression tests
+        run: node test/mobile-modal-layout-regression.test.mjs
 
       - name: P9.5 audit integrity contract tests
         run: node test/p9.5-audit-integrity.test.mjs
