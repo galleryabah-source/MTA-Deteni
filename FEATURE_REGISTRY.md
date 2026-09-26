@@ -34,9 +34,9 @@
 
 | Metric | Nilai |
 |---|---:|
-| Total feature | 1 |
+| Total feature | 2 |
 | ☑ VERIFIED | 1 |
-| ◐ IN_PROGRESS | 0 |
+| ◐ IN_PROGRESS | 1 |
 | ☐ PLANNED | 0 |
 | ⚠ BLOCKED | 0 |
 | ↺ REGRESSION | 0 |
@@ -46,6 +46,7 @@
 | ID | Tanggal | Fitur | Area | Status | Bukti / Acceptance |
 |---|---|---|---|---|---|
 | MTA-F-20260926-001 | 2026-09-26 | **Feature Registry & Verification Tracking** | Governance / Project Control | ☑ VERIFIED | Registry dibuat di repository; aturan pencatatan dan status verifikasi dikunci. |
+| MTA-F-20260926-002 | 2026-09-26 | **Detail Data Deteni + Histori + QR + Dokumen** | Data Deteni / Individual Record | ◐ IN_PROGRESS | Nama deteni dapat dibuka ke halaman detail; identitas lengkap, penempatan, histori masuk→penahanan→pergerakan→deportasi bila tersedia, QR, dokumen terkait, download Word-compatible, dan cetak dokumen terformat. | `web/detainee-detail-v1.js`, `web/index.html`, `test/detainee-detail-feature.test.mjs`; menunggu evidence CI/runtime. |
 
 ## Incoming Feature Queue
 
