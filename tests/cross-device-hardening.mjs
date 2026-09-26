@@ -40,7 +40,10 @@ function rect(page, selector){
 }
 function insideViewport(r,w,h){return r.x>=-1&&r.y>=-1&&r.right<=w+1&&r.bottom<=h+1&&r.width>0&&r.height>0;}
 
-for(const cfg of matrix){
+const targetDevice=process.env.DEVICE || 'all';
+const targets=targetDevice==='all'?matrix:matrix.filter(x=>x.device===targetDevice);
+if(!targets.length) throw new Error('Unknown cross-device target: '+targetDevice);
+for(const cfg of targets){
   const browser=await chromium.launch({headless:true});
   const page=await browser.newPage({viewport:{width:cfg.width,height:cfg.height},deviceScaleFactor:1,isMobile:cfg.mobile,hasTouch:cfg.mobile});
   const errors=[];
@@ -142,7 +145,7 @@ for(const cfg of matrix){
   }finally{await browser.close();}
 }
 
-const summary={certification:'CROSS-DEVICE-HARDENING-v1',matrix:results.map(r=>({device:r.device,width:r.width,height:r.height,status:r.status})),allPass:results.length===matrix.length&&results.every(r=>r.status==='PASS'),governance:{syntheticOnly:true,productionAccessAuthorized:false,migrationExecuted:false,aiEnabled:false}};
+const summary={certification:'CROSS-DEVICE-HARDENING-v1',matrix:results.map(r=>({device:r.device,width:r.width,height:r.height,status:r.status})),allPass:results.length===targets.length&&results.every(r=>r.status==='PASS'),governance:{syntheticOnly:true,productionAccessAuthorized:false,migrationExecuted:false,aiEnabled:false}};
 fs.writeFileSync('/tmp/mta-cross-device-summary.json',JSON.stringify(summary,null,2));
 console.log('CROSS_DEVICE_HARDENING '+JSON.stringify(summary));
 if(!summary.allPass) process.exitCode=1;
