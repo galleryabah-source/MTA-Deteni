@@ -17,7 +17,7 @@ test("movement navigation has one canonical owner", () => {
 });
 
 test("QR action preserves detainee context into movement", () => {
-  assert.match(shell, /mtaUnifiedOpenMovement\('\$\{esc\(id\)\}'\)/);
+  assert.ok(shell.includes("mtaUnifiedOpenMovement(\\'${esc(id)}\\')"));
   assert.match(preview, /window\.p5openMovement=id=>\{show\('movement'\)/);
   assert.match(preview, /#p9moveForm select\[name="detaineeId"\]/);
 });
