@@ -126,7 +126,12 @@ jobs:
               exit 1
             fi
           done
-          test "$(grep -c 'function detected' web/qr-camera-v2.js)" -eq 1
+          detected_count="$(grep -c 'function detected' web/qr-camera-v2.js || true)"
+          echo "QR_CAMERA_DETECTED_FUNCTION_COUNT=${detected_count}"
+          if [ "${detected_count}" -ne 1 ]; then
+            printf "STATIC_CONTRACT_FAIL pattern=function detected file=web/qr-camera-v2.js count=%s\n" "${detected_count}" > static-contract-failure.txt
+            exit 1
+          fi
       - name: Upload static contract failure diagnostic
         if: failure()
         uses: actions/upload-artifact@v4
