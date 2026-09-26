@@ -71,6 +71,14 @@ jobs:
           npx playwright install --with-deps chromium
       - name: Start static runtime
         run: http-server web -p 4173 > /tmp/mta-http.log 2>&1 &
+      - name: Wait for static runtime
+        run: |
+          for i in $(seq 1 30); do
+            if curl -fsS http://127.0.0.1:4173/ >/dev/null; then exit 0; fi
+            sleep 1
+          done
+          cat /tmp/mta-http.log || true
+          exit 1
       - name: Browser E2E journey
         env:
           DEVICE: ${{ matrix.device }}
