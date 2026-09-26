@@ -13,6 +13,58 @@ const put=d=>{const result=window.MTADeteniStateKernel?window.MTADeteniStateKern
 const E=s=>String(s??'').replace(/[&<>\"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;',"'":'&#39;'}[c]));
 const uid=p=>p+'-'+crypto.randomUUID().slice(0,10).toUpperCase();
 const now=()=>new Date().toISOString();
+
+const MTA_RBAC_PERMISSION_CATALOG=[
+  ['Identity / Admin','IDENTITY.USER.VIEW','Lihat daftar pengguna'],['Identity / Admin','IDENTITY.USER.CREATE','Tambah pengguna'],['Identity / Admin','IDENTITY.USER.EDIT','Edit pengguna'],['Identity / Admin','IDENTITY.USER.DISABLE','Nonaktifkan pengguna'],
+  ['Deteni','DETENI.VIEW','Lihat data deteni'],['Deteni','DETENI.CREATE','Tambah deteni'],['Deteni','DETENI.EDIT','Edit deteni'],['Deteni','DETENI.VERIFY','Verifikasi deteni'],['Deteni','DETENI.HISTORY.VIEW','Lihat riwayat deteni'],['Deteni','DETENI.ARCHIVE','Arsipkan deteni'],
+  ['Penempatan','PLACEMENT.VIEW','Lihat penempatan'],['Penempatan','PLACEMENT.ASSIGN','Tetapkan kamar'],['Penempatan','PLACEMENT.EDIT','Edit penempatan'],['Penempatan','PLACEMENT.VERIFY','Verifikasi penempatan'],
+  ['Pergerakan / Headcount','MOVEMENT.VIEW','Lihat pergerakan'],['Pergerakan / Headcount','MOVEMENT.CREATE','Catat pergerakan'],['Pergerakan / Headcount','MOVEMENT.EDIT','Edit pergerakan'],['Pergerakan / Headcount','MOVEMENT.VERIFY','Verifikasi pergerakan'],['Pergerakan / Headcount','MOVEMENT.EXECUTE','Eksekusi pergerakan'],['Pergerakan / Headcount','HEADCOUNT.VIEW','Lihat headcount'],['Pergerakan / Headcount','HEADCOUNT.EXECUTE','Eksekusi headcount'],['Pergerakan / Headcount','HEADCOUNT.CORRECT','Koreksi headcount'],
+  ['Izin Sementara','LEAVE.VIEW','Lihat izin'],['Izin Sementara','LEAVE.CREATE','Buat izin'],['Izin Sementara','LEAVE.EDIT_DRAFT','Edit draft izin'],['Izin Sementara','LEAVE.VERIFY','Verifikasi izin'],['Izin Sementara','LEAVE.APPROVE','Setujui izin'],['Izin Sementara','LEAVE.REJECT','Tolak izin'],['Izin Sementara','LEAVE.GENERATE_LETTER','Generate surat izin'],['Izin Sementara','LEAVE.DOWNLOAD_LETTER','Download surat izin'],['Izin Sementara','LEAVE.RECORD_DEPARTURE','Catat keberangkatan'],['Izin Sementara','LEAVE.RECORD_RETURN','Catat kepulangan'],['Izin Sementara','LEAVE.CLOSE','Tutup workflow izin'],
+  ['Pengawalan','ESCORT.VIEW','Lihat pengawalan'],['Pengawalan','ESCORT.CREATE','Buat pengawalan'],['Pengawalan','ESCORT.ASSIGN','Tetapkan petugas'],['Pengawalan','ESCORT.EXECUTE','Eksekusi pengawalan'],['Pengawalan','ESCORT.RECORD_RESULT','Catat hasil'],['Pengawalan','ESCORT.HISTORY.VIEW','Lihat riwayat pengawalan'],
+  ['Surat Pengawalan / TU','ESCORT_LETTER.VIEW','Lihat surat pengawalan'],['Surat Pengawalan / TU','ESCORT_LETTER.VERIFY','Verifikasi surat'],['Surat Pengawalan / TU','ESCORT_LETTER.GENERATE','Generate surat'],['Surat Pengawalan / TU','ESCORT_LETTER.REGISTER','Register surat'],['Surat Pengawalan / TU','ESCORT_LETTER.DOWNLOAD','Download surat'],['Surat Pengawalan / TU','ESCORT_LETTER.DISTRIBUTE','Distribusi surat'],['Surat Pengawalan / TU','ESCORT_LETTER.ARCHIVE','Arsip surat'],
+  ['Kesehatan Terbatas','HEALTH.OPERATIONAL_FLAG.VIEW','Lihat flag operasional kesehatan'],['Kesehatan Terbatas','HEALTH.RECORD.VIEW_RESTRICTED','Lihat data kesehatan terbatas'],['Kesehatan Terbatas','HEALTH.RECORD.CREATE','Buat data kesehatan'],['Kesehatan Terbatas','HEALTH.RECORD.EDIT','Edit data kesehatan'],['Kesehatan Terbatas','HEALTH.RECORD.VERIFY','Verifikasi data kesehatan'],['Kesehatan Terbatas','HEALTH.HISTORY.VIEW_RESTRICTED','Lihat riwayat kesehatan terbatas'],['Kesehatan Terbatas','HEALTH.RECOMMENDATION.CREATE','Buat rekomendasi kesehatan'],
+  ['Dokumen','DOCUMENT.VIEW','Lihat dokumen'],['Dokumen','DOCUMENT.UPLOAD','Upload dokumen'],['Dokumen','DOCUMENT.REVISE','Revisi dokumen'],['Dokumen','DOCUMENT.GENERATE','Generate dokumen'],['Dokumen','DOCUMENT.DOWNLOAD','Download dokumen'],['Dokumen','DOCUMENT.PRINT','Cetak dokumen'],['Dokumen','DOCUMENT.DISTRIBUTE','Distribusi dokumen'],['Dokumen','DOCUMENT.ARCHIVE','Arsip dokumen'],['Dokumen','DOCUMENT.EXPORT','Export dokumen'],
+  ['Kepemimpinan','LEADERSHIP.DASHBOARD.VIEW','Lihat dashboard pimpinan'],['Kepemimpinan','LEADERSHIP.TIMELINE.VIEW','Lihat timeline'],['Kepemimpinan','LEADERSHIP.PETUNJUK','Beri petunjuk'],['Kepemimpinan','LEADERSHIP.ARAHAN','Beri arahan'],['Kepemimpinan','LEADERSHIP.REKOMENDASI','Buat rekomendasi'],['Kepemimpinan','LEADERSHIP.DISPOSISI','Buat disposisi'],['Kepemimpinan','LEADERSHIP.ACKNOWLEDGE','Acknowledgement'],['Kepemimpinan','LEADERSHIP.FOLLOW_UP','Kelola tindak lanjut'],['Kepemimpinan','LEADERSHIP.MONITOR','Monitor tindak lanjut'],
+  ['Audit','AUDIT.VIEW','Lihat audit trail'],['Audit','AUDIT.SEARCH','Cari audit trail'],['Audit','AUDIT.EVIDENCE.EXPORT','Export evidence'],['Audit','AUDIT.INTEGRITY.VERIFY','Verifikasi integritas audit'],
+  ['RBAC','RBAC.POLICY.VIEW','Lihat policy RBAC'],['RBAC','RBAC.POLICY.PROPOSE','Ajukan perubahan policy'],['RBAC','RBAC.POLICY.APPROVE','Approve perubahan policy'],['RBAC','RBAC.POLICY.APPLY','Terapkan policy'],['RBAC','RBAC.POLICY.ROLLBACK','Rollback policy'],['RBAC','RBAC.ROLE.MANAGE','Kelola role'],['RBAC','RBAC.PERMISSION.CATALOG.MANAGE','Kelola katalog permission'],
+  ['System','SYSTEM.CONFIGURATION.MANAGE','Kelola konfigurasi sistem'],['System','SYSTEM.JOBS.MANAGE','Kelola jobs'],['System','SYSTEM.STORAGE.MANAGE','Kelola storage'],['System','SYSTEM.INTEGRATIONS.MANAGE','Kelola integrasi'],['System','SYSTEM.SECURITY.MANAGE','Kelola security settings']
+];
+
+const MTA_RBAC_DEFAULTS=(()=>{
+  const all=MTA_RBAC_PERMISSION_CATALOG.map(x=>x[1]);
+  const byPrefix=(prefix)=>all.filter(p=>p.startsWith(prefix));
+  const common=all.filter(p=>/\\.(VIEW|HISTORY\\.VIEW|DASHBOARD\\.VIEW)$/.test(p));
+  return {
+    OWNER:all,
+    ADMIN:all.filter(p=>p!=='RBAC.POLICY.ROLLBACK'),
+    EDITOR:[
+      ...byPrefix('DETENI.'),...byPrefix('PLACEMENT.'),...byPrefix('MOVEMENT.'),...byPrefix('HEADCOUNT.'),
+      ...byPrefix('LEAVE.').filter(p=>/\\.(VIEW|CREATE|EDIT_DRAFT)$/.test(p)),
+      ...byPrefix('ESCORT.').filter(p=>/\\.(VIEW|CREATE|ASSIGN|EXECUTE|RECORD_RESULT|HISTORY\\.VIEW)$/.test(p)),
+      ...byPrefix('ESCORT_LETTER.').filter(p=>/\\.(VIEW|VERIFY|GENERATE|REGISTER|DOWNLOAD)$/.test(p)),
+      ...byPrefix('DOCUMENT.').filter(p=>/\\.(VIEW|UPLOAD|REVISE|GENERATE|DOWNLOAD|PRINT)$/.test(p)),
+      'LEADERSHIP.DASHBOARD.VIEW'
+    ],
+    REVIEWER:[
+      ...common,...byPrefix('DETENI.'),...byPrefix('PLACEMENT.'),...byPrefix('MOVEMENT.'),...byPrefix('HEADCOUNT.'),
+      ...byPrefix('LEAVE.').filter(p=>/\\.(VIEW|VERIFY|APPROVE|REJECT|GENERATE_LETTER|DOWNLOAD_LETTER)$/.test(p)),
+      ...byPrefix('ESCORT.').filter(p=>/\\.(VIEW|RECORD_RESULT|HISTORY\\.VIEW)$/.test(p)),
+      ...byPrefix('ESCORT_LETTER.').filter(p=>/\\.(VIEW|VERIFY|DOWNLOAD)$/.test(p)),
+      ...byPrefix('DOCUMENT.').filter(p=>/\\.(VIEW|DOWNLOAD|PRINT)$/.test(p)),
+      'AUDIT.VIEW','AUDIT.SEARCH','LEADERSHIP.DASHBOARD.VIEW','LEADERSHIP.TIMELINE.VIEW'
+    ],
+    AUDITOR:[
+      ...common,...byPrefix('DETENI.').filter(p=>/\\.(VIEW|HISTORY\\.VIEW)$/.test(p)),
+      ...byPrefix('PLACEMENT.').filter(p=>p.endsWith('.VIEW')),...byPrefix('MOVEMENT.').filter(p=>p.endsWith('.VIEW')),
+      ...byPrefix('HEADCOUNT.').filter(p=>p.endsWith('.VIEW')),...byPrefix('LEAVE.').filter(p=>p.endsWith('.VIEW')),
+      ...byPrefix('ESCORT.').filter(p=>/\\.(VIEW|HISTORY\\.VIEW)$/.test(p)),
+      ...byPrefix('ESCORT_LETTER.').filter(p=>p.endsWith('.VIEW')),
+      ...byPrefix('DOCUMENT.').filter(p=>/\\.(VIEW|DOWNLOAD)$/.test(p)),
+      'AUDIT.VIEW','AUDIT.SEARCH','AUDIT.EVIDENCE.EXPORT','AUDIT.INTEGRITY.VERIFY','LEADERSHIP.DASHBOARD.VIEW','LEADERSHIP.TIMELINE.VIEW'
+    ]
+  };
+})();
+
 const audit=(a,t,i,r='SUCCESS',state=null)=>{const d=state||get();if(window.MTADeteniStateKernel?.audit)window.MTADeteniStateKernel.audit(d,a,t,i,r,{actor:'DEMO-ADMIN'});else{d.audit=d.audit||[];d.audit.unshift({id:uid('AUD'),action:a,resourceType:t,resourceId:i||'',result:r,occurredAt:now(),actor:'DEMO-ADMIN',requestId:uid('REQ'),correlationId:uid('COR'),policyVersion:'AUTHZ-1.0'})}if(!state)put(d);};
 function ensure(){const d=get();let changed=false;if(!d.adminSettings){d.adminSettings={role:'ADMIN',facilityName:'MTA DETENI Digital',timezone:'Asia/Jakarta',qrPolicy:'OPAQUE_TOKEN',migrationFreeze:true,ai:'OFF'};changed=true}const aiSecret=d.adminSettings.aiSettings;if(aiSecret&&Object.prototype.hasOwnProperty.call(aiSecret,'apiKey')){aiSecret.secretConfigured=!!String(aiSecret.apiKey||'').trim();delete aiSecret.apiKey;changed=true}if(!d.blocks){d.blocks=[];changed=true}if(!d.rooms){d.rooms=[];changed=true}if(!d.qr){d.qr={detainee:{},room:{},leave:{}};changed=true}d.qr.detainee=d.qr.detainee||{};d.qr.leave=d.qr.leave||{};if(!d.qr.room){d.qr.room={};changed=true}if(!d.adminCatalogs){d.adminCatalogs={};changed=true}const defaults={dutyGroups:['REGU A','REGU B','REGU C','REGU D'],shifts:['PAGI','SIANG','MALAM'],movementTypes:['INTERNAL','TRANSFER_KAMAR','KLINIK','SIDANG','LAINNYA'],leaveTypes:['IZIN SEMENTARA','PEMERIKSAAN KESEHATAN','PENGAWALAN','LAINNYA'],documentTypes:['LAPORAN HARIAN','BERITA ACARA','SURAT TUGAS','SURAT PENGANTAR','LAINNYA'],classifications:['INTERNAL','TERBATAS','RAHASIA'],roomTypes:['STANDARD','ISOLATION','OBSERVATION','MEDICAL','TRANSIT'],roomCategories:['UMUM','PRIA','WANITA','KHUSUS']};for(const [k,v] of Object.entries(defaults)){if(!(Array.isArray(d.adminCatalogs[k])&&d.adminCatalogs[k].length)){d.adminCatalogs[k]=v;changed=true}}d.rooms.forEach(r=>{if(!r.blockId){const b=d.blocks.find(b=>String(b.name).toLowerCase()===String(r.block).toLowerCase());if(b){r.blockId=b.id;changed=true}}if(!d.qr.room[r.id]){d.qr.room[r.id]={token:uid('RMQR'),status:r.status==='ACTIVE'?'ACTIVE':'SUSPENDED'};changed=true}});if(changed)put(d);return d}
 function nav(){const n=document.querySelector('#nav');if(!n||document.querySelector('#p9settings'))return;const b=document.createElement('button');b.id='p9settings';b.dataset.view='p9settings';b.textContent='Pengaturan';b.onclick=e=>{e.stopPropagation();settings()};n.appendChild(b)}
@@ -119,7 +171,7 @@ function settings(){
   const ai=d.adminSettings.aiSettings||{provider:'Gemini',endpoint:'',model:'',apiKey:'',enabled:false};
   const tabs=[
     ['system','System'],['security','Security & Governance'],['blocks','Master Blok'],['rooms','Master Kamar'],
-    ['catalog','Master Data'],['roomparams','Room Parameter'],['ai','API AI'],['design','Desain Web']
+    ['catalog','Master Data'],['roomparams','Room Parameter'],['users','User & RBAC'],['ai','API AI'],['design','Desain Web']
   ];
   const tabHtml='<div class="mta-admin-tabs" role="tablist">'+tabs.map((x,i)=>'<button type="button" class="mta-admin-tab '+(i===0?'active':'')+'" data-tab="'+x[0]+'" onclick="window.p9settingsTab(\''+x[0]+'\')">'+x[1]+'</button>').join('')+'</div>';
 
@@ -145,7 +197,9 @@ function settings(){
 
     '<div class="mta-admin-panel" data-panel="roomparams"><div class="p6card"><h2>Master Room Parameter</h2><div class="notice">Tipe: '+d.adminCatalogs.roomTypes.map(E).join(' · ')+'<br>Kategori: '+d.adminCatalogs.roomCategories.map(E).join(' · ')+'</div></div></div>'+
 
-    '<div class="mta-admin-panel" data-panel="ai"><div class="p6card"><h2>Pengaturan API AI</h2><p class="p6mini">Konfigurasi disiapkan pada control plane. Runtime AI tetap <b>OFF</b> sampai integrasi AI resmi diaktifkan. Jangan menaruh API key produksi pada browser/localStorage.</p><div class="formgrid">'+
+    '<div class="mta-admin-panel" data-panel="users"><div class="p6card"><div class="toolbar"><div style="margin-right:auto"><h2>Manajemen User & RBAC</h2><div class="p6mini">Tambah user melalui protected Admin API. Checklist di bawah mengikuti default role dan dapat disesuaikan sebagai permission profile.</div></div><button class="btn primary" onclick="window.mtaAdminAddUser()">+ Tambah User</button></div><div class="notice" style="margin-bottom:12px"><b>RBAC:</b> OWNER · ADMIN · EDITOR · REVIEWER · AUDITOR. Deny-by-default tetap berlaku. Perubahan permission adalah konfigurasi kontrol akses dan dicatat sebagai audit event.</div><div id="mtaAdminUsersList"><div class="empty">Memuat user...</div></div></div></div>
+
+<div class="mta-admin-panel" data-panel="ai"><div class="p6card"><h2>Pengaturan API AI</h2><p class="p6mini">Konfigurasi disiapkan pada control plane. Runtime AI tetap <b>OFF</b> sampai integrasi AI resmi diaktifkan. Jangan menaruh API key produksi pada browser/localStorage.</p><div class="formgrid">'+
       '<div class="field"><label>Provider</label><select id="p9aiProvider"><option '+(ai.provider==='Gemini'?'selected':'')+'>Gemini</option><option '+(ai.provider==='OpenAI'?'selected':'')+'>OpenAI</option><option '+(ai.provider==='Anthropic'?'selected':'')+'>Anthropic</option><option '+(ai.provider==='Custom'?'selected':'')+'>Custom</option></select></div>'+
       '<div class="field"><label>Model</label><input id="p9aiModel" value="'+E(ai.model||'')+'" placeholder="Nama model"></div>'+
       '<div class="field full"><label>Endpoint API</label><input id="p9aiEndpoint" value="'+E(ai.endpoint||'')+'" placeholder="https://..."></div>'+
@@ -167,6 +221,7 @@ function settings(){
     'Control plane untuk master data dan konfigurasi operasional. Runtime tetap synthetic/local.',
     body
   );
+  bootAdminUsers();
 }
 window.p9openSettings=()=>settings();
 window.p9settingsTab=settingsTab;
@@ -199,7 +254,83 @@ window.p9uploadAsset=kind=>{
     applyWebBranding();settings();toast('Aset '+kind+' berhasil diunggah.');
   });
 };
-function shell(t,desc,b){return `<section class="hero"><h1>${t}</h1><p class="sub">${desc}</p></section>${b}`}
+
+async function mtaAdminFetchUsers(){
+  if(!window.mtaProductionApi) throw new Error('PRODUCTION_API_UNAVAILABLE');
+  const r=await window.mtaProductionApi.list('admin-users');
+  return r.data||[];
+}
+function mtaAdminPermissionGroups(selected){
+  const s=new Set(selected||[]);
+  const groups={};
+  for(const [group,key,label] of MTA_RBAC_PERMISSION_CATALOG)(groups[group]??=[]).push({key,label});
+  return Object.entries(groups).map(([group,items])=>'<div class="p6card" style="margin-top:10px"><div class="toolbar" style="margin:0 0 8px"><h3 style="margin-right:auto;font-size:14px">'+E(group)+'</h3><label class="p6mini"><input type="checkbox" data-rbac-group="'+E(group)+'"> Pilih semua</label></div><div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px">'+items.map(x=>'<label style="display:flex;gap:7px;align-items:flex-start;font-size:11px;padding:7px;border:1px solid #edf0f4;border-radius:8px;background:#fff"><input class="mta-rbac-perm" type="checkbox" value="'+E(x.key)+'" '+(s.has(x.key)?'checked':'')+'><span><b>'+E(x.key)+'</b><small style="display:block;color:#667085;margin-top:2px">'+E(x.label)+'</small></span></label>').join('')+'</div></div>').join('');
+}
+function mtaAdminSelectedPermissions(){
+  return [...document.querySelectorAll('.mta-rbac-perm:checked')].map(x=>x.value);
+}
+function mtaAdminBindPermissionGroups(){
+  document.querySelectorAll('[data-rbac-group]').forEach(groupBox=>{
+    groupBox.onchange=()=>{
+      const group=groupBox.dataset.rbacGroup;
+      document.querySelectorAll('.mta-rbac-perm').forEach(x=>{
+        const row=x.closest('label'); if(row?.closest('.p6card')?.querySelector('h3')?.textContent===group)x.checked=groupBox.checked;
+      });
+    };
+  });
+}
+function mtaAdminApplyRoleDefaults(role){
+  const selected=MTA_RBAC_DEFAULTS[role]||[];
+  document.querySelectorAll('.mta-rbac-perm').forEach(x=>x.checked=selected.includes(x.value));
+  document.querySelectorAll('[data-rbac-group]').forEach(g=>{
+    const group=g.dataset.rbacGroup;
+    const boxes=[...document.querySelectorAll('.mta-rbac-perm')].filter(x=>x.closest('.p6card')?.querySelector('h3')?.textContent===group);
+    g.checked=boxes.length>0&&boxes.every(x=>x.checked);
+    g.indeterminate=boxes.some(x=>x.checked)&&!g.checked;
+  });
+}
+async function mtaAdminRenderUsers(){
+  const host=document.getElementById('mtaAdminUsersList'); if(!host)return;
+  host.innerHTML='<div class="empty">Memuat user...</div>';
+  try{
+    const users=await mtaAdminFetchUsers();
+    host.innerHTML='<div class="tablewrap"><table class="table"><thead><tr><th>Email</th><th>Nama</th><th>Role</th><th>Status</th><th>Permission Profile</th><th>Aksi</th></tr></thead><tbody>'+
+      (users.length?users.map(u=>'<tr><td><b>'+E(u.email||'-')+'</b></td><td>'+E(u.display_name||'-')+'</td><td>'+E(u.role||'-')+'</td><td><span class="status">'+(u.active?'ACTIVE':'DISABLED')+'</span></td><td>'+((u.permissions||[]).length)+' permission</td><td><button class="btn small" onclick="window.mtaAdminEditUser('+JSON.stringify(u).replace(/"/g,'&quot;')+')">Edit</button></td></tr>').join(''):'<tr><td colspan="6" class="empty">Belum ada user.</td></tr>')+
+      '</tbody></table></div>';
+  }catch(err){host.innerHTML='<div class="notice p6danger">Gagal memuat user: '+E(err.message||'ADMIN_USERS_READ_FAILED')+'</div>'}
+}
+function mtaAdminUserForm(user){
+  const editing=!!user, role=user?.role||'EDITOR', selected=user?.permissions?.length?user.permissions:(MTA_RBAC_DEFAULTS[role]||[]);
+  openModal('<div class="dialoghead"><div><h2>'+(editing?'Edit User':'Tambah User')+'</h2><div class="p6mini">Default permission otomatis mengikuti role '+E(role)+'.</div></div><button class="x" onclick="closeModal()">×</button></div>'+
+    '<form id="mtaAdminUserForm" class="formgrid"><div class="field"><label>Nama</label><input id="mtaUserName" required value="'+E(user?.display_name||'')+'"></div>'+
+    '<div class="field"><label>Email</label><input id="mtaUserEmail" type="email" required '+(editing?'disabled':'')+' value="'+E(user?.email||'')+'"></div>'+
+    (!editing?'<div class="field"><label>Password awal (min. 12 karakter)</label><input id="mtaUserPassword" type="password" minlength="12" required autocomplete="new-password"></div>':'')+
+    '<div class="field"><label>Role RBAC</label><select id="mtaUserRole">'+['OWNER','ADMIN','EDITOR','REVIEWER','AUDITOR'].map(r=>'<option '+(r===role?'selected':'')+'>'+r+'</option>').join('')+'</select></div>'+
+    '<div class="field full"><div class="notice">Checklist adalah permission profile per user. Unchecked = DENY. Role default dapat di-override secara eksplisit. Server tetap fail-closed.</div></div>'+
+    '<div class="full" id="mtaRbacPermissionHost">'+mtaAdminPermissionGroups(selected)+'</div>'+
+    '<div class="actions full"><button type="button" class="btn" onclick="closeModal()">Batal</button><button class="btn" type="button" onclick="window.mtaAdminResetRoleDefaults()">Reset ke Default RBAC</button><button class="btn primary">'+(editing?'Simpan Perubahan':'Buat User')+'</button></div></form>');
+  document.getElementById('mtaUserRole').onchange=()=>window.mtaAdminApplyRoleDefaults(document.getElementById('mtaUserRole').value);
+  mtaAdminBindPermissionGroups();
+  document.getElementById('mtaAdminUserForm').onsubmit=async e=>{
+    e.preventDefault();
+    const role=document.getElementById('mtaUserRole').value,permissions=mtaAdminSelectedPermissions();
+    try{
+      const body={role,display_name:document.getElementById('mtaUserName').value.trim(),permissions};
+      let r;
+      if(editing) r=await window.mtaProductionApi.update('admin-users',user.id,body);
+      else {body.email=document.getElementById('mtaUserEmail').value.trim();body.password=document.getElementById('mtaUserPassword').value;r=await window.mtaProductionApi.create('admin-users',body);}
+      if(!r?.ok)throw new Error(r?.error||'USER_SAVE_FAILED');
+      closeModal();await mtaAdminRenderUsers();toast(editing?'User & permission profile diperbarui.':'User berhasil dibuat.');
+    }catch(err){toast('Gagal menyimpan user: '+(err?.data?.error||err?.message||'USER_SAVE_FAILED'))}
+  };
+}
+window.mtaAdminResetRoleDefaults=()=>mtaAdminApplyRoleDefaults(document.getElementById('mtaUserRole')?.value||'EDITOR');
+window.mtaAdminAddUser=()=>mtaAdminUserForm(null);
+window.mtaAdminEditUser=user=>mtaAdminUserForm(user);
+function bootAdminUsers(){
+  if(document.querySelector('.mta-admin-tab[data-tab="users"]'))mtaAdminRenderUsers();
+}
+\nfunction shell(t,desc,b){return `<section class="hero"><h1>${t}</h1><p class="sub">${desc}</p></section>${b}`}
 window.p9saveSystem=()=>{const d=ensure();d.adminSettings.facilityName=(document.querySelector('#p9facility')?.value||d.adminSettings.facilityName).trim();d.adminSettings.timezone=document.querySelector('#p9tz')?.value||d.adminSettings.timezone;audit('ADMIN_SETTINGS_UPDATE','SYSTEM','ADMIN','SUCCESS',d);put(d);settings();toast('Pengaturan system tersimpan.')};
 window.p9addCatalog=(key,label)=>{openModal(`<div class="dialoghead"><h2>Tambah ${E(label)}</h2><button class="x" onclick="closeModal()">×</button></div><div class="field"><label>Nilai</label><input id="p9cat" placeholder="Masukkan nilai master"></div><div class="actions"><button class="btn" onclick="closeModal()">Batal</button><button class="btn primary" onclick="window.p9saveCatalog('${E(key)}')">Simpan</button></div>`) };
 window.p9saveCatalog=key=>{const d=ensure(),v=(document.querySelector('#p9cat')?.value||'').trim();if(!v){toast('Nilai wajib diisi.');return}if(d.adminCatalogs[key].some(x=>x.toLowerCase()===v.toLowerCase())){toast('Nilai sudah terdaftar.');return}d.adminCatalogs[key].push(v);audit('MASTER_CATALOG_CREATE','ADMIN_CATALOG',key,'SUCCESS',d);put(d);closeModal();settings();toast('Master tersimpan.')};
