@@ -320,7 +320,7 @@ try {
     const d = JSON.parse(localStorage.getItem('mta-deteni-demo-v2') || '{}');
     const l = (d.leaves || []).find(x => x.id === id);
     const audits = (d.audit || []).filter(x => x.resourceId === id);
-    return { status: l?.status, correlationId: l?.correlationId, auditCorrelations: [...new Set(audits.map(x => x.correlationId).filter(Boolean))], auditCount: d.audit.length, leaveAuditActions: audits.map(x => x.action), lastMutation: d.lastMutation };
+    return { id: l?.id, status: l?.status, correlationId: l?.correlationId, auditCorrelations: [...new Set(audits.map(x => x.correlationId).filter(Boolean))], auditCount: d.audit.length, leaveAuditActions: audits.map(x => x.action), lastMutation: d.lastMutation };
   }, { id: leaveState.id });
   if (leaveState.status !== 'COMPLETED' || !leaveState.correlationId || leaveState.auditCorrelations.length !== 1 || leaveState.auditCorrelations[0] !== leaveState.correlationId || leaveState.auditCount < mutationBaseline.beforeAudit + 8 || leaveState.leaveAuditActions.length < 6) {
     throw new Error(`leave workflow evidence failed: ${JSON.stringify(leaveState)}`);
