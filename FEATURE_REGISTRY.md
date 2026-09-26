@@ -35,12 +35,12 @@
 
 | Metric | Nilai |
 |---|---:|
-| Total feature | 2 |
+| Total feature | 3 |
 | ☑ VERIFIED | 1 |
 | ◐ IN_PROGRESS | 0 |
 | ☐ PLANNED | 0 |
 | ⚠ BLOCKED | 0 |
-| ☑ IMPLEMENTED | 1 |
+| ☑ IMPLEMENTED | 2 |
 | ↺ REGRESSION | 0 |
 
 ## Feature List
@@ -48,6 +48,7 @@
 | ID | Tanggal | Fitur | Area | Status | Bukti / Acceptance |
 |---|---|---|---|---|---|
 | MTA-F-20260926-001 | 2026-09-26 | **Feature Registry & Verification Tracking** | Governance / Project Control | ☑ VERIFIED | Registry dibuat di repository; aturan pencatatan dan status verifikasi dikunci. |
+| MTA-F-20260926-003 | 2026-09-26 | **Statistik Data Deteni & Ekosistem Kegiatan** | Data & Penempatan / Operational Statistics | ☑ IMPLEMENTED | Menu dan halaman statistik yang merangkum populasi Deteni, status, kebangsaan, usia, jenis kelamin, penempatan blok/kamar, pergerakan, izin, dokumen terkait, tren input, serta indikator ekosistem. Tidak memasukkan audit trail, log, telemetry, authentication, event aplikasi, atau proses kesisteman MTA. | `web/detainee-statistics-v1.js`, `web/index.html`, `test/detainee-statistics-feature.test.mjs` |
 | MTA-F-20260926-002 | 2026-09-26 | **Detail Data Deteni + Histori + QR + Dokumen** | Data Deteni / Individual Record | ☑ IMPLEMENTED | Nama deteni dapat dibuka ke halaman detail; identitas lengkap, penempatan, histori masuk→penahanan→pergerakan→deportasi bila tersedia, **QR canonical yang sama dengan QR saat input pertama dan tidak berubah**, dokumen terkait, download Word-compatible, dan cetak dokumen terformat. | `web/detainee-detail-v1.js`, `web/index.html`, `test/detainee-detail-feature.test.mjs`; Static Integration Gate PASS; browser/runtime verification masih menjadi tahap berikutnya. |
 
 ## Incoming Feature Queue
