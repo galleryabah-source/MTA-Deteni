@@ -383,6 +383,15 @@ try {
   }
   console.log(`AUTH_FUNCTIONAL_SURFACES_PASS ${device}`);
 
+  fs.writeFileSync(`/tmp/mta-auth-journey-${device}.json`, JSON.stringify({
+    certification: 'E2E-BROWSER-JOURNEY-v1',
+    journeyId: `E2E-BROWSER-${device.toUpperCase()}`,
+    correlationIds: { movement: movementState.movementCorrelationId, leave: leaveState.correlationId, report: reportEvidence.reportCorrelationId },
+    stages: { authentication:'PASS', qr:'PASS', detainee:'PASS', movement:'PASS', leave:'PASS', monitor:'PASS', report:'PASS', evidence:'PASS', surfaces:'PASS' },
+    evidence: { movementId:movementState.movementId, placementId:movementState.placementId, leaveId:leaveState.id, reportId:reportEvidence.id, sourceCorrelationIds:reportEvidence.sourceCorrelationIds, auditCount:reportEvidence.auditEventCount },
+    syntheticOnly:true, productionAccessAuthorized:false, migrationExecuted:false, aiEnabled:false, device, width, height, views
+  }, null, 2));
+
   stage = 'logout';
   await page.locator('#mtaAuthUi button').getByText('Logout').evaluate(button => button.click());
   await page.locator('body.mta-auth-locked').waitFor({ state: 'attached', timeout: 5000 });
