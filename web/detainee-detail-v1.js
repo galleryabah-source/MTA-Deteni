@@ -58,8 +58,16 @@ function list(){
  document.getElementById('ddSearch').oninput=filter;document.getElementById('ddStatus').onchange=filter;document.getElementById('ddRefresh').onclick=list;
  root.querySelectorAll('[data-id]').forEach(b=>b.onclick=()=>detail(b.dataset.id));root.querySelectorAll('[data-detail]').forEach(b=>b.onclick=()=>detail(b.dataset.detail));
 }
-const originalShow=window.show;
-window.show=function(v){if(v==='detainee')return list();if(v==='detainee-detail')return detail(arguments[1]);return originalShow?.apply(this,arguments)};
-window.MTADetaineeDetailView=Object.freeze({list,detail,downloadDoc,printDoc});
+let originalShow=null;
+function install(){
+  if(window.__mtaDetaineeDetailInstalled)return;
+  originalShow=window.show;
+  window.show=function(v){if(v==='detainee')return list();if(v==='detainee-detail')return detail(arguments[1]);return originalShow?.apply(this,arguments)};
+  window.__mtaDetaineeDetailInstalled=true;
+  if(window.__mtaUnifiedCurrentView==='detainee')list();
+}
+window.MTADetaineeDetailView=Object.freeze({list,detail,downloadDoc,printDoc,install});
+window.addEventListener('mta:unified-ready',install);
+if(window.__mtaUnifiedCurrentView||window.mtaUnifiedResolve)install();
 window.addEventListener('mta:data-changed',()=>{if(window.__mtaUnifiedCurrentView==='detainee')list()});
 })();
