@@ -197,6 +197,19 @@ try {
   const addDetaineeButton = page.getByRole('button', { name: /Tambah Deteni/i }).first();
   await addDetaineeButton.waitFor({ state: 'attached', timeout: 5000 });
   await addDetaineeButton.evaluate(button => button.click());
+  await page.waitForTimeout(250);
+  const detaineeModalProbe = await page.evaluate(() => ({
+    modalExists: !!document.querySelector('#modal'),
+    modalOpen: document.querySelector('#modal')?.classList.contains('open') || false,
+    dialogHtml: document.querySelector('#dialog')?.innerHTML?.slice(0, 5000) || '',
+    dFormExists: !!document.querySelector('#dForm'),
+    addDetaineeType: typeof window.addDetainee,
+    pageUrl: location.href,
+    bodyText: document.body.textContent?.slice(-2000) || ''
+  }));
+  if (!detaineeModalProbe.modalOpen || !detaineeModalProbe.dFormExists) {
+    throw new Error('DETAINEE_MODAL_OPEN_FAILED '+JSON.stringify(detaineeModalProbe));
+  }
   await page.locator('#modal.open').waitFor({ state: 'attached', timeout: 5000 });
   await page.locator('#dForm').waitFor({ state: 'attached', timeout: 5000 });
   await page.locator('#dForm').waitFor({ state: 'visible', timeout: 5000 });
