@@ -279,9 +279,9 @@ try {
     const m = (d.movements || []).find(x => x.detaineeId === id && x.source === 'ROOM_TRANSFER');
     const p = (d.placements || []).find(x => x.movementId === m?.id);
     const audits = (d.audit || []).filter(x => x.resourceId === m?.id || x.resourceId === p?.id);
-    return { movementId: m?.id, placementId: p?.id, movementCount: d.movements.length, auditCount: d.audit.length, audits: audits.map(x => x.action), toRoomId: m?.toRoomId };
+    return { movementId: m?.id, placementId: p?.id, movementCorrelationId: m?.correlationId, placementCorrelationId: p?.correlationId, auditCorrelations: [...new Set(audits.map(x => x.correlationId).filter(Boolean))], movementCount: d.movements.length, auditCount: d.audit.length, audits: audits.map(x => x.action), toRoomId: m?.toRoomId };
   }, { id: mutationBaseline.detaineeId });
-  if (!movementState.movementId || !movementState.placementId || movementState.auditCount < mutationBaseline.beforeAudit + 2 || movementState.audits.length < 2) {
+  if (!movementState.movementId || !movementState.placementId || !movementState.movementCorrelationId || movementState.movementCorrelationId !== movementState.placementCorrelationId || movementState.auditCorrelations.length !== 1 || movementState.auditCorrelations[0] !== movementState.movementCorrelationId || movementState.auditCount < mutationBaseline.beforeAudit + 2 || movementState.audits.length < 2) {
     throw new Error(`browser movement mutation evidence failed: ${JSON.stringify(movementState)}`);
   }
   console.log(`AUTH_MOVEMENT_MUTATION_PASS ${device} movement=${movementState.movementId} placement=${movementState.placementId} audit=${movementState.auditCount}`);
@@ -320,9 +320,9 @@ try {
     const d = JSON.parse(localStorage.getItem('mta-deteni-demo-v2') || '{}');
     const l = (d.leaves || []).find(x => x.id === id);
     const audits = (d.audit || []).filter(x => x.resourceId === id);
-    return { status: l?.status, auditCount: d.audit.length, leaveAuditActions: audits.map(x => x.action), lastMutation: d.lastMutation };
+    return { id: l?.id, status: l?.status, correlationId: l?.correlationId, auditCorrelations: [...new Set(audits.map(x => x.correlationId).filter(Boolean))], auditCount: d.audit.length, leaveAuditActions: audits.map(x => x.action), lastMutation: d.lastMutation };
   }, { id: leaveState.id });
-  if (leaveState.status !== 'COMPLETED' || leaveState.auditCount < mutationBaseline.beforeAudit + 8 || leaveState.leaveAuditActions.length < 6) {
+  if (leaveState.status !== 'COMPLETED' || !leaveState.correlationId || leaveState.auditCorrelations.length !== 1 || leaveState.auditCorrelations[0] !== leaveState.correlationId || leaveState.auditCount < mutationBaseline.beforeAudit + 8 || leaveState.leaveAuditActions.length < 6) {
     throw new Error(`leave workflow evidence failed: ${JSON.stringify(leaveState)}`);
   }
   console.log(`AUTH_LEAVE_MUTATION_PASS ${device} leave=${leaveState.status} audit=${leaveState.leaveAuditActions.length}`);
@@ -355,9 +355,9 @@ try {
   const reportEvidence = await page.evaluate(() => {
     const d = JSON.parse(localStorage.getItem('mta-deteni-demo-v2') || '{}');
     const r = (d.documents || [])[0];
-    return { id: r?.documentId || r?.id, status: r?.status, sourceCount: r?.evidence?.sourceRecordCount, auditEventCount: r?.evidence?.auditEventCount, hasMovement: (r?.sourceRecordIds || []).some(id => id && (d.movements || []).some(m => m.id === id)), hasLeave: (r?.sourceRecordIds || []).some(id => id && (d.leaves || []).some(l => l.id === id)) };
+    return { id: r?.documentId || r?.id, status: r?.status, reportCorrelationId: r?.correlationId, sourceCorrelationIds: r?.evidence?.sourceCorrelationIds || [], sourceCount: r?.evidence?.sourceRecordCount, auditEventCount: r?.evidence?.auditEventCount, hasMovement: (r?.sourceRecordIds || []).some(id => id && (d.movements || []).some(m => m.id === id)), hasLeave: (r?.sourceRecordIds || []).some(id => id && (d.leaves || []).some(l => l.id === id)) };
   });
-  if (!reportEvidence.id || !reportEvidence.sourceCount || !reportEvidence.auditEventCount || !reportEvidence.hasMovement || !reportEvidence.hasLeave) {
+  if (!reportEvidence.id || !reportEvidence.reportCorrelationId || !reportEvidence.sourceCount || !reportEvidence.auditEventCount || !reportEvidence.hasMovement || !reportEvidence.hasLeave || !reportEvidence.sourceCorrelationIds.includes(movementState.movementCorrelationId) || !reportEvidence.sourceCorrelationIds.includes(leaveState.correlationId)) {
     throw new Error(`report evidence does not reflect browser mutations: ${JSON.stringify(reportEvidence)}`);
   }
   console.log(`AUTH_REPORT_EVIDENCE_PASS ${device} document=${reportEvidence.id} sources=${reportEvidence.sourceCount} audits=${reportEvidence.auditEventCount}`);
@@ -383,6 +383,15 @@ try {
   }
   console.log(`AUTH_FUNCTIONAL_SURFACES_PASS ${device}`);
 
+  fs.writeFileSync(`/tmp/mta-auth-journey-${device}.json`, JSON.stringify({
+    certification: 'E2E-BROWSER-JOURNEY-v1',
+    journeyId: `E2E-BROWSER-${device.toUpperCase()}`,
+    correlationIds: { movement: movementState.movementCorrelationId, leave: leaveState.correlationId, report: reportEvidence.reportCorrelationId },
+    stages: { authentication:'PASS', qr:'PASS', detainee:'PASS', movement:'PASS', leave:'PASS', monitor:'PASS', report:'PASS', evidence:'PASS', surfaces:'PASS' },
+    evidence: { movementId:movementState.movementId, placementId:movementState.placementId, leaveId:leaveState.id, reportId:reportEvidence.id, sourceCorrelationIds:reportEvidence.sourceCorrelationIds, auditCount:reportEvidence.auditEventCount },
+    syntheticOnly:true, productionAccessAuthorized:false, migrationExecuted:false, aiEnabled:false, device, width, height, views
+  }, null, 2));
+
   stage = 'logout';
   await page.locator('#mtaAuthUi button').getByText('Logout').evaluate(button => button.click());
   await page.locator('body.mta-auth-locked').waitFor({ state: 'attached', timeout: 5000 });
@@ -400,21 +409,34 @@ try {
   if (errors.length) throw new Error(`page errors: ${errors.join('; ')}`);
   console.log(`AUTH_BROWSER_ACCEPTANCE_PASS ${JSON.stringify({device,width,height,views})}`);
 } catch (error) {
-  const snapshot = await page.evaluate(() => ({
-    bodyClass: document.body.className,
-    authMessage: document.getElementById('mtaAuthMessage')?.textContent || '',
-    navViews: [...document.querySelectorAll('#nav button[data-view], #mtaMobileBottomNav button[data-view]')].map(b => b.dataset.view).filter(Boolean),
-    appText: document.getElementById('appView')?.textContent?.trim().slice(0, 1200) || '',
-    runtimeLoaded: !!window.__mtaAppRuntimeLoaded,
-    fullRuntimeBooted: !!window.__mtaAppBooted,
-    fullRuntimeLoading: !!window.__mtaRuntimeLoading
-  }));
+  let snapshot = { contextAvailable: false };
+  try {
+    snapshot = await page.evaluate(() => ({
+      contextAvailable: true,
+      bodyClass: document.body.className,
+      authMessage: document.getElementById('mtaAuthMessage')?.textContent || '',
+      navViews: [...document.querySelectorAll('#nav button[data-view], #mtaMobileBottomNav button[data-view]')].map(b => b.dataset.view).filter(Boolean),
+      appText: document.getElementById('appView')?.textContent?.trim().slice(0, 1200) || '',
+      runtimeLoaded: !!window.__mtaAppRuntimeLoaded,
+      fullRuntimeBooted: !!window.__mtaAppBooted,
+      fullRuntimeLoading: !!window.__mtaRuntimeLoading
+    }));
+  } catch (snapshotError) {
+    snapshot = { contextAvailable: false, snapshotError: String(snapshotError?.message || snapshotError) };
+  }
   fs.writeFileSync(`/tmp/mta-auth-acceptance-${device}.json`, JSON.stringify({device,width,height,stage,error:String(error?.stack||error),errors,snapshot},null,2));
   throw error;
 } finally {
-  if (!fs.existsSync(`/tmp/mta-auth-acceptance-${device}.json`)) {
-    const snapshot = await page.evaluate(() => ({bodyClass:document.body.className,navViews:[...document.querySelectorAll('#nav button[data-view], #mtaMobileBottomNav button[data-view]')].map(b=>b.dataset.view).filter(Boolean),runtimeLoaded:!!window.__mtaAppRuntimeLoaded,fullRuntimeBooted:!!window.__mtaAppBooted}));
-    fs.writeFileSync(`/tmp/mta-auth-acceptance-${device}.json`, JSON.stringify({device,width,height,stage,errors,snapshot},null,2));
+  const successEvidence = `/tmp/mta-auth-journey-${device}.json`;
+  const failureEvidence = `/tmp/mta-auth-acceptance-${device}.json`;
+  if (!fs.existsSync(successEvidence) && !fs.existsSync(failureEvidence)) {
+    let snapshot = { contextAvailable: false };
+    try {
+      snapshot = await page.evaluate(() => ({contextAvailable:true,bodyClass:document.body.className,navViews:[...document.querySelectorAll('#nav button[data-view], #mtaMobileBottomNav button[data-view]')].map(b => b.dataset.view).filter(Boolean),runtimeLoaded:!!window.__mtaAppRuntimeLoaded,fullRuntimeBooted:!!window.__mtaAppBooted}));
+    } catch (snapshotError) {
+      snapshot = { contextAvailable:false, snapshotError:String(snapshotError?.message || snapshotError) };
+    }
+    fs.writeFileSync(failureEvidence, JSON.stringify({device,width,height,stage,errors,snapshot},null,2));
   }
   await browser.close();
 }

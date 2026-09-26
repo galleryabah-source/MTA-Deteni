@@ -66,12 +66,12 @@ let originalShow=null;
 function install(){
   if(window.__mtaDetaineeDetailInstalled)return;
   originalShow=window.show;
-  window.show=function(v){if(v==='detainee')return list();if(v==='detainee-detail')return detail(arguments[1]);return originalShow?.apply(this,arguments)};
+  window.show=function(v){if(v==='detainee-detail')return detail(arguments[1]);return originalShow?.apply(this,arguments)};
   window.__mtaDetaineeDetailInstalled=true;
-  if(window.__mtaUnifiedCurrentView==='detainee')list();
+  if(window.__mtaUnifiedCurrentView==='detainee-detail')detail(window.__mtaUnifiedDetaineeId);
 }
 window.MTADetaineeDetailView=Object.freeze({list,detail,downloadDoc,printDoc,install});
 window.addEventListener('mta:unified-ready',install);
 if(window.__mtaUnifiedCurrentView||window.mtaUnifiedResolve)install();
-window.addEventListener('mta:data-changed',()=>{if(window.__mtaUnifiedCurrentView==='detainee')list()});
+window.addEventListener('mta:data-changed',()=>{if(window.__mtaUnifiedCurrentView==='detainee-detail'&&window.__mtaUnifiedDetaineeId)detail(window.__mtaUnifiedDetaineeId)});
 })();
