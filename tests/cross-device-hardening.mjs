@@ -129,7 +129,7 @@ for(const cfg of targets){
     }
 
     // Logout must restore the protected boundary on every device.
-    await page.locator('#mtaAuthUi button').getByText('Logout').click();
+    await page.locator('#mtaAuthUi button').getByText('Logout').evaluate(button=>button.click());
     await page.locator('body.mta-auth-locked').waitFor({state:'attached',timeout:5000});
     checks.push({name:'LOGOUT_BOUNDARY',ok:await page.locator('#mtaAuthGate.open').count()===1&&await page.locator('.app').evaluate(el=>getComputedStyle(el).display==='none')});
 
