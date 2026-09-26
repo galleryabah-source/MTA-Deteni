@@ -49,6 +49,8 @@ jobs:
           psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f p9.6/00-local-supabase-compat.sql
       - name: Run P9.6 reconciliation engine regression tests
         run: node --test test/p9.6-reconciliation-engine.test.mjs
+      - name: Run DB-001 through DB-020 negative contract gate
+        run: npx tsx --test test/p9.6-db-negative-contract.test.ts
       - name: Replay repository migrations into disposable PostgreSQL
         run: |
           set -euo pipefail
