@@ -18,6 +18,7 @@ jobs:
         shell: bash
         run: |
           set -e
+          trap 'printf "STATIC_CONTRACT_FAIL pattern=%s file=%s\n" "$pattern" "$file" > static-contract-failure.txt' ERR
           checks=(
           "mta-app-runtime.js|web/index.html"
           "mta-app-runtime-full.js|web/mta-app-runtime.js"
@@ -126,6 +127,13 @@ jobs:
             fi
           done
           test "$(grep -c 'function detected' web/qr-camera-v2.js)" -eq 1
+      - name: Upload static contract failure diagnostic
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: static-contract-failure-diagnostic
+          path: static-contract-failure.txt
+
       - name: Enforce unified runtime ownership contracts
         shell: bash
         run: |
