@@ -7,11 +7,15 @@ const checks=[
   ["K3","Authentication","node --test test/production-auth-rbac-api.test.mjs"],
   ["K4","Authorization","npx tsx test/authorization-adversarial-certification.test.ts"],
   ["K5","Audit","node test/p9.5-audit-integrity.test.mjs"],
-  ["K6","Database Adapter","npx tsx test/p9.6-database-adapter.test.ts test/p9.6-db-negative-contract.test.ts"],
-  ["K7","Transaction + Idempotency","npx tsx test/transaction-idempotency-boundary.test.ts test/p10.456-463-idempotency.test.ts test/p11-961-1088-transaction-command.test.ts"],
+  ["K6-A","Database Adapter Positive","npx tsx test/p9.6-database-adapter.test.ts"],
+  ["K6-B","Database Adapter Negative","npx tsx test/p9.6-db-negative-contract.test.ts"],
+  ["K7-A","Transaction + Idempotency Boundary","npx tsx test/transaction-idempotency-boundary.test.ts"],
+  ["K7-B","Idempotency Contract","npx tsx test/p10.456-463-idempotency.test.ts"],
+  ["K7-C","Transactional Command","npx tsx test/p11-961-1088-transaction-command.test.ts"],
   ["K8","Outbox","npx tsx test/outbox-runtime-contract.test.ts"],
   ["K9","Private Storage","npx tsx test/p9.13-private-storage-certification.test.ts"],
-  ["K10","Observability","npx tsx test/observability-certification.test.ts test/observability-context-continuity.test.ts"],
+  ["K10-A","Observability","npx tsx test/observability-certification.test.ts"],
+  ["K10-B","Observability Context Continuity","npx tsx test/observability-context-continuity.test.ts"],
   ["K11","Test Harness","npx tsx test/p9-kernel-certification.test.ts"],
   ["K12","CI Quality Gate","npx tsx test/p9-ci-certification.test.ts"],
   ["AI-OFF","AI Independence","npx tsx test/ai-off-deterministic-fallback.test.ts"],
@@ -33,13 +37,14 @@ for(const [id,name,command] of checks){
 
 const worker=fs.readFileSync("worker-v11.js","utf8");
 const governance={
-  syntheticOnly:worker.includes("dataMode:'SYNTHETIC_ONLY'"),
-  productionAccessAuthorized:worker.includes("productionAccessAuthorized:false"),
-  livePostgresqlExecution:worker.includes("livePostgresqlExecution:false"),
-  realDetaineeDataAllowed:worker.includes("realDetaineeDataAllowed:false"),
-  migrationFreeze:worker.includes("migrationFreeze:true"),
-  aiOff:worker.includes("ai:'OFF'"),
+  syntheticOnly:/dataMode:\s*['"]SYNTHETIC_ONLY['"]/.test(worker),
+  productionAccessAuthorized:/productionAccessAuthorized:\s*false/.test(worker),
+  livePostgresqlExecution:/livePostgresqlExecution:\s*false/.test(worker),
+  realDetaineeDataAllowed:/realDetaineeDataAllowed:\s*false/.test(worker),
+  migrationFreeze:/migrationFreeze:\s*true/.test(worker),
+  aiOff:/ai:\s*['"]OFF['"]/.test(worker),
 };
+
 const governancePass=Object.values(governance).every(Boolean);
 const mandatoryPass=results.every(x=>x.status==="PASS");
 const certified=mandatoryPass&&governancePass;
