@@ -38,14 +38,14 @@ for(const [id,name,command] of checks){
 const worker=fs.readFileSync("worker-v11.js","utf8");
 const governance={
   syntheticOnly:/dataMode:\s*['"]SYNTHETIC_ONLY['"]/.test(worker),
-  productionAccessAuthorized:/productionAccessAuthorized:\s*false/.test(worker),
-  livePostgresqlExecution:/livePostgresqlExecution:\s*false/.test(worker),
-  realDetaineeDataAllowed:/realDetaineeDataAllowed:\s*false/.test(worker),
+  productionAccessAuthorized:!/productionAccessAuthorized:\s*false/.test(worker),
+  livePostgresqlExecution:!/livePostgresqlExecution:\s*false/.test(worker),
+  realDetaineeDataAllowed:!/realDetaineeDataAllowed:\s*false/.test(worker),
   migrationFreeze:/migrationFreeze:\s*true/.test(worker),
   aiOff:/ai:\s*['"]OFF['"]/.test(worker),
 };
 
-const governancePass=Object.values(governance).every(Boolean);
+const governancePass=governance.syntheticOnly===true && governance.productionAccessAuthorized===false && governance.livePostgresqlExecution===false && governance.realDetaineeDataAllowed===false && governance.migrationFreeze===true && governance.aiOff===true;
 const mandatoryPass=results.every(x=>x.status==="PASS");
 const certified=mandatoryPass&&governancePass;
 
