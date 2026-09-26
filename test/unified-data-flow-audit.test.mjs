@@ -20,7 +20,7 @@ test("UDF leave return delegates to canonical leave transition",()=>{
 test("UDF movement UI delegates mutation to canonical command",()=>{
   const movement=read("web/movement-v9.js");
   assert.match(movement,/typeof window\.mtaUnifiedCreateMovement!=='function'/);
-  assert.match(movement,/window\.mtaUnifiedCreateMovement\(ensure\(\),/);
+  assert.match(movement,/window\.mtaUnifiedCreateMovement\(d,/);
   assert.doesNotMatch(movement,/d\.movements\.unshift\(movement\)/);
 });
 
