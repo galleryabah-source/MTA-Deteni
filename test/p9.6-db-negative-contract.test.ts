@@ -13,7 +13,16 @@ const baseConfig = (overrides = {}) => ({
   ...overrides,
 });
 
-function fakeDriver(options = {}) {
+type FakeDriverOptions = Readonly<{
+  query?: (text: string, parameters: readonly unknown[]) => Promise<{ rows: readonly object[]; rowCount: number }>;
+  begin?: (transactionId: string) => Promise<{
+    execute: (query: { text: string; parameters: readonly unknown[] }) => Promise<{ rows: readonly object[]; rowCount: number }>;
+    commit: () => Promise<void>;
+    rollback: () => Promise<void>;
+  }>;
+}>;
+
+function fakeDriver(options: FakeDriverOptions = {}) {
   const calls = [];
   const query = options.query ?? (async () => ({ rows: [{ ok: 1 }], rowCount: 1 }));
   const begin = options.begin ?? (async () => ({
