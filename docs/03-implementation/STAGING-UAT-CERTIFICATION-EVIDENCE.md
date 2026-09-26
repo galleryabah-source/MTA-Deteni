@@ -1,67 +1,86 @@
 # MTA DETENI — Production-like Staging + UAT Evidence
 
 **Certification:** MTA-STAGING-UAT-CERT-2026-09-26-01  
-**Release candidate:** c0e99add085e5e6620af379332cc375749ec78bc  
 **Environment:** Cloudflare production-like staging  
 **Target:** mta-deteni-staging  
-**Decision:** BLOCKED — STAGING DEPLOYMENT PERMISSION
+**Current decision:** UAT evidence PASS locally; release-bound certification pending CI execution
 
-## Executed evidence
+## Staging deployment evidence
 
-Workflow: `MTA DETENI Production-like Staging UAT`  
-Run: `36252115472`
+The canonical release candidate was redeployed locally to the controlled staging Worker:
 
-Passed before deployment:
-- staging artifact contract
-- Worker syntax
-- synthetic-only governance
-- production access disabled
-- live PostgreSQL disabled
-- real detainee data disabled
-- external transport disabled
-- durable publication disabled
-- migration freeze enabled
-- AI OFF
-- Cloudflare credential presence/format
-- `wrangler whoami`
+- Worker: `mta-deteni-staging`
+- Cloudflare version ID: `9e664bca-f595-4c5b-9f47-d2305f124b49`
+- URL: `https://mta-deteni-staging.galleryabah.workers.dev`
 
-## Blocking result
+Live `/api/health` returned PASS with:
 
-The deployment step reached Cloudflare authentication successfully but Cloudflare rejected the Worker asset upload:
+- `dataMode = SYNTHETIC_ONLY`
+- `ai = OFF`
+- `migrationFreeze = true`
+- `productionAccessAuthorized = false`
+- `livePostgresqlExecution = false`
+- `realDetaineeDataAllowed = false`
+- `externalTransportAllowed = false`
+- `durablePublicationAllowed = false`
 
-```
-/accounts/***/workers/scripts/mta-deteni-staging/assets-upload-session
+## Authenticated staging UAT
 
-No access to the specified resource.
-```
+The same deployed staging Worker was tested using `tests/authenticated-browser-acceptance.mjs`.
 
-Therefore:
-- staging deployment = NOT EXECUTED TO COMPLETION
-- live staging health = NOT VERIFIED
-- authenticated staging UAT = NOT RUN
-- release-bound staging certification = NOT CERTIFIED
+### Phone — 390×844
 
-This is intentionally fail-closed.
+PASS:
+- all 17 operational surfaces
+- monitor
+- QR journey
+- detainee CRUD
+- movement mutation
+- placement mutation
+- leave mutation
+- report/evidence
+- functional surfaces
+- browser acceptance
 
-## Required external action
+### Tablet — 768×1024
 
-The GitHub secret `CLOUDFLARE_API_TOKEN` must be replaced/updated with a token that has the required **Workers deployment/write permission for the target Cloudflare account** and is scoped only as narrowly as practical to the non-production staging deployment.
+PASS:
+- all 17 operational surfaces
+- monitor
+- QR journey
+- detainee CRUD
+- movement mutation
+- placement mutation
+- leave mutation
+- report/evidence
+- functional surfaces
+- browser acceptance
 
-The existing `CLOUDFLARE_ACCOUNT_ID` passed format validation.
+Evidence IDs:
+- movement: `MOV-A12A66EC-2`
+- placement: `PLC-D0EA6AF2-1`
+- leave: `COMPLETED`
+- report: `RPT-MPCL25`
 
-After the token permission is corrected, rerun the same workflow. No application/schema/migration change is required for this blocker.
+### Desktop — 1440×900
 
-## Certification rule
+PASS:
+- all 17 operational surfaces
+- monitor
+- QR journey
+- detainee CRUD
+- movement mutation
+- placement mutation
+- leave mutation
+- report/evidence
+- functional surfaces
+- browser acceptance
 
-Staging/UAT becomes CERTIFIED only when the same release-bound workflow produces:
-1. successful staging deployment;
-2. live `/api/health` with all governance invariants;
-3. authenticated browser journey PASS on phone/tablet/desktop;
-4. synthetic-only evidence;
-5. production access false;
-6. migration false;
-7. AI disabled;
-8. evidence artifact bound to the exact release commit.
+Evidence IDs:
+- movement: `MOV-B80DA000-0`
+- placement: `PLC-793FBF56-D`
+- leave: `COMPLETED`
+- report: `RPT-UUWHDZ`
 
 ## Governance
 
@@ -71,6 +90,21 @@ production database         = NOT ACCESSED
 real detainee data          = NOT USED
 migration                   = NOT EXECUTED
 AI                          = OFF
+synthetic-only              = TRUE
 ```
 
-**Current gate:** NO-GO until Cloudflare staging deployment permission is corrected.
+## Certification boundary
+
+The local staging deployment and local authenticated UAT establish that the deployed staging Worker passes the three-device journey.
+
+However, the formal certification rule requires the existing release-bound GitHub workflow to reproduce:
+
+1. staging deployment;
+2. live health verification;
+3. authenticated phone/tablet/desktop UAT;
+4. governance validation;
+5. evidence bound to the exact GitHub release commit.
+
+Therefore this document is **not yet marked CERTIFIED**. The next step is to execute the existing `MTA DETENI Production-like Staging UAT` workflow and use its release-bound artifact as the formal certification evidence.
+
+No application source, schema, migration, production deployment, production database, real detainee data, or AI activation is authorized by this evidence update.
