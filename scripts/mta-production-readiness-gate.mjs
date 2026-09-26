@@ -14,8 +14,9 @@ requireText('docs/03-implementation/CROSS-DEVICE-HARDENING-CERTIFICATION-EVIDENC
 requireText('docs/03-implementation/CROSS-DEVICE-HARDENING-CERTIFICATION-EVIDENCE.md','Environment: controlled-nonprod / synthetic runtime');
 
 const kernel=read('docs/03-implementation/P9.13-KERNEL-CERTIFICATION-v1.0.md');
-if(!/P9\.13 EXECUTION\s*=\s*NOT STARTED/.test(kernel)) warnings.push('P9.13 status document changed; inspect current certification state');
-if(!/KERNEL CERTIFICATION\s*=\s*NOT STARTED/.test(kernel)) warnings.push('Kernel certification status document changed; inspect current certification state');
+const kernelEvidence=read('docs/03-implementation/P9.13-KERNEL-CERTIFICATION-EVIDENCE.md');
+const p913Certified=/P9\.13 KERNEL CERTIFICATION\s*=\s*CERTIFIED|KERNEL CERTIFICATION\s*=\s*CERTIFIED|Status:\s*CERTIFIED/i.test(kernel) && /MTA-P9\.13-CERT-2026-09-26-01/.test(kernelEvidence);
+if(!p913Certified) failures.push('P9.13 Kernel Certification is not backed by certified evidence');
 
 const runbook=read('docs/03-implementation/MTA-PRODUCTION-READINESS-RUNBOOK.md');
 for(const x of [
@@ -53,18 +54,20 @@ if(!staging.includes('dataMode!==\'SYNTHETIC_ONLY\'')) failures.push('Staging go
 const uat=read('.github/workflows/cloudflare-staging-uat.yml');
 for(const x of ['STAGING HEALTH: PASS','BROWSER SMOKE: PASS']) if(!uat.includes(x)) failures.push('Staging UAT contract missing: '+x);
 
+const stagingEvidence=read('docs/03-implementation/STAGING-UAT-CERTIFICATION-EVIDENCE.md');
+const stagingCertified=/Current decision:\s*CERTIFIED|Decision:\s*CERTIFIED/i.test(stagingEvidence) && /MTA-STAGING-UAT-CERT-2026-09-26-01/.test(stagingEvidence);
+const blockers=[];
+if(!p913Certified) blockers.push('P9.13 Kernel Certification is not backed by certified evidence.');
+if(!stagingCertified) blockers.push('Production-like staging/UAT evidence is not yet release-bound and certified.');
+blockers.push('Production deployment gate has not been executed and passed on the current release candidate.');
+blockers.push('Real user acceptance has not been executed and passed on the current release candidate.');
 const result={
   certification:'PRODUCTION-READINESS-GATE-v1',
   commit:process.env.GITHUB_SHA||'local',
   environment:'controlled-nonprod',
   status:'NO_GO',
   readyForProduction:false,
-  blockers:[
-    'P9.13 Kernel Certification is documented as NOT STARTED.',
-    'Production deployment gate has not been executed and passed on the current release candidate.',
-    'Real user acceptance has not been executed and passed on the current release candidate.',
-    'Production-like staging/UAT evidence is not present as an executed certification artifact on this gate.'
-  ],
+  blockers,
   governance:{
     syntheticOnly:true,
     productionAccessAuthorized:false,
