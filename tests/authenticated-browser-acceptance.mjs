@@ -194,7 +194,11 @@ try {
   // Real UI Detainee CRUD certification: add -> persist -> edit -> archive.
   stage = 'browser-detainee-crud';
   await page.evaluate(() => window.show('detainee'));
-  await page.getByRole('button', { name: /Tambah Deteni/i }).click();
+  const addDetaineeButton = page.getByRole('button', { name: /Tambah Deteni/i }).first();
+  await addDetaineeButton.waitFor({ state: 'attached', timeout: 5000 });
+  await addDetaineeButton.evaluate(button => button.click());
+  await page.locator('#modal.open').waitFor({ state: 'attached', timeout: 5000 });
+  await page.locator('#dForm').waitFor({ state: 'attached', timeout: 5000 });
   await page.locator('#dForm').waitFor({ state: 'visible', timeout: 5000 });
   const crudCode = 'DET-BROWSER-' + Date.now();
   await page.locator('#dForm [name="code"]').fill(crudCode);
