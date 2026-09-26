@@ -11,6 +11,13 @@ const movement = read("web/movement-v9.js");
 const runtime = read("web/mta-app-runtime-full.js");
 const preview = read("web/preview-v5.js");
 
+test("detainee CRUD remains owned by core runtime", () => {
+  const detail = read("web/detainee-detail-v1.js");
+  assert.doesNotMatch(detail, /if\(v==='detainee'\)return list\(\)/);
+  assert.match(detail, /if\(v==='detainee-detail'\)return detail/);
+  assert.match(runtime, /window\.MTA_DETAINEE_CRUD_OWNER='CORE_RUNTIME_V2'/);
+});
+
 test("movement navigation has one canonical owner", () => {
   assert.match(shell, /if\(v==='movement'\)\{if\(typeof window\.MTAMovementView\?\.render==='function'\)return window\.MTAMovementView\.render\(\)/);
   assert.match(shell, /window\.mtaUnifiedOpenMovement=openMovementForDetainee/);
