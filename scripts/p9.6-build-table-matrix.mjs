@@ -9,7 +9,7 @@ const names=new Set();
 for(const file of await fs.readdir(migrations)){
   if(!file.endsWith(".sql")) continue;
   const text=await fs.readFile(path.join(migrations,file),"utf8");
-  for(const m of text.matchAll(/create\\s+table\\s+(?:if\\s+not\\s+exists\\s+)?(?:public\\.)?([a-zA-Z0-9_]+)/gi)) names.add("public."+m[1].toLowerCase());
+  for(const m of text.matchAll(/create\s+table\s+(?:if\s+not\s+exists\s+)?(?:public\.)?([a-zA-Z0-9_]+)/gi)) names.add("public."+m[1].toLowerCase());
 }
 const actualNames=new Set((actual.tables||[]).filter(x=>x.schema_name==="public"&&x.relkind==="r").map(x=>"public."+x.table_name.toLowerCase()));
 const all=new Set([...names,...actualNames]);
