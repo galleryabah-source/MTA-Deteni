@@ -1,10 +1,15 @@
 import { chromium } from 'playwright';
 import fs from 'node:fs';
+import os from 'node:os';
+import path from 'node:path';
 
 const width = Number(process.env.WIDTH || 1440);
 const height = Number(process.env.HEIGHT || 900);
 const device = process.env.DEVICE || 'desktop';
 const BASE_URL = process.env.BASE_URL || 'http://127.0.0.1:4173/';
+const EVIDENCE_DIR = path.join(os.tmpdir(), 'mta-deteni-evidence');
+fs.mkdirSync(EVIDENCE_DIR, { recursive: true });
+const evidencePath = name => path.join(EVIDENCE_DIR, name);
 
 const SUPABASE_STUB = `
 let session = null;
@@ -384,7 +389,7 @@ try {
   }
   console.log(`AUTH_FUNCTIONAL_SURFACES_PASS ${device}`);
 
-  fs.writeFileSync(`/tmp/mta-auth-journey-${device}.json`, JSON.stringify({
+  fs.writeFileSync(evidencePath(`mta-auth-journey-${device}.json`), JSON.stringify({
     certification: 'E2E-BROWSER-JOURNEY-v1',
     journeyId: `E2E-BROWSER-${device.toUpperCase()}`,
     correlationIds: { movement: movementState.movementCorrelationId, leave: leaveState.correlationId, report: reportEvidence.reportCorrelationId },
@@ -425,11 +430,11 @@ try {
   } catch (snapshotError) {
     snapshot = { contextAvailable: false, snapshotError: String(snapshotError?.message || snapshotError) };
   }
-  fs.writeFileSync(`/tmp/mta-auth-acceptance-${device}.json`, JSON.stringify({device,width,height,stage,error:String(error?.stack||error),errors,snapshot},null,2));
+  fs.writeFileSync(evidencePath(`mta-auth-acceptance-${device}.json`), JSON.stringify({device,width,height,stage,error:String(error?.stack||error),errors,snapshot},null,2));
   throw error;
 } finally {
-  const successEvidence = `/tmp/mta-auth-journey-${device}.json`;
-  const failureEvidence = `/tmp/mta-auth-acceptance-${device}.json`;
+  const successEvidence = evidencePath(`mta-auth-journey-${device}.json`);
+  const failureEvidence = evidencePath(`mta-auth-acceptance-${device}.json`);
   if (!fs.existsSync(successEvidence) && !fs.existsSync(failureEvidence)) {
     let snapshot = { contextAvailable: false };
     try {
