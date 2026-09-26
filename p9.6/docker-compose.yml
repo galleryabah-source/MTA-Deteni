@@ -12,7 +12,12 @@ services:
     volumes:
       - p96_pgdata:/var/lib/postgresql/data
       - ./00-local-supabase-compat.sql:/docker-entrypoint-initdb.d/00-local-supabase-compat.sql:ro
-      - ../supabase/migrations:/docker-entrypoint-initdb.d/migrations:ro
+      - ../supabase/migrations/20260921060500_mta_deteni_production_activation_foundation.sql:/docker-entrypoint-initdb.d/20260921060500_mta_deteni_production_activation_foundation.sql:ro
+      - ../supabase/migrations/20260921061400_mta_production_auth_rbac_v1_2_private_helper.sql:/docker-entrypoint-initdb.d/20260921061400_mta_production_auth_rbac_v1_2_private_helper.sql:ro
+      - ../supabase/migrations/20260921070000_mta_production_auth_rbac_v1.sql:/docker-entrypoint-initdb.d/20260921070000_mta_production_auth_rbac_v1.sql:ro
+      - ../supabase/migrations/20260921071000_mta_production_auth_rbac_v1_1_hardening.sql:/docker-entrypoint-initdb.d/20260921071000_mta_production_auth_rbac_v1_1_hardening.sql:ro
+      - ../supabase/migrations/20260923040000_mta_document_storage_read_hardening.sql:/docker-entrypoint-initdb.d/20260923040000_mta_document_storage_read_hardening.sql:ro
+      - ../supabase/migrations/20260923041000_mta_audit_hash_chain_v1.sql:/docker-entrypoint-initdb.d/20260923041000_mta_audit_hash_chain_v1.sql:ro
     healthcheck:
       test: ["CMD-SHELL","pg_isready -U mta_p96 -d mta_deteni_p96"]
       interval: 2s
