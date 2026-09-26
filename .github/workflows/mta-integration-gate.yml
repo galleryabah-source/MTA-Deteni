@@ -121,6 +121,7 @@ jobs:
             file="${spec#*|}"
             if ! grep -Fq -- "$pattern" "$file"; then
               echo "STATIC_CONTRACT_FAIL pattern=$pattern file=$file"
+              grep -Fn -- "$pattern" "$file" || true
               exit 1
             fi
           done
