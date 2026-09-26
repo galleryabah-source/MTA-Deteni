@@ -1,0 +1,95 @@
+name: MTA P9.6 Local PostgreSQL Reconciliation
+
+on:
+  workflow_dispatch:
+  pull_request:
+    branches: [main]
+    paths:
+      - "supabase/migrations/**"
+      - "scripts/p9.6-*"
+      - "p9.6/**"
+      - "src/application/database-adapter-contract.ts"
+      - "src/infrastructure/database/p9.6-database-adapter.ts"
+
+permissions:
+  contents: read
+
+jobs:
+  p9-6-local-reconciliation:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_DB: mta_deteni_p96
+          POSTGRES_USER: mta_p96
+          POSTGRES_PASSWORD: mta_p96_local_only
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U mta_p96 -d mta_deteni_p96"
+          --health-interval 2s
+          --health-timeout 3s
+          --health-retries 20
+
+    env:
+      DATABASE_URL: postgresql://mta_p96:mta_p96_local_only@127.0.0.1:5432/mta_deteni_p96
+      P9_6_ALLOW_WRITE: "false"
+      CI: true
+      MTA_EXECUTION_ENV: controlled-nonprod
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+
+      - name: Verify PostgreSQL target is local
+        run: |
+          case "$DATABASE_URL" in
+            *supabase.co*|*supabase.com*) echo "Production boundary violation"; exit 2;;
+          esac
+          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -c "select current_database(), current_user, inet_server_addr(), inet_server_port();"
+
+      - name: Install local Supabase compatibility objects
+        run: psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f p9.6/00-local-supabase-compat.sql
+
+      - name: Replay repository migrations into disposable PostgreSQL
+        run: |
+          for f in $(find supabase/migrations -maxdepth 1 -type f -name "*.sql" | sort); do
+            echo "APPLYING LOCAL REPLAY: $f"
+            psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f "$f"
+          done
+
+      - name: Run read-only PostgreSQL introspection
+        run: bash scripts/p9.6-run-introspection.sh
+
+      - name: Build expected-vs-actual reconciliation matrix
+        run: node scripts/p9.6-build-reconciliation-matrix.mjs
+
+      - name: Validate reconciliation evidence
+        run: |
+          test -s artifacts/p9.6/local-postgres-introspection.json
+          test -s artifacts/p9.6/schema-reconciliation-matrix.json
+          node - <<'NODE'
+          const x=require('./artifacts/p9.6/schema-reconciliation-matrix.json');
+          console.log(JSON.stringify(x.summary,null,2));
+          if(Object.values(x.summary).some(v=>v.missing>0||v.extra>0)){
+            console.log('RECONCILIATION_GAPS_PRESENT=true');
+          } else {
+            console.log('RECONCILIATION_GAPS_PRESENT=false');
+          }
+          NODE
+
+      - name: Upload P9.6 evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: mta-p9.6-local-reconciliation-${{ github.sha }}
+          path: artifacts/p9.6/
+          if-no-files-found: error
+          retention-days: 14
