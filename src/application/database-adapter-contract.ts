@@ -1,4 +1,4 @@
-export type DatabaseRole = "APPLICATION" | "MIGRATION" | "READ_ONLY";
+export type DatabaseRole = "APPLICATION" | "MIGRATION" | "READ_ONLY" | "REPORTING" | "AI_PROCESSOR";
 
 export type DatabaseAdapterState = "UNINITIALIZED" | "READY" | "CLOSED";
 
@@ -45,9 +45,7 @@ export function validateDatabaseAdapterConfig(config: DatabaseAdapterConfig): vo
 }
 
 export function assertDatabaseRoleForRuntime(role: DatabaseRole): void {
-  if (role === "MIGRATION") {
-    throw new Error("MIGRATION_ROLE_BLOCKED_BY_GOVERNANCE_FREEZE");
-  }
+  if (role === "MIGRATION") throw new Error("MIGRATION_ROLE_BLOCKED_BY_GOVERNANCE_FREEZE");
 }
 
 export function createDatabaseAdapterContract(config: DatabaseAdapterConfig): DatabaseAdapter {
