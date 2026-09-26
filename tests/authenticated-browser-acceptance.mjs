@@ -426,7 +426,6 @@ try {
   }
   fs.writeFileSync(`/tmp/mta-auth-acceptance-${device}.json`, JSON.stringify({device,width,height,stage,error:String(error?.stack||error),errors,snapshot},null,2));
   throw error;
-}
 } finally {
   const successEvidence = `/tmp/mta-auth-journey-${device}.json`;
   const failureEvidence = `/tmp/mta-auth-acceptance-${device}.json`;
