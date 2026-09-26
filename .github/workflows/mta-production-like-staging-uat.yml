@@ -69,12 +69,34 @@ jobs:
           printf '%s' "$CLOUDFLARE_ACCOUNT_ID" | grep -Eq '^[A-Za-z0-9_-]+$'
           CLOUDFLARE_API_TOKEN="$CLOUDFLARE_API_TOKEN" CLOUDFLARE_ACCOUNT_ID="$CLOUDFLARE_ACCOUNT_ID" wrangler whoami
 
+      - name: Diagnose staging Worker access
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          set -euo pipefail
+          if curl --fail --silent --show-error \
+            --header "Authorization: Bearer $CLOUDFLARE_API_TOKEN" \
+            "https://api.cloudflare.com/client/v4/accounts/$CLOUDFLARE_ACCOUNT_ID/workers/scripts/$DEPLOY_WORKER_NAME" \
+            > staging-worker.json; then
+            echo "STAGING_WORKER_EXISTS=true" >> "$GITHUB_ENV"
+            echo "Existing staging Worker detected: $DEPLOY_WORKER_NAME"
+          else
+            echo "STAGING_WORKER_EXISTS=false" >> "$GITHUB_ENV"
+            echo "Staging Worker does not exist or token cannot read it."
+          fi
+
       - name: Deploy release candidate to staging
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
         run: |
           set -euo pipefail
+          if [ "$STAGING_WORKER_EXISTS" = "true" ]; then
+            echo "Deploying existing Worker; token requires Workers Editor scope."
+          else
+            echo "Worker is not readable/existing; first creation requires Workers Admin at product scope."
+          fi
           wrangler deploy --config wrangler.staging.toml --name "$DEPLOY_WORKER_NAME"
 
       - name: Verify staging health and bind release
