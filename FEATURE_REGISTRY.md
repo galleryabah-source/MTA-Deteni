@@ -107,3 +107,8 @@ Untuk setiap permintaan fitur berikutnya:
 ### QR Identity Integrity Rule
 
 Untuk `MTA-F-20260926-002`, QR Deteni adalah **single immutable identity artifact**. QR wajib berasal dari record QR yang dibuat pada input/registrasi Deteni pertama kali. Halaman detail, cetak, download, scan, dan aksi berikutnya hanya boleh menggunakan payload/token QR yang sudah tersimpan; tidak boleh membuat token/QR identity baru. Perubahan data profil, status, penempatan, pergerakan, izin, dokumen, atau deportasi tidak boleh mengubah QR Deteni.
+
+
+## Complete Capability Inventory
+
+For repository-wide capability reconciliation beyond the explicitly registered Feature IDs, see [`FEATURE_INVENTORY.md`](FEATURE_INVENTORY.md). The inventory separates user-facing features from platform/governance capabilities and records implementation, test, runtime, phase, commit, and registration evidence.
