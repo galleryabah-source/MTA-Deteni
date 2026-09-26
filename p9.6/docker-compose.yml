@@ -1,0 +1,22 @@
+services:
+  postgres:
+    image: postgres:17
+    container_name: mta-deteni-p96-postgres
+    restart: "no"
+    environment:
+      POSTGRES_DB: mta_deteni_p96
+      POSTGRES_USER: mta_p96
+      POSTGRES_PASSWORD: mta_p96_local_only
+    ports:
+      - "55432:5432"
+    volumes:
+      - p96_pgdata:/var/lib/postgresql/data
+      - ./00-local-supabase-compat.sql:/docker-entrypoint-initdb.d/00-local-supabase-compat.sql:ro
+      - ../supabase/migrations:/docker-entrypoint-initdb.d/migrations:ro
+    healthcheck:
+      test: ["CMD-SHELL","pg_isready -U mta_p96 -d mta_deteni_p96"]
+      interval: 2s
+      timeout: 3s
+      retries: 15
+volumes:
+  p96_pgdata:
