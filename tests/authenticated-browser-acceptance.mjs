@@ -428,9 +428,16 @@ try {
   throw error;
 }
 } finally {
-  if (!fs.existsSync(`/tmp/mta-auth-acceptance-${device}.json`)) {
-    const snapshot = await page.evaluate(() => ({bodyClass:document.body.className,navViews:[...document.querySelectorAll('#nav button[data-view], #mtaMobileBottomNav button[data-view]')].map(b=>b.dataset.view).filter(Boolean),runtimeLoaded:!!window.__mtaAppRuntimeLoaded,fullRuntimeBooted:!!window.__mtaAppBooted}));
-    fs.writeFileSync(`/tmp/mta-auth-acceptance-${device}.json`, JSON.stringify({device,width,height,stage,errors,snapshot},null,2));
+  const successEvidence = `/tmp/mta-auth-journey-${device}.json`;
+  const failureEvidence = `/tmp/mta-auth-acceptance-${device}.json`;
+  if (!fs.existsSync(successEvidence) && !fs.existsSync(failureEvidence)) {
+    let snapshot = { contextAvailable: false };
+    try {
+      snapshot = await page.evaluate(() => ({contextAvailable:true,bodyClass:document.body.className,navViews:[...document.querySelectorAll('#nav button[data-view], #mtaMobileBottomNav button[data-view]')].map(b => b.dataset.view).filter(Boolean),runtimeLoaded:!!window.__mtaAppRuntimeLoaded,fullRuntimeBooted:!!window.__mtaAppBooted}));
+    } catch (snapshotError) {
+      snapshot = { contextAvailable:false, snapshotError:String(snapshotError?.message || snapshotError) };
+    }
+    fs.writeFileSync(failureEvidence, JSON.stringify({device,width,height,stage,errors,snapshot},null,2));
   }
   await browser.close();
 }
