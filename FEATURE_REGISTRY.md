@@ -8,7 +8,8 @@
 
 - ☐ **PLANNED** — fitur dicatat, belum dikerjakan.
 - ◐ **IN_PROGRESS** — implementasi sedang dikerjakan.
-- ☑ **VERIFIED** — implementasi sudah diterapkan dan bukti verifikasi tersedia.
+- ☑ **IMPLEMENTED** — implementasi sudah diterapkan di repository dan acceptance criteria utama sudah diwujudkan.
+- ☑ **VERIFIED** — implementasi sudah diterapkan dan bukti repository + test/CI + runtime yang relevan tersedia.
 - ⚠ **BLOCKED** — implementasi tertahan oleh blocker.
 - ↺ **REGRESSION** — sebelumnya verified tetapi verifikasi terakhir menemukan regresi.
 
@@ -36,9 +37,10 @@
 |---|---:|
 | Total feature | 2 |
 | ☑ VERIFIED | 1 |
-| ◐ IN_PROGRESS | 1 |
+| ◐ IN_PROGRESS | 0 |
 | ☐ PLANNED | 0 |
 | ⚠ BLOCKED | 0 |
+| ☑ IMPLEMENTED | 1 |
 | ↺ REGRESSION | 0 |
 
 ## Feature List
@@ -46,7 +48,7 @@
 | ID | Tanggal | Fitur | Area | Status | Bukti / Acceptance |
 |---|---|---|---|---|---|
 | MTA-F-20260926-001 | 2026-09-26 | **Feature Registry & Verification Tracking** | Governance / Project Control | ☑ VERIFIED | Registry dibuat di repository; aturan pencatatan dan status verifikasi dikunci. |
-| MTA-F-20260926-002 | 2026-09-26 | **Detail Data Deteni + Histori + QR + Dokumen** | Data Deteni / Individual Record | ◐ IN_PROGRESS | Nama deteni dapat dibuka ke halaman detail; identitas lengkap, penempatan, histori masuk→penahanan→pergerakan→deportasi bila tersedia, QR, dokumen terkait, download Word-compatible, dan cetak dokumen terformat. | `web/detainee-detail-v1.js`, `web/index.html`, `test/detainee-detail-feature.test.mjs`; menunggu evidence CI/runtime. |
+| MTA-F-20260926-002 | 2026-09-26 | **Detail Data Deteni + Histori + QR + Dokumen** | Data Deteni / Individual Record | ☑ IMPLEMENTED | Nama deteni dapat dibuka ke halaman detail; identitas lengkap, penempatan, histori masuk→penahanan→pergerakan→deportasi bila tersedia, QR, dokumen terkait, download Word-compatible, dan cetak dokumen terformat. | `web/detainee-detail-v1.js`, `web/index.html`, `test/detainee-detail-feature.test.mjs`; Static Integration Gate PASS; browser/runtime verification masih menjadi tahap berikutnya. |
 
 ## Incoming Feature Queue
 
