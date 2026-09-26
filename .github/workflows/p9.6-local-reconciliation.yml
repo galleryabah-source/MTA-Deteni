@@ -47,6 +47,8 @@ jobs:
         run: |
           psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -c "do \$\$ begin if not exists (select 1 from pg_roles where rolname='anon') then create role anon noinherit nologin; end if; if not exists (select 1 from pg_roles where rolname='authenticated') then create role authenticated noinherit nologin; end if; if not exists (select 1 from pg_roles where rolname='service_role') then create role service_role noinherit nologin; end if; end \$\$;"
           psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f p9.6/00-local-supabase-compat.sql
+      - name: Run P9.6 reconciliation engine regression tests
+        run: node --test test/p9.6-reconciliation-engine.test.mjs
       - name: Replay repository migrations into disposable PostgreSQL
         run: |
           set -euo pipefail
