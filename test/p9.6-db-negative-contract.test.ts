@@ -191,7 +191,7 @@ test("DB-014 partial multi-domain mutation can be rolled back atomically", async
 test("DB-015 concurrent Duty Officer receipt permits one successful versioned write", async () => {
   let version = 1;
   const repository = {
-    async get() { return { id: "L1", state: "HANDOVER_READY", version }; },
+    async get() { return { id: "L1", state: "RETURN_PENDING", version }; },
     async save(_, expectedVersion) {
       if (expectedVersion !== version) throw new Error("OPTIMISTIC_CONCURRENCY_CONFLICT");
       version += 1;
@@ -203,8 +203,8 @@ test("DB-015 concurrent Duty Officer receipt permits one successful versioned wr
     canManage: () => true,
   });
   const [a, b] = await Promise.allSettled([
-    service.advance("L1", "OUTSIDE", { userId: "DO-1", roles: ["DUTY_OFFICER"], scopes: [] }),
-    service.advance("L1", "OUTSIDE", { userId: "DO-2", roles: ["DUTY_OFFICER"], scopes: [] }),
+    service.advance("L1", "RETURNED", { actorId: "DO-1", role: "DUTY_OFFICER", domain: "KAMTIB", scope: {}, correlationId: "C-1" }),
+    service.advance("L1", "RETURNED", { actorId: "DO-2", role: "DUTY_OFFICER", domain: "KAMTIB", scope: {}, correlationId: "C-2" }),
   ]);
   const successes = [a, b].filter((x) => x.status === "fulfilled").length;
   assert.ok(successes <= 1);
