@@ -4,7 +4,7 @@ import path from "node:path";
 
 const url=process.env.DATABASE_URL;
 if(!url) throw new Error("DATABASE_URL is required");
-if(/supabase\\.(co|com)/i.test(url)) throw new Error("P9.6 local harness refuses Supabase URLs; use local PostgreSQL only.");
+if(/supabase\.(co|com)/i.test(url)) throw new Error("P9.6 local harness refuses Supabase URLs; use local PostgreSQL only.");
 if(process.env.P9_6_ALLOW_WRITE==="true") throw new Error("P9.6 introspection is read-only; write mode is forbidden.");
 
 const sql=path.resolve("scripts/p9.6-introspect-postgres.sql");
