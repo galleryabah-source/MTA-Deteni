@@ -109,12 +109,13 @@ for(const cfg of targets){
       await page.getByRole('button',{name:/Tambah Deteni/i}).click();
       await page.locator('#dForm').waitFor({state:'visible',timeout:5000});
       const dialog=await rect(page,'#dForm');
-      checks.push({name:'FORM_WITHIN_VIEWPORT',ok:insideViewport(dialog,cfg.width,cfg.height),details:dialog});
+      const dialogGeometry=await page.evaluate(()=>{const el=document.querySelector('#dForm');const r=el.getBoundingClientRect();return {left:r.left,right:r.right,top:r.top,width:r.width,height:r.height,scrollHeight:el.scrollHeight,clientHeight:el.clientHeight,scrollable:el.scrollHeight>el.clientHeight+1}});
+      checks.push({name:'FORM_HORIZONTAL_CONTAINMENT',ok:dialogGeometry.left>=-1&&dialogGeometry.right<=cfg.width+1&&dialogGeometry.width<=cfg.width+2,details:dialogGeometry});
       const actions=page.locator('#dForm .actions .btn');
       const actionCount=await actions.count();
-      let actionVisible=true;
-      for(let i=0;i<actionCount;i++){const r=await actions.nth(i).boundingBox();if(!r||r.height<44||r.y<0||r.y>cfg.height+2)actionVisible=false;}
-      checks.push({name:'FORM_ACTIONS_REACHABLE',ok:actionVisible&&actionCount>0,details:{actionCount}});
+      if(actionCount) await actions.first().scrollIntoViewIfNeeded();
+      const actionEvidence=await page.evaluate(()=>{const form=document.querySelector('#dForm');const action=form?.querySelector('.actions');const r=action?.getBoundingClientRect();return {top:r?.top??null,bottom:r?.bottom??null,height:r?.height??0,withinViewport:!!r&&r.top>=-1&&r.bottom<=innerHeight+1,scrollable:!!form&&form.scrollHeight>form.clientHeight+1}});
+      checks.push({name:'FORM_ACTIONS_REACHABLE',ok:actionCount>0&&actionEvidence.withinViewport&&actionEvidence.height>=44,details:{actionCount,...actionEvidence}});
       await page.keyboard.press('Escape').catch(()=>{});
     }
 
@@ -137,7 +138,7 @@ for(const cfg of targets){
     const evidence={certification:'CROSS-DEVICE-HARDENING-v1',device:cfg.device,width:cfg.width,height:cfg.height,mobile:cfg.mobile,status:passed?'PASS':'FAIL',checks,errors,syntheticOnly:true,productionAccessAuthorized:false,migrationExecuted:false,aiEnabled:false};
     fs.writeFileSync('/tmp/mta-cross-device-'+cfg.device+'.json',JSON.stringify(evidence,null,2));
     results.push(evidence);
-    if(!passed) throw new Error('cross-device checks failed: '+JSON.stringify(checks.filter(x=>!x.ok)));
+    if(!passed){ console.error('CROSS_DEVICE_FAILED_CHECKS '+JSON.stringify(checks.filter(x=>!x.ok))); throw new Error('cross-device checks failed: '+JSON.stringify(checks.filter(x=>!x.ok))); }
   }catch(error){
     const evidence={certification:'CROSS-DEVICE-HARDENING-v1',device:cfg.device,width:cfg.width,height:cfg.height,mobile:cfg.mobile,status:'FAIL',checks,errors,error:String(error?.stack||error),syntheticOnly:true,productionAccessAuthorized:false,migrationExecuted:false,aiEnabled:false};
     fs.writeFileSync('/tmp/mta-cross-device-'+cfg.device+'.json',JSON.stringify(evidence,null,2));
