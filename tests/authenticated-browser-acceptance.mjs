@@ -409,17 +409,24 @@ try {
   if (errors.length) throw new Error(`page errors: ${errors.join('; ')}`);
   console.log(`AUTH_BROWSER_ACCEPTANCE_PASS ${JSON.stringify({device,width,height,views})}`);
 } catch (error) {
-  const snapshot = await page.evaluate(() => ({
-    bodyClass: document.body.className,
-    authMessage: document.getElementById('mtaAuthMessage')?.textContent || '',
-    navViews: [...document.querySelectorAll('#nav button[data-view], #mtaMobileBottomNav button[data-view]')].map(b => b.dataset.view).filter(Boolean),
-    appText: document.getElementById('appView')?.textContent?.trim().slice(0, 1200) || '',
-    runtimeLoaded: !!window.__mtaAppRuntimeLoaded,
-    fullRuntimeBooted: !!window.__mtaAppBooted,
-    fullRuntimeLoading: !!window.__mtaRuntimeLoading
-  }));
+  let snapshot = { contextAvailable: false };
+  try {
+    snapshot = await page.evaluate(() => ({
+      contextAvailable: true,
+      bodyClass: document.body.className,
+      authMessage: document.getElementById('mtaAuthMessage')?.textContent || '',
+      navViews: [...document.querySelectorAll('#nav button[data-view], #mtaMobileBottomNav button[data-view]')].map(b => b.dataset.view).filter(Boolean),
+      appText: document.getElementById('appView')?.textContent?.trim().slice(0, 1200) || '',
+      runtimeLoaded: !!window.__mtaAppRuntimeLoaded,
+      fullRuntimeBooted: !!window.__mtaAppBooted,
+      fullRuntimeLoading: !!window.__mtaRuntimeLoading
+    }));
+  } catch (snapshotError) {
+    snapshot = { contextAvailable: false, snapshotError: String(snapshotError?.message || snapshotError) };
+  }
   fs.writeFileSync(`/tmp/mta-auth-acceptance-${device}.json`, JSON.stringify({device,width,height,stage,error:String(error?.stack||error),errors,snapshot},null,2));
   throw error;
+}
 } finally {
   if (!fs.existsSync(`/tmp/mta-auth-acceptance-${device}.json`)) {
     const snapshot = await page.evaluate(() => ({bodyClass:document.body.className,navViews:[...document.querySelectorAll('#nav button[data-view], #mtaMobileBottomNav button[data-view]')].map(b=>b.dataset.view).filter(Boolean),runtimeLoaded:!!window.__mtaAppRuntimeLoaded,fullRuntimeBooted:!!window.__mtaAppBooted}));
