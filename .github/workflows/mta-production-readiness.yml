@@ -1,0 +1,106 @@
+name: MTA DETENI Production Readiness Gate
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'web/**'
+      - 'worker-v11.js'
+      - 'wrangler*.toml'
+      - 'scripts/mta-production-readiness-gate.mjs'
+      - 'docs/03-implementation/**'
+      - '.github/workflows/cloudflare-*.yml'
+      - '.github/workflows/mta-production-readiness.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: mta-production-readiness-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  MTA_EXECUTION_ENV: controlled-nonprod
+  CI: true
+
+jobs:
+  preflight:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+
+      - name: Verify release artifact
+        run: |
+          set -euo pipefail
+          test -f wrangler.toml
+          test -f wrangler.staging.toml
+          test -f worker-v11.js
+          test -d web
+          test -f web/index.html
+          node --check worker-v11.js
+          node scripts/mta-production-readiness-gate.mjs
+
+      - name: Verify governance lock
+        run: |
+          node - <<'NODE'
+          const fs=require('fs');
+          const x=JSON.parse(fs.readFileSync('artifacts/mta-evidence/production-readiness-gate.json','utf8'));
+          const g=x.governance;
+          for(const [k,v] of Object.entries({
+            syntheticOnly:true,
+            productionAccessAuthorized:false,
+            migrationExecuted:false,
+            aiEnabled:false
+          })) {
+            if(g[k]!==v) throw new Error(`Governance violation: ${k}=${g[k]}`);
+          }
+          console.log('GOVERNANCE LOCK: PASS');
+          NODE
+
+      - name: Run mandatory regression evidence
+        run: |
+          npm install
+          npm run typecheck
+          npm run typecheck:test
+          npm test
+          npm run test:unit
+          npx tsx test/security-adversarial-certification.test.ts
+
+      - name: Verify production readiness decision
+        run: |
+          node - <<'NODE'
+          const fs=require('fs');
+          const x=JSON.parse(fs.readFileSync('artifacts/mta-evidence/production-readiness-gate.json','utf8'));
+          console.log('PRODUCTION_READINESS_STATUS='+x.status);
+          console.log('BLOCKERS='+JSON.stringify(x.blockers));
+          if(x.status!=='NO_GO' || x.readyForProduction!==false) {
+            throw new Error('Unexpected readiness state; require explicit certified PASS evidence before production.');
+          }
+          NODE
+
+      - name: Upload readiness evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: mta-production-readiness-${{ github.sha }}
+          path: artifacts/mta-evidence/production-readiness-gate.json
+          if-no-files-found: error
+          retention-days: 30
+
+  certify:
+    needs: preflight
+    runs-on: ubuntu-latest
+    if: ${{ always() }}
+    steps:
+      - name: Fail closed until production prerequisites are certified
+        run: |
+          echo "Production Readiness Gate remains NO-GO until all mandatory production prerequisites have observable PASS evidence."
+          exit 1
