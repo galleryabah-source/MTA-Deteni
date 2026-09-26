@@ -49,8 +49,9 @@ test("leave transition has one canonical command boundary", () => {
 
 test("movement audit writer is defined and correlation is propagated", () => {
   assert.match(movement, /const appendAudit=\(/);
-  assert.match(movement, /placementCommand\(d,[\s\S]*correlationId\)/);
-  assert.match(movement, /appendAudit\(d,'MOVEMENT_CREATE','MOVEMENT',movement\.id,'SUCCESS',correlationId\)/);
+  assert.match(shell, /assignPlacementCommand\(d,[\s\S]*correlationId\)/);
+  assert.match(shell, /appendAuditToState\(d,'MOVEMENT_CREATE','MOVEMENT',movement\.id,'SUCCESS',correlationId\)/);
+  assert.match(movement, /window\.mtaUnifiedCreateMovement\(d,/);
 });
 
 test("unified journey certification contract is part of the hardening gate", () => {
