@@ -53,6 +53,14 @@ test("movement audit writer is defined and correlation is propagated", () => {
   assert.match(movement, /appendAudit\(d,'MOVEMENT_CREATE','MOVEMENT',movement\.id,'SUCCESS',correlationId\)/);
 });
 
+test("unified journey certification contract is part of the hardening gate", () => {
+  const certification = read("src/application/unified-journey-certification.ts");
+  assert.match(certification, /UNIFIED_JOURNEY_CERTIFICATION_VERSION/);
+  assert.match(certification, /UNIFIED_JOURNEY_CORRELATION_DRIFT/);
+  assert.match(certification, /scan: "PASS"/);
+  assert.match(certification, /evidence: "PASS"/);
+});
+
 test("integration hardening remains synthetic and does not add production DB capabilities", () => {
   assert.doesNotMatch(shell, /DATABASE_URL|postgres(?:ql)?:\/\//i);
   assert.doesNotMatch(movement, /DATABASE_URL|postgres(?:ql)?:\/\//i);
