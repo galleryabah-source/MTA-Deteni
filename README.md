@@ -22,6 +22,12 @@ MTA DETENI adalah model tata kelola administrasi deteni yang mengintegrasikan st
 
 The repository is the source of truth for the MTA DETENI blueprint, architecture, requirements, security baseline, roadmap, and implementation decisions.
 
+## Feature Tracking
+
+**FEATURE_REGISTRY.md is the single source of truth for feature additions.**
+
+Every new feature must receive a unique Feature ID, acceptance criteria, implementation evidence, and verification status. A feature is marked **☑ VERIFIED** only after the applicable repository, test/CI, and runtime evidence has been verified.
+
 ## Repository Structure
 
 - `docs/00-master-blueprint/` — master blueprint
@@ -38,6 +44,7 @@ The repository is the source of truth for the MTA DETENI blueprint, architecture
 - `docs/11-testing/` — test strategy and quality gates
 - `docs/12-adr/` — architecture decision records
 - `docs/13-data-governance/` — classification, retention and privacy
+- `FEATURE_REGISTRY.md` — feature registry and verification contract
 - `PROJECT_STATUS.md` — current project status
 - `CHANGELOG.md` — controlled project changes
 
