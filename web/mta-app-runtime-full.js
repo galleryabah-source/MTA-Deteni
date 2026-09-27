@@ -291,7 +291,7 @@ if(!window.__mtaRuntimeClockTimer){window.__mtaRuntimeClockTimer=setInterval(()=
 async function loadAuthenticatedRuntime(){
   if(window.__mtaRuntimeLoading)return window.__mtaRuntimeLoading;
   const scripts=[
-    '/mta-production-state-adapter-v1.js?v=1',
+    '/mta-production-state-adapter-v1.js?v=2',
     '/mta-state-kernel-v1.js?v=4',
     '/mta-domain-commands-v2.js?v=1',
     '/offline-v1.js?v=2',
