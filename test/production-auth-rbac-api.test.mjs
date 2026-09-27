@@ -20,8 +20,8 @@ assert.match(edge,/RBAC_WRITE_DENIED/);
 assert.match(edge,/resource==="admin-users"/);
 assert.match(edge,/RBAC_USER_ADMIN_DENIED/);
 assert.match(edge,/allowedOrigin/);
-assert.match(edge,/const TABLES=new Set\\(["detainees","placements","movements","leaves","documents","blocks","rooms","audit"]\\)/);
-assert.match(edge,/const table=resource==="audit"\?"mta_audit_events":"mta_"+resource;/);
+assert.equal(edge.includes('const TABLES=new Set(["detainees","placements","movements","leaves","documents","blocks","rooms","audit"]);'),true);
+assert.equal(edge.includes('const table=resource==="audit"?"mta_audit_events":"mta_"+resource;'),true);
 assert.doesNotMatch(edge,/detail:error\.message/);
 assert.doesNotMatch(edge,/detail:String\(error\)/);
 
