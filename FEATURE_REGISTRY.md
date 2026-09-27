@@ -35,7 +35,7 @@
 
 | Metric | Nilai |
 |---|---:|
-| Total feature | 21 |
+| Total feature | 22 |
 | ☑ VERIFIED | 1 |
 | ◐ IN_PROGRESS | 1 |
 | ☐ PLANNED | 1 |
@@ -66,7 +66,7 @@
 | MTA-F-20260927-018 | 2026-09-27 | MFE Evidence → Daily Dataset → Report | Evidence / Reporting | ☑ IMPLEMENTED | Evidence queue → daily dataset → report assembly dengan runtime test evidence. Evidence: f4b13cbc / 292e5f3f / ed5b591d. |
 | MTA-F-20260927-019 | 2026-09-27 | Admin Settings — AI API + Web Branding | Administration | ☑ IMPLEMENTED | Admin-only settings untuk API AI dan web branding; AI OFF/config-only dan secret tidak disimpan di browser. Evidence: 1f9a861a / 1b9cd1ff. |
 | MTA-F-20260927-020 | 2026-09-27 | Branding Upload / Operational-State Isolation | Administration / Branding | ☑ IMPLEMENTED | Branding assets terisolasi dari operational state; upload/data regression evidence. Evidence: 36a500a6 / 79ab9f8a. |
-| MTA-F-20260927-021 | 2026-09-27 | User Management / Tambah User | Administration / Identity | ☐ PLANNED | Requested capability: admin dapat membuat/mengelola user dengan role, scope, status, dan authorization boundary. Audit source belum menemukan operational Tambah User UI/service; tidak diklaim implemented. |
+| MTA-F-20260927-021 | 2026-09-27 | User Management / Tambah User | Administration / Identity | ☑ IMPLEMENTED | Admin/Owner dapat melihat, membuat, mengubah role/status/profile user melalui protected `admin-users` API; password minimal 12 karakter tidak disimpan di browser; RBAC deny-by-default, self-disable/self-role-change diblokir, dan USER_CREATE/USER_UPDATE diaudit. Evidence: `web/user-management-v1.js`, `web/mta-production-api.js`, `supabase/functions/mta-api/index.ts`, `test/user-management-feature.test.mjs`. Runtime production verification pending. |
 | MTA-F-20260927-022 | 2026-09-27 | Detainee Detail Navigation / Lihat Data Deteni | Data Deteni | ☑ IMPLEMENTED | Nama deteni dan tombol Lihat membuka detail individu melalui canonical `MTADetaineeDetailView.detail(id)`, dengan back navigation, histori, penempatan, pergerakan, izin, dokumen, QR, download, cetak, dan audit detail. Evidence: `web/mta-app-runtime-full.js`, `web/detainee-detail-v1.js`, `web/index.html`, `test/detainee-detail-navigation.test.mjs`. Runtime deployment verification pending. |
 ## Incoming Feature Queue
 
