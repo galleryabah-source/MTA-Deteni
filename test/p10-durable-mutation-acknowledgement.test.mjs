@@ -4,6 +4,13 @@ import fs from 'node:fs';
 
 const kernelSource=fs.readFileSync(new URL('../web/mta-state-kernel-v1.js',import.meta.url),'utf8');
 const apiSource=fs.readFileSync(new URL('../web/mta-production-api.js',import.meta.url),'utf8');
+const runtimeSource=fs.readFileSync(new URL('../web/mta-app-runtime-full.js',import.meta.url),'utf8');
+
+assert.match(runtimeSource,/onsubmit=async e=>/);
+assert.match(runtimeSource,/if\(\!\(await save\(\)\)\)return/);
+assert.match(runtimeSource,/async function archiveDetainee/);
+assert.match(runtimeSource,/async function advanceLeave/);
+
 
 function makeContext({createImpl,failAfterCreate=false}={}){
   const store=new Map();
