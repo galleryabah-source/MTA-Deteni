@@ -8,6 +8,7 @@ const uid=p=>p+'-'+crypto.randomUUID().slice(0,10).toUpperCase();
 const now=()=>new Date().toISOString();
 function normalize(state){
   if(!state||typeof state!=='object')throw new Error('STATE_INVALID');
+  state=clone(state);
   for(const k of ['detainees','placements','movements','leaves','documents','audit','rooms','blocks'])if(!Array.isArray(state[k]))state[k]=[];
   state.qr=state.qr&&typeof state.qr==='object'?state.qr:{detainee:{},room:{},leave:{}};
   state.qr.detainee=state.qr.detainee&&typeof state.qr.detainee==='object'?state.qr.detainee:{};
