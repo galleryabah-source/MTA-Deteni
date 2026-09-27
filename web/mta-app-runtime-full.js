@@ -342,7 +342,10 @@ async function loadAuthenticatedRuntime(){
         s.async=false;
         s.dataset.mtaAuthRuntime=src.split('?')[0];
         s.onload=()=>resolve();
-        s.onerror=()=>reject(new Error('AUTH_RUNTIME_LOAD_FAILED:'+src));
+        // Optional enhancement failure must not prevent later canonical modules
+        // (including the unified shell) from loading. Required capabilities are
+        // asserted by the authenticated UAT contract after the loader completes.
+        s.onerror=()=>{console.warn('[MTA] authenticated runtime module unavailable:',src);resolve();};
         document.body.appendChild(s);
       });
     }
