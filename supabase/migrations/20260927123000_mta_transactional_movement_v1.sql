@@ -1,5 +1,31 @@
 create schema if not exists mta_internal;
 
+create table if not exists mta_internal.idempotency_keys (
+  idempotency_key text primary key,
+  request_hash text not null,
+  status text not null default 'COMPLETED' check(status='COMPLETED'),
+  response jsonb not null default '{}'::jsonb,
+  created_at timestamptz not null default now(),
+  completed_at timestamptz not null default now()
+);
+
+create table if not exists mta_internal.outbox_events (
+  event_id uuid primary key default gen_random_uuid(),
+  event_type text not null,
+  aggregate_type text not null,
+  aggregate_id text,
+  payload jsonb not null default '{}'::jsonb,
+  idempotency_key text not null unique,
+  occurred_at timestamptz not null default now(),
+  status text not null default 'PENDING' check(status in ('PENDING','PROCESSING','PUBLISHED','FAILED')),
+  attempts integer not null default 0 check(attempts>=0),
+  available_at timestamptz not null default now(),
+  locked_at timestamptz,
+  published_at timestamptz,
+  last_error text,
+  created_at timestamptz not null default now()
+);
+
 create or replace function mta_internal.execute_movement_transaction(p_idempotency_key text,p_request_hash text,p_detainee_id uuid,p_target_room_id uuid,p_actor_user_id uuid,p_request_id text,p_correlation_id text,p_movement_type text default 'TRANSFER',p_purpose text default null,p_occurred_at timestamptz default now()) returns jsonb language plpgsql security definer set search_path to pg_catalog,public,mta_internal as $$
 declare e mta_internal.idempotency_keys%rowtype; a mta_profiles%rowtype; d mta_detainees%rowtype; r mta_rooms%rowtype; cur mta_placements%rowtype; occ int; cap int; mid uuid:=gen_random_uuid(); pid uuid:=gen_random_uuid(); aid uuid; oid uuid:=gen_random_uuid(); out jsonb;
 begin
