@@ -70,7 +70,7 @@ jobs:
           "FAILURE_RECOVERY_CONTRACT|web/mta-unified-shell-v2.js"
           "requestKey|web/movement-v9.js"
           "appendAudit(d|web/movement-v9.js"
-          "appendLocalAudit|web/mta-app-runtime-full.js"
+          "CANONICAL_AUDIT_KERNEL_REQUIRED|web/mta-app-runtime-full.js"
           "mtaUnifiedAssignPlacement|web/mta-unified-shell-v2.js"
           "mtaUnifiedAdvanceLeave|web/mta-unified-shell-v2.js"
           "mtaUnifiedOpenMovement|web/mta-unified-shell-v2.js"
