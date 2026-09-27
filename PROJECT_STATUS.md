@@ -1,23 +1,38 @@
-# MTA DETENI - Current Audit Addendum (2026-09-22)
+# MTA DETENI — Current Audit Addendum (2026-09-27)
 
-## Latest remediation
+## CI Process 01 Closure / Canonical Pipeline Hardening
 
-The latest audit found and repaired a runtime-governance inconsistency in the Cloudflare Worker health contract: the runtime previously reported migrationFreeze=false while the repository governance baseline requires Migration Freeze TRUE. The health contract now reports the governed synthetic-only state explicitly, including productionAccessAuthorized=false, livePostgresqlExecution=false, realDetaineeDataAllowed=false, externalTransportAllowed=false and durablePublicationAllowed=false.
+The CI Process 01 remediation series is now **GREEN** on commit `b486d003ba697ce6dc1ae1b49cadeace4b782d84`.
 
-A dedicated executable test now protects these health invariants.
+Latest controlled-nonprod evidence:
+- Domain CI Run #2460 — **PASS**
+- Static Integration Gate Run #671 — **PASS**
+- Feature Verification Run #23 — **PASS**
+- Device Regression Run #517 — **PASS**
+- UI Responsive / Offline Smoke Run #341 — **PASS**
+- Cloudflare Non-Production Preflight Run #380 — **PASS**
 
-The Cloudflare non-production workflow was also changed from credential-dependent deployment on every main push to a credential-free Wrangler dry-run preflight. This removes the known Cloudflare token/permission failure from the normal CI path. Actual preview deployment is now an explicit operation from a supported authenticated deployment station.
+The remediation resolved four concrete integration defects without changing the governed runtime architecture:
+1. removed lockfile-dependent npm cache configuration from Feature Verification;
+2. restored the malformed detainee-detail navigation test source;
+3. aligned the unified runtime contract from stale v20 to canonical runtime v22;
+4. promoted User Management to a canonical unified navigation surface so authenticated browser acceptance is deterministic across device profiles.
 
-Android Termux finding: Wrangler 4.132.0 currently cannot be installed in the Android ARM64 Termux environment because its workerd dependency reports "Unsupported platform: android arm64 LE". This is an environment limitation, not an MTA DETENI source-code defect. Termux remains suitable for repository control/SSH; Wrangler deployment should run from a supported Windows, macOS or Linux deployment station.
+Domain CI Run #2460 reached and passed the complete certification/evidence chain, including P9.13 Kernel Certification, Integrated Acceptance Runtime Evidence, F5.4 Direct Final Integrity Certification, Local Runtime Adapter/Recovery Evidence, Backup/Restore/DR Certification, Controlled Execution Evidence and final evidence validation/upload.
 
-**Important:** the governance fix is committed to GitHub source but is **not yet live on Cloudflare production** until a successful manual production deployment occurs.
+**This closes the current CI Process 01 blocker. It does not authorize production access, database execution, schema migration, AI activation, real detainee data or durable external publication.**
 
-## Current verification boundary
+## Next Workstream — Canonical Pipeline Hardening
 
-- Latest Domain CI: in progress for the remediation series; do not call the series CI-PASS until the run completes successfully.
-- Latest Cloudflare non-production preflight: in progress for the remediation series; it no longer requires Cloudflare deployment credentials.
-- P1 Runtime Observation Run #238: PASS for the preceding remediation commit.
-- Cloudflare production: last verified live deployment remains the earlier Run #66 boundary; the new governance health response requires a subsequent deployment before it can be considered live.
+With Process 01 green, the active workstream is no longer CI repair. The next work is **canonical pipeline hardening and runtime-boundary verification**, in this order:
+
+1. reconcile project/feature evidence against the latest green CI;
+2. audit canonical Scan → Resolve → Data → Action → Mutation → Audit → Monitor → Report → Evidence chain for stale/duplicate ownership;
+3. verify feature-specific runtime evidence without weakening governance locks;
+4. verify deployment boundary and Cloudflare health contract on the current canonical commit when an authorized deployment station is available;
+5. only then advance feature statuses from IMPLEMENTED to VERIFIED where the registry evidence contract is fully satisfied.
+
+No schema migration is introduced by this workstream.
 
 ---
 
