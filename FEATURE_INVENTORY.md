@@ -28,22 +28,22 @@ Inventory ini memetakan capability yang terdeteksi dari source, commit history, 
 | 3 | Immutable Canonical QR Deteni | QR Identity | cfcc10b7 / 12179daa | F5 / QR integrity | HARDENED | immutable QR contract | runtime feature verification pending | MTA-F-20260926-002 |
 | 4 | Statistik Data Deteni & Ekosistem | Statistics | b54ae876 / 105552fe | Feature track | IMPLEMENTED | detainee-statistics-feature.test.mjs | runtime verification pending | MTA-F-20260926-003 |
 | 5 | Tabel Statistik + Download + Print A4 | Statistics/Reporting | 105552fe / 76a3cedd | Feature track | IMPLEMENTED | export/print regression | browser/runtime pending | MTA-F-20260926-003 |
-| 6 | Data Deteni CRUD + ownership/placement integrity | Core Administration | 46b3528e | P10/P12 + F5 | HARDENED / UNREGISTERED | domain/integration regression | synthetic runtime; production DB blocked | UNREGISTERED |
-| 7 | Placement Block / Room / Bed | Placement | e0228ca4 / 3f87faaa | P10 / F5.3 | HARDENED / UNREGISTERED | placement/cross-domain contracts | synthetic runtime; live DB blocked | UNREGISTERED |
-| 8 | Room Master Governance / Occupied Room Guard | Master Room | 3f87faaa / 46702d4e | F5.3 / UI | HARDENED / UNREGISTERED | room integrity + mobile regression | device/synthetic evidence | UNREGISTERED |
-| 9 | Movement Operational Actions | Movement | 8728e0da / 21c3dc15 | F3 / F5 | HARDENED / UNREGISTERED | f3-operational-actions + movement contracts | browser journey evidence | UNREGISTERED |
-| 10 | Headcount + Movement Consistency | Movement/Headcount | 22f2828d / bd178a17 | P10/P11 | CONTRACT/IMPLEMENTED | P11 operational consistency tests | synthetic-only | UNREGISTERED |
-| 11 | Temporary Exit / Izin Keluar | Leave | 7206de11 / 8d5fc94d | F3 / P11 | IMPLEMENTED / UNREGISTERED | f3-leave-return + DOM/browser tests | synthetic browser evidence | UNREGISTERED |
-| 12 | Escort / Pengawalan Service | Escort | 8d9cb968 / 31af8925 | P10 | CONTRACT/IMPLEMENTED | P10 escort service contracts | live operational execution gated | UNREGISTERED |
-| 13 | QR Camera Scanner v2 | QR Camera | 8b52104d / 92c4b284 | F0-F1 | HARDENED / UNREGISTERED | qr-camera-integration + device tests | device smoke evidence; latest runtime recheck needed | UNREGISTERED |
-| 14 | QR Resolve → Data → Action | QR/Operational Action | 42e6ee97 / 4b648320 | F1-F3 | HARDENED / UNREGISTERED | QR resolve/action tests | browser/device journey evidence | UNREGISTERED |
-| 15 | QR Print / Download Clean Output | QR Documents | qr-print-clean-v3 lineage | F3/F5 | IMPLEMENTED / regression-sensitive | QR/browser regression coverage | clean-print path exists; must remain runtime-verified | UNREGISTERED |
-| 16 | Daily Guard Report Renderer | Reporting | d3e0fb7c / d957a0d6 | D5 / F4 | IMPLEMENTED | daily-guard + F4 browser tests | browser report evidence | UNREGISTERED |
-| 17 | Daily Guard Report Lifecycle / Approval | Reporting Workflow | D5.7 lineage | D5 | IMPLEMENTED | lifecycle + retrieval/revision tests | synthetic runtime; storage/PDF gated | UNREGISTERED |
-| 18 | MFE Evidence → Daily Dataset → Report | Mobile Evidence/Reporting | f4b13cbc / 292e5f3f / ed5b591d | D5 | IMPLEMENTED / HARDENED | mfe-canonical-daily-report-runtime | actual MFE queue → renderer evidence | UNREGISTERED |
-| 19 | Mobile Field Evidence Intake Adapter | Mobile/Evidence | f4ac23dc | Mobile roadmap | IMPLEMENTED ADAPTER | MFE runtime tests | controlled/synthetic; production data blocked | UNREGISTERED |
-| 20 | Admin Settings — AI API + Web Branding | Admin | 1f9a861a / 1b9cd1ff | Admin hardening | IMPLEMENTED / UNREGISTERED | settings-navigation regression | loader/navigation hardening; AI OFF | UNREGISTERED |
-| 21 | Branding Upload / Operational-State Isolation | Admin/Storage | 36a500a6 / 79ab9f8a | Admin hardening | HARDENED | settings/data regression | synthetic runtime | UNREGISTERED |
+| 6 | Data Deteni CRUD + ownership/placement integrity | Core Administration | 46b3528e | P10/P12 + F5 | HARDENED / UNREGISTERED | domain/integration regression | synthetic runtime; production DB blocked | MTA-F-20260927-005 |
+| 7 | Placement Block / Room / Bed | Placement | e0228ca4 / 3f87faaa | P10 / F5.3 | HARDENED / UNREGISTERED | placement/cross-domain contracts | synthetic runtime; live DB blocked | MTA-F-20260927-006 |
+| 8 | Room Master Governance / Occupied Room Guard | Master Room | 3f87faaa / 46702d4e | F5.3 / UI | HARDENED / UNREGISTERED | room integrity + mobile regression | device/synthetic evidence | MTA-F-20260927-007 |
+| 9 | Movement Operational Actions | Movement | 8728e0da / 21c3dc15 | F3 / F5 | HARDENED / UNREGISTERED | f3-operational-actions + movement contracts | browser journey evidence | MTA-F-20260927-008 |
+| 10 | Headcount + Movement Consistency | Movement/Headcount | 22f2828d / bd178a17 | P10/P11 | CONTRACT/IMPLEMENTED | P11 operational consistency tests | synthetic-only | MTA-F-20260927-009 |
+| 11 | Temporary Exit / Izin Keluar | Leave | 7206de11 / 8d5fc94d | F3 / P11 | IMPLEMENTED / UNREGISTERED | f3-leave-return + DOM/browser tests | synthetic browser evidence | MTA-F-20260927-010 |
+| 12 | Escort / Pengawalan Service | Escort | 8d9cb968 / 31af8925 | P10 | CONTRACT/IMPLEMENTED | P10 escort service contracts | live operational execution gated | MTA-F-20260927-011 |
+| 13 | QR Camera Scanner v2 | QR Camera | 8b52104d / 92c4b284 | F0-F1 | HARDENED / UNREGISTERED | qr-camera-integration + device tests | device smoke evidence; latest runtime recheck needed | MTA-F-20260927-012 |
+| 14 | QR Resolve → Data → Action | QR/Operational Action | 42e6ee97 / 4b648320 | F1-F3 | HARDENED / UNREGISTERED | QR resolve/action tests | browser/device journey evidence | MTA-F-20260927-013 |
+| 15 | QR Print / Download Clean Output | QR Documents | qr-print-clean-v3 lineage | F3/F5 | IMPLEMENTED / regression-sensitive | QR/browser regression coverage | clean-print path exists; must remain runtime-verified | MTA-F-20260927-014 |
+| 16 | Daily Guard Report Renderer | Reporting | d3e0fb7c / d957a0d6 | D5 / F4 | IMPLEMENTED | daily-guard + F4 browser tests | browser report evidence | MTA-F-20260927-015 |
+| 17 | Daily Guard Report Lifecycle / Approval | Reporting Workflow | D5.7 lineage | D5 | IMPLEMENTED | lifecycle + retrieval/revision tests | synthetic runtime; storage/PDF gated | MTA-F-20260927-016 |
+| 18 | MFE Evidence → Daily Dataset → Report | Mobile Evidence/Reporting | f4b13cbc / 292e5f3f / ed5b591d | D5 | IMPLEMENTED / HARDENED | mfe-canonical-daily-report-runtime | actual MFE queue → renderer evidence | MTA-F-20260927-018 |
+| 19 | Mobile Field Evidence Intake Adapter | Mobile/Evidence | f4ac23dc | Mobile roadmap | IMPLEMENTED ADAPTER | MFE runtime tests | controlled/synthetic; production data blocked | MTA-F-20260927-017 |
+| 20 | Admin Settings — AI API + Web Branding | Admin | 1f9a861a / 1b9cd1ff | Admin hardening | IMPLEMENTED / UNREGISTERED | settings-navigation regression | loader/navigation hardening; AI OFF | MTA-F-20260927-019 |
+| 21 | Branding Upload / Operational-State Isolation | Admin/Storage | 36a500a6 / 79ab9f8a | Admin hardening | HARDENED | settings/data regression | synthetic runtime | MTA-F-20260927-020 |
 | 22 | Authentication + Session Hydration | Auth | c68223b8 / 67aa69ba | P9/P12 | HARDENED / UNREGISTERED | production-auth-rbac + auth regressions | controlled runtime; production governed | UNREGISTERED |
 | 23 | Production Auth/RBAC + CRUD API Adapter | Auth/API | 8c55de41 | P12 | IMPLEMENTED / GOVERNANCE BLOCKED | production-auth-rbac-api.test.mjs | adapter exists; live DB blocked | UNREGISTERED |
 | 24 | RBAC / Authorization Adversarial Boundary | Security | f64021d0 / de674e17 | P9/P12 | HARDENED | authorization-adversarial-certification | non-production evidence | UNREGISTERED |
@@ -138,6 +138,6 @@ Therefore:
 
 ## Conclusion
 
-The repository contains a substantially larger capability surface than the current 4-entry Feature Registry. The dominant gap is traceability and feature-specific runtime evidence, not simply missing implementation.
+The repository contains a substantially larger capability surface than the current 4-entry Feature Registry. The dominant remaining gaps are traceability, feature-specific runtime evidence, and the unimplemented User Management / Tambah User capability.
 
 The next engineering step is **Feature Reconciliation + Runtime Verification**, not indiscriminate feature development.
