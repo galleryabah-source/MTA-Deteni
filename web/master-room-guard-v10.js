@@ -1,7 +1,7 @@
 (()=>{
 const K='mta-deteni-demo-v2';
 const get=()=>window.MTADeteniStateKernel?window.MTADeteniStateKernel.read():JSON.parse(localStorage.getItem(K)||'{}');
-const put=d=>window.MTADeteniStateKernel?window.MTADeteniStateKernel.write(d):localStorage.setItem(K,JSON.stringify(d));
+const put=d=>{const kernel=window.MTADeteniStateKernel;if(!kernel)throw new Error('CANONICAL_STATE_KERNEL_REQUIRED');return kernel.write(d)};
 const E=s=>String(s??'').replace(/[&<>\"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;',"'":'&#39;'}[c]));
 const uid=p=>p+'-'+crypto.randomUUID().slice(0,10).toUpperCase();
 const now=()=>new Date().toISOString();
