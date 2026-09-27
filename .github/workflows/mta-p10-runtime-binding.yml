@@ -1,0 +1,49 @@
+name: MTA DETENI P10 Runtime Binding
+
+on:
+  pull_request:
+    branches: [gate/production-readiness]
+    paths:
+      - 'web/mta-production-api.js'
+      - 'web/mta-state-kernel-v1.js'
+      - 'web/mta-app-runtime-full.js'
+      - 'web/index.html'
+      - 'supabase/functions/mta-api/index.ts'
+      - 'test/p10-runtime-binding-contract.test.mjs'
+      - '.github/workflows/mta-p10-runtime-binding.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: mta-p10-runtime-binding-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  contract:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: P10 runtime binding contract
+        run: node test/p10-runtime-binding-contract.test.mjs
+
+      - name: JavaScript regression suite
+        run: npm test
+
+      - name: Durable mutation acknowledgement regression
+        run: node test/p10-durable-mutation-acknowledgement.test.mjs
+
+      - name: Typecheck
+        run: npm run typecheck
