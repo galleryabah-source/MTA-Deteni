@@ -1,6 +1,7 @@
 (()=>{
 const K='mta-deteni-demo-v2';
 const get=()=>window.MTADeteniStateKernel?window.MTADeteniStateKernel.read():JSON.parse(localStorage.getItem(K)||'{}');
+const QR_ROOM_STATE='QR_ROOM_STATE';
 const put=d=>{const kernel=window.MTADeteniStateKernel;if(!kernel)throw new Error('CANONICAL_STATE_KERNEL_REQUIRED');const result=kernel.write(d);window.dispatchEvent(new CustomEvent('mta:data-changed',{detail:{source:'room-ops-v9'}}));return result};
 const E=s=>String(s??'').replace(/[&<>\"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;',"'":'&#39;'}[c]));
 const uid=p=>p+'-'+crypto.randomUUID().slice(0,10).toUpperCase();
