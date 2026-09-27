@@ -312,27 +312,32 @@ async function loadAuthenticatedRuntime(){
     '/admin-settings-v9.js?v=4',
     '/mta-unified-shell-v2.js?v=10',
     '/mta-system-audit-v1.js?v=2'
-  ];
+  ];  const criticalRuntimeScripts=new Set(['/desktop-shell-v2.js','/mta-unified-shell-v2.js']);
   window.__mtaRuntimeLoading=(async()=>{
+    const failures=[];
     for(const src of scripts){
-      await new Promise((resolve,reject)=>{
-        const existing=document.querySelector('script[data-mta-auth-runtime="'+src.split('?')[0]+'"]');
-        if(existing)return resolve();
-        const s=document.createElement('script');
-        s.src=src;
-        s.async=false;
-        s.dataset.mtaAuthRuntime=src.split('?')[0];
-        s.onload=()=>resolve();
-        s.onerror=()=>reject(new Error('AUTH_RUNTIME_LOAD_FAILED:'+src));
-        document.body.appendChild(s);
-      });
+      try{
+        await new Promise((resolve,reject)=>{
+          const existing=document.querySelector('script[data-mta-auth-runtime="'+src.split('?')[0]+'"]');
+          if(existing)return resolve();
+          const s=document.createElement('script');s.src=src;s.async=false;
+          s.dataset.mtaAuthRuntime=src.split('?')[0];
+          s.onload=()=>resolve();s.onerror=()=>reject(new Error('AUTH_RUNTIME_LOAD_FAILED:'+src));
+          document.body.appendChild(s);
+        });
+      }catch(err){
+        failures.push({src,error:err.message||String(err)});
+        console.warn('[MTA] runtime module unavailable:',src,err);
+        if(criticalRuntimeScripts.has(src.split('?')[0]))throw err;
+      }
     }
+    window.__mtaRuntimeLoadFailures=failures;
+    if(failures.length)console.warn('[MTA] runtime loaded with non-critical module failures',failures);
   })().catch(err=>{
     console.error('[MTA] authenticated runtime failed to load',err);
     const msg=document.getElementById('mtaAuthMessage');
-    if(msg){msg.textContent='Runtime aplikasi gagal dimuat. Silakan refresh halaman.';msg.className='mta-auth-message error'}
-    window.__mtaRuntimeLoading=null;
-    throw err;
+    if(msg){msg.textContent='Runtime navigasi gagal dimuat. Silakan refresh halaman.';msg.className='mta-auth-message error'}
+    window.__mtaRuntimeLoading=null;throw err;
   });
   return window.__mtaRuntimeLoading;
 }
