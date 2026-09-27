@@ -42,5 +42,8 @@ jobs:
       - name: JavaScript regression suite
         run: npm test
 
+      - name: Durable mutation acknowledgement regression
+        run: node test/p10-durable-mutation-acknowledgement.test.mjs
+
       - name: Typecheck
         run: npm run typecheck
