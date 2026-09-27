@@ -1,3 +1,18 @@
+## 2026-09-27 — Global Canonical Pipeline Certification Closure
+
+- Commit `c29b534cee8aa169b29a29848dc38e4d0e3fa489` completed the canonical hardening closure.
+- Domain CI #2563: **PASS**.
+- Static Integration Gate #774: **PASS**.
+- Feature Verification #118: **PASS**.
+- Device Regression #620: **PASS** across phone, tablet, desktop and desktop-HD.
+- P1 Runtime Observation #664: **PASS**.
+- P9.13 Kernel Certification, integrated acceptance runtime evidence, local runtime adapter/recovery evidence, backup/restore/DR certification, controlled execution evidence and F5.4 evidence verification/upload: **PASS**.
+- Global Mutation Surface Certification: **PASS**.
+- State/Evidence Chain Verification: **PASS**.
+- F5.4 Direct Final Integrity Certification: **PASS**.
+- No schema migration, production DB execution, AI activation, real detainee data, or production deployment was performed.
+- Feature Registry remains conservative; no user-facing feature is promoted to VERIFIED solely from synthetic CI evidence.
+
 ## 2026-09-27 — H1-H8 Canonical Mutation Ownership Hardening
 
 - H1: Placement UI delegated to canonical `mtaUnifiedAssignPlacement`.
