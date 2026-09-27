@@ -21,7 +21,7 @@ assert.match(edge,/resource==="admin-users"/);
 assert.match(edge,/RBAC_USER_ADMIN_DENIED/);
 assert.match(edge,/allowedOrigin/);
 assert.match(edge,/const TABLES=new Set\(\["detainees","placements","movements","leaves","documents"\]\)/);
-assert.equal(edge.includes('const table="mta_"+resource;'),true);
+assert.match(edge,/const table=resource==="audit"\?"mta_audit_events":"mta_"+resource;/);
 assert.doesNotMatch(edge,/detail:error\.message/);
 assert.doesNotMatch(edge,/detail:String\(error\)/);
 

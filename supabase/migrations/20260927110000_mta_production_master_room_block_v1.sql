@@ -1,3 +1,6 @@
+-- Local replay compatibility: production already has mta_scopes; disposable CI replay must create the dependency when absent.
+create table if not exists public.mta_scopes (id uuid primary key default gen_random_uuid(), code text not null unique, name text not null, active boolean not null default true, created_at timestamptz not null default now(), updated_at timestamptz not null default now());
+
 -- MTA DETENI Production Foundation v1
 -- Controlled exception to Migration Freeze: canonical Master Block/Room dependency.
 -- Synthetic data only: no seed rows are inserted.
