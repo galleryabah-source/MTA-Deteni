@@ -70,6 +70,9 @@ Inventory ini memetakan capability yang terdeteksi dari source, commit history, 
 | 45 | P13 Integrated Integrity / Publication Certification Chain | Governance | P13.260881–274880 lineage | P13 | CLOSED AT GOVERNANCE LEVEL | extensive P13 tests + exit criteria | controlled-nonprod evidence; no external publication | Not a user feature |
 | 46 | F5 Final Integrity / Cross-Module Integrity | Governance/Integrity | F5 lineage | F5 | HARDENED / CERTIFICATION TRACK | placement/movement/leave/QR/audit contracts | synthetic integrity boundary | Not a user feature |
 
+
+| 47 | Dashboard Room Summary | Dashboard/Core Runtime | eb621931 / 432dbe89 | Feature track 2026-09-27 | IMPLEMENTED | test/room-summary-dashboard.test.mjs | Static regression contract; browser/runtime verification pending | MTA-F-20260927-004 |
+
 ## Functional Requirement Mapping
 
 | Requirement | Inventory | Assessment |
