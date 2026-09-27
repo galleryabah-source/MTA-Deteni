@@ -23,6 +23,7 @@ concurrency:
 env:
   MTA_EXECUTION_ENV: controlled-nonprod
   CI: true
+  RELEASE_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
 
 jobs:
   preflight:
