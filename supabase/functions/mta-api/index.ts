@@ -32,6 +32,19 @@ Deno.serve(async(req)=>{
   const resource=parts[0],id=parts[1];
   if(resource==="me" && req.method==="GET") return json(req,{ok:true,user:{id:user.id,email:user.email},profile,role});
 
+  if(resource==="audit" && req.method==="GET"){
+    const adminKey=Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+    if(!adminKey)return json(req,{ok:false,error:"SERVER_CONFIGURATION_ERROR"},503);
+    const admin=createClient(Deno.env.get("SUPABASE_URL")!,adminKey,{auth:{autoRefreshToken:false,persistSession:false}});
+    const limit=Math.min(Math.max(Number(url.searchParams.get("limit")||500),1),1000);
+    const resourceType=url.searchParams.get("resource_type");
+    let query=admin.from("mta_audit_events").select("*").order("occurred_at",{ascending:false}).limit(limit);
+    if(resourceType)query=query.eq("resource_type",resourceType);
+    const {data,error}=await query;
+    if(error)return json(req,{ok:false,error:"AUDIT_READ_FAILED"},500);
+    return json(req,{ok:true,resource,role,data:data||[]});
+  }
+
 
   if(resource==="admin-users"){
     if(!new Set(["OWNER","ADMIN"]).has(role)) return json(req,{ok:false,error:"RBAC_USER_ADMIN_DENIED"},403);
