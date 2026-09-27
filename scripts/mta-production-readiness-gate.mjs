@@ -13,10 +13,11 @@ function readJsonIfExists(file){
   return JSON.parse(read(file));
 }
 
-const expectedCommit=(process.env.GITHUB_SHA||'local').trim();
+const expectedCommit=(process.env.RELEASE_SHA||process.env.GITHUB_SHA||'local').trim();
 
 requireText('docs/03-implementation/CROSS-DEVICE-HARDENING-CERTIFICATION-EVIDENCE.md','Certification ID: MTA-CDH-CERT-2026-09-26-01');
 requireText('docs/03-implementation/CROSS-DEVICE-HARDENING-CERTIFICATION-EVIDENCE.md','Environment: controlled-nonprod / synthetic runtime');
+requireText('docs/03-implementation/CROSS-DEVICE-HARDENING-CERTIFICATION-EVIDENCE.md','**Status:** CERTIFIED');
 
 const kernel=read('docs/03-implementation/P9.13-KERNEL-CERTIFICATION-v1.0.md');
 const kernelEvidence=read('docs/03-implementation/P9.13-KERNEL-CERTIFICATION-EVIDENCE.md');
