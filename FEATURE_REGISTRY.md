@@ -40,7 +40,7 @@
 | ◐ IN_PROGRESS | 1 |
 | ☐ PLANNED | 1 |
 | ⚠ BLOCKED | 0 |
-| ☑ IMPLEMENTED | 17 |
+| ☑ IMPLEMENTED | 18 |
 | ↺ REGRESSION | 0 |
 ## Feature List
 
