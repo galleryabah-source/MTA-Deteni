@@ -20,3 +20,6 @@ console.log('MTA-F-20260926-002 detainee detail static contract: PASS');
 assert.match(source,/canonicalQrPayload/);
 assert.match(source,/Never generate a new token here/);
 assert.match(source,/q\.payload\|\|q\.data/);
+
+assert.match(source,/v==='detainee-detail'/);
+assert.match(source,/window\.MTADetaineeDetailView/);
