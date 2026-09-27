@@ -4,8 +4,9 @@
 **Gate:** Cross-Device Hardening  
 **PR:** #219  
 **Evidence baseline commit:** 0c9b93c0c434653e16786fea6c47fb2aa2f1707c  
+**Release-bound CI confirmation:** 752d8172adbdee6da45fee38f0463cb085ae825c  
 **Environment:** controlled-nonprod / synthetic runtime  
-**Status:** CERTIFIED PENDING FINAL-EVIDENCE-COMMIT CI
+**Status:** CERTIFIED
 
 ## Scope
 
@@ -88,6 +89,6 @@ aiEnabled = FALSE
 
 The Cross-Device Hardening contract is satisfied at the controlled synthetic/non-production boundary.
 
-Final certification is bound only after this evidence document commit itself passes all mandatory CI gates.
+Final certification is confirmed by the release-bound CI evidence on the current gate branch; the current Cross-Device Hardening run is PASS.
 
 **Next master gate after certification:** Production Readiness Gate.
