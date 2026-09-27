@@ -3,7 +3,7 @@
 **Certification:** PRODUCTION-READINESS-GATE-v1  
 **Gate:** Production Readiness  
 **Branch:** gate/production-readiness  
-**Baseline:** Cross-Device Hardening certified at commit 3d3c867f62cbc7405c11c6bf9ef56e7ae23381e8  
+**Release candidate:** b689b91ffe73f5b68d279fac4b90783ded8e4426  
 **Environment:** controlled-nonprod / synthetic  
 **Decision:** NO-GO
 
@@ -26,16 +26,17 @@ The repository's canonical production-readiness definition requires:
 
 The executable preflight intentionally reports NO_GO because mandatory production prerequisites do not yet have observable PASS evidence.
 
-### Blockers
+### Current blockers
 
-1. **Production-like staging/UAT deployment permission** — The executable staging/UAT workflow reached Cloudflare authentication (`wrangler whoami` PASS) but the Worker asset upload was rejected with `No access to the specified resource` for `/workers/scripts/mta-deteni-staging/assets-upload-session`. Therefore release-bound staging deployment and authenticated UAT remain unverified.
+1. **Production deployment gate** — The production deployment workflow exists and is manually gated. No successful production deployment plus live-health certification has been executed for the current release candidate. Therefore this prerequisite remains unverified.
 
-2. **Production deployment gate** — The production deployment workflow exists and is manually gated. Current gate evidence does not contain a successful production deployment plus live-health certification for this release candidate. Therefore this prerequisite remains unverified.
+2. **Real User Acceptance** — Cross-device, synthetic E2E, and release-bound staging/UAT evidence are certified. Real User Acceptance has not been executed in this gate. Therefore this prerequisite remains unverified.
 
-3. **Real User Acceptance** — Cross-device and synthetic E2E evidence are certified. Real user acceptance on authorized real data has not been executed in this gate. Therefore this prerequisite remains unverified.
+### Closed prerequisites
 
-4. **Real User Acceptance** — Cross-device and synthetic E2E evidence are certified. Real user acceptance on authorized real data has not been executed in this gate. Therefore this prerequisite remains unverified.
-
+- **P9.13 Kernel Certification** — CERTIFIED.
+- **Production-like staging/UAT** — CERTIFIED by GitHub Actions run #11 (36282132980), release commit b689b91ffe73f5b68d279fac4b90783ded8e4426, with Cloudflare deployment, live health, phone/tablet/desktop UAT, governance validation, and release-bound evidence all PASS.
+- **Cloudflare GitHub Actions credential** — deployment write permission verified by successful staging deployment.
 ## What is already green
 
 ```text
@@ -77,6 +78,6 @@ Real User Acceptance
 Production Readiness PASS
 ```
 
-The next action is to correct the Cloudflare staging deployment permission and rerun the existing executable staging/UAT gate. P9.13 is already certified and must not be reopened.
+The staging/UAT gate is now closed successfully. The next controlled actions are the manually gated Production Deployment Gate and, separately, Real User Acceptance. P9.13 and staging/UAT must not be reopened unless new evidence invalidates their certifications.
 
 **Final decision: NO-GO — correctly fail-closed.**
