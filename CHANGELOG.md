@@ -1,3 +1,15 @@
+## 2026-09-27 — H1-H8 Canonical Mutation Ownership Hardening
+
+- H1: Placement UI delegated to canonical `mtaUnifiedAssignPlacement`.
+- H2: Detainee create/update delegated to `MTADeteniDomainCommands`.
+- H3: Detainee archive/status delegated to `MTADeteniDomainCommands.archiveDetainee`.
+- H4: Legacy movement mutation entrypoint neutralized; legacy placement/detainee/archive writers removed from their UI entrypoints.
+- H5: Added canonical mutation ownership regression certification.
+- H6: Domain CI #2470, Static Integration Gate #681, Feature Verification #31, Device Regression #527, UI Responsive/Offline #347, Cloudflare Non-Production Preflight #386 and P1 Runtime Observation #645 all passed.
+- H7: F5.4 Direct Final Integrity Certification passed again in Domain CI #2470 with evidence verification/upload.
+- H8: Feature Registry remains conservative; no feature promoted to VERIFIED solely from synthetic CI.
+- Global Unified Data Flow Audit remains NOT CERTIFIED until remaining legacy mutation surfaces are audited.
+
 ## 2026-09-27 — CI Process 01 GREEN / Canonical Pipeline Hardening
 
 - Closed the current CI Process 01 remediation series on commit `b486d003ba697ce6dc1ae1b49cadeace4b782d84`.
