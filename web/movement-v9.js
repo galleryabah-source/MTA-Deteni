@@ -1,3 +1,4 @@
+const CANONICAL_DATA_EVENT='mta:data-changed';
 (()=>{
 const appendAudit=(d,a,t,i,r='SUCCESS',correlationId)=>{const kernel=window.MTADeteniStateKernel;if(kernel?.audit)return kernel.audit(d,a,t,i,r,{actor:'DEMO-OPERATOR',correlationId});throw new Error('CANONICAL_AUDIT_KERNEL_REQUIRED')};
 const audit=(a,t,i,r='SUCCESS')=>{const d=get(),kernel=window.MTADeteniStateKernel;if(kernel?.audit){kernel.audit(d,a,t,i,r,{actor:'DEMO-OPERATOR'});put(d);return}throw new Error('CANONICAL_AUDIT_KERNEL_REQUIRED')};
