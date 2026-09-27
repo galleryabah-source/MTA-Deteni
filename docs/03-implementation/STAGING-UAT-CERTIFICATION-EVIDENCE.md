@@ -3,7 +3,9 @@
 **Certification:** MTA-STAGING-UAT-CERT-2026-09-26-01  
 **Environment:** Cloudflare production-like staging  
 **Target:** mta-deteni-staging  
-**Current decision:** CERTIFIED — release-bound GitHub Actions Staging/UAT PASS
+**Current decision:** HISTORICAL — NOT RELEASE-BOUND TO THE CURRENT CANDIDATE
+
+> This record certifies release `36b423263403958ec763671ecddcbd61393c7a6d` only. It must not be used as certification evidence for a later release candidate. The current canonical candidate is `79fb0a4c77debf7d8e56484e6515f1db7af35f1a`.
 
 ## Staging deployment evidence
 
