@@ -3,7 +3,7 @@ import fs from "node:fs";
 
 const read=p=>fs.readFileSync(p,"utf8");
 const webFiles=fs.readdirSync("web").filter(p=>p.endsWith(".js")).map(p=>"web/"+p);
-const allowStorage=new Set(["web/mta-state-kernel-v1.js","web/mta-unified-shell-v1.js","web/preview-v10.js","web/qr-print-clean-v2.js","web/qr-print-clean.js"]);
+const allowStorage=new Set(["web/mta-state-kernel-v1.js","web/mta-unified-shell-v1.js","web/preview-v10.js","web/qr-print-clean-v2.js","web/qr-print-clean.js","web/room-ops-v7.js"]);
 
 for(const path of webFiles){
   const source=read(path);
@@ -14,6 +14,7 @@ for(const path of webFiles){
 test("legacy unified shell v1 is not part of the active runtime",()=>{
   const runtime=read("web/mta-app-runtime-full.js");
   assert.doesNotMatch(runtime,/mta-unified-shell-v1\.js/);
+  assert.doesNotMatch(runtime,/room-ops-v7\.js/);
 });
 
 test("global mutation ownership has one canonical command module",()=>{
