@@ -29,6 +29,7 @@ assert.match(kernel,/refusing synthetic fallback/);
 const readyAwait=runtime.indexOf('await window.MTADeteniStateKernel.ready()');
 const dbLoad=runtime.indexOf('db=load()');
 assert(readyAwait>=0 && dbLoad>readyAwait,'runtime must hydrate/govern before reading application state');
+assert(!runtime.includes('/mta-state-kernel-v1.js?v=4'),'authenticated enhancement loader must not bootstrap a second state kernel');
 
 assert.match(edge,/resource==="audit" && req\.method==="GET"/);
 assert.match(edge,/AUDIT_READ_FAILED/);
