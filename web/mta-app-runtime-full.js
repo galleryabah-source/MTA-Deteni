@@ -291,7 +291,7 @@ window.__mtaLegacyShow=show;
 // Navigation is owned by the unified shell; do not register a second nav listener.
 document.getElementById('backupBtn').onclick=()=>{audit('EXPORT_DOWNLOAD','BACKUP','synthetic');save();const blob=new Blob([JSON.stringify(db,null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='mta-deteni-synthetic-backup.json';a.click();toast('Backup JSON dibuat')};
 document.getElementById('importBtn').onclick=()=>document.getElementById('importFile').click();
-document.getElementById('importFile').onchange=e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{try{const x=JSON.parse(r.result);validateRuntimeState(x);db=x;appendAudit(db,'BACKUP_RESTORE','BACKUP','synthetic');db.lastMutation={key:'BACKUP_RESTORE:'+now(),action:'BACKUP_RESTORE',completedAt:now()};save();render();toast('Backup dipulihkan')}catch(err){toast('Backup tidak valid: '+err.message)}};r.readAsText(f)};
+document.getElementById('importFile').onchange=e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{try{const x=JSON.parse(r.result);const result=window.MTADeteniDomainCommandsV2?.restoreBackup(x);if(!result?.ok)throw new Error(result?.code||'BACKUP_RESTORE_FAILED');db=result.state;validateRuntimeState(db);if(!save())return;render();toast('Backup dipulihkan')}catch(err){toast('Backup tidak valid: '+err.message)}};r.readAsText(f)};
 if(!window.__mtaRuntimeClockTimer){window.__mtaRuntimeClockTimer=setInterval(()=>document.getElementById('clock').textContent=new Date().toLocaleString('id-ID'),1000);}
 async function loadAuthenticatedRuntime(){
   if(window.__mtaRuntimeLoading)return window.__mtaRuntimeLoading;
