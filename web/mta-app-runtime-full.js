@@ -306,6 +306,7 @@ window.__mtaLegacyShow=show;
 document.getElementById('backupBtn').onclick=()=>{audit('EXPORT_DOWNLOAD','BACKUP','synthetic');save();const blob=new Blob([JSON.stringify(db,null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='mta-deteni-synthetic-backup.json';a.click();toast('Backup JSON dibuat')};
 document.getElementById('importBtn').onclick=()=>document.getElementById('importFile').click();
 document.getElementById('importFile').onchange=e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{try{const x=JSON.parse(r.result);validateRuntimeState(x);db=x;appendAudit(db,'BACKUP_RESTORE','BACKUP','synthetic');db.lastMutation={key:'BACKUP_RESTORE:'+now(),action:'BACKUP_RESTORE',completedAt:now()};save();render();toast('Backup dipulihkan')}catch(err){toast('Backup tidak valid: '+err.message)}};r.readAsText(f)};
+window.addEventListener('mta:remote-sync',e=>{if(e?.detail?.status==='ERROR')console.error('[MTA] remote persistence error',e.detail)});
 if(!window.__mtaRuntimeClockTimer){window.__mtaRuntimeClockTimer=setInterval(()=>document.getElementById('clock').textContent=new Date().toLocaleString('id-ID'),1000);}
 async function loadAuthenticatedRuntime(){
   if(window.__mtaRuntimeLoading)return window.__mtaRuntimeLoading;
@@ -362,6 +363,7 @@ async function bootMtaApp(){
   // Core dashboard must not wait for optional/operational enhancement scripts.
   // Render immediately after authentication; load enhancements in the background.
   try{
+    if(window.MTADeteniStateKernel?.ready) await window.MTADeteniStateKernel.ready();
     db=load();
     window.__mtaAppBooted=true;
     render();
