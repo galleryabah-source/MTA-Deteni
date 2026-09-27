@@ -18,16 +18,8 @@ function save(){
   try{
     if(!db||typeof db!=='object')throw new Error('STATE_NOT_READY');
     const STATE_KERNEL=stateKernel();
-    if(STATE_KERNEL)return STATE_KERNEL.write(db);
-    const branding=db.adminSettings?.branding;
-    const persist=JSON.parse(JSON.stringify(db));
-    if(persist.adminSettings)delete persist.adminSettings.branding;
-    const serialized=JSON.stringify(persist);
-    localStorage.setItem(KEY,serialized);
-    if(localStorage.getItem(KEY)!==serialized)throw new Error('STORAGE_VERIFY_FAILED');
-    if(branding)localStorage.setItem(BRANDING_KEY,JSON.stringify(branding));
-    window.dispatchEvent(new CustomEvent('mta:data-changed',{detail:{source:'core-save'}}));
-    return true;
+    if(!STATE_KERNEL)throw new Error('CANONICAL_STATE_KERNEL_REQUIRED');
+    return STATE_KERNEL.write(db);
   }catch(err){console.error('[MTA] save failed',err);toast('Gagal menyimpan data: '+(err?.message||'STORAGE_ERROR'));return false}
 }
 function uid(prefix){return prefix+'-'+Math.random().toString(36).slice(2,8).toUpperCase()}
