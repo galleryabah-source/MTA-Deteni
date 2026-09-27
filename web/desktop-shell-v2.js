@@ -11,14 +11,14 @@
     documents:'REKAM & KEPATUHAN',audit:'REKAM & KEPATUHAN',reports:'REKAM & KEPATUHAN',
     'qr-center':'QR & PEMINDAIAN','scan-center':'QR & PEMINDAIAN','leave-qr':'QR & PEMINDAIAN','camera-scan':'QR & PEMINDAIAN',
     'room-ops':'FASILITAS','p6rooms':'FASILITAS','master-block':'FASILITAS','master-room':'FASILITAS','master-operational-catalogs':'FASILITAS','room-transfer-master':'FASILITAS',
-    'admin-settings':'ADMINISTRASI'
+    'admin-settings':'ADMINISTRASI','user-management':'ADMINISTRASI'
   };
   function loadCss(){if(document.getElementById(STYLE_ID))return;const l=document.createElement('link');l.id=STYLE_ID;l.rel='stylesheet';l.href=CSS;document.head.appendChild(l)}
   function syncA11y(nav){
     nav.setAttribute('aria-label','Navigasi utama MTA DETENI');
     nav.querySelectorAll('button').forEach(b=>{b.setAttribute('aria-current',b.classList.contains('active')?'page':'false');if(!b.title)b.title=b.textContent.trim()});
   }
-  const NAV_ORDER=['dashboard','detainee','placement','movement','leave','monitor','ops-queue','qr-center','scan-center','leave-qr','camera-scan','documents','audit','reports','room-ops','p9settings'];
+  const NAV_ORDER=['dashboard','detainee','placement','movement','leave','monitor','ops-queue','qr-center','scan-center','leave-qr','camera-scan','documents','audit','reports','room-ops','p9settings','user-management'];
   function groupNav(nav){
     const buttons=[...nav.querySelectorAll('button[data-view]')];
     const allowed=new Set(NAV_ORDER);
