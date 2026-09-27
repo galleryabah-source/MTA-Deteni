@@ -3,7 +3,7 @@
 **Certification:** MTA-STAGING-UAT-CERT-2026-09-26-01  
 **Environment:** Cloudflare production-like staging  
 **Target:** mta-deteni-staging  
-**Current decision:** UAT evidence PASS locally; release-bound certification pending CI execution
+**Current decision:** CERTIFIED — release-bound GitHub Actions Staging/UAT PASS
 
 ## Staging deployment evidence
 
@@ -93,18 +93,41 @@ AI                          = OFF
 synthetic-only              = TRUE
 ```
 
-## Certification boundary
+## Release-bound GitHub Actions certification
 
-The local staging deployment and local authenticated UAT establish that the deployed staging Worker passes the three-device journey.
+The formal release-bound workflow was executed successfully after the GitHub Actions → Cloudflare credential correction and CI evidence-path correction.
 
-However, the formal certification rule requires the existing release-bound GitHub workflow to reproduce:
+- Workflow: `MTA DETENI Production-like Staging UAT`
+- Run: `#10`
+- Run ID: `36282041542`
+- Release commit: `36b423263403958ec763671ecddcbd61393c7a6d`
+- Artifact ID: `10918859824`
+- Artifact: `mta-staging-uat-certification-36b423263403958ec763671ecddcbd61393c7a6d`
+- Artifact digest: `sha256:0ccddc2a91df1b1b88d77f1ba8334328bea815bdd5b4c05f19df424608db477b`
 
-1. staging deployment;
-2. live health verification;
-3. authenticated phone/tablet/desktop UAT;
-4. governance validation;
-5. evidence bound to the exact GitHub release commit.
+Release-bound execution results:
 
-Therefore this document is **not yet marked CERTIFIED**. The next step is to execute the existing `MTA DETENI Production-like Staging UAT` workflow and use its release-bound artifact as the formal certification evidence.
+| Control | Result |
+|---|---|
+| Cloudflare credentials | PASS |
+| Existing staging Worker access | PASS |
+| Staging deployment | PASS |
+| Live staging health | PASS |
+| Phone 390×844 authenticated UAT | PASS |
+| Tablet 768×1024 authenticated UAT | PASS |
+| Desktop 1440×900 authenticated UAT | PASS |
+| Governance validation | PASS |
+| Release-bound evidence generation | PASS |
+| Evidence artifact upload | PASS |
+
+The release-bound artifact contains certification ID `MTA-STAGING-UAT-CERT-2026-09-26-01`, binds the evidence to commit `36b423263403958ec763671ecddcbd61393c7a6d`, and is generated only when all three synthetic journeys and staging governance invariants pass.
+
+**Certification decision: CERTIFIED.**
+
+No production deployment, production database access, real detainee data, migration execution, or AI activation was performed by this certification.
+
+### Certification boundary
+
+Formal release-bound certification is now complete. The remaining Production Readiness blockers are independent of staging/UAT: production deployment gate execution and Real User Acceptance.
 
 No application source, schema, migration, production deployment, production database, real detainee data, or AI activation is authorized by this evidence update.
