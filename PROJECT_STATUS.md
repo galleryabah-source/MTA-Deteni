@@ -1,3 +1,63 @@
+# MTA DETENI — Canonical Pipeline Hardening Addendum (2026-09-27)
+
+## H1–H8 Mutation Ownership Hardening — CLOSED GREEN
+
+The canonical mutation hardening track was executed without adding a user-facing feature or changing the database schema.
+
+### H1 — Placement single-owner
+- Placement UI now delegates mutation to the existing canonical `window.mtaUnifiedAssignPlacement` command.
+- Legacy placement UI no longer performs direct `placements.unshift` mutation.
+- Master Room remains the governing source for target-room selection.
+
+### H2 — Detainee mutation single-owner
+- Added `web/mta-domain-commands-v1.js` as the canonical detainee domain-command boundary.
+- Create/update operations delegate to `MTADeteniDomainCommands.createDetainee/updateDetainee`.
+- Initial placement continues through the canonical placement command rather than a second placement writer.
+
+### H3 — Archive/status single-owner
+- Detainee archive/status mutation delegates to `MTADeteniDomainCommands.archiveDetainee`.
+- QR suspension and audit evidence are produced within that canonical command.
+
+### H4 — Legacy mutation entrypoints neutralized
+- Legacy core movement entrypoint no longer mutates `db.movements`; it redirects to canonical Movement UI.
+- Legacy placement/detainee/archive entrypoints no longer own domain mutation.
+
+### H5 — Canonical ownership regression
+- Added `test/canonical-mutation-ownership.test.mjs`.
+- Added it to the consolidated feature verification contract.
+- Static tests explicitly reject direct mutation in the hardened UI entrypoints.
+
+### H6 — Full CI re-run
+Latest canonical commit: `6c091ec41baaa62231f437a0f36dd614e7d349ed`.
+
+Latest evidence:
+- Domain CI Run #2470 — **PASS**
+- Static Integration Gate Run #681 — **PASS**
+- Feature Verification Run #31 — **PASS**
+- Device Regression Run #527 — **PASS**
+- UI Responsive / Offline Smoke Run #347 — **PASS**
+- Cloudflare Non-Production Preflight Run #386 — **PASS**
+- P1 Runtime Observation Run #645 — **PASS**
+
+### H7 — F5.4 re-certification
+Domain CI Run #2470 completed the full certification chain, including:
+- P9.13 Kernel Certification;
+- Integrated Acceptance Runtime Evidence;
+- **F5.4 Direct Final Integrity Certification — PASS**;
+- local runtime adapter/recovery evidence;
+- backup/restore disaster recovery certification;
+- controlled execution evidence;
+- final F5.4 evidence verification and upload.
+
+### H8 — Feature Registry reconciliation
+No feature was promoted to VERIFIED solely from synthetic CI. Existing feature statuses remain governed by their evidence contract. The hardening work is recorded as platform/governance work rather than a new user-facing feature.
+
+**Important boundary:** Unified Data Flow Audit remains not certified globally because other legacy mutation surfaces outside H1–H4 still require audit. Production deployment, production DB execution, migration, AI activation, real detainee data and durable external publication remain locked.
+
+## Next hardening target
+
+Continue the same canonical-ownership audit on the remaining mutation surfaces (notably leave creation/status, room QR state, backup/restore and other legacy writers), then re-run the full certification chain. Do not add unrelated features or deploy production before the global mutation-surface audit is clean.
+
 # MTA DETENI — Current Audit Addendum (2026-09-27)
 
 ## CI Process 01 Closure / Canonical Pipeline Hardening
