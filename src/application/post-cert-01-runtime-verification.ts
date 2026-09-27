@@ -84,13 +84,7 @@ export function derivePostCert01Observation(
   const placement = latestPlacement(state, input.detaineeId);
   const movement = placement?.movementId
     ? state.movements.find((x) => x.id === placement.movementId)
-    : state.movements
-        .filter(
-          (x) =>
-            x.detaineeId === input.detaineeId &&
-            x.toRoomId === input.roomId,
-        )
-        .at(0);
+    : undefined;
   const correlatedAudit = movement
     ? state.audit.find(
         (x) =>
