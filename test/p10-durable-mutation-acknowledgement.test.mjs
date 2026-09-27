@@ -98,7 +98,7 @@ function makeContext({createImpl,failAfterCreate=false}={}){
   assert.match(edge,/correlationId/);
 }
 
-console.log('P10 durable mutation acknowledgement regression: PASS');
+console.log('P10 durable mutation acknowledgement regression: PASS — certification contract');
 console.log('Verified:');
 console.log('- success waits for remote mutation completion');
 console.log('- remote failure rejects and is not reported as success');
