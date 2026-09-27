@@ -183,7 +183,7 @@ window.p9saveAI=()=>{const d=ensure(),entered=(document.querySelector('#p9aiKey'
   document.querySelector('#p9aiKey').value='';
   toast(entered?'Konfigurasi tersimpan; API key tidak disimpan di browser.':'Konfigurasi tersimpan tanpa API key.');
 };
-window.p9saveDesign=()=>{
+window.p9saveDesign=()=>{const d=ensure(),result=window.MTADeteniDomainCommandsV2?.updateBranding(d,{title:(document.querySelector('#p9brandTitle')?.value||'MTA DETENI Digital').trim(),subtitle:(document.querySelector('#p9brandSubtitle')?.value||'Manajemen Terpadu Administrasi Deteni').trim()});if(!result?.ok){toast('Branding ditolak: '+(result?.code||'CANONICAL_COMMAND_UNAVAILABLE'));return}put(d);applyWebBranding();settings();toast('Pengaturan desain web tersimpan.');};
   const d=ensure();d.adminSettings.branding=d.adminSettings.branding||{};
   d.adminSettings.branding.title=(document.querySelector('#p9brandTitle')?.value||'MTA DETENI Digital').trim();
   d.adminSettings.branding.subtitle=(document.querySelector('#p9brandSubtitle')?.value||'Manajemen Terpadu Administrasi Deteni').trim();
