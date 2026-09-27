@@ -28,6 +28,9 @@ jobs:
   preflight:
     runs-on: ubuntu-latest
     timeout-minutes: 20
+    outputs:
+      readiness_status: ${{ steps.readiness.outputs.status }}
+      ready_for_production: ${{ steps.readiness.outputs.ready_for_production }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -75,15 +78,21 @@ jobs:
           npx tsx test/security-adversarial-certification.test.ts
 
       - name: Verify production readiness decision
+        id: readiness
         run: |
           node - <<'NODE'
           const fs=require('fs');
           const x=JSON.parse(fs.readFileSync('artifacts/mta-evidence/production-readiness-gate.json','utf8'));
           console.log('PRODUCTION_READINESS_STATUS='+x.status);
           console.log('BLOCKERS='+JSON.stringify(x.blockers));
-          if(x.status!=='NO_GO' || x.readyForProduction!==false) {
-            throw new Error('Unexpected readiness state; require explicit certified PASS evidence before production.');
+          if(!['NO_GO','PASS'].includes(x.status)) {
+            throw new Error('Unexpected readiness state.');
           }
+          if(typeof x.readyForProduction!=='boolean') {
+            throw new Error('Missing readyForProduction boolean.');
+          }
+          const out=process.env.GITHUB_OUTPUT;
+          fs.appendFileSync(out,`status=${x.status}\nready_for_production=${x.readyForProduction}\n`);
           NODE
 
       - name: Upload readiness evidence
@@ -100,7 +109,16 @@ jobs:
     runs-on: ubuntu-latest
     if: ${{ always() }}
     steps:
-      - name: Fail closed until production prerequisites are certified
+      - name: Certify release boundary
         run: |
-          echo "Production Readiness Gate remains NO-GO until all mandatory production prerequisites have observable PASS evidence."
+          set -euo pipefail
+          STATUS="${{ needs.preflight.outputs.readiness_status }}"
+          READY="${{ needs.preflight.outputs.ready_for_production }}"
+          echo "PRODUCTION_READINESS_STATUS=$STATUS"
+          echo "READY_FOR_PRODUCTION=$READY"
+          if [ "$STATUS" = "PASS" ] && [ "$READY" = "true" ]; then
+            echo "Production Readiness Gate: PASS"
+            exit 0
+          fi
+          echo "Production Readiness Gate: NO-GO — mandatory production evidence is still missing or stale."
           exit 1
