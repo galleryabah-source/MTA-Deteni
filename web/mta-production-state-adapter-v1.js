@@ -23,7 +23,7 @@
   const mapAudit=a=>({id:a.id,action:a.action,resourceType:a.resource_type,resourceId:a.resource_id,result:a.result,actor:a.actor_user_id||'',requestId:a.request_id||'',correlationId:a.correlation_id||'',occurredAt:a.occurred_at,metadata:a.metadata||{},previousHash:a.previous_hash||null,eventHash:a.event_hash||null,hashVersion:a.hash_version||null,source:'PRODUCTION_DB'});
   async function hydrate(){
     if(!isProduction())return null;
-    const [blocks,rooms,detainees,placements,movements,leaves,documents,audit]=await Promise.all(['blocks','rooms','detainees','placements','movements','leaves','documents','audit'].map(list));
+    const [blocks,rooms,detainees,placements,movements,leaves,documents,audit]=await Promise.all(['blocks','rooms','detainees','placements','movements','leaves','documents','audit'].map(resource=>request(resource)));
     const byBlock=new Map(blocks.data.map(mapBlock).map(b=>[b.id,b]));
     const rs=rooms.data.map(mapRoom).map(r=>({...r,block:byBlock.get(r.blockId)?.name||''}));
     const ds=detainees.data.map(mapDetainee);
