@@ -1,3 +1,17 @@
+## 2026-09-27 — CI Process 01 GREEN / Canonical Pipeline Hardening
+
+- Closed the current CI Process 01 remediation series on commit `b486d003ba697ce6dc1ae1b49cadeace4b782d84`.
+- Domain CI Run #2460: **PASS**.
+- Static Integration Gate Run #671: **PASS**.
+- Feature Verification Run #23: **PASS**.
+- Device Regression Run #517: **PASS** across phone, tablet, desktop and desktop-HD.
+- UI Responsive / Offline Smoke Run #341: **PASS**.
+- Cloudflare Non-Production Preflight Run #380: **PASS**.
+- Repaired the lockfile-dependent npm cache contract, malformed detainee navigation test source, stale runtime v20 contract, and User Management navigation ownership mismatch.
+- Domain CI reached and passed P9.13, integrated acceptance, F5.4 final integrity, local runtime adapter/recovery, backup/restore/DR and controlled execution evidence validation.
+- CI green does not authorize production access, migration, AI activation, real detainee data or durable external publication.
+- Next active track: canonical pipeline hardening and feature-specific runtime evidence reconciliation.
+
 ## 2026-09-25 — Mobile Field Evidence Intake & Daily Report Supply Locked
 
 - Locked **Mobile Field Evidence Intake → Daily Report Assembly** as a core MTA DETENI capability.
