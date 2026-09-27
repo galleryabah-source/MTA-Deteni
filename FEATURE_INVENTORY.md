@@ -3,7 +3,7 @@
 Tanggal audit: 2026-09-27  
 Repository: galleryabah-source/MTA-Deteni  
 Branch: main  
-Head yang diaudit: 03df70eaf128e8f7cda353e68635708d3e047b45
+Audit baseline commit: 03df70eaf128e8f7cda353e68635708d3e047b45
 
 ## Tujuan
 
