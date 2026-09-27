@@ -24,7 +24,7 @@
         '<div class="mta-kpi-card"><span class="mta-kpi-icon">◷</span><div><small>Audit Event</small><strong>0</strong><em>Evidence</em></div></div>'+
       '</section>'+
       '<section class="mta-dashboard-grid">'+
-        '<article class="mta-panel mta-quick-panel"><div class="mta-panel-head"><div><span class="mta-section-kicker">OPERASIONAL</span><h2>Alur kerja cepat</h2></div><span class="mta-panel-badge">SYNTHETIC</span></div>'+
+        '<article class="mta-panel mta-quick-panel"><div class="mta-panel-head"><div><span class="mta-section-kicker">OPERASIONAL</span><h2>Alur kerja cepat</h2></div><span class="mta-panel-badge">RUNTIME LOADING</span></div>'+
           '<div class="mta-action-grid">'+
             '<button onclick="show(\'detainee\')" class="mta-action-tile"><span>♙</span><b>Data Deteni</b><small>Kelola master data</small></button>'+
             '<button onclick="show(\'placement\')" class="mta-action-tile"><span>▱</span><b>Penempatan</b><small>Assignment kamar</small></button>'+
@@ -35,8 +35,8 @@
           '</div>'+
         '</article>'+
         '<aside class="mta-panel mta-health-panel"><div class="mta-panel-head"><div><span class="mta-section-kicker">GOVERNANCE</span><h2>Runtime status</h2></div><span class="mta-live-dot">● LIVE</span></div>'+
-          '<div class="mta-status-list"><div><span>Authentication</span><b>AUTHENTICATED</b></div><div><span>Data mode</span><b>SYNTHETIC</b></div><div><span>AI</span><b>OFF</b></div><div><span>Database</span><b>NOT CONNECTED</b></div></div>'+
-          '<div class="mta-governance-note"><strong>Governed runtime</strong><span>Migration Freeze · Production access locked · Synthetic data only</span></div>'+
+          '<div class="mta-status-list"><div><span>Authentication</span><b>AUTHENTICATED</b></div><div><span>Data mode</span><b>LOADING</b></div><div><span>AI</span><b>OFF</b></div><div><span>Database</span><b>CONNECTING</b></div></div>'+
+          '<div class="mta-governance-note"><strong>Governed runtime</strong><span>Migration Freeze · Runtime sedang menginisialisasi</span></div>'+
         '</aside>'+
       '</section>'+
       '<section class="mta-roadmap-panel"><div class="mta-panel-head"><div><span class="mta-section-kicker">ROADMAP</span><h2>Operational journey</h2></div><span class="mta-panel-muted">Scan → Resolve → Data → Action → Audit → Monitor → Report</span></div>'+
