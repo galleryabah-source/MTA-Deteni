@@ -5,6 +5,8 @@ const runtime=fs.readFileSync('web/mta-app-runtime-full.js','utf8');
 
 assert.match(runtime,/function roomSummary\(\)/);
 assert.match(runtime,/totalRooms:rooms\.length/);
+assert.match(runtime,/if\(d\?\.status!==['"]AKTIF['"]\)continue/);
+assert.match(runtime,/const latestPlacement=new Map\(\)/);
 assert.match(runtime,/occupiedRooms/);
 assert.match(runtime,/capacity=rooms\.reduce/);
 assert.match(runtime,/Room Summary/);
