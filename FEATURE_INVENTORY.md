@@ -73,7 +73,7 @@ Inventory ini memetakan capability yang terdeteksi dari source, commit history, 
 
 | 47 | Dashboard Room Summary | Dashboard/Core Runtime | eb621931 / 432dbe89 | Feature track 2026-09-27 | IMPLEMENTED | test/room-summary-dashboard.test.mjs | Static regression contract; browser/runtime verification pending | MTA-F-20260927-004 |
 
-| 48 | User Management / Tambah User | Administration / Identity | Requested capability; no operational implementation found in audited source | Feature reconciliation | PLANNED | No implementation/test evidence | Not available | MTA-F-20260927-021 |
+| 48 | User Management / Tambah User | Administration / Identity | 38752e64 / f12d3088 / 24f89fd | Administration / Identity | IMPLEMENTED | user-management-feature.test.mjs | protected admin-users API; production runtime verification pending | MTA-F-20260927-021 |
 
 ## Functional Requirement Mapping
 
@@ -140,6 +140,6 @@ Therefore:
 
 ## Conclusion
 
-The repository contains a substantially larger capability surface than the current 4-entry Feature Registry. The dominant remaining gaps are traceability, feature-specific runtime evidence, and the unimplemented User Management / Tambah User capability.
+The repository contains a substantially larger capability surface than the registered Feature IDs. The dominant remaining gaps are feature-specific runtime evidence and controlled production verification.
 
 The next engineering step is **Feature Reconciliation + Runtime Verification**, not indiscriminate feature development.
