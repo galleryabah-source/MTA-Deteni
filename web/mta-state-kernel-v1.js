@@ -218,5 +218,5 @@ function contractTest(){
 }
 function transact(mutator){const state=read();const value=mutator(state);write(state);return value===undefined?state:value}
 window.MTADeteniStateKernel=Object.freeze({version:'2.0.0',key:KEY,brandingKey:BRANDING_KEY,read,write,persist:persistLocal,transact,audit,uid,now,normalize,initialize,ready:initialize,contractTest,getRuntimeContract:()=>clone(runtimeContract),getSyncState:()=>clone(lastSync)});
-void initialize().catch(()=>{});
+
 })();
