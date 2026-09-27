@@ -136,7 +136,7 @@ jobs:
           for spec in "phone 390 844" "tablet 768 1024" "desktop 1440 900"; do
             set -- $spec
             DEVICE="$1" WIDTH="$2" HEIGHT="$3" BASE_URL="$BASE_URL" node tests/authenticated-browser-acceptance.mjs
-            cp "/tmp/mta-auth-journey-$1.json" "artifacts/staging-uat/$1-journey.json"
+            cp "/tmp/mta-deteni-evidence/mta-auth-journey-$1.json" "artifacts/staging-uat/$1-journey.json"
           done
 
       - name: Build release-bound staging UAT evidence
