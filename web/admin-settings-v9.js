@@ -189,7 +189,7 @@ window.p9saveDesign=()=>{const d=ensure(),result=window.MTADeteniDomainCommandsV
   d.adminSettings.branding.subtitle=(document.querySelector('#p9brandSubtitle')?.value||'Manajemen Terpadu Administrasi Deteni').trim();
   audit('ADMIN_WEB_DESIGN_UPDATE','WEB_BRANDING','ADMIN','SUCCESS',d);put(d);applyWebBranding();settings();toast('Pengaturan desain web tersimpan.');
 };
-window.p9uploadAsset=kind=>{
+window.p9uploadAsset=kind=>{const map={icon:'p9iconFile',logo:'p9logoFile',header:'p9headerFile'};const file=document.querySelector('#'+map[kind])?.files?.[0];if(!file)return toast('Pilih file terlebih dahulu.');readImage(file,data=>{const d=ensure(),result=window.MTADeteniDomainCommandsV2?.uploadBranding(d,{kind,data});if(!result?.ok){toast('Aset ditolak: '+(result?.code||'CANONICAL_COMMAND_UNAVAILABLE'));return}put(d);applyWebBranding();settings();toast('Aset '+kind+' berhasil diunggah.');});};
   const map={icon:'p9iconFile',logo:'p9logoFile',header:'p9headerFile'};
   const file=document.querySelector('#'+map[kind])?.files?.[0];if(!file)return toast('Pilih file terlebih dahulu.');
   readImage(file,data=>{
