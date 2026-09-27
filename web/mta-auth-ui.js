@@ -45,7 +45,7 @@
           <div><strong>MTA DETENI Digital</strong><small>Manajemen Terpadu Administrasi Deteni</small></div>
         </div>
         <h1 class="mta-auth-title">Masuk ke MTA DETENI</h1>
-        <p class="mta-auth-sub">Authentication diperlukan sebelum mengakses dashboard dan data operasional. Runtime saat ini tetap synthetic dan tidak menggunakan data deteni produksi.</p>
+        <p class="mta-auth-sub">Authentication diperlukan sebelum mengakses dashboard dan data operasional. Runtime dikendalikan oleh environment boundary dan tidak menggunakan data deteni produksi sebelum production runtime terhubung.</p>
         <div class="mta-auth-mode">
           <button type="button" id="mtaAuthLoginMode" class="active">Login</button>
           
@@ -56,7 +56,7 @@
           <button class="mta-auth-submit" id="mtaAuthSubmit" type="submit">Login</button>
           <div class="mta-auth-message" id="mtaAuthMessage"></div>
         </form>
-        <div class="mta-auth-foot">MTA DETENI · Authentication boundary · AI OFF · Synthetic runtime</div>
+        <div class="mta-auth-foot">MTA DETENI · Authentication boundary · AI OFF · Controlled runtime</div>
       </div>`;
     document.body.appendChild(gate);
     return gate;
