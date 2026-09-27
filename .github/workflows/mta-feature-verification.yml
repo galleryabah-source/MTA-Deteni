@@ -1,0 +1,43 @@
+name: MTA Feature Verification
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'web/**'
+      - 'test/**'
+      - 'package.json'
+      - 'package-lock.json'
+      - '.github/workflows/mta-feature-verification.yml'
+  pull_request:
+    paths:
+      - 'web/**'
+      - 'test/**'
+      - 'package.json'
+      - 'package-lock.json'
+      - '.github/workflows/mta-feature-verification.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  feature-verification:
+    name: F-002/F-003/F-004 verification
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout tested revision
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Run consolidated feature verification
+        run: node --test test/feature-runtime-verification.test.mjs
