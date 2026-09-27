@@ -84,6 +84,30 @@ jobs:
       - name: TypeScript domain tests
         run: npm run test:unit
 
+      - name: POST-CERT-01 Headcount + Movement Consistency Runtime Verification
+        run: npx tsx scripts/mta-post-cert-01-runtime-evidence.ts
+
+      - name: Verify POST-CERT-01 certification evidence
+        if: always()
+        run: |
+          test -s artifacts/mta-evidence/post-cert-01-runtime-verification.json
+          node - <<'NODE'
+          const x=require('./artifacts/mta-evidence/post-cert-01-runtime-verification.json');
+          if(x.certification!=='POST-CERT-01'||x.status!=='READY') process.exit(1);
+          if(x.environment!=='controlled-nonprod'||x.syntheticOnly!==true) process.exit(1);
+          if(x.productionAccessAuthorized!==false||x.migrationExecuted!==false||x.aiEnabled!==false) process.exit(1);
+          if(x.result?.status!=='READY'||(x.result?.reasonCodes||[]).length) process.exit(1);
+          console.log('POST-CERT-01='+x.status);
+          NODE
+
+      - name: Upload POST-CERT-01 certification evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: mta-post-cert-01-runtime-${{ github.sha }}
+          path: artifacts/mta-evidence/post-cert-01-runtime-verification.json
+          if-no-files-found: error
+          retention-days: 14
       - name: P9.13 Kernel Certification
         run: node scripts/mta-p9.13-kernel-certification.mjs
 
