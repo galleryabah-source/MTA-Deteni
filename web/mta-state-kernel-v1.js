@@ -153,24 +153,36 @@ async function syncCollection(resource,nextRows,prevRows){
 }
 
 async function syncRemote(state){
-  if(!apiEnabled())return;
+  if(!apiEnabled())return {status:'SYNTHETIC'};
   if(!remoteSnapshot)remoteSnapshot=clone(state);
   for(const resource of RESOURCES)await syncCollection(resource,state[resource]||[],remoteSnapshot[resource]||[]);
   remoteSnapshot=clone(state);
   lastSync={status:'SYNCED',at:now(),error:null};
   window.dispatchEvent(new CustomEvent('mta:remote-sync',{detail:clone(lastSync)}));
+  return {status:'SYNCED',at:lastSync.at};
 }
 
-function write(state){
+async function write(state){
   normalize(state);
-  if(!apiEnabled()){persistLocal(state);lastSync={status:'SYNTHETIC',at:now(),error:null};return true}
-  persistLocal(state);
+  if(!apiEnabled()){
+    persistLocal(state);
+    lastSync={status:'SYNTHETIC',at:now(),error:null};
+    return true;
+  }
   const snapshot=clone(state);
+  /*
+   * Durable acknowledgement:
+   * success is returned only after the serialized remote mutation chain completes.
+   * Remote failure rejects and is never converted into a successful write.
+   */
   syncChain=syncChain.then(()=>syncRemote(snapshot)).catch(err=>{
     lastSync={status:'ERROR',at:now(),error:err?.message||'REMOTE_SYNC_FAILED'};
     console.error('[MTA] remote sync failed',err);
     window.dispatchEvent(new CustomEvent('mta:remote-sync',{detail:clone(lastSync)}));
+    throw err;
   });
+  await syncChain;
+  persistLocal(state);
   return true;
 }
 
@@ -216,7 +228,7 @@ function contractTest(){
     {name:'NO_SYNTHETIC_FALLBACK_AFTER_REMOTE_AUTH',ok:!apiEnabled()||!!remoteState}
   ]}
 }
-function transact(mutator){const state=read();const value=mutator(state);write(state);return value===undefined?state:value}
+async function transact(mutator){const state=read();const value=mutator(state);await write(state);return value===undefined?state:value}
 window.MTADeteniStateKernel=Object.freeze({version:'2.0.0',key:KEY,brandingKey:BRANDING_KEY,read,write,persist:persistLocal,transact,audit,uid,now,normalize,initialize,ready:initialize,contractTest,getRuntimeContract:()=>clone(runtimeContract),getSyncState:()=>clone(lastSync)});
 
 })();
