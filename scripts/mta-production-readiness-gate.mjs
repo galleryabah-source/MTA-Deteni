@@ -36,6 +36,19 @@ for(const x of [
   'Real user acceptance = PASS'
 ]) if(!runbook.includes(x)) failures.push('Missing production-readiness criterion: '+x);
 
+const p10Kernel=read('web/mta-state-kernel-v1.js');
+const p10Api=read('web/mta-production-api.js');
+const p10Runtime=read('web/mta-app-runtime-full.js');
+const p10Index=read('web/index.html');
+const p10Edge=read('supabase/functions/mta-api/index.ts');
+if(!p10Kernel.includes("mtaProductionApi.list('detainees')")) failures.push('P10 UI state kernel is not bound to production API');
+if(!p10Kernel.includes('productionAccessAuthorized')||!p10Kernel.includes('livePostgresqlExecution')) failures.push('P10 runtime governance binding missing');
+if(!p10Kernel.includes('refusing synthetic fallback')) failures.push('P10 fail-closed remote hydration contract missing');
+if(!p10Api.includes("Idempotency-Key")) failures.push('P10 API adapter idempotency header missing');
+if(!(p10Index.indexOf('/mta-production-api.js') < p10Index.indexOf('/mta-state-kernel-v1.js') && p10Index.indexOf('/mta-state-kernel-v1.js') < p10Index.indexOf('/mta-auth-ui.js'))) failures.push('P10 bootstrap order must be API -> state kernel -> auth UI');
+if(!p10Runtime.includes('await window.MTADeteniStateKernel.ready()')) failures.push('P10 runtime does not await canonical binding hydration');
+if(!p10Edge.includes('resource==="audit" && req.method==="GET"')) failures.push('P10 governed audit read contract missing');
+
 const worker=read('worker-v11.js');
 const requiredGovernance=[
   "dataMode:'SYNTHETIC_ONLY'",
