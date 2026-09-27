@@ -51,13 +51,7 @@ alter table public.mta_blocks enable row level security;
 alter table public.mta_rooms enable row level security;
 
 drop policy if exists mta_blocks_select_scope on public.mta_blocks;
-create policy mta_blocks_select_scope on public.mta_blocks for select using (
-  private.mta_current_role() = any(array['OWNER','ADMIN','AUDITOR']) or
-  exists (
-    select 1 from public.mta_profile_scopes ps
-    where ps.profile_id = auth.uid() and ps.scope_id = mta_blocks.scope_id and ps.active = true
-  )
-);
+create policy mta_blocks_select_authenticated on public.mta_blocks for select using (auth.uid() is not null);
 
 drop policy if exists mta_blocks_write_scope on public.mta_blocks;
 create policy mta_blocks_write_scope on public.mta_blocks for all using (
@@ -67,13 +61,7 @@ create policy mta_blocks_write_scope on public.mta_blocks for all using (
 );
 
 drop policy if exists mta_rooms_select_scope on public.mta_rooms;
-create policy mta_rooms_select_scope on public.mta_rooms for select using (
-  private.mta_current_role() = any(array['OWNER','ADMIN','AUDITOR']) or
-  exists (
-    select 1 from public.mta_profile_scopes ps
-    where ps.profile_id = auth.uid() and ps.scope_id = mta_rooms.scope_id and ps.active = true
-  )
-);
+create policy mta_rooms_select_authenticated on public.mta_rooms for select using (auth.uid() is not null);
 
 drop policy if exists mta_rooms_write_scope on public.mta_rooms;
 create policy mta_rooms_write_scope on public.mta_rooms for all using (
