@@ -311,7 +311,6 @@ if(!window.__mtaRuntimeClockTimer){window.__mtaRuntimeClockTimer=setInterval(()=
 async function loadAuthenticatedRuntime(){
   if(window.__mtaRuntimeLoading)return window.__mtaRuntimeLoading;
   const scripts=[
-    '/mta-state-kernel-v1.js?v=4',
     '/offline-v1.js?v=2',
     '/offline-queue-v1.js?v=2',
     '/mfe-evidence-v1.js?v=1',
