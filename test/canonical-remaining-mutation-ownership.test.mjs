@@ -35,7 +35,7 @@ test("H7 admin master mutations delegate to canonical domain commands",()=>{
   for(const marker of [
     "updateAi","updateBranding","uploadBranding","updateSystem",
     "catalogCreate","catalogRemove","createBlock","updateBlock","createRoom","updateRoom"
-  ]) assert.match(admin,new RegExp("MTADeteniDomainCommandsV2\\."+marker));
+  ]) assert.match(admin,new RegExp("MTADeteniDomainCommandsV2\\?\\."+marker));
   for(const marker of [
     "function updateAi(","function updateBranding(","function uploadBranding(","function updateSystem(",
     "function catalogCreate(","function catalogRemove(","function createBlock(","function updateBlock(","function createRoom(","function updateRoom("
@@ -53,10 +53,10 @@ test("H8 canonical mutation module is wired into runtime",()=>{
 test("H9 document lifecycle and backup restore use canonical domain commands",()=>{
   const runtime=read("web/mta-app-runtime-full.js");
   const commands=read("web/mta-domain-commands-v2.js");
-  assert.match(runtime,/MTADeteniDomainCommandsV2\.createDocument/);
-  assert.match(runtime,/MTADeteniDomainCommandsV2\.transitionDocument/);
-  assert.match(runtime,/MTADeteniDomainCommandsV2\.createDocumentRevision/);
-  assert.match(runtime,/MTADeteniDomainCommandsV2\.restoreBackup/);
+  assert.match(runtime,/MTADeteniDomainCommandsV2\?\.createDocument/);
+  assert.match(runtime,/MTADeteniDomainCommandsV2\?\.transitionDocument/);
+  assert.match(runtime,/MTADeteniDomainCommandsV2\?\.createDocumentRevision/);
+  assert.match(runtime,/MTADeteniDomainCommandsV2\?\.restoreBackup/);
   assert.match(commands,/function createDocument\(s,document\)/);
   assert.match(commands,/function transitionDocument\(s,id,next,note\)/);
   assert.match(commands,/function createDocumentRevision\(s,id\)/);
@@ -71,7 +71,7 @@ test("H10 document generation preparation is read-only until canonical mutation"
   const block=runtime.slice(runtime.indexOf("async function generateValidatedReport"),runtime.indexOf("function workflowNote"));
   assert.match(block,/structuredClone\(r\)/);
   assert.match(block,/mtaDailyGuardReport\.prepare\(source\)/);
-  assert.match(block,/MTADeteniDomainCommandsV2\.applyGeneratedDocument/);
+  assert.match(block,/MTADeteniDomainCommandsV2\?\.applyGeneratedDocument/);
   assert.doesNotMatch(block,/Object\.assign\(r,prepared\)/);
   assert.match(commands,/function applyGeneratedDocument\(s,id,prepared\)/);
 });
