@@ -1,8 +1,9 @@
 (()=>{
   'use strict';
   const API='https://tmmhxqgzelgrsrxbbfzh.supabase.co/functions/v1/mta-api';
-  const SYNTHETIC_HOSTS=new Set(['localhost','127.0.0.1']);
-  const isProduction=()=>!SYNTHETIC_HOSTS.has(location.hostname);
+  // Production is explicit. Staging/preview workers remain synthetic unless deliberately promoted.
+  const PRODUCTION_HOSTS=new Set(['mta-deteni.galleryabah.workers.dev']);
+  const isProduction=()=>PRODUCTION_HOSTS.has(location.hostname);
   const state=()=>window.__mtaProductionState||null;
   const session=async()=>{const r=await window.mtaAuth?.session?.();return r?.data?.session||null};
   async function request(resource,{method='GET',body,headers={}}={}){
