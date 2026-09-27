@@ -134,32 +134,40 @@ const converters={detainees:toDetainee,placements:toPlacement,movements:toMoveme
 async function syncCollection(resource,nextRows,prevRows){
   const prevById=new Map((prevRows||[]).filter(x=>x?.id).map(x=>[String(x.id),x]));
   const nextById=new Map((nextRows||[]).filter(x=>x?.id).map(x=>[String(x.id),x]));
+  const idMap=[];
   for(const item of nextRows||[]){
-    const id=String(item.id||'');
-    const old=prevById.get(id);
+    const clientId=String(item.id||'');
+    const old=prevById.get(clientId);
     if(!old){
       const result=await window.mtaProductionApi.create(resource,converters[resource](item));
       const row=result.row||result.data;
-      if(row?.id&&item.id!==row.id)item.id=row.id;
+      if(row?.id&&clientId!==String(row.id)){
+        idMap.push({resource,clientId,remoteId:String(row.id)});
+        item.id=row.id;
+      }
       continue;
     }
     const oldPayload=JSON.stringify(converters[resource](old));
     const nextPayload=JSON.stringify(converters[resource](item));
-    if(oldPayload!==nextPayload)await window.mtaProductionApi.update(resource,id,converters[resource](item));
+    if(oldPayload!==nextPayload)await window.mtaProductionApi.update(resource,clientId,converters[resource](item));
   }
   for(const [id] of prevById){
     if(!nextById.has(id))await window.mtaProductionApi.remove(resource,id);
   }
+  return idMap;
 }
 
 async function syncRemote(state){
-  if(!apiEnabled())return {status:'SYNTHETIC',state};
+  if(!apiEnabled())return {status:'SYNTHETIC',state,idMap:[]};
   if(!remoteSnapshot)remoteSnapshot=clone(state);
-  for(const resource of RESOURCES)await syncCollection(resource,state[resource]||[],remoteSnapshot[resource]||[]);
+  const idMap=[];
+  for(const resource of RESOURCES){
+    idMap.push(...await syncCollection(resource,state[resource]||[],remoteSnapshot[resource]||[]));
+  }
   remoteSnapshot=clone(state);
   lastSync={status:'SYNCED',at:now(),error:null};
   window.dispatchEvent(new CustomEvent('mta:remote-sync',{detail:clone(lastSync)}));
-  return {status:'SYNCED',at:lastSync.at,state:clone(state)};
+  return {status:'SYNCED',at:lastSync.at,state:clone(state),idMap};
 }
 
 async function write(state){
@@ -170,11 +178,6 @@ async function write(state){
     return true;
   }
   const snapshot=clone(state);
-  /*
-   * Durable acknowledgement:
-   * success is returned only after the serialized remote mutation chain completes.
-   * Remote failure rejects and is never converted into a successful write.
-   */
   syncChain=syncChain.then(()=>syncRemote(snapshot)).catch(err=>{
     lastSync={status:'ERROR',at:now(),error:err?.message||'REMOTE_SYNC_FAILED'};
     console.error('[MTA] remote sync failed',err);
@@ -182,16 +185,9 @@ async function write(state){
     throw err;
   });
   const acknowledged=await syncChain;
-  if(acknowledged?.state){
-    for(const resource of RESOURCES){
-      const sourceRows=acknowledged.state[resource]||[];
-      const targetRows=state[resource]||[];
-      const byId=new Map(targetRows.filter(x=>x?.id).map(x=>[String(x.id),x]));
-      for(const row of sourceRows){
-        const originalId=row?.metadata?.clientId||row?.clientId;
-        if(originalId&&byId.has(String(originalId)))byId.get(String(originalId)).id=row.id;
-      }
-    }
+  for(const mapping of acknowledged.idMap||[]){
+    const target=(state[mapping.resource]||[]).find(x=>String(x.id)===String(mapping.clientId));
+    if(target)target.id=mapping.remoteId;
   }
   persistLocal(state);
   return true;
