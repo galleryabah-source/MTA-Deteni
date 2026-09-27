@@ -289,50 +289,42 @@ if(!window.__mtaRuntimeClockTimer){window.__mtaRuntimeClockTimer=setInterval(()=
 async function loadAuthenticatedRuntime(){
   if(window.__mtaRuntimeLoading)return window.__mtaRuntimeLoading;
   const scripts=[
-    '/mta-production-state-adapter-v1.js?v=1',
-    '/mta-state-kernel-v1.js?v=4',
-    '/mta-domain-commands-v2.js?v=1',
-    '/offline-v1.js?v=2',
-    '/offline-queue-v1.js?v=2',
-    '/mfe-evidence-v1.js?v=1',
-    '/qr-camera-v2.js?v=4',
-    '/qr-context-v1.js?v=2',
+    '/desktop-shell-v2.js?v=7','/mobile-shell-v1.js?v=3','/mta-unified-shell-v2.js?v=10',
+    '/mta-production-state-adapter-v1.js?v=1','/mta-state-kernel-v1.js?v=4','/mta-domain-commands-v2.js?v=1',
+    '/offline-v1.js?v=2','/offline-queue-v1.js?v=2','/mfe-evidence-v1.js?v=1',
+    '/qr-camera-v2.js?v=4','/qr-context-v1.js?v=2',
     'https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.js',
-    '/preview-v5.js?v=13',
-    '/preview-v6.js?v=9',
-    '/qr-print-clean-v3.js?v=6',
-    '/room-ops-v9.js?v=11',
-    '/movement-v9.js?v=11',
-    '/master-room-guard-v10.js?v=12',
-    '/preview-v10.js?v=11',
-    '/desktop-shell-v2.js?v=7',
-    '/mobile-shell-v1.js?v=3',
-    '/daily-guard-report-v2.js',
-    '/daily-guard-report-d57.js',
-    '/admin-settings-v9.js?v=4',
-    '/mta-unified-shell-v2.js?v=10',
-    '/mta-system-audit-v1.js?v=2'
+    '/preview-v5.js?v=13','/preview-v6.js?v=9','/qr-print-clean-v3.js?v=6',
+    '/room-ops-v9.js?v=11','/movement-v9.js?v=11','/master-room-guard-v10.js?v=12',
+    '/preview-v10.js?v=11','/daily-guard-report-v2.js','/daily-guard-report-d57.js',
+    '/admin-settings-v9.js?v=4','/mta-system-audit-v1.js?v=2'
   ];
+  const criticalRuntimeScripts=new Set(['/desktop-shell-v2.js','/mta-unified-shell-v2.js']);
   window.__mtaRuntimeLoading=(async()=>{
+    const failures=[];
     for(const src of scripts){
-      await new Promise((resolve,reject)=>{
-        const existing=document.querySelector('script[data-mta-auth-runtime="'+src.split('?')[0]+'"]');
-        if(existing)return resolve();
-        const s=document.createElement('script');
-        s.src=src;
-        s.async=false;
-        s.dataset.mtaAuthRuntime=src.split('?')[0];
-        s.onload=()=>resolve();
-        s.onerror=()=>reject(new Error('AUTH_RUNTIME_LOAD_FAILED:'+src));
-        document.body.appendChild(s);
-      });
+      try{
+        await new Promise((resolve,reject)=>{
+          const existing=document.querySelector('script[data-mta-auth-runtime="'+src.split('?')[0]+'"]');
+          if(existing)return resolve();
+          const s=document.createElement('script');s.src=src;s.async=false;
+          s.dataset.mtaAuthRuntime=src.split('?')[0];
+          s.onload=()=>resolve();s.onerror=()=>reject(new Error('AUTH_RUNTIME_LOAD_FAILED:'+src));
+          document.body.appendChild(s);
+        });
+      }catch(err){
+        failures.push({src,error:err.message||String(err)});
+        console.warn('[MTA] runtime module unavailable:',src,err);
+        if(criticalRuntimeScripts.has(src.split('?')[0]))throw err;
+      }
     }
+    window.__mtaRuntimeLoadFailures=failures;
+    if(failures.length)console.warn('[MTA] runtime loaded with non-critical module failures',failures);
   })().catch(err=>{
     console.error('[MTA] authenticated runtime failed to load',err);
     const msg=document.getElementById('mtaAuthMessage');
-    if(msg){msg.textContent='Runtime aplikasi gagal dimuat. Silakan refresh halaman.';msg.className='mta-auth-message error'}
-    window.__mtaRuntimeLoading=null;
-    throw err;
+    if(msg){msg.textContent='Runtime navigasi gagal dimuat. Silakan refresh halaman.';msg.className='mta-auth-message error'}
+    window.__mtaRuntimeLoading=null;throw err;
   });
   return window.__mtaRuntimeLoading;
 }
