@@ -11,7 +11,8 @@ test("H1 placement has one canonical mutation owner",()=>{
   assert.match(placementUi,/window\.mtaUnifiedAssignPlacement\(db/);
   assert.doesNotMatch(placementUi,/db\.placements\.unshift\(/);
   assert.match(shell,/function assignPlacementCommand\(state,options=\{\}\)/);
-  assert.match(shell,/d\.placements\.unshift\(placement\)/);
+  assert.match(shell,/canonicalCommand\('assignPlacement'\)/);
+  assert.doesNotMatch(shell,/d\.placements\.unshift\(placement\)/);
 });
 
 test("H2 detainee CRUD delegates mutation to canonical domain commands",()=>{
