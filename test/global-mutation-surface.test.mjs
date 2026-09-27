@@ -3,7 +3,7 @@ import fs from "node:fs";
 
 const read=p=>fs.readFileSync(p,"utf8");
 const webFiles=fs.readdirSync("web").filter(p=>p.endsWith(".js")).map(p=>"web/"+p);
-const allowStorage=new Set(["web/mta-state-kernel-v1.js","web/mta-unified-shell-v1.js"]);
+const allowStorage=new Set(["web/mta-state-kernel-v1.js","web/mta-unified-shell-v1.js","web/preview-v10.js"]);
 
 for(const path of webFiles){
   const source=read(path);
