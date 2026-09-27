@@ -2,6 +2,7 @@
 const KEY='mta-deteni-demo-v2';
 const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const read=()=>{try{const k=window.MTADeteniStateKernel;if(k?.read)return k.read();return JSON.parse(localStorage.getItem(KEY)||'{}')}catch{return {}}};
+const audit=(action,id='statistics')=>{try{const k=window.MTADeteniStateKernel;if(!k?.read||!k?.audit||!k?.write)return;const s=k.read();k.audit(s,action,'DETAINEE_STATISTICS',id,'SUCCESS',{actor:'DEMO-OPERATOR'});k.write(s)}catch{}};
 const A=(s,k)=>Array.isArray(s[k])?s[k]:[], norm=v=>String(v??'').trim()||'Tidak diisi';
 const groups=(a,f)=>{const m={};a.forEach(x=>{const k=norm(f(x));m[k]=(m[k]||0)+1});return Object.entries(m).sort((a,b)=>b[1]-a[1])};
 const age=d=>{let n=Number(d.age);if(Number.isFinite(n))return n;const r=d.dateOfBirth||d.birthDate||d.tanggalLahir;if(!r)return null;const x=new Date(r),t=new Date();if(Number.isNaN(x.getTime()))return null;n=t.getFullYear()-x.getFullYear();if(t.getMonth()<x.getMonth()||(t.getMonth()===x.getMonth()&&t.getDate()<x.getDate()))n--;return n};
@@ -21,11 +22,11 @@ function tableHtml(rows){
  '</tbody></table>';}
 function downloadTable(rows){
  const html='<!doctype html><html lang="id"><head><meta charset="utf-8"><title>Data Statistik Deteni</title><style>@page{size:A4 landscape;margin:10mm}body{font-family:Arial,sans-serif;color:#172033}h1{text-align:center;font-size:20px}p{font-size:10px;color:#667085}.detail-table{width:100%;border-collapse:collapse}.detail-table th,.detail-table td{border:1px solid #9ca3af;padding:5px;font-size:8px;text-align:left}.detail-table th{background:#eef2f7;font-weight:700}</style></head><body><h1>DATA STATISTIK DETENI</h1><p>Data operasional Deteni — tanpa audit/log/kesisteman MTA DETENI.</p>'+tableHtml(rows)+'</body></html>';
- const blob=new Blob([html],{type:'application/msword;charset=utf-8'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='Data_Statistik_Deteni.doc';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000);
+ const blob=new Blob([html],{type:'application/msword;charset=utf-8'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='Data_Statistik_Deteni.doc';a.click();audit('DETAINEE_STATISTICS_DOWNLOAD');setTimeout(()=>URL.revokeObjectURL(a.href),1000);
 }
 function printTable(rows){
  const html='<!doctype html><html lang="id"><head><meta charset="utf-8"><title>Data Statistik Deteni</title><style>@page{size:A4 landscape;margin:10mm}body{font-family:Arial,sans-serif;color:#172033;margin:0}h1{text-align:center;font-size:20px}p{font-size:9px;color:#667085}.detail-table{width:100%;border-collapse:collapse}.detail-table th,.detail-table td{border:1px solid #9ca3af;padding:5px;font-size:8px;text-align:left}.detail-table th{background:#eef2f7;font-weight:700}</style></head><body><h1>DATA STATISTIK DETENI</h1><p>Data operasional Deteni — tanpa audit/log/kesisteman MTA DETENI.</p>'+tableHtml(rows)+'</body></html>';
- const frame=document.createElement('iframe');frame.style.cssText='position:fixed;width:1px;height:1px;right:0;bottom:0;border:0;opacity:0';frame.setAttribute('aria-hidden','true');document.body.appendChild(frame);const w=frame.contentWindow;w.document.open();w.document.write(html);w.document.close();setTimeout(()=>{w.focus();w.print();setTimeout(()=>frame.remove(),1200)},250);
+ const frame=document.createElement('iframe');frame.style.cssText='position:fixed;width:1px;height:1px;right:0;bottom:0;border:0;opacity:0';frame.setAttribute('aria-hidden','true');document.body.appendChild(frame);const w=frame.contentWindow;w.document.open();w.document.write(html);w.document.close();setTimeout(()=>{w.focus();w.print();audit('DETAINEE_STATISTICS_PRINT');setTimeout(()=>frame.remove(),1200)},250);
 }
 function statistics(){styles();const s=read(),d=A(s,'detainees'),p=A(s,'placements'),m=A(s,'movements'),l=A(s,'leaves'),docs=A(s,'documents');
 const latest={};p.forEach(x=>{if(!x.detaineeId)return;const t=String(x.since||x.createdAt||'');if(!latest[x.detaineeId]||t>latest[x.detaineeId]._t)latest[x.detaineeId]={...x,_t:t}});
