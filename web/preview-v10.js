@@ -4,6 +4,7 @@
   const HARDEN_ID='mta-responsive-v12-link';
   const NAV_ID='mtaResponsiveNavToggle';
   const KEY='mta-deteni-nav-collapsed';
+  const get=()=>window.MTADeteniStateKernel?window.MTADeteniStateKernel.read():{};
   const labels={dashboard:'⌂',detainee:'♙',placement:'▦',movement:'↔',leave:'✓',documents:'▤',audit:'◷',monitor:'◉','qr-center':'▣','scan-center':'▤','ops-queue':'☷','room-ops':'▥','leave-qr':'⌁','camera-scan':'⌾',reports:'▤', 'admin-settings':'⚙','master-block':'▤','master-room':'▥','master-operational-catalogs':'☷','room-transfer-master':'⇄'};
   function injectHardening(){if(document.getElementById(HARDEN_ID))return;const l=document.createElement('link');l.id=HARDEN_ID;l.rel='stylesheet';l.href='/responsive-v11.css?v=12';document.head.appendChild(l)}
   function injectStyle(){
