@@ -38,10 +38,7 @@ function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t
 function appendAudit(state,action,resourceType,resourceId,result='SUCCESS',correlationId){
   const kernel=stateKernel();
   if(kernel?.audit)return kernel.audit(state,action,resourceType,resourceId,result,{actor:'DEMO-OPERATOR',correlationId});
-  state.audit=state.audit||[];
-  const event={id:uid('AUD'),action,resourceType,resourceId:resourceId||'',result,occurredAt:now(),actor:'DEMO-OPERATOR',requestId:uid('REQ'),correlationId:correlationId||uid('COR'),policyVersion:'AUTHZ-1.0'};
-  state.audit.unshift(event);
-  return event;
+  throw new Error('CANONICAL_AUDIT_KERNEL_REQUIRED');
 }
 function audit(action,resourceType,resourceId,result='SUCCESS',correlationId){return appendAudit(db,action,resourceType,resourceId,result,correlationId)}
 function openModal(html){document.getElementById('dialog').innerHTML=html;document.getElementById('modal').classList.add('open')}
