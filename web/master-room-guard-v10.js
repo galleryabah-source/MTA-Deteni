@@ -5,7 +5,7 @@ const put=d=>window.MTADeteniStateKernel?window.MTADeteniStateKernel.write(d):lo
 const E=s=>String(s??'').replace(/[&<>\"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;',"'":'&#39;'}[c]));
 const uid=p=>p+'-'+crypto.randomUUID().slice(0,10).toUpperCase();
 const now=()=>new Date().toISOString();
-const audit=(a,t,i,r='SUCCESS')=>{const d=get();d.audit=d.audit||[];d.audit.unshift({id:uid('AUD'),action:a,resourceType:t,resourceId:i||'',result:r,occurredAt:now(),actor:'DEMO-ADMIN',requestId:uid('REQ'),correlationId:uid('COR'),policyVersion:'AUTHZ-1.0'});put(d)};
+const audit=(a,t,i,r='SUCCESS')=>{const d=get(),kernel=window.MTADeteniStateKernel;if(kernel?.audit){kernel.audit(d,a,t,i,r,{actor:'DEMO-ADMIN'});put(d);return}throw new Error('CANONICAL_AUDIT_KERNEL_REQUIRED')};
 const activeRooms=d=>(d.rooms||[]).filter(r=>r.status==='ACTIVE');
 const currentRoom=(d,id)=>{const p=(d.placements||[]).filter(x=>x.detaineeId===id).sort((a,b)=>String(b.since||'').localeCompare(String(a.since||'')))[0];return p?(d.rooms||[]).find(r=>r.id===p.roomId)||((d.rooms||[]).find(r=>r.block===p.block&&r.room===p.room)):null};
 const occupancy=(d,r,exclude)=> (d.detainees||[]).filter(x=>x.status==='AKTIF'&&x.id!==exclude).filter(x=>currentRoom(d,x.id)?.id===r.id).length;
