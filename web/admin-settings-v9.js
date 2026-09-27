@@ -170,7 +170,7 @@ function settings(){
 }
 window.p9openSettings=()=>settings();
 window.p9settingsTab=settingsTab;
-window.p9saveAI=()=>{
+window.p9saveAI=()=>{const d=ensure(),entered=(document.querySelector('#p9aiKey')?.value||'').trim();const result=window.MTADeteniDomainCommandsV2?.updateAi(d,{provider:document.querySelector('#p9aiProvider')?.value||'Gemini',model:(document.querySelector('#p9aiModel')?.value||'').trim(),endpoint:(document.querySelector('#p9aiEndpoint')?.value||'').trim(),apiKey:entered});if(!result?.ok){toast('Konfigurasi AI ditolak: '+(result?.code||'CANONICAL_COMMAND_UNAVAILABLE'));return}put(d);document.querySelector('#p9aiKey').value='';toast(entered?'Konfigurasi tersimpan; API key tidak disimpan di browser.':'Konfigurasi tersimpan tanpa API key.');};
   const d=ensure(),entered=(document.querySelector('#p9aiKey')?.value||'').trim();
   d.adminSettings.aiSettings={
     provider:document.querySelector('#p9aiProvider')?.value||'Gemini',
