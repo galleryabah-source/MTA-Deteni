@@ -345,8 +345,10 @@ async function loadAuthenticatedRuntime(){
 }
 async function bootMtaApp(){
   if(window.__mtaAppBooted)return;
-  if(!window.__mtaAuthState?.resolved||!window.__mtaAuthState?.authenticated)return;
-  if(!document.body.classList.contains('mta-auth-ready'))return;
+  const authState=window.__mtaAuthState||{};
+  const authReady=document.body.classList.contains('mta-auth-ready');
+  const authenticated=authState.authenticated===true || (authReady && authState.authenticated!==false);
+  if(!authReady||!authenticated)return;
   // Core dashboard must not wait for optional/operational enhancement scripts.
   // Render immediately after authentication; load enhancements in the background.
   try{

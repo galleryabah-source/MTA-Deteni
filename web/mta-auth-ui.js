@@ -170,13 +170,13 @@
     }
     const view=document.getElementById('appView');
     if(view){
-      view.innerHTML='<section class="hero"><h1>Dashboard</h1><p class="sub">MTA DETENI Digital · Authentication aktif · Core dashboard siap.</p></section>'+
+      view.innerHTML='<section class="hero"><h1>Dashboard</h1><p class="sub">Authentication aktif. Canonical runtime sedang memuat state operasional.</p></section>'+
         '<section class="grid stats" style="margin-top:12px">'+
         '<div class="card"><div class="label">Authentication</div><div class="value" style="font-size:18px">AUTHENTICATED</div><span class="status">PASS</span></div>'+
-        '<div class="card"><div class="label">Data Mode</div><div class="value" style="font-size:18px">SYNTHETIC</div><span class="status">SAFE</span></div>'+
+        '<div class="card"><div class="label">Data Mode</div><div class="value" style="font-size:18px">LOADING</div><span class="status">CONTROLLED</span></div>'+
         '<div class="card"><div class="label">AI</div><div class="value" style="font-size:18px">OFF</div><span class="status">CONTROLLED</span></div>'+
         '<div class="card"><div class="label">Session</div><div class="value" style="font-size:18px">ACTIVE</div><span class="status">SECURE</span></div>'+
-        '<div class="card"><div class="label">Runtime</div><div class="value" style="font-size:18px">CORE</div><span class="status">READY</span></div>'+
+        '<div class="card"><div class="label">Runtime</div><div class="value" style="font-size:18px">LOADING</div><span class="status">INITIALIZING</span></div>'+
         '</section>';
     }
     renderHeader(true,user||null);
