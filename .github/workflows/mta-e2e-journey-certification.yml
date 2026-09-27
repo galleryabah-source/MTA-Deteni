@@ -89,7 +89,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: e2e-browser-${{ matrix.device }}
-          path: /tmp/mta-auth-journey-${{ matrix.device }}.json
+          path: /tmp/mta-deteni-evidence/mta-auth-journey-${{ matrix.device }}.json
           if-no-files-found: error
 
   certify:
