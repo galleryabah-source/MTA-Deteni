@@ -46,7 +46,7 @@ document.getElementById('modal').addEventListener('click',e=>{if(e.target.id==='
 function statCards(){return `<section class="grid stats"><div class="card"><div class="label">Deteni Aktif</div><div class="value">${db.detainees.filter(x=>x.status==='AKTIF').length}</div><span class="status">Operational</span></div><div class="card"><div class="label">Penempatan</div><div class="value">${db.placements.length}</div><span class="status">Tracked</span></div><div class="card"><div class="label">Pergerakan</div><div class="value">${db.movements.length}</div><span class="status">Logged</span></div><div class="card"><div class="label">Izin</div><div class="value">${db.leaves.length}</div><span class="status">Workflow</span></div><div class="card"><div class="label">Audit Event</div><div class="value">${db.audit.length}</div><span class="status">Evidence</span></div></section>`}
 function render(){const v=document.getElementById('appView'); if(current==='dashboard')return dashboard(v);if(current==='detainee')return detainee(v);if(current==='placement')return placement(v);if(current==='movement')return movement(v);if(current==='leave')return leave(v);if(current==='documents')return documents(v);if(current==='audit')return auditView(v)}
 function runtimeContext(){const production=window.mtaProductionStateAdapter?.isProduction?.()===true;const s=window.__mtaRuntimeStatus||{};const connected=production&&s.database==='CONNECTED';return {mode:production?'PRODUCTION':'SYNTHETIC',database:connected?'CONNECTED':'NOT CONNECTED',ai:s.ai||'OFF',badge:production?'PRODUCTION':'SYNTHETIC',note:production?'Migration Freeze · Production database connected · AI OFF':'Migration Freeze · Synthetic data only'};}
-function syncRuntimeChrome(){const r=runtimeContext();const pill=document.querySelector('.topright>.pill');if(pill)pill.textContent='● '+(r.mode==='PRODUCTION'?'Production runtime':'Local synthetic runtime');const footer=document.querySelector('.footer span');if(footer)footer.textContent='MTA DETENI Digital · '+(r.mode==='PRODUCTION'?'Production runtime · AI OFF':'Synthetic functional runtime · No operational detainee data');}
+function syncRuntimeChrome(){const r=runtimeContext();const pill=document.querySelector('.topright>.pill');if(pill)pill.textContent='● '+(r.mode==='PRODUCTION'?'Production runtime':'Local synthetic runtime');const footer=document.querySelector('.footer span');if(footer)footer.textContent='MTA DETENI Digital · '+(r.mode==='PRODUCTION'?'Production runtime · AI OFF':'Synthetic functional runtime · No operational detainee data');window.dispatchEvent(new CustomEvent('mta-runtime-status',{detail:r}));}
 function shell(title,desc,body){return `<section class="hero"><h1>${title}</h1><p class="sub">${desc}</p></section>${body}`}
 function roomSummary(){
   const rooms=Array.isArray(db?.rooms)?db.rooms:[];
@@ -307,7 +307,7 @@ async function loadAuthenticatedRuntime(){
     '/movement-v9.js?v=11',
     '/master-room-guard-v10.js?v=12',
     '/preview-v10.js?v=11',
-    '/desktop-shell-v2.js?v=7',
+    '/desktop-shell-v2.js?v=8',
     '/mobile-shell-v1.js?v=3',
     '/daily-guard-report-v2.js',
     '/daily-guard-report-d57.js',

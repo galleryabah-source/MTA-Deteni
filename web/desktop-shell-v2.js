@@ -91,24 +91,43 @@
   }
 
   function statusStrip(){
-    if(document.querySelector('.mta-desktop-status'))return;
+    let strip=document.querySelector('.mta-desktop-status');
     const view=document.querySelector('.view');
     if(!view||!view.parentElement)return;
-    const strip=document.createElement('div');strip.className='mta-desktop-status';strip.setAttribute('role','status');
-    strip.innerHTML='<span class="dot" aria-hidden="true"></span><span><strong>Runtime:</strong> Local Synthetic · AI OFF · Database NOT CONNECTED · Migration Freeze</span>';
-    view.parentElement.insertBefore(strip,view);
+    if(!strip){
+      strip=document.createElement('div');
+      strip.className='mta-desktop-status';
+      strip.setAttribute('role','status');
+      view.parentElement.insertBefore(strip,view);
+    }
+    const adapter=window.mtaProductionStateAdapter;
+    const production=adapter?.isProduction?.()===true;
+    const runtime=window.__mtaRuntimeStatus||{};
+    const connected=production&&runtime.database==='CONNECTED';
+    const mode=production?'Production':'Local Synthetic';
+    const database=connected?'CONNECTED':'NOT CONNECTED';
+    const ai=runtime.ai||'OFF';
+    strip.innerHTML='<span class="dot" aria-hidden="true"></span><span><strong>Runtime:</strong> '+mode+' · AI '+ai+' · Database '+database+' · Migration Freeze</span>';
+    strip.dataset.runtimeMode=production?'PRODUCTION':'SYNTHETIC';
+    strip.dataset.database=database;
+  }
+  function syncRuntimeStatusStrip(){
+    const strip=document.querySelector('.mta-desktop-status');
+    if(!strip)return;
+    statusStrip();
   }
   function apply(){
     const desktop=window.matchMedia('(min-width:1025px)').matches;
     document.body.classList.toggle('mta-desktop-enhanced',desktop);
     const nav=document.getElementById('nav');
     if(!desktop||!nav)return;
-    groupNav(nav);syncA11y(nav);installSidebarToggle();statusStrip();
+    groupNav(nav);syncA11y(nav);installSidebarToggle();statusStrip();syncRuntimeStatusStrip();
   }
   function setup(){
     if(window.__mtaDesktopShellV2Setup)return;
     window.__mtaDesktopShellV2Setup=true;
     loadCss();apply();
+    window.addEventListener('mta-runtime-status',syncRuntimeStatusStrip);
     const nav=document.getElementById('nav');
     if(nav){
       let syncing=false;
