@@ -283,13 +283,17 @@ function finalIntegrityGate(){
   checks.push({name:'E2E_SCAN',ok:scan.decision==='ACCEPTED'});checks.push({name:'E2E_RESOLVE',ok:scan.decision==='ACCEPTED'});
   const actionResource=active&&((state.detainees||[]).find(x=>x.id===scan.id));
   checks.push({name:'E2E_DATA',ok:!!actionResource&&actionResource.status==='AKTIF'});
-  const probe=structuredClone(state),correlationId='F5-FINAL-'+Date.now(),movementId='MOV-F5-FINAL-PROBE',placementId='PLC-F5-FINAL-PROBE';
+  const probe=structuredClone(state),correlationId='F5-FINAL-'+Date.now(),movementId='MOV-F5-FINAL-PROBE',placementId='PLC-F5-FINAL-PROBE',occurredAt=new Date().toISOString();
   probe.movements=Array.isArray(probe.movements)?probe.movements:[];probe.placements=Array.isArray(probe.placements)?probe.placements:[];probe.audit=Array.isArray(probe.audit)?probe.audit:[];
   const target=(probe.rooms||[]).find(r=>r.status==='ACTIVE'&&r.id!==roomForPlacement(probe,findPlacement(probe,active?.id))?.id);
-  let mutationOk=false;
-  if(active&&target&&validateMovementState(probe,active.id,target.id).ok){probe.movements.unshift({id:movementId,detaineeId:active.id,toRoomId:target.id,requestKey:'F5-FINAL:'+active.id+':'+target.id,correlationId,createdAt:new Date().toISOString()});probe.placements.unshift({id:placementId,detaineeId:active.id,roomId:target.id,source:'MASTER_ROOM',since:new Date().toISOString(),correlationId});probe.audit.unshift({id:'AUD-F5-FINAL-MOV',action:'MOVEMENT_CREATE',resourceType:'MOVEMENT',resourceId:movementId,result:'SUCCESS',occurredAt:new Date().toISOString(),correlationId});probe.audit.unshift({id:'AUD-F5-FINAL-PLC',action:'PLACEMENT_ASSIGN',resourceType:'PLACEMENT',resourceId:placementId,result:'SUCCESS',occurredAt:new Date().toISOString(),correlationId});mutationOk=true}
+  let mutationResult={ok:false,code:'NOT_RUN'},mutationOk=false;
+  if(active&&target&&typeof createMovementCommand==='function'){
+    mutationResult=createMovementCommand(probe,{id:movementId,detaineeId:active.id,roomId:target.id,occurredAt,requestKey:'F5-FINAL:'+active.id+':'+target.id+':'+occurredAt,correlationId,note:'F5 canonical integrity probe'});
+    mutationOk=mutationResult.ok===true&&mutationResult.code==='MOVEMENT_CREATED'&&mutationResult.movement?.id===movementId&&mutationResult.placement?.id;
+  }
   checks.push({name:'E2E_ACTION',ok:mutationOk});
-  const movementAudit=probe.audit.filter(a=>a.correlationId===correlationId);checks.push({name:'AUDIT_CHAIN_COMPLETE',ok:mutationOk&&movementAudit.length===2&&movementAudit.every(a=>a.resourceId&&a.correlationId===correlationId)});
+  const movementAudit=probe.audit.filter(a=>a.correlationId===correlationId);
+  checks.push({name:'AUDIT_CHAIN_COMPLETE',ok:mutationOk&&movementAudit.length===2&&movementAudit.some(a=>a.action==='MOVEMENT_CREATE'&&a.resourceId===movementId)&&movementAudit.some(a=>a.action==='PLACEMENT_ASSIGN'&&a.resourceId===mutationResult.placement.id)&&movementAudit.every(a=>a.correlationId===correlationId)});
   const queue=buildOperationalQueue(probe),metrics=buildMonitorMetrics(probe);checks.push({name:'AUDIT_TO_MONITOR',ok:queue.some(a=>a.correlationId===correlationId)&&metrics.audit===state.audit.length+2});
   const report={id:'F5-FINAL-REPORT-PROBE',sourceRecordIds:[{type:'DETAINEE',id:active?.id},{type:'MOVEMENT',id:movementId},{type:'PLACEMENT',id:placementId}],evidence:null};
   report.evidence={capturedAt:new Date().toISOString(),sourceRecords:report.sourceRecordIds.map(x=>({...x,exists:true})),auditIds:movementAudit.map(a=>a.id),sourceRecordCount:3,auditEventCount:movementAudit.length};
