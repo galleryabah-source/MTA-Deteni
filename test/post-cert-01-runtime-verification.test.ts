@@ -4,7 +4,7 @@ import {
   evaluatePostCert01,
   type PostCert01Contract,
   type PostCert01Observation,
-} from "../src/application/post-cert-01-runtime-verification";
+} from "../src/application/post-cert-01-runtime-verification.js";
 
 const base = (
   overrides: Partial<PostCert01Observation> = {},
@@ -95,7 +95,7 @@ test("POST-CERT-01 remains synthetic-only", () => {
 import {
   verifyPostCert01Runtime,
   type PostCert01RuntimeState,
-} from "../src/application/post-cert-01-runtime-verification";
+} from "../src/application/post-cert-01-runtime-verification.js";
 
 const runtimeState = (): PostCert01RuntimeState => ({
   target: "SYNTHETIC",
