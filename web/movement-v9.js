@@ -1,5 +1,7 @@
 const CANONICAL_DATA_EVENT='mta:data-changed';
 (()=>{
+const E=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const uid=p=>p+'-'+crypto.randomUUID().slice(0,10).toUpperCase();
 const get=()=>window.MTADeteniStateKernel?window.MTADeteniStateKernel.read():{};
 const put=d=>{const kernel=window.MTADeteniStateKernel;if(!kernel)throw new Error('CANONICAL_STATE_KERNEL_REQUIRED');return kernel.write(d)};
 const appendAudit=(d,a,t,i,r='SUCCESS',correlationId)=>{const kernel=window.MTADeteniStateKernel;if(kernel?.audit)return kernel.audit(d,a,t,i,r,{actor:'DEMO-OPERATOR',correlationId});throw new Error('CANONICAL_AUDIT_KERNEL_REQUIRED')};
