@@ -49,3 +49,18 @@ test("H8 canonical mutation module is wired into runtime",()=>{
   const runtime=read("web/mta-app-runtime-full.js");
   assert.match(runtime,/mta-domain-commands-v2\.js\?v=1/);
 });
+
+test("H9 document lifecycle and backup restore use canonical domain commands",()=>{
+  const runtime=read("web/mta-app-runtime-full.js");
+  const commands=read("web/mta-domain-commands-v2.js");
+  assert.match(runtime,/MTADeteniDomainCommandsV2\.createDocument/);
+  assert.match(runtime,/MTADeteniDomainCommandsV2\.transitionDocument/);
+  assert.match(runtime,/MTADeteniDomainCommandsV2\.createDocumentRevision/);
+  assert.match(runtime,/MTADeteniDomainCommandsV2\.restoreBackup/);
+  assert.match(commands,/function createDocument\(s,document\)/);
+  assert.match(commands,/function transitionDocument\(s,id,next,note\)/);
+  assert.match(commands,/function createDocumentRevision\(s,id\)/);
+  assert.match(commands,/function restoreBackup\(s,x\)/);
+  const lifecycle=runtime.slice(runtime.indexOf("function startReview(id){"),runtime.indexOf("function downloadReport(id)",runtime.indexOf("function startReview(id){")));
+  assert.doesNotMatch(lifecycle,/db\.documents\.unshift\(/);
+});
