@@ -112,3 +112,10 @@ Untuk `MTA-F-20260926-002`, QR Deteni adalah **single immutable identity artifac
 ## Complete Capability Inventory
 
 For repository-wide capability reconciliation beyond the explicitly registered Feature IDs, see [`FEATURE_INVENTORY.md`](FEATURE_INVENTORY.md). The inventory separates user-facing features from platform/governance capabilities and records implementation, test, runtime, phase, commit, and registration evidence.
+
+
+### MTA-F-20260927-004 — Dashboard Room Summary
+- [x] **IMPLEMENTED**
+- Acceptance: Dashboard menampilkan Room Summary dinamis dari canonical `rooms` dan `placements` state: Total Kamar, Kamar Terisi, dan Kapasitas; tidak menggunakan angka hard-coded.
+- Evidence: `web/mta-app-runtime-full.js`, `web/index.html`, `test/room-summary-dashboard.test.mjs`.
+- Runtime: static regression contract added; browser/runtime deployment verification pending.
