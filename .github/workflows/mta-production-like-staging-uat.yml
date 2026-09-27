@@ -3,6 +3,14 @@ name: MTA DETENI Production-like Staging UAT
 on:
   push:
     branches: [gate/production-readiness]
+  pull_request:
+    branches: [gate/production-readiness]
+    paths:
+      - 'web/**'
+      - 'worker-v11.js'
+      - 'wrangler*.toml'
+      - 'tests/authenticated-browser-acceptance.mjs'
+      - '.github/workflows/mta-production-like-staging-uat.yml'
   workflow_dispatch:
 
 permissions:
