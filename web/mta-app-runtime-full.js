@@ -68,12 +68,15 @@ function roomSummary(){
     if(roomId)occupiedByRoom.set(roomId,(occupiedByRoom.get(roomId)||0)+1);
   }
   const occupiedRooms=rooms.filter(r=>(occupiedByRoom.get(r.id)||0)>0).length;
+  const totalDetaineesInRooms=[...occupiedByRoom.values()].reduce((sum,count)=>sum+count,0);
+  const overcapacity=rooms.reduce((sum,r)=>sum+Math.max(0,(occupiedByRoom.get(r.id)||0)-Math.max(0,Number(r?.capacity)||0)),0);
+  const overcapacityRooms=rooms.filter(r=>(occupiedByRoom.get(r.id)||0)>Math.max(0,Number(r?.capacity)||0)).length;
   const capacity=rooms.reduce((sum,r)=>sum+Math.max(0,Number(r?.capacity)||0),0);
-  return {totalRooms:rooms.length,occupiedRooms,capacity,occupiedByRoom};
+  return {totalRooms:rooms.length,occupiedRooms,capacity,totalDetaineesInRooms,overcapacity,overcapacityRooms,occupiedByRoom};
 }
 function roomSummaryCard(){
   const s=roomSummary();
-  return '<section class="mta-room-summary" aria-label="Room Summary"><div class="mta-room-summary-head"><div><span class="mta-section-kicker">PENEMPATAN</span><h2>Room Summary</h2></div><button class="btn small" onclick="show(\'placement\')">Lihat Kamar</button></div><div class="mta-room-summary-grid"><div class="mta-room-summary-card"><small>Total Kamar</small><strong>'+s.totalRooms+'</strong></div><div class="mta-room-summary-card"><small>Kamar Terisi</small><strong>'+s.occupiedRooms+'</strong></div><div class="mta-room-summary-card"><small>Kapasitas</small><strong>'+s.capacity+'</strong></div></div></section>';
+  return '<section class="mta-room-summary" aria-label="Room Summary"><div class="mta-room-summary-head"><div><span class="mta-section-kicker">PENEMPATAN</span><h2>Room Summary</h2></div><button class="btn small" onclick="show(\'placement\')">Lihat Kamar</button></div><div class="mta-room-summary-grid"><div class="mta-room-summary-card"><small>Total Kamar</small><strong>'+s.totalRooms+'</strong></div><div class="mta-room-summary-card"><small>Kamar Terisi</small><strong>'+s.occupiedRooms+'</strong></div><div class="mta-room-summary-card"><small>Kapasitas</small><strong>'+s.capacity+'</strong></div><div class="mta-room-summary-card"><small>Deteni Mengisi Kamar</small><strong>'+s.totalDetaineesInRooms+'</strong></div><div class="mta-room-summary-card"><small>Overcapacity</small><strong>'+s.overcapacity+'</strong></div></div></section>';
 }
 function dashboard(v){
   const active=db.detainees.filter(x=>x.status==='AKTIF').length;
