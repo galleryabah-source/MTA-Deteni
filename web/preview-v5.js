@@ -1,7 +1,7 @@
 (()=>{
 const K='mta-deteni-demo-v2';
 const get=()=>window.MTADeteniStateKernel?window.MTADeteniStateKernel.read():JSON.parse(localStorage.getItem(K)||'{}');
-const put=d=>window.MTADeteniStateKernel?window.MTADeteniStateKernel.write(d):localStorage.setItem(K,JSON.stringify(d));
+const put=d=>{const kernel=window.MTADeteniStateKernel;if(!kernel)throw new Error('CANONICAL_STATE_KERNEL_REQUIRED');return kernel.write(d)};
 const esc=s=>String(s??'').replace(/[&<>\"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;',"'":'&#39;'}[c]));
 const audit=(action,type,id,result='SUCCESS')=>{const d=get(),kernel=window.MTADeteniStateKernel;if(kernel?.audit){kernel.audit(d,action,type,id,result,{actor:'DEMO-OPERATOR'});put(d);return}throw new Error('CANONICAL_AUDIT_KERNEL_REQUIRED')};
 function ensure(){const d=get();d.qr=d.qr||{detainee:{},room:{},leave:{}};d.rooms=d.rooms||[{id:'ROOM-A01',block:'Blok A',room:'Kamar 01',capacity:8,status:'ACTIVE'},{id:'ROOM-A02',block:'Blok A',room:'Kamar 02',capacity:8,status:'ACTIVE'},{id:'ROOM-B01',block:'Blok B',room:'Kamar 01',capacity:8,status:'ACTIVE'},{id:'ROOM-B02',block:'Blok B',room:'Kamar 02',capacity:8,status:'ACTIVE'}];(d.detainees||[]).forEach(x=>{if(!d.qr.detainee[x.id])d.qr.detainee[x.id]={token:'DTQR-'+crypto.randomUUID().slice(0,10).toUpperCase(),status:'ACTIVE',context:'DETAINEE',issuedAt:new Date().toISOString()}});d.rooms.forEach(x=>{if(!d.qr.room[x.id])d.qr.room[x.id]={token:'RMQR-'+crypto.randomUUID().slice(0,10).toUpperCase(),status:x.status}});put(d);return d}
