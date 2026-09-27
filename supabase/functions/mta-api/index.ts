@@ -191,7 +191,8 @@ Deno.serve(async(req)=>{
     return json(req,{ok:true,created:true,user:{id:created.data.user?.id,email:created.data.user?.email},createdBy:user.id},201);
   }
   
-  if(!TABLES.has(resource)) return json(req,{ok:false,error:"RESOURCE_NOT_FOUND"},404);\n  if(resource==="audit" && req.method!=="GET") return json(req,{ok:false,error:"AUDIT_READ_ONLY"},405);
+  if(!TABLES.has(resource)) return json(req,{ok:false,error:"RESOURCE_NOT_FOUND"},404);
+  if(resource==="audit" && req.method!=="GET") return json(req,{ok:false,error:"AUDIT_READ_ONLY"},405);
   if(["POST","PATCH","DELETE"].includes(req.method)&&!WRITE_ROLES.has(role)) return json(req,{ok:false,error:"RBAC_WRITE_DENIED",role},403);
   const table=resource==="audit"?"mta_audit_events":"mta_"+resource;
   try{
