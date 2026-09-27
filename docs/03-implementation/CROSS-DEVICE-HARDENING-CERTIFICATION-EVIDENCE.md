@@ -5,6 +5,7 @@
 **PR:** #219  
 **Evidence baseline commit:** 0c9b93c0c434653e16786fea6c47fb2aa2f1707c  
 **Release-bound CI confirmation:** 752d8172adbdee6da45fee38f0463cb085ae825c  
+**Current release candidate:** eb2f7a398e2fac0aab6b66dcc922fea5e6bb1bc9  
 **Environment:** controlled-nonprod / synthetic runtime  
 **Status:** CERTIFIED
 
