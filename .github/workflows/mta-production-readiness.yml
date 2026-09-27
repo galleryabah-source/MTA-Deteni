@@ -1,0 +1,125 @@
+name: MTA DETENI Production Readiness Gate
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'web/**'
+      - 'worker-v11.js'
+      - 'wrangler*.toml'
+      - 'scripts/mta-production-readiness-gate.mjs'
+      - 'docs/03-implementation/**'
+      - '.github/workflows/cloudflare-*.yml'
+      - '.github/workflows/mta-production-readiness.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: mta-production-readiness-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  MTA_EXECUTION_ENV: controlled-nonprod
+  CI: true
+  RELEASE_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+
+jobs:
+  preflight:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    outputs:
+      readiness_status: ${{ steps.readiness.outputs.status }}
+      ready_for_production: ${{ steps.readiness.outputs.ready_for_production }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+
+      - name: Verify release artifact
+        run: |
+          set -euo pipefail
+          test -f wrangler.toml
+          test -f wrangler.staging.toml
+          test -f worker-v11.js
+          test -d web
+          test -f web/index.html
+          node --check worker-v11.js
+          node scripts/mta-production-readiness-gate.mjs
+
+      - name: Verify governance lock
+        run: |
+          node - <<'NODE'
+          const fs=require('fs');
+          const x=JSON.parse(fs.readFileSync('artifacts/mta-evidence/production-readiness-gate.json','utf8'));
+          const g=x.governance;
+          for(const [k,v] of Object.entries({
+            syntheticOnly:true,
+            productionAccessAuthorized:false,
+            migrationExecuted:false,
+            aiEnabled:false
+          })) {
+            if(g[k]!==v) throw new Error(`Governance violation: ${k}=${g[k]}`);
+          }
+          console.log('GOVERNANCE LOCK: PASS');
+          NODE
+
+      - name: Run mandatory regression evidence
+        run: |
+          npm install
+          npm run typecheck
+          npm run typecheck:test
+          npm test
+          npm run test:unit
+          npx tsx test/security-adversarial-certification.test.ts
+
+      - name: Verify production readiness decision
+        id: readiness
+        run: |
+          node - <<'NODE'
+          const fs=require('fs');
+          const x=JSON.parse(fs.readFileSync('artifacts/mta-evidence/production-readiness-gate.json','utf8'));
+          console.log('PRODUCTION_READINESS_STATUS='+x.status);
+          console.log('BLOCKERS='+JSON.stringify(x.blockers));
+          if(!['NO_GO','PASS'].includes(x.status)) {
+            throw new Error('Unexpected readiness state.');
+          }
+          if(typeof x.readyForProduction!=='boolean') {
+            throw new Error('Missing readyForProduction boolean.');
+          }
+          const out=process.env.GITHUB_OUTPUT;
+          fs.appendFileSync(out,`status=${x.status}\nready_for_production=${x.readyForProduction}\n`);
+          NODE
+
+      - name: Upload readiness evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: mta-production-readiness-${{ github.sha }}
+          path: artifacts/mta-evidence/production-readiness-gate.json
+          if-no-files-found: error
+          retention-days: 30
+
+  certify:
+    needs: preflight
+    runs-on: ubuntu-latest
+    if: ${{ always() }}
+    steps:
+      - name: Certify release boundary
+        run: |
+          set -euo pipefail
+          STATUS="${{ needs.preflight.outputs.readiness_status }}"
+          READY="${{ needs.preflight.outputs.ready_for_production }}"
+          echo "PRODUCTION_READINESS_STATUS=$STATUS"
+          echo "READY_FOR_PRODUCTION=$READY"
+          if [ "$STATUS" = "PASS" ] && [ "$READY" = "true" ]; then
+            echo "Production Readiness Gate: PASS"
+            exit 0
+          fi
+          echo "Production Readiness Gate: NO-GO — mandatory production evidence is still missing or stale."
+          exit 1

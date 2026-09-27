@@ -1,0 +1,87 @@
+name: MTA DETENI P9.13 Kernel Certification
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'src/application/**'
+      - 'src/infrastructure/**'
+      - 'test/**'
+      - 'scripts/mta-p9.13-kernel-certification.mjs'
+      - 'worker-v11.js'
+      - '.github/workflows/mta-p9.13-kernel-certification.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: mta-p9-13-kernel-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  MTA_EXECUTION_ENV: controlled-nonprod
+  AI_ENABLED: false
+  CI: true
+
+jobs:
+  certify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Verify migration freeze and production boundary
+        run: |
+          node - <<'NODE'
+          const fs=require('fs');
+          const worker=fs.readFileSync('worker-v11.js','utf8');
+          const required=[
+            ["migrationFreeze:true", "migration freeze"],
+            ["productionAccessAuthorized:false", "production access"],
+            ["livePostgresqlExecution:false", "live PostgreSQL"],
+            ["realDetaineeDataAllowed:false", "real detainee data"],
+            ["dataMode:'SYNTHETIC_ONLY'", "synthetic-only"],
+            ["ai:'OFF'", "AI off"]
+          ];
+          for(const [needle,label] of required) {
+            if(!worker.includes(needle)) throw new Error('Missing governance invariant: '+label);
+          }
+          console.log('GOVERNANCE BOUNDARY: PASS');
+          NODE
+
+      - name: Execute P9.13 certification harness
+        run: node scripts/mta-p9.13-kernel-certification.mjs
+
+      - name: Verify certification evidence
+        if: always()
+        run: |
+          test -s artifacts/mta-evidence/p9.13-kernel-certification.json
+          node - <<'NODE'
+          const fs=require('fs');
+          const x=JSON.parse(fs.readFileSync('artifacts/mta-evidence/p9.13-kernel-certification.json','utf8'));
+          console.log('P9.13='+x.status);
+          console.log('CONTROLS='+JSON.stringify(x.controls));
+          if(x.status!=='CERTIFIED') process.exit(1);
+          if(x.environment!=='controlled-nonprod') process.exit(1);
+          if(x.productionAccessAuthorized!==false || x.migrationExecuted!==false || x.aiEnabled!==false || x.syntheticOnly!==true) process.exit(1);
+          for(const [id,status] of Object.entries(x.controls)) if(status!=='PASS') process.exit(1);
+          NODE
+
+      - name: Upload P9.13 certification evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: mta-p9.13-kernel-certification-${{ github.sha }}
+          path: artifacts/mta-evidence/p9.13-kernel-certification.json
+          if-no-files-found: error
+          retention-days: 30

@@ -54,9 +54,26 @@ Required final conditions:
 - Preserve the existing smartphone bottom navigation: Beranda | Deteni | Scan QR | Laporan | Menu; do not modify its design, position, size, icons, labels, colors, Scan QR button, height, structure, or behavior unless explicitly authorized.
 - AI remains controlled by environment/policy and is not a prerequisite for core production operation.
 - Every gate must have objective evidence before being marked PASS.
+- Every release-bound evidence record must identify the exact Git commit SHA being certified.
+- Evidence from an earlier release candidate must remain historical and must not be silently reused for a newer candidate.
 
-## Current Direction
+## Current Release Boundary
 
-The immediate sequence begins with post-merge CI verification, followed by Cloudflare test/staging deployment and real-device Master Kamar testing. After those checks, return to P9.6 database introspection and reconciliation.
+**Canonical release candidate:** `79fb0a4c77debf7d8e56484e6515f1db7af35f1a`
+
+Current verified evidence on this release includes the mandatory CI/certification gates already recorded in PR #220. The production readiness gate remains **NO-GO** because production deployment and real UAT have not been executed for this exact release candidate.
+
+The existing staging/UAT document records a successful certification for release `36b423263403958ec763671ecddcbd61393c7a6d`. That evidence is historical and is not valid as release-bound evidence for `79fb0a4`.
+
+## Immediate Next Sequence
+
+1. Run **Production-like Staging UAT** manually against the exact release candidate `79fb0a4c77debf7d8e56484e6515f1db7af35f1a`.
+2. Confirm the generated staging evidence artifact binds to that exact SHA and all synthetic-only governance controls remain PASS.
+3. Execute the **manual Cloudflare production deployment gate** against the same release candidate.
+4. Confirm production `/api/health` PASS from the deployment workflow.
+5. Perform **Real User Acceptance** against the exact production release.
+6. Record production deployment and real-UAT evidence with the exact release SHA.
+7. Re-run the Production Readiness Gate. It may become PASS only when every required evidence contract is present, current, and SHA-bound.
+8. Only after that gate is PASS may GO-LIVE be considered.
 
 This document is the canonical execution guide for subsequent MTA DETENI work.
