@@ -1,3 +1,5 @@
+create schema if not exists mta_internal;
+
 create or replace function mta_internal.execute_movement_transaction(p_idempotency_key text,p_request_hash text,p_detainee_id uuid,p_target_room_id uuid,p_actor_user_id uuid,p_request_id text,p_correlation_id text,p_movement_type text default 'TRANSFER',p_purpose text default null,p_occurred_at timestamptz default now()) returns jsonb language plpgsql security definer set search_path to pg_catalog,public,mta_internal as $$
 declare e mta_internal.idempotency_keys%rowtype; a mta_profiles%rowtype; d mta_detainees%rowtype; r mta_rooms%rowtype; cur mta_placements%rowtype; occ int; cap int; mid uuid:=gen_random_uuid(); pid uuid:=gen_random_uuid(); aid uuid; oid uuid:=gen_random_uuid(); out jsonb;
 begin
