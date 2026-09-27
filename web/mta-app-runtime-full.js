@@ -227,11 +227,12 @@ async function generateValidatedReport(id){
   const r=documentById(id);if(!r)return;
   try{
     if(r.status!=='VALIDATED')throw new Error('REPORT_NOT_VALIDATED');
-    validateReportEvidence(r);r.evidence.generatedAt=now();r.generatedAt=now();
-    const transition=window.MTADeteniDomainCommandsV2?.transitionDocument(db,id,'GENERATED');if(!transition?.ok)throw new Error(transition?.code||'DOCUMENT_TRANSITION_FAILED');
-    const prepared=await window.mtaDailyGuardReport.prepare(r);
-    Object.assign(r,prepared);
-    audit('DOCUMENT_GENERATE','DOCUMENT',id);save();render();previewReport(id);toast('Dokumen generated — siap Review');
+    validateReportEvidence(r);
+    const source=structuredClone(r);
+    const prepared=await window.mtaDailyGuardReport.prepare(source);
+    const result=window.MTADeteniDomainCommandsV2?.applyGeneratedDocument(db,id,prepared);
+    if(!result?.ok)throw new Error(result?.code||'DOCUMENT_GENERATE_FAILED');
+    if(!save())return;render();previewReport(id);toast('Dokumen generated — siap Review');
   }catch(err){
     if(r.status==='GENERATED'&&!r.integrityHash)r.status='VALIDATED';
     toast('Generate gagal: '+err.message)
