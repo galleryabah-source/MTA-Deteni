@@ -55,7 +55,7 @@
   s.src='/mta-app-runtime-full.js?v=22';
   s.async=true;
   s.dataset.mtaOperationalRuntime='1';
-  s.onload=()=>console.info('[MTA] operational runtime loaded v21');
+  s.onload=()=>console.info('[MTA] operational runtime loaded v22');
   s.onerror=err=>console.warn('[MTA] operational runtime unavailable; core dashboard remains active',err);
   document.body.appendChild(s);
 })();
