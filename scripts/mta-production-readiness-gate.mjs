@@ -8,7 +8,12 @@ function requireText(file, text, label=file){
   const s=read(file);
   if(!s.includes(text)) failures.push(label);
 }
-function json(file){return JSON.parse(read(file));}
+function readJsonIfExists(file){
+  if(!fs.existsSync(file)) return null;
+  return JSON.parse(read(file));
+}
+
+const expectedCommit=(process.env.GITHUB_SHA||'local').trim();
 
 requireText('docs/03-implementation/CROSS-DEVICE-HARDENING-CERTIFICATION-EVIDENCE.md','Certification ID: MTA-CDH-CERT-2026-09-26-01');
 requireText('docs/03-implementation/CROSS-DEVICE-HARDENING-CERTIFICATION-EVIDENCE.md','Environment: controlled-nonprod / synthetic runtime');
@@ -56,25 +61,51 @@ for(const x of ['STAGING HEALTH: PASS','BROWSER SMOKE: PASS']) if(!uat.includes(
 
 const stagingEvidence=read('docs/03-implementation/STAGING-UAT-CERTIFICATION-EVIDENCE.md');
 const stagingCertified=/Current decision:\s*CERTIFIED|Decision:\s*CERTIFIED/i.test(stagingEvidence) && /MTA-STAGING-UAT-CERT-2026-09-26-01/.test(stagingEvidence);
+const stagingCommit=(stagingEvidence.match(/Release commit:\s*`?([0-9a-f]{40})`?/i)||[])[1]||null;
+if(!stagingCommit) failures.push('Staging UAT evidence has no release commit');
+else if(expectedCommit!=='local' && stagingCommit!==expectedCommit) failures.push(`Staging UAT evidence is stale: ${stagingCommit} != current release ${expectedCommit}`);
+
+const productionEvidence=readJsonIfExists('docs/03-implementation/PRODUCTION-DEPLOYMENT-GATE-EVIDENCE.json');
+const uatEvidence=readJsonIfExists('docs/03-implementation/REAL-UAT-EVIDENCE.json');
+
+function evidencePass(e, label){
+  if(!e) return false;
+  if(e.status!=='PASS') { failures.push(`${label} status is not PASS`); return false; }
+  if(expectedCommit!=='local' && e.commitSha!==expectedCommit) failures.push(`${label} is not bound to current release: ${e.commitSha||'missing'} != ${expectedCommit}`);
+  return e.commitSha===expectedCommit || expectedCommit==='local';
+}
+
+const productionPass=evidencePass(productionEvidence,'Production deployment gate evidence');
+const realUatPass=evidencePass(uatEvidence,'Real user acceptance evidence');
+
 const blockers=[];
 if(!p913Certified) blockers.push('P9.13 Kernel Certification is not backed by certified evidence.');
-if(!stagingCertified) blockers.push('Production-like staging/UAT evidence is not yet release-bound and certified.');
-blockers.push('Production deployment gate has not been executed and passed on the current release candidate.');
-blockers.push('Real user acceptance has not been executed and passed on the current release candidate.');
+if(!stagingCertified) blockers.push('Production-like staging/UAT evidence is not certified.');
+if(stagingCommit && expectedCommit!=='local' && stagingCommit!==expectedCommit) blockers.push(`Staging UAT evidence is bound to ${stagingCommit}, not current release ${expectedCommit}.`);
+if(failures.length) blockers.push(...failures);
+if(!productionPass) blockers.push('Production deployment gate has not been executed and passed on the current release candidate.');
+if(!realUatPass) blockers.push('Real user acceptance has not been executed and passed on the current release candidate.');
+
+const pass=expectedCommit!=='local' && blockers.length===0;
 const result={
-  certification:'PRODUCTION-READINESS-GATE-v1',
-  commit:process.env.GITHUB_SHA||'local',
+  certification:'PRODUCTION-READINESS-GATE-v2',
+  commit:expectedCommit,
   environment:'controlled-nonprod',
-  status:'NO_GO',
-  readyForProduction:false,
-  blockers,
+  status:pass?'PASS':'NO_GO',
+  readyForProduction:pass,
+  blockers:[...new Set(blockers)],
+  evidence:{
+    staging:{status:stagingCertified?'CERTIFIED':'NOT_CERTIFIED',commitSha:stagingCommit},
+    productionDeployment:{status:productionEvidence?.status||'NOT_EXECUTED',commitSha:productionEvidence?.commitSha||null},
+    realUat:{status:uatEvidence?.status||'NOT_EXECUTED',commitSha:uatEvidence?.commitSha||null}
+  },
   governance:{
     syntheticOnly:true,
     productionAccessAuthorized:false,
     migrationExecuted:false,
     aiEnabled:false
   },
-  staticContractFailures:failures,
+  staticContractFailures:[...new Set(failures)],
   warnings
 };
 fs.mkdirSync('artifacts/mta-evidence',{recursive:true});
