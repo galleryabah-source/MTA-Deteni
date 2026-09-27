@@ -4,6 +4,7 @@ const seed={meta:{version:2,createdAt:new Date().toISOString()},blocks:[{id:'BLK
 let db=null; let current='dashboard'; window.MTA_DETAINEE_CRUD_OWNER='CORE_RUNTIME_V2';
 function load(){
   try{
+    if(window.mtaProductionStateAdapter?.isProduction()&&window.__mtaProductionState)return structuredClone(window.__mtaProductionState);
     const STATE_KERNEL=stateKernel();
     if(STATE_KERNEL){
       const state=STATE_KERNEL.read();
@@ -17,6 +18,11 @@ function load(){
 }
 function save(){
   try{
+    if(window.mtaProductionStateAdapter?.isProduction()){
+      toast('Production foundation aktif dalam mode READ-ONLY. Mutasi menunggu transactional command release.');
+      void window.mtaProductionStateAdapter.refresh().then(s=>{if(s){db=structuredClone(s);render()}}).catch(()=>{});
+      return false;
+    }
     if(!db||typeof db!=='object')throw new Error('STATE_NOT_READY');
     const STATE_KERNEL=stateKernel();
     if(!STATE_KERNEL)throw new Error('CANONICAL_STATE_KERNEL_REQUIRED');
@@ -283,6 +289,7 @@ if(!window.__mtaRuntimeClockTimer){window.__mtaRuntimeClockTimer=setInterval(()=
 async function loadAuthenticatedRuntime(){
   if(window.__mtaRuntimeLoading)return window.__mtaRuntimeLoading;
   const scripts=[
+    '/mta-production-state-adapter-v1.js?v=1',
     '/mta-state-kernel-v1.js?v=4',
     '/mta-domain-commands-v2.js?v=1',
     '/offline-v1.js?v=2',
@@ -336,6 +343,7 @@ async function bootMtaApp(){
   // Core dashboard must not wait for optional/operational enhancement scripts.
   // Render immediately after authentication; load enhancements in the background.
   try{
+    if(window.mtaProductionStateAdapter?.isProduction()) await window.mtaProductionStateAdapter.hydrate();
     db=load();
     window.__mtaAppBooted=true;
     render();
