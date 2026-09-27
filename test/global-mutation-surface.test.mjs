@@ -1,5 +1,6 @@
 import { strict as assert } from "node:assert";
 import fs from "node:fs";
+import { test } from "node:test";
 
 const read=p=>fs.readFileSync(p,"utf8");
 const webFiles=fs.readdirSync("web").filter(p=>p.endsWith(".js")).map(p=>"web/"+p);
