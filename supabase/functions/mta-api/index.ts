@@ -28,8 +28,13 @@ Deno.serve(async(req)=>{
   if(profileError||!profile?.active) { emit("WARN","request.denied",{status:403,outcome:"DENIED",errorCode:"RBAC_PROFILE_MISSING_OR_INACTIVE",durationMs:performance.now()-startedAt}); return json(req,{ok:false,error:"RBAC_PROFILE_MISSING_OR_INACTIVE"},403,{requestId,correlationId}); }
   const role=String(profile.role||"").toUpperCase();
   const url=new URL(req.url);
-  const parts=url.pathname.replace(/^\/+/,"").split("/").filter(Boolean);
-  const resource=parts[0],id=parts[1];
+  // Supabase Edge Functions receive the full /functions/v1/<function>/<route> path.
+  // Normalize the route so deployed and direct/local invocation forms resolve
+  // the resource after the mta-api function prefix.
+  const parts=url.pathname.replace(/^\/+|\/+$/g,"").split("/").filter(Boolean);
+  const functionIndex=parts.indexOf("mta-api");
+  const routeParts=functionIndex>=0?parts.slice(functionIndex+1):parts;
+  const resource=routeParts[0],id=routeParts[1];
   if(resource==="me" && req.method==="GET") return json(req,{ok:true,user:{id:user.id,email:user.email},profile,role});
 
 
