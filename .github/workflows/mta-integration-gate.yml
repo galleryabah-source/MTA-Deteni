@@ -81,7 +81,7 @@ jobs:
           "lastMutation|web/movement-v9.js"
           "state=null|web/admin-settings-v9.js"
           "MTA_ADMIN_SETTINGS_OWNER|web/admin-settings-v9.js"
-          "appendAudit(d|web/room-ops-v9.js"
+          "const appendAudit=|web/room-ops-v9.js"
           "QR_ROOM_STATE|web/room-ops-v9.js"
           "validateRuntimeState|web/mta-app-runtime-full.js"
           "BACKUP_RESTORE|web/mta-app-runtime-full.js"
