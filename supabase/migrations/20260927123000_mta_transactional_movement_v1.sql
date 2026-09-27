@@ -11,7 +11,7 @@ begin
    if e.response='{}'::jsonb then raise exception 'P11_INCOMPLETE_IDEMPOTENCY_STATE'; end if;
    return e.response||jsonb_build_object('replayed',true);
  end if;
- insert into mta_internal.idempotency_keys(idempotency_key,request_hash,status,response) values(p_idempotency_key,lower(p_request_hash),'PROCESSING','{}'::jsonb);
+ insert into mta_internal.idempotency_keys(idempotency_key,request_hash,status,response) values(p_idempotency_key,lower(p_request_hash) ,'COMPLETED','{}'::jsonb) on conflict(idempotency_key) do nothing;
  select * into a from public.mta_profiles where id=p_actor_user_id and active=true for update;
  if not found or a.role not in ('OWNER','ADMIN','EDITOR') then raise exception 'P11_RBAC_WRITE_DENIED'; end if;
  select * into d from public.mta_detainees where id=p_detainee_id for update;
