@@ -55,6 +55,9 @@ function makeContext({createImpl,failAfterCreate=false}={}){
   const result=await context.window.MTADeteniStateKernel.write(state);
   assert.equal(result,true,'write must acknowledge only after remote completion');
   assert.equal(calls(),1,'one logical mutation must produce exactly one remote mutation');
+  assert.equal(state.detainees[0].id,'REMOTE-001','server canonical ID must replace the client-only ID after acknowledgement');
+  await context.window.MTADeteniStateKernel.write(state);
+  assert.equal(calls(),1,'replaying the same acknowledged state must not create a duplicate mutation');
   assert.equal(context.window.MTADeteniStateKernel.getSyncState().status,'SYNCED');
 }
 
