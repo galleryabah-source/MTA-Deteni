@@ -10,6 +10,7 @@ const MIGRATION_FREEZE='MIGRATION_FREEZE';
 function appendAuditToState(state,action,type,id,result='SUCCESS',correlationId){const kernel=window.MTADeteniStateKernel;if(kernel?.audit)return kernel.audit(state,action,type,id,result,{actor:'DEMO-OPERATOR',correlationId:correlationId||'COR-'+crypto.randomUUID().slice(0,8).toUpperCase()});throw new Error('CANONICAL_AUDIT_KERNEL_REQUIRED')}
 function canonicalCommand(name){const commands=window.MTADeteniDomainCommandsV2;if(!commands||typeof commands[name]!=='function')throw new Error('CANONICAL_DOMAIN_COMMAND_REQUIRED:'+name);return commands[name]}
 const PLACEMENT_ASSIGN_BLOCKED='PLACEMENT_ASSIGN_BLOCKED';
+const PLACEMENT_CAPACITY_BLOCKED='PLACEMENT_CAPACITY_BLOCKED';
 function assignPlacementCommand(state,options={}){return canonicalCommand('assignPlacement')(state,options)}
 function advanceLeaveCommand(state,id){return canonicalCommand('advanceLeave')(state,id)}
 function createMovementCommand(state,options={}){return canonicalCommand('createMovement')(state,options)}
