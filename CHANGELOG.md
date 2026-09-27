@@ -1,6 +1,6 @@
 ## 2026-09-27 — Global Canonical Pipeline Certification Closure
 
-- Commit `c29b534cee8aa169b29a29848dc38e4d0e3fa489` completed the canonical hardening closure.
+- Canonical hardening closure recorded at commit `c29b534cee8aa169b29a29848dc38e4d0e3fa489`.
 - Domain CI #2563: **PASS**.
 - Static Integration Gate #774: **PASS**.
 - Feature Verification #118: **PASS**.
@@ -10,6 +10,7 @@
 - Global Mutation Surface Certification: **PASS**.
 - State/Evidence Chain Verification: **PASS**.
 - F5.4 Direct Final Integrity Certification: **PASS**.
+- Governance locks remain intact: migration freeze TRUE, AI OFF, synthetic-only repository, production access NOT AUTHORIZED.
 - No schema migration, production DB execution, AI activation, real detainee data, or production deployment was performed.
 - Feature Registry remains conservative; no user-facing feature is promoted to VERIFIED solely from synthetic CI evidence.
 
