@@ -4,8 +4,9 @@ if(window.MTADeteniDomainCommands)return;
 const now=()=>new Date().toISOString();
 const uid=p=>p+'-'+crypto.randomUUID().slice(0,10).toUpperCase();
 function audit(state,action,type,id,result='SUCCESS',correlationId){
-  state.audit=Array.isArray(state.audit)?state.audit:[];
-  state.audit.unshift({id:uid('AUD'),action,resourceType:type,resourceId:id||'',result,occurredAt:now(),actor:'DEMO-OPERATOR',requestId:uid('REQ'),correlationId:correlationId||uid('COR'),policyVersion:'AUTHZ-1.0'});
+  const kernel=window.MTADeteniStateKernel;
+  if(kernel?.audit)return kernel.audit(state,action,type,id,result,{actor:'DEMO-OPERATOR',correlationId:correlationId||uid('COR')});
+  throw new Error('CANONICAL_AUDIT_KERNEL_REQUIRED');
 }
 function createDetainee(state,options={}){
   const d=state||{},code=String(options.code||'').trim(),name=String(options.name||'').trim(),nationality=String(options.nationality||'').trim(),status=String(options.status||'AKTIF'),roomId=String(options.roomId||'');
