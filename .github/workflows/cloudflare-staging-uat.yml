@@ -61,21 +61,98 @@ jobs:
           cat > smoke.mjs <<'NODE'
           import { chromium } from 'playwright';
           const base=process.env.BASE_URL;
+          const SUPABASE_STUB = \`
+          let session = null;
+          let authListener = null;
+          export function createClient(){
+            return {
+              auth: {
+                async getSession(){ return { data: { session }, error: null }; },
+                onAuthStateChange(cb){
+                  authListener = cb;
+                  return { data: { subscription: { unsubscribe(){ if(authListener===cb) authListener=null; } } } };
+                },
+                async signInWithPassword({email,password}){
+                  if(email !== 'synthetic@example.test' || password !== 'synthetic-password'){
+                    return { data: { session: null, user: null }, error: { message: 'INVALID_SYNTHETIC_CREDENTIALS' } };
+                  }
+                  session = {
+                    access_token: 'synthetic-browser-token',
+                    user: { id: 'synthetic-browser-user', email }
+                  };
+                  authListener?.('SIGNED_IN', session);
+                  return { data: { session, user: session.user }, error: null };
+                },
+                async signOut(){
+                  session = null;
+                  authListener?.('SIGNED_OUT', null);
+                  return { error: null };
+                },
+                async getUser(){ return { data: { user: session?.user || null }, error: null }; }
+              }
+            };
+          }
+          \`;
+
+          const QR_STUB = \`
+          window.qrcode = window.qrcode || function(){
+            return {
+              addData(){},
+              make(){},
+              createDataURL(){ return ''; },
+              createSvgTag(){ return '<svg xmlns="http://www.w3.org/2000/svg"></svg>'; }
+            };
+          };
+          \`;
+
           const browser=await chromium.launch({headless:true});
-          const page=await browser.newPage({viewport:{width:1440,height:900}});
+          const context=await browser.newContext({
+            viewport:{width:1440,height:900},
+            serviceWorkers:'block'
+          });
+          const page=await context.newPage();
           const errors=[];
           page.on('console',m=>{if(m.type()==='error') errors.push('console:'+m.text())});
           page.on('pageerror',e=>errors.push('pageerror:'+e.message));
-          await page.goto(base,{waitUntil:'networkidle',timeout:30000});
+
+          await page.route('https://esm.sh/@supabase/supabase-js@2.117.1', route =>
+            route.fulfill({ status:200, contentType:'application/javascript', body:SUPABASE_STUB })
+          );
+          await page.route('https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.js', route =>
+            route.fulfill({ status:200, contentType:'application/javascript', body:QR_STUB })
+          );
+
+          await page.goto(base,{waitUntil:'domcontentloaded',timeout:30000});
           await page.screenshot({path:'staging-home.png',fullPage:true});
+
           const title=await page.title();
           if(!title) throw new Error('Missing document title');
+
+          await page.locator('#mtaAuthGate.open').waitFor({state:'visible',timeout:10000});
+          const locked=await page.evaluate(()=>({
+            bodyLocked:document.body.classList.contains('mta-auth-locked'),
+            appHidden:getComputedStyle(document.querySelector('.app')).display==='none',
+            form:!!document.querySelector('#mtaAuthForm')
+          }));
+          if(!locked.bodyLocked || !locked.appHidden || !locked.form){
+            throw new Error('Unauthenticated boundary contract failed: '+JSON.stringify(locked));
+          }
+
+          await page.locator('#mtaAuthEmail').fill('synthetic@example.test');
+          await page.locator('#mtaAuthPassword').fill('synthetic-password');
+          await page.locator('#mtaAuthSubmit').click();
+
+          await page.locator('body.mta-auth-ready').waitFor({state:'attached',timeout:10000});
+          await page.locator('.app').waitFor({state:'visible',timeout:10000});
+          await page.getByRole('heading',{name:'Dashboard'}).first().waitFor({state:'visible',timeout:10000});
+
           const text=(await page.locator('body').innerText()).trim();
-          if(!text) throw new Error('Empty application shell');
+          if(!text) throw new Error('Empty authenticated application shell');
           const probes=['Dashboard','Dokumen','QR','Scan'];
           const found=probes.filter(x=>text.toLowerCase().includes(x.toLowerCase()));
-          if(found.length<2) throw new Error('Core application surfaces not visible: '+found.join(','));
-          if(errors.length) throw new Error(errors.join('\n'));
+          if(found.length<2) throw new Error('Core application surfaces not visible after synthetic authentication: '+found.join(','));
+          if(errors.length) throw new Error(errors.join('\\n'));
+
           await browser.close();
           console.log('BROWSER SMOKE: PASS');
           NODE
