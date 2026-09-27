@@ -106,6 +106,9 @@ jobs:
           npm install --no-save playwright@1.55.0
           npx playwright install --with-deps chromium
 
+      - name: Execute durable mutation acknowledgement regression
+        run: node test/p10-durable-mutation-acknowledgement.test.mjs
+
       - name: Execute P10 runtime binding evidence
         env:
           BASE_URL: ${{ env.BASE_URL }}
