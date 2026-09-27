@@ -3,22 +3,27 @@ import test from "node:test";
 import {
   evaluatePostCert01,
   type PostCert01Contract,
+  type PostCert01Observation,
 } from "../src/application/post-cert-01-runtime-verification";
 
-const base = (overrides = {}) => ({
+const base = (
+  overrides: Partial<PostCert01Observation> = {},
+): PostCert01Observation => ({
   checkpoint: "POST-CERT-01-001",
   detaineeId: "DET-SYN-001",
-  placement: "MOVED" as const,
+  placement: "MOVED",
   expectedHeadcount: 2,
   actualHeadcount: 2,
-  qrContext: "RUDENIM_STAY" as const,
-  qrValidity: "ACTIVE" as const,
+  qrContext: "RUDENIM_STAY",
+  qrValidity: "ACTIVE",
   movementId: "MOV-SYN-001",
   auditEventId: "AUD-SYN-001",
   ...overrides,
 });
 
-const contract = (observation = base()): PostCert01Contract => ({
+const contract = (
+  observation: PostCert01Observation = base(),
+): PostCert01Contract => ({
   contractId: "POST-CERT-01-SYNTHETIC",
   target: "SYNTHETIC",
   observations: [observation],
