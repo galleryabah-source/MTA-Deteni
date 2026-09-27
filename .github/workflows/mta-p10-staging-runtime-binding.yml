@@ -4,6 +4,17 @@ on:
   push:
     branches:
       - fix/p10-runtime-binding
+  pull_request:
+    branches: [gate/production-readiness]
+    paths:
+      - 'web/mta-production-api.js'
+      - 'web/mta-state-kernel-v1.js'
+      - 'web/mta-app-runtime-full.js'
+      - 'web/index.html'
+      - 'supabase/functions/mta-api/index.ts'
+      - 'test/p10-durable-mutation-acknowledgement.test.mjs'
+      - 'test/p10-staging-runtime-binding.mjs'
+      - '.github/workflows/mta-p10-staging-runtime-binding.yml'
   workflow_dispatch:
 
 permissions:
