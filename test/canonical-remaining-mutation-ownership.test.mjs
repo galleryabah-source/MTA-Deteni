@@ -64,3 +64,30 @@ test("H9 document lifecycle and backup restore use canonical domain commands",()
   const lifecycle=runtime.slice(runtime.indexOf("function startReview(id){"),runtime.indexOf("function downloadReport(id)",runtime.indexOf("function startReview(id){")));
   assert.doesNotMatch(lifecycle,/db\.documents\.unshift\(/);
 });
+
+test("H10 document generation preparation is read-only until canonical mutation",()=>{
+  const runtime=read("web/mta-app-runtime-full.js");
+  const commands=read("web/mta-domain-commands-v2.js");
+  const block=runtime.slice(runtime.indexOf("async function generateValidatedReport"),runtime.indexOf("function workflowNote"));
+  assert.match(block,/structuredClone\(r\)/);
+  assert.match(block,/mtaDailyGuardReport\.prepare\(source\)/);
+  assert.match(block,/MTADeteniDomainCommandsV2\.applyGeneratedDocument/);
+  assert.doesNotMatch(block,/Object\.assign\(r,prepared\)/);
+  assert.match(commands,/function applyGeneratedDocument\(s,id,prepared\)/);
+});
+
+test("H11 admin normalization is read-only and does not persist implicitly",()=>{
+  const admin=read("web/admin-settings-v9.js");
+  const block=admin.slice(admin.indexOf("function ensure()"),admin.indexOf("\nfunction nav()"));
+  assert.match(block,/structuredClone\(source\)/);
+  assert.doesNotMatch(block,/put\(d\)/);
+  assert.doesNotMatch(block,/localStorage\.setItem/);
+});
+
+test("H12 QR bootstrap is read-only normalization and never writes storage",()=>{
+  const shell=read("web/mta-unified-shell-v2.js");
+  const block=shell.slice(shell.indexOf("function bootstrapQrResources"),shell.indexOf("\nconst esc=",shell.indexOf("function bootstrapQrResources")));
+  assert.match(block,/structuredClone\(state\|\|\{\}\)/);
+  assert.doesNotMatch(block,/write\(d\)/);
+  assert.doesNotMatch(block,/localStorage\.setItem/);
+});
