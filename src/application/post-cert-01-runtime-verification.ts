@@ -33,6 +33,129 @@ export type PostCert01Result = Readonly<{
   reasonCodes: readonly string[];
 }>;
 
+export type PostCert01RuntimeState = Readonly<{
+  target: "SYNTHETIC";
+  detainees: readonly Readonly<{ id: string; status: string }>[];
+  placements: readonly Readonly<{
+    id: string;
+    detaineeId: string;
+    roomId: string;
+    since: string;
+    movementId?: string | null;
+    correlationId?: string | null;
+  }>[];
+  movements: readonly Readonly<{
+    id: string;
+    detaineeId: string;
+    toRoomId: string;
+    correlationId?: string | null;
+  }>[];
+  rooms: readonly Readonly<{ id: string; status: string }>[];
+  qr: Readonly<Record<string, Readonly<{
+    context: QrContext;
+    validity: QrValidity;
+  }>>>;
+  audit: readonly Readonly<{
+    id: string;
+    action: string;
+    resourceType: string;
+    resourceId: string;
+    result: string;
+    correlationId?: string | null;
+  }>[];
+}>;
+
+export type PostCert01RuntimeInput = Readonly<{
+  checkpoint: string;
+  detaineeId: string;
+  roomId: string;
+  placement: PlacementState;
+}>;
+
+const latestPlacement = (state: PostCert01RuntimeState, detaineeId: string) =>
+  [...state.placements]
+    .filter((x) => x.detaineeId === detaineeId)
+    .sort((a, b) => String(b.since).localeCompare(String(a.since)))[0];
+
+export function derivePostCert01Observation(
+  state: PostCert01RuntimeState,
+  input: PostCert01RuntimeInput,
+): PostCert01Observation {
+  const placement = latestPlacement(state, input.detaineeId);
+  const movement = placement?.movementId
+    ? state.movements.find((x) => x.id === placement.movementId)
+    : state.movements
+        .filter(
+          (x) =>
+            x.detaineeId === input.detaineeId &&
+            x.toRoomId === input.roomId,
+        )
+        .at(0);
+  const correlatedAudit = movement
+    ? state.audit.find(
+        (x) =>
+          x.resourceType === "MOVEMENT" &&
+          x.resourceId === movement.id &&
+          x.action === "MOVEMENT_CREATE" &&
+          x.result === "SUCCESS" &&
+          x.correlationId === movement.correlationId,
+      )
+    : undefined;
+
+  const actualHeadcount = state.detainees.filter((detainee) => {
+    if (detainee.status !== "AKTIF") return false;
+    const current = latestPlacement(state, detainee.id);
+    return current?.roomId === input.roomId;
+  }).length;
+
+  const qr = state.qr[input.detaineeId] ?? {
+    context: "RUDENIM_STAY" as const,
+    validity: "INACTIVE" as const,
+  };
+
+  return {
+    checkpoint: input.checkpoint,
+    detaineeId: input.detaineeId,
+    placement: input.placement,
+    expectedHeadcount: actualHeadcount,
+    actualHeadcount,
+    qrContext: qr.context,
+    qrValidity: qr.validity,
+    movementId: movement?.id ?? "",
+    auditEventId: correlatedAudit?.id ?? "",
+  };
+}
+
+export function verifyPostCert01Runtime(
+  state: PostCert01RuntimeState,
+  input: PostCert01RuntimeInput,
+): PostCert01Result {
+  const observation = derivePostCert01Observation(state, input);
+  const result = evaluatePostCert01({
+    contractId: "POST-CERT-01-SYNTHETIC-RUNTIME",
+    target: state.target,
+    observations: [observation],
+  });
+
+  const reasons = [...result.reasonCodes];
+  const placement = latestPlacement(state, input.detaineeId);
+  const roomExists = state.rooms.some(
+    (room) => room.id === input.roomId && room.status === "ACTIVE",
+  );
+
+  if (!roomExists) reasons.push("ROOM_CONTEXT_INVALID");
+  if (!placement || placement.roomId !== input.roomId) {
+    reasons.push("PLACEMENT_STATE_NOT_CANONICAL");
+  }
+
+  return {
+    status: reasons.length === 0 ? "READY" : "BLOCKED",
+    failedCheckpoints:
+      reasons.length === 0 ? [] : [input.checkpoint],
+    reasonCodes: [...new Set(reasons)],
+  };
+}
+
 const nonBlank = (value: string) => value.trim().length > 0;
 const nonNegativeInt = (value: number) => Number.isInteger(value) && value >= 0;
 
