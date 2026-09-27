@@ -153,13 +153,13 @@ async function syncCollection(resource,nextRows,prevRows){
 }
 
 async function syncRemote(state){
-  if(!apiEnabled())return {status:'SYNTHETIC'};
+  if(!apiEnabled())return {status:'SYNTHETIC',state};
   if(!remoteSnapshot)remoteSnapshot=clone(state);
   for(const resource of RESOURCES)await syncCollection(resource,state[resource]||[],remoteSnapshot[resource]||[]);
   remoteSnapshot=clone(state);
   lastSync={status:'SYNCED',at:now(),error:null};
   window.dispatchEvent(new CustomEvent('mta:remote-sync',{detail:clone(lastSync)}));
-  return {status:'SYNCED',at:lastSync.at};
+  return {status:'SYNCED',at:lastSync.at,state:clone(state)};
 }
 
 async function write(state){
@@ -181,7 +181,18 @@ async function write(state){
     window.dispatchEvent(new CustomEvent('mta:remote-sync',{detail:clone(lastSync)}));
     throw err;
   });
-  await syncChain;
+  const acknowledged=await syncChain;
+  if(acknowledged?.state){
+    for(const resource of RESOURCES){
+      const sourceRows=acknowledged.state[resource]||[];
+      const targetRows=state[resource]||[];
+      const byId=new Map(targetRows.filter(x=>x?.id).map(x=>[String(x.id),x]));
+      for(const row of sourceRows){
+        const originalId=row?.metadata?.clientId||row?.clientId;
+        if(originalId&&byId.has(String(originalId)))byId.get(String(originalId)).id=row.id;
+      }
+    }
+  }
   persistLocal(state);
   return true;
 }
