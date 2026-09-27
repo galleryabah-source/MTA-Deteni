@@ -8,6 +8,7 @@ const read = (p) => fs.readFileSync(path.join(root, p), "utf8");
 
 const shell = read("web/mta-unified-shell-v2.js");
 const movement = read("web/movement-v9.js");
+const commands = read("web/mta-domain-commands-v2.js");
 const runtime = read("web/mta-app-runtime-full.js");
 const preview = read("web/preview-v5.js");
 
@@ -57,7 +58,7 @@ test("leave transition has one canonical command boundary", () => {
 test("movement audit writer is defined and correlation is propagated", () => {
   assert.match(movement, /const appendAudit=\(/);
   assert.match(shell, /assignPlacementCommand\(d,[\s\S]*correlationId\)/);
-  assert.match(shell, /appendAuditToState\(d,'MOVEMENT_CREATE','MOVEMENT',movement\.id,'SUCCESS',correlationId\)/);
+  assert.match(commands, /audit\(d,'MOVEMENT_CREATE','MOVEMENT',movement\.id,'SUCCESS',correlationId\)/);
   assert.match(movement, /window\.mtaUnifiedCreateMovement\(d,/);
 });
 
