@@ -14,7 +14,7 @@ assert.match(runtime,/Kapasitas/);
 assert.match(runtime,/\$\{roomSummaryCard\(\)\}/);
 
 const index=fs.readFileSync('web/index.html','utf8');
-assert.match(index,/mta-room-summary-dashboard-v1/);
+assert.match(index,/mta-room-summary-dashboard-v2/);
 assert.match(index,/mta-app-runtime-full\.js\?v=21/);
 
 console.log('ROOM_SUMMARY_DASHBOARD_TEST: PASS');
