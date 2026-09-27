@@ -35,7 +35,7 @@
 
 | Metric | Nilai |
 |---|---:|
-| Total feature | 3 |
+| Total feature | 4 |
 | ☑ VERIFIED | 1 |
 | ◐ IN_PROGRESS | 0 |
 | ☐ PLANNED | 0 |
