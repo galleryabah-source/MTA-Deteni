@@ -8,13 +8,13 @@ const authUi=fs.readFileSync("web/mta-auth-ui.js","utf8");
 
 test("production dashboard renders runtime status from canonical production adapter state",()=>{
   assert.match(runtime,/function runtimeContext()/);
-  assert.match(runtime,/mtaProductionStateAdapter\?\.isProduction/);
-  assert.match(runtime,/database==='CONNECTED'/);
-  assert.match(runtime,/mode==='PRODUCTION'/);
-  assert.match(runtime,/runtimeContext().database/);
-  assert.match(runtime,/runtimeContext().mode/);
-  assert.match(runtime,/runtimeContext().ai/);
-  assert.match(runtime,/syncRuntimeChrome()/);
+  assert.ok(runtime.includes("mtaProductionStateAdapter?.isProduction"));
+  assert.ok(runtime.includes("database==='CONNECTED'"));
+  assert.ok(runtime.includes("mode==='PRODUCTION'"));
+  assert.ok(runtime.includes("runtimeContext().database"));
+  assert.ok(runtime.includes("runtimeContext().mode"));
+  assert.ok(runtime.includes("runtimeContext().ai"));
+  assert.ok(runtime.includes("syncRuntimeChrome()"));
 });
 
 test("production chrome has no hardcoded Local synthetic runtime label",()=>{
