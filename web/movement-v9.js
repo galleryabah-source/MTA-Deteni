@@ -1,6 +1,6 @@
 (()=>{
 const appendAudit=(d,a,t,i,r='SUCCESS',correlationId)=>{const kernel=window.MTADeteniStateKernel;if(kernel?.audit)return kernel.audit(d,a,t,i,r,{actor:'DEMO-OPERATOR',correlationId});throw new Error('CANONICAL_AUDIT_KERNEL_REQUIRED')};
-const audit=(a,t,i,r='SUCCESS')=>{const d=get();if(window.MTADeteniStateKernel?.audit)window.MTADeteniStateKernel.audit(d,a,t,i,r,{actor:'DEMO-OPERATOR'});else{d.audit=d.audit||[];d.audit.unshift({id:uid('AUD'),action:a,resourceType:t,resourceId:i||'',result:r,occurredAt:now(),actor:'DEMO-OPERATOR',requestId:uid('REQ'),correlationId:uid('COR'),policyVersion:'AUTHZ-1.0'})}put(d)};
+const audit=(a,t,i,r='SUCCESS')=>{const d=get(),kernel=window.MTADeteniStateKernel;if(kernel?.audit){kernel.audit(d,a,t,i,r,{actor:'DEMO-OPERATOR'});put(d);return}throw new Error('CANONICAL_AUDIT_KERNEL_REQUIRED')};
 function ensure(){const d=get();d.detainees=d.detainees||[];d.rooms=d.rooms||[];d.blocks=d.blocks||[];d.placements=d.placements||[];d.movements=d.movements||[];d.qr=d.qr||{detainee:{},room:{},leave:{}};return d}
 function current(d,id){return d.placements.filter(p=>p.detaineeId===id).sort((a,b)=>String(b.since||'').localeCompare(String(a.since||'')))[0]||null}
 function room(d,p){return p?.roomId?d.rooms.find(r=>r.id===p.roomId):d.rooms.find(r=>r.block===p?.block&&r.room===p?.room)}
