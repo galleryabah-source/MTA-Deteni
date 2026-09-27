@@ -8,7 +8,7 @@ const authUi=fs.readFileSync("web/mta-auth-ui.js","utf8");
 
 test("production dashboard renders runtime status from canonical production adapter state",()=>{
   assert.match(runtime,/function runtimeContext()/);
-  assert.match(runtime,/mtaProductionStateAdapter?.isProduction/);
+  assert.match(runtime,/mtaProductionStateAdapter\?\.isProduction/);
   assert.match(runtime,/database==='CONNECTED'/);
   assert.match(runtime,/mode==='PRODUCTION'/);
   assert.match(runtime,/runtimeContext().database/);
