@@ -211,6 +211,40 @@ Deno.serve(async(req)=>{
     const correlationId=req.headers.get("X-Correlation-Id")||requestId;
     const idempotencyKey=req.headers.get("Idempotency-Key")||crypto.randomUUID();
     const body=req.method==="DELETE"?{}:await req.json().catch(()=>({}));
+    if(req.method==="POST" && resource==="movements" && body?.command==="MOVE_DETAINEE"){
+      const requestHash=await sha256Hex(stableJson({method:req.method,resource,body}));
+      const {data,error}=await admin.rpc("mta_execute_movement_transaction",{
+        p_idempotency_key:idempotencyKey,
+        p_request_hash:requestHash,
+        p_detainee_id:body.detaineeId,
+        p_target_room_id:body.targetRoomId,
+        p_actor_user_id:user.id,
+        p_request_id:requestId,
+        p_correlation_id:correlationId,
+        p_movement_type:body.movementType||"TRANSFER",
+        p_purpose:body.purpose||null,
+        p_occurred_at:body.occurredAt||new Date().toISOString()
+      });
+      if(error){
+        const message=String(error.message||"");
+        const map=[
+          ["P11_IDEMPOTENCY_CONFLICT","IDEMPOTENCY_CONFLICT",409],
+          ["P11_DETAINEE_NOT_FOUND","DETAINEE_NOT_FOUND",404],
+          ["P11_ROOM_NOT_FOUND","ROOM_NOT_FOUND",404],
+          ["P11_DETAINEE_NOT_ACTIVE","DETAINEE_NOT_ACTIVE",409],
+          ["P11_ROOM_NOT_ACTIVE","ROOM_NOT_ACTIVE",409],
+          ["P11_ROOM_SCOPE_MISMATCH","ROOM_SCOPE_MISMATCH",403],
+          ["P11_DETAINEE_SCOPE_DENIED","DETAINEE_SCOPE_DENIED",403],
+          ["P11_SAME_ROOM","SAME_ROOM",409],
+          ["P11_ROOM_CAPACITY_EXCEEDED","ROOM_CAPACITY_EXCEEDED",409],
+          ["P11_RBAC_WRITE_DENIED","RBAC_WRITE_DENIED",403]
+        ];
+        const hit=map.find(([needle])=>message.includes(needle));
+        if(hit) return json(req,{ok:false,error:hit[1],command:"MOVE_DETAINEE",requestId,correlationId},hit[2]);
+        return json(req,{ok:false,error:"TRANSACTIONAL_MOVEMENT_REJECTED",command:"MOVE_DETAINEE",requestId,correlationId},400);
+      }
+      return json(req,{ok:true,resource,role,command:"MOVE_DETAINEE",data,replayed:!!data?.replayed},data?.replayed?200:201);
+    }
     const operation=req.method==="POST"?"INSERT":req.method==="PATCH"?"UPDATE":"DELETE";
     const requestHash=await sha256Hex(stableJson({method:req.method,resource,id:id||null,body}));
     const resourceType={detainees:"DETAINEE",placements:"PLACEMENT",movements:"MOVEMENT",leaves:"LEAVE",documents:"DOCUMENT",blocks:"BLOCK",rooms:"ROOM",audit:"AUDIT"}[resource];
