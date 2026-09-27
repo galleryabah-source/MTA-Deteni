@@ -3,7 +3,7 @@ import { createObservabilityEvent, sanitizeObservabilityError, serializeObservab
 
 const allowedOrigin=(origin)=>origin&&(/^https:\/\/(?:[a-z0-9-]+-)?mta-deteni\.galleryabah\.workers\.dev$/i.test(origin)||origin==="https://mta-deteni.galleryabah.workers.dev")?origin:"null";
 const cors=(req)=>({"Access-Control-Allow-Origin":allowedOrigin(req.headers.get("Origin")),"Access-Control-Allow-Headers":"authorization, x-client-info, apikey, content-type, x-request-id, x-correlation-id, idempotency-key","Access-Control-Allow-Methods":"GET,POST,PATCH,DELETE,OPTIONS","Access-Control-Expose-Headers":"X-Request-Id, X-Correlation-Id","Vary":"Origin","Content-Type":"application/json","X-Content-Type-Options":"nosniff"});
-const TABLES=new Set(["detainees","placements","movements","leaves","documents"]);
+const TABLES=new Set(["detainees","placements","movements","leaves","documents","blocks","rooms"]);
 const WRITE_ROLES=new Set(["OWNER","ADMIN","EDITOR"]);
 const requestStarts=new WeakMap();
 const json=(req,body,status=200,context={})=>{const requestId=context.requestId||req.headers.get("X-Request-Id")||crypto.randomUUID();const correlationId=context.correlationId||req.headers.get("X-Correlation-Id")||requestId;const durationMs=requestStarts.has(req)?performance.now()-requestStarts.get(req):undefined;const event=(()=>{try{return serializeObservabilityEvent(createObservabilityEvent({level:status>=500?"ERROR":status>=400?"WARN":"INFO",service:"mta-api",event:status>=500?"request.failed":"request.completed",requestId,correlationId,method:req.method,route:new URL(req.url).pathname,status,durationMs,outcome:status>=500?"FAILED":status>=400?"DENIED":"SUCCESS",errorCode:body?.error}));}catch{return null;}})();if(event)console.log(event);return new Response(JSON.stringify(body),{status,headers:{...cors(req),"X-Request-Id":requestId,"X-Correlation-Id":correlationId}});};
@@ -212,7 +212,7 @@ Deno.serve(async(req)=>{
     const body=req.method==="DELETE"?{}:await req.json().catch(()=>({}));
     const operation=req.method==="POST"?"INSERT":req.method==="PATCH"?"UPDATE":"DELETE";
     const requestHash=await sha256Hex(stableJson({method:req.method,resource,id:id||null,body}));
-    const resourceType={detainees:"DETAINEE",placements:"PLACEMENT",movements:"MOVEMENT",leaves:"LEAVE",documents:"DOCUMENT"}[resource];
+    const resourceType={detainees:"DETAINEE",placements:"PLACEMENT",movements:"MOVEMENT",leaves:"LEAVE",documents:"DOCUMENT",blocks:"BLOCK",rooms:"ROOM"}[resource];
     const action=resourceType+"_"+operation;
     const {data,error}=await admin.rpc("mta_execute_idempotent_mutation",{
       p_idempotency_key:idempotencyKey,
