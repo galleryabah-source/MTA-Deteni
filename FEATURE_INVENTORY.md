@@ -128,7 +128,7 @@ Therefore:
 
 ### E. Recommended reconciliation order
 
-1. Keep Feature IDs 001–003 unchanged.
+1. Keep Feature IDs 001–004 unchanged.
 2. Use this inventory as the capability map.
 3. Retrospectively assign Feature IDs only to genuine user-facing operational capabilities.
 4. Reuse existing tests/commits as evidence; do not manufacture new checkpoints.
@@ -138,6 +138,6 @@ Therefore:
 
 ## Conclusion
 
-The repository contains a substantially larger capability surface than the current 3-entry Feature Registry. The dominant gap is traceability and feature-specific runtime evidence, not simply missing implementation.
+The repository contains a substantially larger capability surface than the current 4-entry Feature Registry. The dominant gap is traceability and feature-specific runtime evidence, not simply missing implementation.
 
 The next engineering step is **Feature Reconciliation + Runtime Verification**, not indiscriminate feature development.
