@@ -73,6 +73,8 @@ Inventory ini memetakan capability yang terdeteksi dari source, commit history, 
 
 | 47 | Dashboard Room Summary | Dashboard/Core Runtime | eb621931 / 432dbe89 | Feature track 2026-09-27 | IMPLEMENTED | test/room-summary-dashboard.test.mjs | Static regression contract; browser/runtime verification pending | MTA-F-20260927-004 |
 
+| 48 | User Management / Tambah User | Administration / Identity | Requested capability; no operational implementation found in audited source | Feature reconciliation | PLANNED | No implementation/test evidence | Not available | MTA-F-20260927-021 |
+
 ## Functional Requirement Mapping
 
 | Requirement | Inventory | Assessment |
