@@ -61,7 +61,7 @@ jobs:
           cat > smoke.mjs <<'NODE'
           import { chromium } from 'playwright';
           const base=process.env.BASE_URL;
-          const SUPABASE_STUB = \`
+          const SUPABASE_STUB = `
           let session = null;
           let authListener = null;
           export function createClient(){
@@ -92,9 +92,9 @@ jobs:
               }
             };
           }
-          \`;
+          `;
 
-          const QR_STUB = \`
+          const QR_STUB = `
           window.qrcode = window.qrcode || function(){
             return {
               addData(){},
@@ -103,7 +103,7 @@ jobs:
               createSvgTag(){ return '<svg xmlns="http://www.w3.org/2000/svg"></svg>'; }
             };
           };
-          \`;
+          `;
 
           const browser=await chromium.launch({headless:true});
           const context=await browser.newContext({
