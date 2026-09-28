@@ -308,10 +308,12 @@ Deno.serve(async(req)=>{
         return [name,data||[]];
       }));
       const payload=Object.fromEntries(loaded);
+      const scopeInfo=await admin.from("mta_scopes").select("id").limit(1000);
+      if(scopeInfo.error)return json(req,{ok:false,error:"BACKUP_SCOPE_READ_FAILED"},500);
       const createdAt=new Date().toISOString();
       const backupId="BKP-"+crypto.randomUUID().replaceAll("-","").slice(0,20).toUpperCase();
       const payloadFingerprint=await sha256Hex(stableJson(payload));
-      const manifest={schemaVersion:1,backupId,sourceRuntime:"MTA_API",createdAt,payloadFingerprint,syntheticOnly:false};
+      const manifest={schemaVersion:1,backupId,sourceRuntime:"MTA_API",createdAt,payloadFingerprint,syntheticOnly:false,scopeCount:(scopeInfo.data||[]).length};
       return json(req,{ok:true,resource,data:{manifest,payload}});
     }catch(e){
       emit("ERROR","backup.create.failed",{status:500,outcome:"FAILED",errorCode:"BACKUP_CREATE_FAILED"});
@@ -326,6 +328,10 @@ Deno.serve(async(req)=>{
       const body=await req.json().catch(()=>null);
       const manifest=body?.manifest,payload=body?.payload;
       if(!manifest||manifest.schemaVersion!==1||!payload||typeof payload!=="object")return json(req,{ok:false,error:"BACKUP_INVALID"},400);
+      if(Number(manifest.scopeCount||0)!==1)return json(req,{ok:false,error:"BACKUP_RESTORE_MULTI_SCOPE_UNSUPPORTED"},409);
+      const scopeInfo=await admin.from("mta_scopes").select("id").limit(1000);
+      if(scopeInfo.error)return json(req,{ok:false,error:"BACKUP_SCOPE_READ_FAILED"},500);
+      if((scopeInfo.data||[]).length!==1)return json(req,{ok:false,error:"BACKUP_RESTORE_MULTI_SCOPE_UNSUPPORTED"},409);
       const roots=["detainees","blocks","rooms","movements","placements","leaves","documents","audit"];
       if(!roots.every(k=>Array.isArray(payload[k])))return json(req,{ok:false,error:"BACKUP_ROOT_INVALID"},400);
       const fingerprint=await sha256Hex(stableJson(payload));
