@@ -10,10 +10,17 @@
   const state=()=>window.__mtaProductionState||null;
   const session=async()=>{const r=await window.mtaAuth?.session?.();return r?.data?.session||null};
   async function request(resource,{method='GET',id,body,headers={}}={}){
-    const s=await session();
+    let s=await session();
     if(!s?.access_token)throw new Error('PRODUCTION_AUTH_REQUIRED');
     const path=API+'/'+encodeURIComponent(resource)+(id?'/'+encodeURIComponent(id):'');
-    const res=await fetch(path,{method,headers:{Authorization:'Bearer '+s.access_token,Accept:'application/json',...(body!==undefined?{'Content-Type':'application/json'}:{}),...headers},body:body===undefined?undefined:JSON.stringify(body)});
+    const init=()=>({method,headers:{Authorization:'Bearer '+s.access_token,Accept:'application/json',...(body!==undefined?{'Content-Type':'application/json'}:{}),...headers},body:body===undefined?undefined:JSON.stringify(body)});
+    let res=await fetch(path,init());
+    if(res.status===401&&window.mtaAuth?.refreshSession){
+      try{
+        const refreshed=await window.mtaAuth.refreshSession();
+        if(refreshed?.access_token){s=refreshed;res=await fetch(path,init());}
+      }catch{}
+    }
     const data=await res.json().catch(()=>({ok:false,error:'INVALID_JSON'}));
     if(!res.ok||data.ok===false){const error=new Error(data.error||('PRODUCTION_API_'+res.status));error.status=res.status;error.data=data;throw error;}
     return data;
