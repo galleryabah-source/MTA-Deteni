@@ -1,3 +1,29 @@
+# P2 PostgreSQL Persistence Expansion Checkpoint — 2026-09-28 13:51 WIB
+
+Continued canonical persistence migration across the requested domain order.
+
+Completed in repository during this checkpoint:
+- Master Block create/update routes through PostgreSQL.
+- Master Room create/update routes through PostgreSQL; room scope is derived server-side from the canonical block.
+- Initial Placement assignment routes through PostgreSQL.
+- Movement production path remains the existing transactional PostgreSQL boundary (P11), with audit/outbox evidence.
+- Leave creation and full leave status workflow now route through PostgreSQL in production runtime.
+- Room QR and Leave QR lifecycle route through PostgreSQL metadata.
+- Document create, status transitions, generation, and revision creation route through PostgreSQL.
+- Administrator System, Master Catalog, Branding and AI configuration now route through server-side PostgreSQL/control-plane resources; production browser writes are suppressed.
+- Added server-side runtime audit-event seam for non-row-change runtime events.
+- Production state hydration now includes administrator configuration.
+
+Not yet certified:
+- Backup restore must be converted to a server-side transactional restore boundary; browser restore is not allowed to become a production persistence path.
+- Browser/deployment runtime verification has not been executed from an authorized station.
+- Two-computer/two-user shared-state verification has not been executed.
+- CI status for these push commits is not currently exposed by the repository status tool; no CI PASS claim is made.
+
+The production runtime is now being treated as PostgreSQL-backed by design, while the remaining backup/restore seam and live verification are kept explicit rather than silently falling back to browser storage.
+
+---
+
 # MTA DETENI — PostgreSQL Persistence Activation Checkpoint (2026-09-28)
 
 The PostgreSQL persistence activation has begun at the canonical runtime boundary. This checkpoint does **not** claim full-domain completion yet.
