@@ -276,16 +276,16 @@ function clearDemo(){if(confirm('Reset seluruh data synthetic demo?')){db=struct
 function show(v,id){if(v==='detainee-detail'){current='detainee';document.querySelectorAll('.nav button').forEach(b=>b.classList.toggle('active',b.dataset.view==='detainee'));const detailView=window.MTADetaineeDetailView;if(detailView&&typeof detailView.detail==='function')return detailView.detail(id);toast('Modul detail deteni belum siap. Silakan refresh halaman.');return}current=v;document.querySelectorAll('.nav button').forEach(b=>b.classList.toggle('active',b.dataset.view===v));render()}
 window.__mtaLegacyShow=show;
 // Navigation is owned by the unified shell; do not register a second nav listener.
-document.getElementById('backupBtn').onclick=()=>{audit('EXPORT_DOWNLOAD','BACKUP','synthetic');save();const blob=new Blob([JSON.stringify(db,null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='mta-deteni-synthetic-backup.json';a.click();toast('Backup JSON dibuat')};
+document.getElementById('backupBtn').onclick=async()=>{try{if(window.mtaProductionStateAdapter?.isProduction?.()){const response=await window.mtaProductionStateAdapter.createBackup();const blob=new Blob([JSON.stringify(response.data,null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='mta-deteni-postgres-backup.json';a.click();toast('Backup PostgreSQL dibuat di server')}else{audit('EXPORT_DOWNLOAD','BACKUP','synthetic');save();const blob=new Blob([JSON.stringify(db,null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='mta-deteni-synthetic-backup.json';a.click();toast('Backup JSON dibuat')}}catch(err){toast('Backup gagal: '+(err?.message||err))}};
 document.getElementById('importBtn').onclick=()=>document.getElementById('importFile').click();
-document.getElementById('importFile').onchange=e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{try{const x=JSON.parse(r.result);const result=window.MTADeteniDomainCommandsV2?.restoreBackup(x);if(!result?.ok)throw new Error(result?.code||'BACKUP_RESTORE_FAILED');db=result.state;validateRuntimeState(db);if(!save())return;render();toast('Backup dipulihkan')}catch(err){toast('Backup tidak valid: '+err.message)}};r.readAsText(f)};
+document.getElementById('importFile').onchange=e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=async()=>{try{const x=JSON.parse(r.result);const result=await window.MTADeteniDomainCommandsV2?.restoreBackup(x);if(!result?.ok)throw new Error(result?.code||'BACKUP_RESTORE_FAILED');db=result.state;validateRuntimeState(db);if(window.mtaProductionStateAdapter?.isProduction?.()){render();toast('Backup PostgreSQL dipulihkan secara server-side')}else{if(!save())return;render();toast('Backup dipulihkan')}}catch(err){toast('Backup tidak valid: '+(err?.message||err))}};r.readAsText(f)};
 if(!window.__mtaRuntimeClockTimer){window.__mtaRuntimeClockTimer=setInterval(()=>document.getElementById('clock').textContent=new Date().toLocaleString('id-ID'),1000);}
 async function loadAuthenticatedRuntime(){
   if(window.__mtaRuntimeLoading)return window.__mtaRuntimeLoading;
   const scripts=[
-    '/mta-production-state-adapter-v1.js?v=5',
+    '/mta-production-state-adapter-v1.js?v=6',
     '/mta-state-kernel-v1.js?v=5',
-    '/mta-domain-commands-v2.js?v=4',
+    '/mta-domain-commands-v2.js?v=5',
     '/offline-v1.js?v=2',
     '/offline-queue-v1.js?v=2',
     '/mfe-evidence-v1.js?v=1',
