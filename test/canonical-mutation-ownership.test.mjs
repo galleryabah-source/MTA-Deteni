@@ -8,34 +8,35 @@ test("H1 placement has one canonical mutation owner",()=>{
   const runtime=read("web/mta-app-runtime-full.js");
   const shell=read("web/mta-unified-shell-v2.js");
   const placementUi=runtime.slice(runtime.indexOf("function addPlacement(){"),runtime.indexOf("function movement(v)",runtime.indexOf("function addPlacement(){")));
-  assert.match(placementUi,/window\.mtaUnifiedAssignPlacement\(db/);
+  assert.match(placementUi,/window\.MTADeteniDomainCommandsV2\.assignPlacement\(db/);
   assert.doesNotMatch(placementUi,/db\.placements\.unshift\(/);
   assert.match(shell,/function assignPlacementCommand\(state,options=\{\}\)/);
   assert.match(shell,/canonicalCommand\('assignPlacement'\)/);
   assert.doesNotMatch(shell,/d\.placements\.unshift\(placement\)/);
 });
 
-test("H2 detainee CRUD delegates mutation to canonical domain commands",()=>{
+test("H2 detainee CRUD delegates mutation to canonical v2 domain commands",()=>{
   const runtime=read("web/mta-app-runtime-full.js");
-  const commands=read("web/mta-domain-commands-v1.js");
+  const commands=read("web/mta-domain-commands-v2.js");
   const block=runtime.slice(runtime.indexOf("function addDetainee(existing){"),runtime.indexOf("function placement(v)",runtime.indexOf("function addDetainee(existing){")));
-  assert.match(block,/window\.MTADeteniDomainCommands\.createDetainee/);
-  assert.match(block,/window\.MTADeteniDomainCommands\.updateDetainee/);
+  assert.match(block,/window\.MTADeteniDomainCommandsV2/);
+  assert.match(block,/await command\.createDetainee/);
+  assert.match(block,/await command\.updateDetainee/);
   assert.doesNotMatch(block,/db\.detainees\.unshift\(/);
-  assert.match(commands,/function createDetainee\(state,options=\{\}\)/);
-  assert.match(commands,/function updateDetainee\(state,options=\{\}\)/);
-  assert.match(commands,/window\.mtaUnifiedAssignPlacement/);
+  assert.match(commands,/function createDetainee/);
+  assert.match(commands,/function updateDetainee/);
+  assert.match(commands,/productionDetaineeMutation/);
 });
 
 test("H3 archive/status mutation has one canonical owner",()=>{
   const runtime=read("web/mta-app-runtime-full.js");
-  const commands=read("web/mta-domain-commands-v1.js");
-  const start=runtime.indexOf("function archiveDetainee(id){");
+  const commands=read("web/mta-domain-commands-v2.js");
+  const start=runtime.indexOf("async function archiveDetainee(id){");
   const end=runtime.indexOf("function placement(v)",start);
   const block=runtime.slice(start,end);
-  assert.match(block,/window\.MTADeteniDomainCommands\.archiveDetainee/);
+  assert.match(block,/window\.MTADeteniDomainCommandsV2\.archiveDetainee/);
   assert.doesNotMatch(block,/\.status='NONAKTIF'/);
-  assert.match(commands,/function archiveDetainee\(state,id,options=\{\}\)/);
+  assert.match(commands,/function archiveDetainee/);
   assert.match(commands,/DETAINEE_ARCHIVE/);
 });
 
@@ -49,7 +50,7 @@ test("H4 legacy movement entrypoint is neutralized",()=>{
   assert.doesNotMatch(block,/LEGACY_MOVEMENT_CREATE/);
 });
 
-test("canonical domain command module is wired before runtime feature modules",()=>{
+test("canonical v2 command module is wired before runtime feature modules",()=>{
   const index=read("web/index.html");
-  assert.match(index,/mta-domain-commands-v1\.js\?v=1/);
+  assert.match(index,/mta-domain-commands-v2\.js\?v=5/);
 });
