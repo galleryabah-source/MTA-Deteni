@@ -25,8 +25,8 @@ test("auth UI does not treat unresolved refresh hydration as logout",()=>{
 test("last operational view is restored after hard refresh",()=>{
   assert.match(shell,/const ROUTE_KEY='mta-deteni-route-v1'/);
   assert.match(shell,/sessionStorage\.getItem\(ROUTE_KEY\)/);
-  assert.match(shell,/sessionStorage\.setItem\(ROUTE_KEY,String\(v\)\)/);
-  assert.match(shell,/const targetView=window\.__mtaUnifiedReadRoute\?\(\)\|\|window\.__mtaUnifiedCurrentView\|\|'dashboard'/);
+  assert.match(shell,/sessionStorage\.setItem\(ROUTE_KEY,JSON\.stringify\(\{view:String\(v\),id:id\|\|null\}\)\)/);
+  assert.match(shell,/const route=window\.__mtaUnifiedReadRoute\?\.\(\)\|\|\{view:window\.__mtaUnifiedCurrentView\|\|'dashboard',id:null\}/);
 });
 
 test("refresh fix is cache-busted through the authenticated runtime chain",()=>{
@@ -34,5 +34,5 @@ test("refresh fix is cache-busted through the authenticated runtime chain",()=>{
   assert.match(index,/mta-app-runtime\.js\?v=12/);
   assert.match(index,/mta-app-runtime-full\.js\?v=23/);
   assert.match(fs.readFileSync("web/mta-app-runtime.js","utf8"),/mta-app-runtime-full\.js\?v=23/);
-  assert.match(fs.readFileSync("web/mta-app-runtime-full.js","utf8"),/mta-unified-shell-v2\.js\?v=11/);
+  assert.match(fs.readFileSync("web/mta-app-runtime-full.js","utf8"),/mta-unified-shell-v2\.js\?v=12/);
 });
