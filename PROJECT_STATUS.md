@@ -40,6 +40,12 @@ Allowlisted browser persistence is currently limited to:
 
 These are not treated as the production application database.
 
+### Current implementation checkpoint
+
+Latest repository checkpoint: `e72b83b0a9636c948193f6fea8124d40d4ccaee3`.
+
+Manual repository inspection confirms the final mutation audit pattern is clean across the current production writer set (`mta-app-runtime-full.js`, `admin-settings-v9.js`, `room-ops-v9.js`, `movement-v9.js`, `detainee-detail-v1.js`, `detainee-statistics-v1.js`, `data-statistics-report-v1.js`, `master-room-guard-v10.js`): no direct `db/state/data.<domain>` array mutation was found. The automated CMO-05/06 test now enforces the same boundary in CI.
+
 ### Verification boundary
 
 - Repository implementation: **STAGED / CONTRACT TESTS ADDED**
