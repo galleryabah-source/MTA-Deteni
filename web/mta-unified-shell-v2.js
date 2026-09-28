@@ -317,15 +317,21 @@ function install(){
   window.__mtaUnifiedOriginalShow=originalShow;
   const ROUTE_KEY='mta-deteni-route-v1';
   const readRoute=()=>{
-    try{return sessionStorage.getItem(ROUTE_KEY)||'dashboard'}catch{return 'dashboard'}
+    try{
+      const raw=sessionStorage.getItem(ROUTE_KEY);
+      if(!raw)return {view:'dashboard',id:null};
+      const parsed=JSON.parse(raw);
+      if(parsed&&typeof parsed.view==='string')return {view:parsed.view,id:parsed.id||null};
+      return {view:String(raw),id:null};
+    }catch{return {view:'dashboard',id:null}}
   };
-  const writeRoute=v=>{
-    try{if(v)sessionStorage.setItem(ROUTE_KEY,String(v))}catch{}
+  const writeRoute=(v,id=null)=>{
+    try{if(v)sessionStorage.setItem(ROUTE_KEY,JSON.stringify({view:String(v),id:id||null}))}catch{}
   };
   window.__mtaUnifiedReadRoute=readRoute;
-  window.show=function(v){
+  window.show=function(v,id){
     window.__mtaUnifiedCurrentView=v;
-    writeRoute(v);
+    writeRoute(v,id);
     syncLegacyDb();
     document.querySelectorAll('#nav button').forEach(b=>b.classList.toggle('active',b.dataset.view===v));if(v==='user-management'){if(typeof window.MTAUserManagementView?.render==='function')return window.MTAUserManagementView.render();return toast('Modul Manajemen User belum siap')}if(v==='p9settings'&&typeof window.p9openSettings==='function'){window.p9openSettings();return;}if(v==='monitor'){document.getElementById('appView').innerHTML=monitor();return}if(v==='ops-queue'){document.getElementById('appView').innerHTML=queue();return}if(v==='qr-center'){document.getElementById('appView').innerHTML=qrCenter();return}if(v==='scan-center'){if(window.MTAPreviewV5Views?.render)return window.MTAPreviewV5Views.render('p5scan');return toast('Scan Center belum siap')}if(v==='leave-qr'){if(window.MTAPreviewV6Views?.render)return window.MTAPreviewV6Views.render('p6leaveqr');return toast('Leave QR belum siap')}if(v==='camera-scan'){document.getElementById('appView').innerHTML=camera();return}if(v==='movement'){if(typeof window.MTAMovementView?.render==='function')return window.MTAMovementView.render();return toast('Pergerakan belum siap')}if(v==='reports'){if(typeof window.documents==='function')return window.documents(document.getElementById('appView'));document.getElementById('appView').innerHTML='<section class="hero"><h1>Laporan</h1><p class="sub">Workflow laporan belum tersedia pada runtime ini.</p></section>';return}if(v==='room-ops'&&typeof window.MTARoomOpsView?.render==='function')return window.MTARoomOpsView.render();if(typeof originalShow==='function')return originalShow(v);if(typeof window.__mtaLegacyShow==='function')return window.__mtaLegacyShow(v);const legacy=document.querySelector('[data-view="'+v+'"]');if(legacy){document.querySelectorAll('#nav button').forEach(b=>b.classList.toggle('active',b.dataset.view===v));return toast('Navigasi legacy belum siap: '+v)}return toast('View tidak tersedia: '+v)};window.mtaUnifiedResolve=resolve;window.mtaUnifiedEvaluateQr=evaluateQrPayload;window.mtaUnifiedScannerContractTest=scannerContractTest;window.mtaUnifiedOperationalContractTest=operationalContractTest;window.mtaUnifiedJourneyContractTest=journeyContractTest;window.mtaUnifiedJourneyOperationalContractTest=journeyOperationalContractTest;window.mtaUnifiedBuildMonitorMetrics=buildMonitorMetrics;window.mtaUnifiedBuildOperationalQueue=buildOperationalQueue;window.mtaUnifiedFailureRecoveryContractTest=failureRecoveryContractTest;window.mtaUnifiedStateConsistencyContractTest=stateConsistencyContractTest;window.mtaUnifiedFinalIntegrityGate=finalIntegrityGate;window.mtaUnifiedBuildReferentialIntegrityReport=buildReferentialIntegrityReport;window.mtaUnifiedReferentialIntegrityContractTest=referentialIntegrityContractTest;window.mtaUnifiedValidateMovement=validateMovementState;window.mtaUnifiedValidateLeave=validateLeaveState;window.mtaUnifiedAssignPlacement=(d,options={})=>assignPlacementCommand(d,{...options,correlationId:options?.correlationId||null});window.mtaUnifiedCreateMovement=createMovementCommand;window.mtaUnifiedAdvanceLeave=advanceLeaveCommand;window.mtaUnifiedOpenMovement=openMovementForDetainee;window.mtaUnifiedAction=action;window.mtaUnifiedPrintQR=(k,id)=>window.p6printQR?window.p6printQR(k,id):toast('QR print module belum siap');window.mtaUnifiedSelfTest=selfTest}
 let bootStarted=false;
@@ -401,8 +407,8 @@ async function boot(){
   window.MTA_DETENI_MODULE_LOAD_REPORT=loaded;
   setTimeout(()=>{
     if(window.__mtaAuthState?.authenticated){
-      const targetView=window.__mtaUnifiedReadRoute?.()||window.__mtaUnifiedCurrentView||'dashboard';
-      if(typeof window.show==='function')window.show(targetView);
+      const route=window.__mtaUnifiedReadRoute?.()||{view:window.__mtaUnifiedCurrentView||'dashboard',id:null};
+      if(typeof window.show==='function')window.show(route.view,route.id);
     }
   },80);
   window.dispatchEvent(new CustomEvent('mta:unified-ready',{detail:{version:VERSION,loaded}}));
