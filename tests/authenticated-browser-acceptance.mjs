@@ -224,10 +224,21 @@ try {
     await placementSelect.selectOption(options[0].value);
   }
   await page.locator('#dForm').evaluate(form => form.requestSubmit());
-  await page.waitForFunction(code => {
-    const d = window.MTADeteniStateKernel?.read?.() || {};
-    return (d.detainees || []).some(x => x.code === code);
-  }, crudCode, { timeout: 5000 });
+  try {
+    await page.waitForFunction(code => {
+      const d = window.MTADeteniStateKernel?.read?.() || {};
+      return (d.detainees || []).some(x => x.code === code);
+    }, crudCode, { timeout: 5000 });
+  } catch (err) {
+    const probe = await page.evaluate(() => ({
+      toast: document.getElementById('toast')?.textContent || '',
+      modalOpen: !!document.querySelector('#modal.open'),
+      commandReady: !!window.MTADeteniDomainCommandsV2,
+      state: window.MTADeteniStateKernel?.read?.() || null,
+      production: !!window.mtaProductionStateAdapter?.isProduction?.()
+    }));
+    throw new Error('detainee create state timeout: '+JSON.stringify(probe));
+  }
   let crudState = await page.evaluate(code => {
     const d = window.MTADeteniStateKernel?.read?.() || {};
     const x = (d.detainees || []).find(v => v.code === code);
