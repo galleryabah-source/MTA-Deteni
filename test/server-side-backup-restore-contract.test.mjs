@@ -22,7 +22,7 @@ assert.match(adapter,/async function restoreBackup\(snapshot\)/);
 assert.match(adapter,/request\('backup-restore',\{method:'POST'/);
 
 assert.match(commands,/async function restoreBackup\(s,x\)/);
-assert.match(commands,/mtaProductionStateAdapter\?\.restoreBackup\(x\)/);
+assert.match(commands,/mtaProductionStateAdapter\.restoreBackup\(x\)/);
 
 assert.match(runtime,/mtaProductionStateAdapter\?\.createBackup\(\)/);
 assert.match(runtime,/await window\.MTADeteniDomainCommandsV2\?\.restoreBackup\(x\)/);
