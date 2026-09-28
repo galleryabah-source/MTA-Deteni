@@ -6,7 +6,7 @@
   const CSS='/desktop-shell-v2.css?v=3';
   const GROUPS={
     dashboard:'UTAMA',
-    detainee:'DATA & PENEMPATAN',placement:'DATA & PENEMPATAN',
+    detainee:'DATA & PENEMPATAN','detainee-statistics':'DATA & PENEMPATAN',placement:'DATA & PENEMPATAN',
     movement:'OPERASIONAL',leave:'OPERASIONAL',monitor:'OPERASIONAL','ops-queue':'OPERASIONAL',
     documents:'REKAM & KEPATUHAN',audit:'REKAM & KEPATUHAN',reports:'REKAM & KEPATUHAN',
     'qr-center':'QR & PEMINDAIAN','scan-center':'QR & PEMINDAIAN','leave-qr':'QR & PEMINDAIAN','camera-scan':'QR & PEMINDAIAN',
@@ -18,7 +18,7 @@
     nav.setAttribute('aria-label','Navigasi utama MTA DETENI');
     nav.querySelectorAll('button').forEach(b=>{b.setAttribute('aria-current',b.classList.contains('active')?'page':'false');if(!b.title)b.title=b.textContent.trim()});
   }
-  const NAV_ORDER=['dashboard','detainee','placement','movement','leave','monitor','ops-queue','qr-center','scan-center','leave-qr','camera-scan','documents','audit','reports','room-ops','p9settings','user-management'];
+  const NAV_ORDER=['dashboard','detainee','detainee-statistics','placement','movement','leave','monitor','ops-queue','qr-center','scan-center','leave-qr','camera-scan','documents','audit','reports','room-ops','p9settings','user-management'];
   function groupNav(nav){
     const buttons=[...nav.querySelectorAll('button[data-view]')];
     const allowed=new Set(NAV_ORDER);
@@ -51,11 +51,8 @@
     const side=document.querySelector('.side');
     const layout=document.querySelector('.layout');
     if(!side||!layout)return;
-
-    // Normalize any stale/duplicate toggle left by an earlier shell build.
     side.querySelectorAll('button:not([data-view])').forEach(b=>b.remove());
     document.querySelectorAll('.mta-nav-toggle').forEach((b,i)=>{if(i>0)b.remove()});
-
     let toggle=document.getElementById('mtaSidebarToggle');
     if(!toggle){
       toggle=document.createElement('button');
@@ -65,7 +62,6 @@
       side.insertBefore(toggle,side.firstChild);
     }
     toggle.setAttribute('aria-controls','nav');
-
     const key='mta-deteni-sidebar-collapsed';
     const applyCollapsed=(collapsed,save=true)=>{
       side.classList.toggle('mta-collapsed',collapsed);
@@ -77,7 +73,6 @@
       toggle.innerHTML='<span aria-hidden="true">'+(collapsed?'›':'‹')+'</span>';
       if(save)try{localStorage.setItem(key,collapsed?'1':'0')}catch{}
     };
-
     if(!toggle.dataset.mtaBound){
       toggle.dataset.mtaBound='1';
       toggle.addEventListener('click',e=>{
@@ -89,7 +84,6 @@
     try{collapsed=localStorage.getItem(key)==='1'}catch{}
     applyCollapsed(collapsed,false);
   }
-
   function statusStrip(){
     let strip=document.querySelector('.mta-desktop-status');
     const view=document.querySelector('.view');
