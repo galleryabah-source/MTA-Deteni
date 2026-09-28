@@ -17,9 +17,9 @@ assert.match(rbac,/create policy mta_detainees_insert_editor/);
 assert.match(rbac,/create policy mta_detainees_update_editor/);
 
 assert.match(api,/if\(req\.method==="POST"\)/);
-assert.match(api,/supabase\.from\(table\)\.insert\(body\)\.select\("\*"\)\.single\(\)/);
-assert.match(api,/supabase\.from\(table\)\.update\(body\)\.eq\("id",id\)\.select\("\*"\)\.single\(\)/);
-assert.match(api,/mta_detainees/);
+assert.match(api,/mta_execute_idempotent_mutation/);
+assert.match(api,/p_where:req\.method==="POST"\?\{\}:\{id\}/);
+assert.match(api,/const table=resource==="audit"\?"mta_audit_events":"mta_"\+resource/);
 
 assert.match(adapter,/mapDetainee/);
 assert.match(adapter,/metadata\.gender/);
@@ -34,7 +34,7 @@ assert.match(adapter,/PRODUCTION_MUTATION_NOT_AUTHORIZED/);
 assert.match(adapter,/async function mutateDetainee/);
 assert.match(adapter,/async function mutateResource/);
 assert.match(adapter,/const path=API\+'\/'/);
-assert.match(adapter,/id\?\'\/\'+encodeURIComponent\(id\)/);
+assert.match(adapter,/id\?['\"]\/['\"]\+encodeURIComponent\(id\)/);
 assert.match(adapter,/request\('detainees',\{method:'POST'/);
 assert.match(adapter,/request\('detainees',\{method:'PATCH'/);
 assert.match(adapter,/await hydrate\(\)/);

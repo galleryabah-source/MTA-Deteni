@@ -8,7 +8,7 @@ function audit(state,action,type,id,result='SUCCESS',correlationId){
   if(kernel?.audit)return kernel.audit(state,action,type,id,result,{actor:'DEMO-OPERATOR',correlationId:correlationId||uid('COR')});
   throw new Error('CANONICAL_AUDIT_KERNEL_REQUIRED');
 }
-function createDetainee(state,options={}){
+async function createDetainee(state,options={}){
   const d=state||{},code=String(options.code||'').trim(),name=String(options.name||'').trim(),nationality=String(options.nationality||'').trim(),gender=String(options.gender||'').trim(),dateOfBirth=String(options.dateOfBirth||'').trim(),passportNumber=String(options.passportNumber||'').trim(),notes=String(options.notes||'').trim(),status=String(options.status||'AKTIF'),roomId=String(options.roomId||'');
   if(!code||!name)return{ok:false,code:'DETAINEE_INPUT_INVALID'};
   d.detainees=Array.isArray(d.detainees)?d.detainees:[];
@@ -24,8 +24,8 @@ function createDetainee(state,options={}){
   d.detainees.unshift(detainee);
   audit(d,'DETAINEE_CREATE','DETAINEE',id,'SUCCESS',correlationId);
   if(room){
-    if(typeof window.mtaUnifiedAssignPlacement!=='function')return{ok:false,code:'CANONICAL_PLACEMENT_NOT_READY'};
-    const placement=window.mtaUnifiedAssignPlacement(d,{detaineeId:id,roomId:room.id,since:detainee.createdAt,source:'MASTER_ROOM',requestKey:'PLACEMENT:'+id+':'+room.id,correlationId});
+    if(typeof window.MTADeteniDomainCommandsV2?.assignPlacement!=='function')return{ok:false,code:'CANONICAL_PLACEMENT_NOT_READY'};
+    const placement=await window.MTADeteniDomainCommandsV2.assignPlacement(d,{detaineeId:id,roomId:room.id,since:detainee.createdAt,source:'MASTER_ROOM',requestKey:'PLACEMENT:'+id+':'+room.id,correlationId});
     if(!placement.ok){d.detainees=d.detainees.filter(x=>x.id!==id);d.audit=d.audit.filter(x=>x.resourceId!==id);return{ok:false,code:placement.code,correlationId}}
   }
   d.lastMutation={key:'DETAINEE_CREATE:'+id,action:'DETAINEE_CREATE',completedAt:now()};

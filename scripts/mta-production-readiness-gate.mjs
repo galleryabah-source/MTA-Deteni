@@ -14,8 +14,8 @@ requireText('docs/03-implementation/CROSS-DEVICE-HARDENING-CERTIFICATION-EVIDENC
 requireText('docs/03-implementation/CROSS-DEVICE-HARDENING-CERTIFICATION-EVIDENCE.md','Environment: controlled-nonprod / synthetic runtime');
 
 const kernel=read('docs/03-implementation/P9.13-KERNEL-CERTIFICATION-v1.0.md');
-if(!/P9\.13 EXECUTION\s*=\s*NOT STARTED/.test(kernel)) warnings.push('P9.13 status document changed; inspect current certification state');
-if(!/KERNEL CERTIFICATION\s*=\s*NOT STARTED/.test(kernel)) warnings.push('Kernel certification status document changed; inspect current certification state');
+const p913Certified=!/P9\.13 EXECUTION\s*=\s*NOT STARTED/.test(kernel)&&!/KERNEL CERTIFICATION\s*=\s*NOT STARTED/.test(kernel);
+if(p913Certified) warnings.push('P9.13 certification is documented as certified/current; no P9.13 blocker is registered.');
 
 const runbook=read('docs/03-implementation/MTA-PRODUCTION-READINESS-RUNBOOK.md');
 for(const x of [
@@ -53,18 +53,20 @@ if(!staging.includes('dataMode!==\'SYNTHETIC_ONLY\'')) failures.push('Staging go
 const uat=read('.github/workflows/cloudflare-staging-uat.yml');
 for(const x of ['STAGING HEALTH: PASS','BROWSER SMOKE: PASS']) if(!uat.includes(x)) failures.push('Staging UAT contract missing: '+x);
 
+const blockers=[];
+if(!p913Certified) blockers.push('P9.13 Kernel Certification is documented as NOT STARTED.');
+blockers.push(
+  'Production deployment gate has not been executed and passed on the current release candidate.',
+  'Real user acceptance has not been executed and passed on the current release candidate.',
+  'Production-like staging/UAT evidence is not present as an executed certification artifact on this gate.'
+);
 const result={
   certification:'PRODUCTION-READINESS-GATE-v1',
   commit:process.env.GITHUB_SHA||'local',
   environment:'controlled-nonprod',
   status:'NO_GO',
   readyForProduction:false,
-  blockers:[
-    'P9.13 Kernel Certification is documented as NOT STARTED.',
-    'Production deployment gate has not been executed and passed on the current release candidate.',
-    'Real user acceptance has not been executed and passed on the current release candidate.',
-    'Production-like staging/UAT evidence is not present as an executed certification artifact on this gate.'
-  ],
+  blockers,
   governance:{
     syntheticOnly:true,
     productionAccessAuthorized:false,

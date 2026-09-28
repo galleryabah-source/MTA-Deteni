@@ -7,7 +7,7 @@ test('mta-api normalizes Supabase Edge Function route prefix before resource dis
   assert.match(source,/const functionIndex=parts\.indexOf\("mta-api"\)/);
   assert.match(source,/const routeParts=functionIndex>=0\?parts\.slice\(functionIndex\+1\):parts/);
   assert.match(source,/const resource=routeParts\[0\],id=routeParts\[1\]/);
-  assert.match(source,/TABLES=new Set\(\["detainees","placements","movements","leaves","documents","blocks","rooms","audit"\]\)/);
+  assert.match(source,/TABLES=new Set\(\["detainees","placements","movements","leaves","documents","blocks","rooms","audit","audit-event"\]\)/);
 });
 
 test('mta-api route normalization resolves deployed path examples',()=>{

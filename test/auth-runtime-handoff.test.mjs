@@ -19,5 +19,5 @@ test("canonical runtime can take over after authenticated shell readiness",()=>{
 });
 
 test("bootstrap asset is cache-busted",()=>{
-  assert.match(index,/mta-app-runtime\.js\?v=11/);
+  assert.match(index,/mta-app-runtime\.js\?v=12/);
 });

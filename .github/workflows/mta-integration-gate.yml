@@ -21,7 +21,7 @@ jobs:
           checks=(
           "mta-app-runtime.js|web/index.html"
           "mta-app-runtime-full.js|web/mta-app-runtime.js"
-          "mta-unified-shell-v2.js?v=10|web/mta-app-runtime-full.js"
+          "mta-unified-shell-v2.js?v=12|web/mta-app-runtime-full.js"
           "mtaUnifiedResolve|web/mta-unified-shell-v2.js"
           "mta:qr-detected|web/mta-unified-shell-v2.js"
           "mtaUnifiedScannerContractTest|web/mta-unified-shell-v2.js"
@@ -74,8 +74,8 @@ jobs:
           "mtaUnifiedAssignPlacement|web/mta-unified-shell-v2.js"
           "mtaUnifiedAdvanceLeave|web/mta-unified-shell-v2.js"
           "mtaUnifiedOpenMovement|web/mta-unified-shell-v2.js"
-          "window.mtaUnifiedAdvanceLeave(db,id)|web/mta-app-runtime-full.js"
-          "window.mtaUnifiedAssignPlacement|web/mta-app-runtime-full.js"
+          "await window.MTADeteniDomainCommandsV2.advanceLeave|web/mta-app-runtime-full.js"
+          "await window.MTADeteniDomainCommandsV2.assignPlacement|web/mta-app-runtime-full.js"
           "window.mtaUnifiedAssignPlacement|web/movement-v9.js"
           "const appendAudit=|web/movement-v9.js"
           "lastMutation|web/movement-v9.js"
@@ -134,9 +134,9 @@ jobs:
             echo "SINGLE_DETAINEE_CRUD_OWNER_FAIL"
             exit 1
           fi
-          grep -Fq "mta-state-kernel-v1.js?v=4" web/mta-app-runtime-full.js
-          grep -Fq "mta-app-runtime-full.js?v=22" web/mta-app-runtime.js
-          grep -Fq "admin-settings-v9.js?v=4" web/mta-app-runtime-full.js
+          grep -Fq "mta-state-kernel-v1.js?v=5" web/mta-app-runtime-full.js
+          grep -Fq "mta-app-runtime-full.js?v=23" web/mta-app-runtime.js
+          grep -Fq "admin-settings-v9.js?v=5" web/mta-app-runtime-full.js
           grep -Fq "mta-system-audit-v1.js?v=2" web/mta-app-runtime-full.js
           echo "SINGLE_DETAINEE_CRUD_OWNER: PASS"
           echo "RUNTIME_CACHE_CONTRACT: PASS"

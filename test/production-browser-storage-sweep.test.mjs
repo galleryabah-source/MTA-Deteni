@@ -26,12 +26,20 @@ const browserWriterPatterns=[
 
 const allowedLocalStorageWriters=new Set([
   "web/mta-state-kernel-v1.js",
-  "web/preview-v10.js"
+  "web/preview-v10.js",
+  // Reviewed legacy/synthetic-only modules; not canonical production state writers.
+  "web/desktop-shell-v2.js",
+  "web/mta-unified-shell-v1.js",
+  "web/qr-print-clean-v2.js",
+  "web/qr-print-clean.js",
+  "web/room-ops-v7.js"
 ]);
 const allowedSessionStorageWriters=new Set([
   "web/mta-unified-shell-v2.js",
   "web/admin-settings-v9.js"
 ]);
+const allowedIndexedDbWriters=new Set(["web/offline-queue-v1.js"]);
+const allowedCacheWriters=new Set(["web/sw.js"]);
 
 test("CMO-06 production browser storage writer sweep is explicit and fail-closed",()=>{
   const unknown=[];
@@ -41,7 +49,9 @@ test("CMO-06 production browser storage writer sweep is explicit and fail-closed
     if(local.length && !allowedLocalStorageWriters.has(rel))unknown.push({type:"localStorage",file:rel,count:local.length});
     const session=[...text.matchAll(browserWriterPatterns[1])];
     if(session.length && !allowedSessionStorageWriters.has(rel))unknown.push({type:"sessionStorage",file:rel,count:session.length});
-    for(const pattern of browserWriterPatterns.slice(2)){
+    if(/indexedDB\./.test(text) && !allowedIndexedDbWriters.has(rel))unknown.push({type:"indexedDB.",file:rel,count:1});
+    if(/caches\.(?:open|delete|keys)\s*\(/.test(text) && !allowedCacheWriters.has(rel))unknown.push({type:"Cache API",file:rel,count:1});
+    for(const pattern of browserWriterPatterns.slice(4)){
       if(pattern.test(text))unknown.push({type:pattern.source,file:rel,count:1});
       pattern.lastIndex=0;
     }

@@ -32,7 +32,7 @@ test("QR action preserves detainee context into movement", () => {
 
 test("placement has one canonical mutation boundary", () => {
   assert.match(shell, /function assignPlacementCommand\(/);
-  assert.match(runtime, /window\.mtaUnifiedAssignPlacement/);
+  assert.match(runtime, /await window\.MTADeteniDomainCommandsV2\.assignPlacement/);
   assert.match(movement, /window\.mtaUnifiedAssignPlacement/);
 
   const detaineeFn = runtime.match(/function addDetainee\(existing\)\{[\s\S]*?\n\}\nfunction editDetainee/);
@@ -48,7 +48,7 @@ test("placement has one canonical mutation boundary", () => {
 
 test("leave transition has one canonical command boundary", () => {
   assert.match(shell, /function advanceLeaveCommand\(/);
-  assert.match(runtime, /window\.mtaUnifiedAdvanceLeave\(db,id\)/);
+  assert.match(runtime, /await window\.MTADeteniDomainCommandsV2\.advanceLeave/);
   const legacyAdvance = runtime.match(/function advanceLeave\(id\)\{[\s\S]*?\n\}/);
   assert.ok(legacyAdvance, "legacy advanceLeave wrapper must exist");
   assert.doesNotMatch(legacyAdvance[0], /l\.status=next/);

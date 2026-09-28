@@ -41,12 +41,14 @@ test("CMO-05 canonical production mutation surface is centralized",()=>{
 
 test("CMO-05 runtime production path does not persist through synthetic save",()=>{
   const runtime=fs.readFileSync("web/mta-app-runtime-full.js","utf8");
-  const productionBlocks=[...runtime.matchAll(/if\(window\.mtaProductionStateAdapter\?\.isProduction\?\.\(\)\)[\s\S]{0,900}/g)];
+  const productionBlocks=[...runtime.matchAll(/if\(window\.mtaProductionStateAdapter\?\.isProduction\?\.\(\)\)\{/g)];
   assert.ok(productionBlocks.length>0,"No production mutation branches detected");
   for(const block of productionBlocks){
-    const source=block[0];
-    if(source.includes("save()"))
-      assert.match(source,/\}else\{[\s\S]*save\(\)/,"Browser save() must remain confined to the synthetic else branch");
+    const start=block.index??0;
+    const tail=runtime.slice(start,start+1800);
+    const elseIndex=tail.search(/}else\b/);
+    const productionBranch=elseIndex>=0?tail.slice(0,elseIndex):tail;
+    assert.doesNotMatch(productionBranch,/save\(\)/,"Browser save() must remain outside the production mutation branch");
   }
 });
 
@@ -60,4 +62,4 @@ test("CMO-05/06 mutation ownership evidence files exist",()=>{
   ])assert.ok(fs.existsSync(file),file+" missing");
 });
 
-console.log("CMO-05/06 final mutation surface audit PASS");
+console.log("CMO-05/06 final mutation surface audit PASS"); // CI-GATE-2026-09-28

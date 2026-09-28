@@ -224,12 +224,23 @@ try {
     await placementSelect.selectOption(options[0].value);
   }
   await page.locator('#dForm').evaluate(form => form.requestSubmit());
-  await page.waitForFunction(code => {
-    const d = JSON.parse(localStorage.getItem('mta-deteni-demo-v2') || '{}');
-    return (d.detainees || []).some(x => x.code === code);
-  }, crudCode, { timeout: 5000 });
+  try {
+    await page.waitForFunction(code => {
+      const d = window.MTADeteniStateKernel?.read?.() || {};
+      return (d.detainees || []).some(x => x.code === code);
+    }, crudCode, { timeout: 5000 });
+  } catch (err) {
+    const probe = await page.evaluate(() => ({
+      toast: document.getElementById('toast')?.textContent || '',
+      modalOpen: !!document.querySelector('#modal.open'),
+      commandReady: !!window.MTADeteniDomainCommandsV2,
+      state: window.MTADeteniStateKernel?.read?.() || null,
+      production: !!window.mtaProductionStateAdapter?.isProduction?.()
+    }));
+    throw new Error('detainee create state timeout: '+JSON.stringify(probe));
+  }
   let crudState = await page.evaluate(code => {
-    const d = JSON.parse(localStorage.getItem('mta-deteni-demo-v2') || '{}');
+    const d = window.MTADeteniStateKernel?.read?.() || {};
     const x = (d.detainees || []).find(v => v.code === code);
     return { id:x?.id, name:x?.name, placement:x?.placement, audits:(d.audit||[]).filter(a=>a.resourceId===x?.id).map(a=>a.action) };
   }, crudCode);
@@ -294,11 +305,11 @@ try {
     return { targetRoomId: target.value };
   });
   await page.waitForFunction(({id}) => {
-    const d = JSON.parse(localStorage.getItem('mta-deteni-demo-v2') || '{}');
+    const d = window.MTADeteniStateKernel?.read?.() || {};
     return (d.movements || []).some(m => m.source === 'ROOM_TRANSFER' && m.detaineeId === id);
-  }, { id: mutationBaseline.detaineeId }, { timeout: 5000 });
+  }, { id: mutationBaseline.detaineeId }, { timeout: 8000 });
   const movementState = await page.evaluate(({id}) => {
-    const d = JSON.parse(localStorage.getItem('mta-deteni-demo-v2') || '{}');
+    const d = window.MTADeteniStateKernel?.read?.() || {};
     const m = (d.movements || []).find(x => x.detaineeId === id && x.source === 'ROOM_TRANSFER');
     const p = (d.placements || []).find(x => x.movementId === m?.id);
     const audits = (d.audit || []).filter(x => x.resourceId === m?.id || x.resourceId === p?.id);

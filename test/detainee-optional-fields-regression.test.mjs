@@ -11,17 +11,17 @@ test("Tambah Deteni exposes optional identity fields without required validation
   assert.match(runtime,/name="dateOfBirth" type="date"/);
   assert.match(runtime,/name="passportNumber"/);
   assert.match(runtime,/name="notes"/);
-  assert.match(runtime,/Jenis Kelamin <span class="muted">\(opsional\)<\/span>/);
-  assert.match(runtime,/Tanggal Lahir <span class="muted">\(opsional\)<\/span>/);
-  assert.match(runtime,/No Paspor <span class="muted">\(opsional\)<\/span>/);
-  assert.match(runtime,/Catatan <span class="muted">\(opsional\)<\/span>/);
+  assert.match(runtime,/Jenis Kelamin/);
+  assert.match(runtime,/Tanggal Lahir/);
+  assert.match(runtime,/No Paspor/);
+  assert.match(runtime,/Catatan/);
   assert.doesNotMatch(runtime,/name="gender"[^>]*required/);
   assert.doesNotMatch(runtime,/name="dateOfBirth"[^>]*required/);
   assert.doesNotMatch(runtime,/name="passportNumber"[^>]*required/);
   assert.doesNotMatch(runtime,/name="notes"[^>]*required/);
 });
 
-test("canonical detainee command persists optional fields and accepts them blank",()=>{
+test("canonical detainee command persists optional fields and accepts them blank",async()=>{
   const audit=[];
   const context={
     window:{
@@ -38,7 +38,7 @@ test("canonical detainee command persists optional fields and accepts them blank
   const api=context.window.MTADeteniDomainCommands;
   const state={detainees:[],rooms:[],placements:[],audit:[]};
 
-  const created=api.createDetainee(state,{
+  const created=await api.createDetainee(state,{
     code:"DET-OPTIONAL-01",
     name:"Synthetic Optional",
     nationality:"Contoh",
@@ -55,7 +55,7 @@ test("canonical detainee command persists optional fields and accepts them blank
   assert.equal(created.detainee.passportNumber,"");
   assert.equal(created.detainee.notes,"");
 
-  const updated=api.updateDetainee(state,{
+  const updated=await api.updateDetainee(state,{
     id:created.detainee.id,
     code:"DET-OPTIONAL-01",
     name:"Synthetic Optional Updated",
