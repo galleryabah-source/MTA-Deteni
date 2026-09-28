@@ -98,6 +98,17 @@
     }
     throw new Error('DETAINEE_MUTATION_OPERATION_INVALID');
   }
+  async function createBackup(){
+    if(!isProduction())throw new Error('NOT_PRODUCTION');
+    return request('backup',{method:'GET'});
+  }
+  async function restoreBackup(snapshot){
+    if(!isProductionPersistenceEnabled())throw new Error('PRODUCTION_MUTATION_NOT_AUTHORIZED');
+    if(!snapshot||typeof snapshot!=='object')throw new Error('BACKUP_INVALID');
+    const response=await request('backup-restore',{method:'POST',body:snapshot,headers:{'X-Request-Id':crypto.randomUUID(),'X-Correlation-Id':crypto.randomUUID(),'Idempotency-Key':String(snapshot?.manifest?.backupId||crypto.randomUUID())}});
+    const refreshed=await hydrate();
+    return {...response,state:refreshed,replayed:!!response.replayed};
+  }
   async function refresh(){return hydrate()}
-  window.mtaProductionStateAdapter=Object.freeze({isProduction,isProductionPersistenceEnabled,hydrate,refresh,executeMovement,mutateResource,writeAudit,mutateDetainee,get:()=>state(),apiBase:API,request});
+  window.mtaProductionStateAdapter=Object.freeze({isProduction,isProductionPersistenceEnabled,hydrate,refresh,createBackup,restoreBackup,executeMovement,mutateResource,writeAudit,mutateDetainee,get:()=>state(),apiBase:API,request});
 })();
