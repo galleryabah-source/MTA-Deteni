@@ -38,7 +38,23 @@
   const mapAudit=a=>({id:a.id,action:a.action,resourceType:a.resource_type,resourceId:a.resource_id,result:a.result,actor:a.actor_user_id||'',requestId:a.request_id||'',correlationId:a.correlation_id||'',occurredAt:a.occurred_at,metadata:a.metadata||{},previousHash:a.previous_hash||null,eventHash:a.event_hash||null,hashVersion:a.hash_version||null,source:'PRODUCTION_DB'});
   async function hydrate(){
     if(!isProduction())return null;
-    const [blocks,rooms,detainees,placements,movements,leaves,documents,audit,adminConfig]=await Promise.all(['blocks','rooms','detainees','placements','movements','leaves','documents','audit','admin-config'].map(resource=>request(resource)));
+    // Canonical hydration order is explicit: authenticated API identity first,
+    // then the nine canonical resources. The privileged admin-config resource
+    // is part of the contract but is not allowed to block operational hydration
+    // when the authenticated user has no admin scope.
+    const me=await request('me');
+    if(!me?.user||!me?.profile)throw new Error('PRODUCTION_IDENTITY_INVALID');
+    const [blocks,rooms,detainees,placements,movements,leaves,documents,audit]=await Promise.all(['blocks','rooms','detainees','placements','movements','leaves','documents','audit'].map(resource=>request(resource)));
+    let adminConfig={ok:true,data:{settings:{}},skipped:false};
+    try{
+      adminConfig=await request('admin-config');
+    }catch(error){
+      // admin-config is role/scope protected. 403 (RBAC) and 409 (scope not
+      // provisioned) are expected boundaries for non-admin operational users;
+      // 404/5xx remain hard failures so route/config regressions cannot hide.
+      if(error?.status!==403&&error?.status!==409)throw error;
+      adminConfig={ok:true,data:{settings:{}},skipped:true,reason:error?.data?.error||error?.message||'ADMIN_CONFIG_UNAVAILABLE'};
+    }
     const byBlock=new Map(blocks.data.map(mapBlock).map(b=>[b.id,b]));
     const rs=rooms.data.map(mapRoom).map(r=>({...r,block:byBlock.get(r.blockId)?.name||''}));
     const ds=detainees.data.map(mapDetainee);
@@ -46,7 +62,7 @@
     const state={meta:{version:4,mode:'PRODUCTION',loadedAt:new Date().toISOString()},blocks:blocks.data.map(mapBlock),rooms:rs,detainees:ds,placements:ps,movements:movements.data.map(mapMovement),leaves:leaves.data.map(mapLeave),documents:documents.data.map(mapDocument),audit:audit.data.map(mapAudit),adminSettings:adminConfig.data?.settings||{}};
     for(const k of ['blocks','rooms','detainees','placements','movements','leaves','documents','audit'])if(!Array.isArray(state[k]))state[k]=[];
     window.__mtaProductionState=Object.freeze(structuredClone(state));
-    window.__mtaRuntimeStatus={mode:'PRODUCTION',database:'CONNECTED',ai:'OFF',syntheticOnly:false,readOnly:false,loadedAt:state.meta.loadedAt};
+    window.__mtaRuntimeStatus={mode:'PRODUCTION',database:'CONNECTED',ai:'OFF',syntheticOnly:false,readOnly:false,identity:'VALIDATED',adminConfig:adminConfig.skipped?'RBAC_BOUNDARY':'LOADED',loadedAt:state.meta.loadedAt};
     return state;
   }
   async function writeAudit({action,resourceType,resourceId,result='SUCCESS',correlationId,metadata={}}={}){
