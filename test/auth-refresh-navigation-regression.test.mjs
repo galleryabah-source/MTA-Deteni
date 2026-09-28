@@ -30,7 +30,7 @@ test("last operational view is restored after hard refresh",()=>{
 });
 
 test("refresh fix is cache-busted through the authenticated runtime chain",()=>{
-  assert.match(index,/mta-auth-ui\.js\?v=7/);
+  assert.match(index,/mta-auth-ui\.js\?v=8/);
   assert.match(index,/mta-app-runtime\.js\?v=12/);
   assert.match(index,/mta-app-runtime-full\.js\?v=23/);
   assert.match(fs.readFileSync("web/mta-app-runtime.js","utf8"),/mta-app-runtime-full\.js\?v=23/);
