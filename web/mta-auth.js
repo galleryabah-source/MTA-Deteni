@@ -84,12 +84,30 @@ supabase.auth.onAuthStateChange((event,session)=>{
   void syncSession(session,true);
 });
 
+const refreshSession=async()=>{
+  if(authRefreshPromise)return authRefreshPromise;
+  authRefreshPromise=(async()=>{
+    const result=await supabase.auth.refreshSession();
+    if(result?.error)throw result.error;
+    const session=result?.data?.session||null;
+    if(session){
+      authHydrationResolved=true;
+      pendingAuthSession=null;
+      await syncSession(session,true);
+      return session;
+    }
+    return null;
+  })().finally(()=>{authRefreshPromise=null});
+  return authRefreshPromise;
+};
+
 window.mtaAuth=Object.freeze({
   client:supabase,
   async signIn(email,password){return supabase.auth.signInWithPassword({email,password})},
   async signUp(){throw new Error("SELF_REGISTRATION_DISABLED")},
   async signOut(){return supabase.auth.signOut()},
   async session(){return supabase.auth.getSession()},
+  async refreshSession(){return refreshSession()},
   async user(){const r=await supabase.auth.getUser();return r.data.user||null}
 });
 
