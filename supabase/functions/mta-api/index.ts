@@ -89,7 +89,7 @@ Deno.serve(async(req)=>{
     const admin=createClient(Deno.env.get("SUPABASE_URL")!,adminKey,{auth:{autoRefreshToken:false,persistSession:false}});
     try{
       if(req.method==="GET"){
-        const {data:profiles,error:pe}=await admin.from("mta_profiles").select("id,role,display_name,active,created_at,updated_at").order("created_at",{ascending:true});
+        const {data:profiles,error:pe}=await admin.from("mta_profiles").select("id,role,display_name,active,must_change_password,created_at,updated_at").order("created_at",{ascending:true});
         if(pe) return json(req,{ok:false,error:"ADMIN_USERS_READ_FAILED"},500);
         const listed=await admin.auth.admin.listUsers({page:1,perPage:1000});
         if(listed.error) return json(req,{ok:false,error:"ADMIN_AUTH_USERS_READ_FAILED"},500);
