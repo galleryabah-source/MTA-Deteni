@@ -3,7 +3,7 @@ import { createObservabilityEvent, sanitizeObservabilityError, serializeObservab
 
 const allowedOrigin=(origin)=>origin&&(/^https:\/\/(?:[a-z0-9-]+-)?mta-deteni\.galleryabah\.workers\.dev$/i.test(origin)||origin==="https://mta-deteni.galleryabah.workers.dev")?origin:"null";
 const cors=(req)=>({"Access-Control-Allow-Origin":allowedOrigin(req.headers.get("Origin")),"Access-Control-Allow-Headers":"authorization, x-client-info, apikey, content-type, x-request-id, x-correlation-id, idempotency-key","Access-Control-Allow-Methods":"GET,POST,PATCH,DELETE,OPTIONS","Access-Control-Expose-Headers":"X-Request-Id, X-Correlation-Id","Vary":"Origin","Content-Type":"application/json","X-Content-Type-Options":"nosniff"});
-const TABLES=new Set(["detainees","placements","movements","leaves","documents","blocks","rooms","audit"]);
+const TABLES=new Set(["detainees","placements","movements","leaves","documents","blocks","rooms","audit","audit-event"]);
 const WRITE_ROLES=new Set(["OWNER","ADMIN","EDITOR"]);
 const requestStarts=new WeakMap();
 const json=(req,body,status=200,context={})=>{const requestId=context.requestId||req.headers.get("X-Request-Id")||crypto.randomUUID();const correlationId=context.correlationId||req.headers.get("X-Correlation-Id")||requestId;const durationMs=requestStarts.has(req)?performance.now()-requestStarts.get(req):undefined;const event=(()=>{try{return serializeObservabilityEvent(createObservabilityEvent({level:status>=500?"ERROR":status>=400?"WARN":"INFO",service:"mta-api",event:status>=500?"request.failed":"request.completed",requestId,correlationId,method:req.method,route:new URL(req.url).pathname,status,durationMs,outcome:status>=500?"FAILED":status>=400?"DENIED":"SUCCESS",errorCode:body?.error}));}catch{return null;}})();if(event)console.log(event);return new Response(JSON.stringify(body),{status,headers:{...cors(req),"X-Request-Id":requestId,"X-Correlation-Id":correlationId}});};
@@ -295,6 +295,63 @@ Deno.serve(async(req)=>{
     return json(req,{ok:true,created:true,user:{id:created.data.user?.id,email:created.data.user?.email},createdBy:user.id},201);
   }
   
+  if(resource==="backup"&&req.method==="GET"){
+    if(!new Set(["OWNER","ADMIN"]).has(role))return json(req,{ok:false,error:"RBAC_BACKUP_READ_DENIED",role},403);
+    const adminKey=Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");if(!adminKey)return json(req,{ok:false,error:"SERVER_CONFIGURATION_ERROR"},503);
+    const admin=createClient(Deno.env.get("SUPABASE_URL")!,adminKey,{auth:{autoRefreshToken:false,persistSession:false}});
+    try{
+      const names=["detainees","blocks","rooms","movements","placements","leaves","documents","audit"];
+      const loaded=await Promise.all(names.map(async name=>{
+        const table=name==="audit"?"mta_audit_events":"mta_"+name;
+        const {data,error}=await admin.from(table).select("*");
+        if(error)throw new Error("BACKUP_"+name.toUpperCase()+"_READ_FAILED");
+        return [name,data||[]];
+      }));
+      const payload=Object.fromEntries(loaded);
+      const createdAt=new Date().toISOString();
+      const backupId="BKP-"+crypto.randomUUID().replaceAll("-","").slice(0,20).toUpperCase();
+      const payloadFingerprint=await sha256Hex(stableJson(payload));
+      const manifest={schemaVersion:1,backupId,sourceRuntime:"MTA_API",createdAt,payloadFingerprint,syntheticOnly:false};
+      return json(req,{ok:true,resource,data:{manifest,payload}});
+    }catch(e){
+      emit("ERROR","backup.create.failed",{status:500,outcome:"FAILED",errorCode:"BACKUP_CREATE_FAILED"});
+      return json(req,{ok:false,error:"BACKUP_CREATE_FAILED"},500);
+    }
+  }
+  if(resource==="backup-restore"&&req.method==="POST"){
+    if(role!=="OWNER")return json(req,{ok:false,error:"RBAC_BACKUP_RESTORE_DENIED",role},403);
+    const adminKey=Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");if(!adminKey)return json(req,{ok:false,error:"SERVER_CONFIGURATION_ERROR"},503);
+    const admin=createClient(Deno.env.get("SUPABASE_URL")!,adminKey,{auth:{autoRefreshToken:false,persistSession:false}});
+    try{
+      const body=await req.json().catch(()=>null);
+      const manifest=body?.manifest,payload=body?.payload;
+      if(!manifest||manifest.schemaVersion!==1||!payload||typeof payload!=="object")return json(req,{ok:false,error:"BACKUP_INVALID"},400);
+      const roots=["detainees","blocks","rooms","movements","placements","leaves","documents","audit"];
+      if(!roots.every(k=>Array.isArray(payload[k])))return json(req,{ok:false,error:"BACKUP_ROOT_INVALID"},400);
+      const fingerprint=await sha256Hex(stableJson(payload));
+      if(String(manifest.payloadFingerprint||"")!==fingerprint)return json(req,{ok:false,error:"BACKUP_FINGERPRINT_MISMATCH"},409);
+      const requestHash=await sha256Hex(stableJson({manifest,payload}));
+      const {data,error}=await admin.rpc("mta_restore_backup_transaction",{
+        p_backup_id:String(manifest.backupId||""),
+        p_request_hash:requestHash,
+        p_payload:payload,
+        p_actor_user_id:user.id,
+        p_request_id:requestId,
+        p_correlation_id:correlationId
+      });
+      if(error){
+        const message=String(error.message||"");
+        if(message.includes("BACKUP_RESTORE_NOT_READY"))return json(req,{ok:false,error:"BACKUP_RESTORE_NOT_PROVISIONED"},503);
+        if(message.includes("BACKUP_RESTORE_"))return json(req,{ok:false,error:"BACKUP_RESTORE_REJECTED"},400);
+        return json(req,{ok:false,error:"BACKUP_RESTORE_FAILED"},500);
+      }
+      await admin.from("mta_audit_events").insert({action:"BACKUP_RESTORE",resource_type:"BACKUP",resource_id:String(manifest.backupId||""),result:"SUCCESS",actor_user_id:user.id,request_id:requestId,correlation_id:correlationId,metadata:{payloadFingerprint:fingerprint}});
+      return json(req,{ok:true,resource,data,replayed:!!data?.replayed});
+    }catch(e){
+      emit("ERROR","backup.restore.failed",{status:500,outcome:"FAILED",errorCode:"BACKUP_RESTORE_FAILED"});
+      return json(req,{ok:false,error:"BACKUP_RESTORE_FAILED"},500);
+    }
+  }
   if(!TABLES.has(resource)) return json(req,{ok:false,error:"RESOURCE_NOT_FOUND"},404);
   if(resource==="audit-event" && req.method==="POST"){
     if(!WRITE_ROLES.has(role))return json(req,{ok:false,error:"RBAC_WRITE_DENIED",role},403);
