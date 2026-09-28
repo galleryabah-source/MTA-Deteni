@@ -3,7 +3,10 @@
   const API='https://tmmhxqgzelgrsrxbbfzh.supabase.co/functions/v1/mta-api';
   // Production is explicit. Staging/preview workers remain synthetic unless deliberately promoted.
   const PRODUCTION_HOSTS=new Set(['mta-deteni.galleryabah.workers.dev']);
+  // Governance lock: production mutation remains disabled until explicit release.
+  const PRODUCTION_MUTATIONS_ENABLED=false;
   const isProduction=()=>PRODUCTION_HOSTS.has(location.hostname);
+  const isProductionPersistenceEnabled=()=>isProduction()&&PRODUCTION_MUTATIONS_ENABLED;
   const state=()=>window.__mtaProductionState||null;
   const session=async()=>{const r=await window.mtaAuth?.session?.();return r?.data?.session||null};
   async function request(resource,{method='GET',body,headers={}}={}){
@@ -39,7 +42,7 @@
     return state;
   }
   async function executeMovement({detaineeId,targetRoomId,movementType='TRANSFER',purpose=null,occurredAt,idempotencyKey,requestId,correlationId}={}){
-    if(!isProduction())throw new Error('PRODUCTION_COMMAND_OUTSIDE_PRODUCTION');
+    if(!isProductionPersistenceEnabled())throw new Error('PRODUCTION_MUTATION_NOT_AUTHORIZED');
     const cleanDetaineeId=String(detaineeId||'').trim(),cleanRoomId=String(targetRoomId||'').trim();
     if(!cleanDetaineeId||!cleanRoomId)throw new Error('MOVE_DETAINEE_IDENTIFIERS_REQUIRED');
     const requestKey=String(idempotencyKey||('MOVE_DETAINEE:'+cleanDetaineeId+':'+cleanRoomId+':'+String(occurredAt||''))).trim();
@@ -77,5 +80,5 @@
     throw new Error('DETAINEE_MUTATION_OPERATION_INVALID');
   }
   async function refresh(){return hydrate()}
-  window.mtaProductionStateAdapter=Object.freeze({isProduction,hydrate,refresh,executeMovement,mutateDetainee,get:()=>state(),apiBase:API,request});
+  window.mtaProductionStateAdapter=Object.freeze({isProduction,isProductionPersistenceEnabled,hydrate,refresh,executeMovement,mutateDetainee,get:()=>state(),apiBase:API,request});
 })();
