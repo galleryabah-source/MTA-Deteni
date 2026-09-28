@@ -32,7 +32,7 @@ assert.match(apiServer,/USER_CREATE/);
 assert.match(apiServer,/SELF_DISABLE_FORBIDDEN/);
 assert.match(apiServer,/SELF_ROLE_CHANGE_FORBIDDEN/);
 assert.match(apiServer,/OWNER_USER_MANAGEMENT_DENIED/);
-assert.match(apiServer,/role==="OWNER"\?\(profiles\|\|\[\]\):(profiles\|\|\[\]\)\.filter/);
+assert.ok(apiServer.includes('const visibleProfiles=role==="OWNER"?(profiles||[]):(profiles||[]).filter(p=>String(p.role||"VIEWER").toUpperCase()!=="OWNER");'));
 assert.match(s,/currentRole\(\)===\"OWNER\"\?allRows:allRows\.filter/);
 assert.match(s,/Akun OWNER tidak dapat dilihat atau dikelola/);
 assert.match(reg,/MTA-F-20260927-021/);
