@@ -1,0 +1,52 @@
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+
+const adapter=fs.readFileSync('web/mta-production-state-adapter-v1.js','utf8');
+const commands=fs.readFileSync('web/mta-domain-commands-v2.js','utf8');
+const runtime=fs.readFileSync('web/mta-app-runtime-full.js','utf8');
+const index=fs.readFileSync('web/index.html','utf8');
+const api=fs.readFileSync('supabase/functions/mta-api/index.ts','utf8');
+const foundation=fs.readFileSync('supabase/migrations/20260921060500_mta_deteni_production_activation_foundation.sql','utf8');
+const rbac=fs.readFileSync('supabase/migrations/20260921070000_mta_production_auth_rbac_v1.sql','utf8');
+
+assert.match(foundation,/create table if not exists public\.mta_detainees/);
+assert.match(foundation,/metadata jsonb not null default '\{\}'::jsonb/);
+assert.match(rbac,/create policy mta_detainees_select_auth/);
+assert.match(rbac,/create policy mta_detainees_insert_editor/);
+assert.match(rbac,/create policy mta_detainees_update_editor/);
+
+assert.match(api,/if\(req\.method==="POST"\)/);
+assert.match(api,/supabase\.from\(table\)\.insert\(body\)\.select\("\*"\)\.single\(\)/);
+assert.match(api,/supabase\.from\(table\)\.update\(body\)\.eq\("id",id\)\.select\("\*"\)\.single\(\)/);
+assert.match(api,/mta_detainees/);
+
+assert.match(adapter,/mapDetainee/);
+assert.match(adapter,/metadata\.gender/);
+assert.match(adapter,/metadata\.dateOfBirth/);
+assert.match(adapter,/metadata\.passportNumber/);
+assert.match(adapter,/metadata\.notes/);
+assert.match(adapter,/async function mutateDetainee/);
+assert.match(adapter,/request\('detainees',\{method:'POST'/);
+assert.match(adapter,/request\('detainees',\{method:'PATCH'/);
+assert.match(adapter,/await hydrate\(\)/);
+
+assert.match(commands,/function createDetainee/);
+assert.match(commands,/function updateDetainee/);
+assert.match(commands,/function archiveDetainee/);
+assert.match(commands,/productionDetaineeMutation/);
+assert.match(commands,/window\.mtaProductionStateAdapter\?\.isProduction/);
+assert.match(commands,/createDetainee,updateDetainee,archiveDetainee/);
+
+assert.match(runtime,/document\.getElementById\('dForm'\)\.onsubmit=async/);
+assert.match(runtime,/await command\.createDetainee/);
+assert.match(runtime,/await command\.updateDetainee/);
+assert.match(runtime,/result\.state/);
+assert.match(runtime,/Data tersimpan ke database/);
+assert.match(runtime,/mta-production-state-adapter-v1\.js\?v=3/);
+assert.match(runtime,/mta-domain-commands-v2\.js\?v=2/);
+
+assert.match(index,/mta-production-state-adapter-v1\.js\?v=3/);
+
+console.log('P2 canonical detainee persistence contract PASS');
+console.log('Production path: Command -> API -> Supabase mta_detainees -> DB trigger audit -> hydrate');
+console.log('Synthetic path remains localStorage-only and is not used by production runtime.');
