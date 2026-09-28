@@ -34,7 +34,7 @@ assert.match(adapter,/PRODUCTION_MUTATION_NOT_AUTHORIZED/);
 assert.match(adapter,/async function mutateDetainee/);
 assert.match(adapter,/async function mutateResource/);
 assert.match(adapter,/const path=API\+'\/'/);
-assert.match(adapter,/id\?\'\/\'+encodeURIComponent\(id\)/);
+assert.match(adapter,/id\?\'\/\'\+encodeURIComponent\(id\)/);
 assert.match(adapter,/request\('detainees',\{method:'POST'/);
 assert.match(adapter,/request\('detainees',\{method:'PATCH'/);
 assert.match(adapter,/await hydrate\(\)/);
