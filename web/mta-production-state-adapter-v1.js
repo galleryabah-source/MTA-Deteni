@@ -31,12 +31,12 @@
   const mapAudit=a=>({id:a.id,action:a.action,resourceType:a.resource_type,resourceId:a.resource_id,result:a.result,actor:a.actor_user_id||'',requestId:a.request_id||'',correlationId:a.correlation_id||'',occurredAt:a.occurred_at,metadata:a.metadata||{},previousHash:a.previous_hash||null,eventHash:a.event_hash||null,hashVersion:a.hash_version||null,source:'PRODUCTION_DB'});
   async function hydrate(){
     if(!isProduction())return null;
-    const [blocks,rooms,detainees,placements,movements,leaves,documents,audit]=await Promise.all(['blocks','rooms','detainees','placements','movements','leaves','documents','audit'].map(resource=>request(resource)));
+    const [blocks,rooms,detainees,placements,movements,leaves,documents,audit,adminConfig]=await Promise.all(['blocks','rooms','detainees','placements','movements','leaves','documents','audit','admin-config'].map(resource=>request(resource)));
     const byBlock=new Map(blocks.data.map(mapBlock).map(b=>[b.id,b]));
     const rs=rooms.data.map(mapRoom).map(r=>({...r,block:byBlock.get(r.blockId)?.name||''}));
     const ds=detainees.data.map(mapDetainee);
     const ps=placements.data.map(mapPlacement).map(p=>{const room=rs.find(r=>r.id===p.roomId);return {...p,block:p.block||room?.block||'',room:p.room||room?.room||''}});
-    const state={meta:{version:4,mode:'PRODUCTION',loadedAt:new Date().toISOString()},blocks:blocks.data.map(mapBlock),rooms:rs,detainees:ds,placements:ps,movements:movements.data.map(mapMovement),leaves:leaves.data.map(mapLeave),documents:documents.data.map(mapDocument),audit:audit.data.map(mapAudit)};
+    const state={meta:{version:4,mode:'PRODUCTION',loadedAt:new Date().toISOString()},blocks:blocks.data.map(mapBlock),rooms:rs,detainees:ds,placements:ps,movements:movements.data.map(mapMovement),leaves:leaves.data.map(mapLeave),documents:documents.data.map(mapDocument),audit:audit.data.map(mapAudit),adminSettings:adminConfig.data?.settings||{}};
     for(const k of ['blocks','rooms','detainees','placements','movements','leaves','documents','audit'])if(!Array.isArray(state[k]))state[k]=[];
     window.__mtaProductionState=Object.freeze(structuredClone(state));
     window.__mtaRuntimeStatus={mode:'PRODUCTION',database:'CONNECTED',ai:'OFF',syntheticOnly:false,readOnly:false,loadedAt:state.meta.loadedAt};
