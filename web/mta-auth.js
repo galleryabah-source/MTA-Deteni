@@ -17,6 +17,7 @@ const supabase=createClient(
 let authHydrationResolved=false;
 let pendingAuthSession=null;
 let authHydrationPromise=null;
+let authRefreshPromise=null;
 
 async function syncSession(session, resolved=true){
   const token=session?.access_token||null;
