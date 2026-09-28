@@ -76,7 +76,7 @@ function settings(){
   installSettingsStyle();
   const app=document.querySelector('#appView');
   if(!app)return;
-  if(d.adminSettings.role!=='ADMIN'){
+  if(!['OWNER','ADMIN'].includes(String(d.adminSettings.role||'').toUpperCase())){
     app.innerHTML=shell('Pengaturan','Akses dibatasi untuk Administrator.',
       '<div class="p6card"><div class="notice p6danger">ADMIN ONLY · Role synthetic saat ini: '+E(d.adminSettings.role||'UNSET')+'</div></div>');
     return;

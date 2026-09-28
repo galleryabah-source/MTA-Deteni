@@ -59,7 +59,7 @@
     const rs=rooms.data.map(mapRoom).map(r=>({...r,block:byBlock.get(r.blockId)?.name||''}));
     const ds=detainees.data.map(mapDetainee);
     const ps=placements.data.map(mapPlacement).map(p=>{const room=rs.find(r=>r.id===p.roomId);return {...p,block:p.block||room?.block||'',room:p.room||room?.room||''}});
-    const state={meta:{version:4,mode:'PRODUCTION',loadedAt:new Date().toISOString()},blocks:blocks.data.map(mapBlock),rooms:rs,detainees:ds,placements:ps,movements:movements.data.map(mapMovement),leaves:leaves.data.map(mapLeave),documents:documents.data.map(mapDocument),audit:audit.data.map(mapAudit),adminSettings:adminConfig.data?.settings||{}};
+    const state={meta:{version:4,mode:'PRODUCTION',loadedAt:new Date().toISOString()},blocks:blocks.data.map(mapBlock),rooms:rs,detainees:ds,placements:ps,movements:movements.data.map(mapMovement),leaves:leaves.data.map(mapLeave),documents:documents.data.map(mapDocument),audit:audit.data.map(mapAudit),adminSettings:{...(adminConfig.data?.settings||{}),role:String(me.role||me.profile?.role||'').toUpperCase()}};
     for(const k of ['blocks','rooms','detainees','placements','movements','leaves','documents','audit'])if(!Array.isArray(state[k]))state[k]=[];
     window.__mtaProductionState=Object.freeze(structuredClone(state));
     window.__mtaRuntimeStatus={mode:'PRODUCTION',database:'CONNECTED',ai:'OFF',syntheticOnly:false,readOnly:false,identity:'VALIDATED',adminConfig:adminConfig.skipped?'RBAC_BOUNDARY':'LOADED',loadedAt:state.meta.loadedAt};
