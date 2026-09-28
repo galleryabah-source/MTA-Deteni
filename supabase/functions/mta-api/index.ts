@@ -296,6 +296,17 @@ Deno.serve(async(req)=>{
   }
   
   if(!TABLES.has(resource)) return json(req,{ok:false,error:"RESOURCE_NOT_FOUND"},404);
+  if(resource==="audit-event" && req.method==="POST"){
+    if(!WRITE_ROLES.has(role))return json(req,{ok:false,error:"RBAC_WRITE_DENIED",role},403);
+    const body=await req.json().catch(()=>({}));
+    const requestId=req.headers.get("X-Request-Id")||crypto.randomUUID(),correlationId=req.headers.get("X-Correlation-Id")||crypto.randomUUID();
+    const adminKey=Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");if(!adminKey)return json(req,{ok:false,error:"SERVER_CONFIGURATION_ERROR"},503);
+    const admin=createClient(Deno.env.get("SUPABASE_URL")!,adminKey,{auth:{autoRefreshToken:false,persistSession:false}});
+    const inserted=await admin.from("mta_audit_events").insert({action:String(body.action||"RUNTIME_EVENT"),resource_type:String(body.resource_type||"RUNTIME"),resource_id:body.resource_id?String(body.resource_id):null,result:String(body.result||"SUCCESS"),actor_user_id:user.id,request_id:requestId,correlation_id:correlationId,metadata:body.metadata&&typeof body.metadata==="object"?body.metadata:{}}).select("*").single();
+    if(inserted.error)return json(req,{ok:false,error:"AUDIT_WRITE_FAILED"},400);
+    return json(req,{ok:true,resource,data:inserted.data});
+  }
+
   if(resource==="audit" && req.method!=="GET") return json(req,{ok:false,error:"AUDIT_READ_ONLY"},405);
   if(["POST","PATCH","DELETE"].includes(req.method)&&!WRITE_ROLES.has(role)) return json(req,{ok:false,error:"RBAC_WRITE_DENIED",role},403);
   const table=resource==="audit"?"mta_audit_events":"mta_"+resource;
