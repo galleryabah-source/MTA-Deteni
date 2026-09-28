@@ -66,7 +66,7 @@ Deno.serve(async(req)=>{
         const created=await admin.auth.admin.createUser({email,password,email_confirm:true,user_metadata:{full_name:displayName}});
         if(created.error||!created.data.user) return json(req,{ok:false,error:"ADMIN_USER_CREATE_FAILED"},400);
         const uid=created.data.user.id;
-        const prof=await admin.from("mta_profiles").insert({id:uid,role:requestedRole,display_name:displayName||email,active:true}).select("id,role,display_name,active,created_at,updated_at").single();
+        const prof=await admin.from("mta_profiles").upsert({id:uid,role:requestedRole,display_name:displayName||email,active:true},{onConflict:"id"}).select("id,role,display_name,active,created_at,updated_at").single();
         if(prof.error){
           await admin.auth.admin.deleteUser(uid);
           return json(req,{ok:false,error:"ADMIN_PROFILE_CREATE_FAILED"},500);
