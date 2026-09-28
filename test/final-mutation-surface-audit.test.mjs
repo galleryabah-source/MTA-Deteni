@@ -60,4 +60,4 @@ test("CMO-05/06 mutation ownership evidence files exist",()=>{
   ])assert.ok(fs.existsSync(file),file+" missing");
 });
 
-console.log("CMO-05/06 final mutation surface audit PASS");
+console.log("CMO-05/06 final mutation surface audit PASS"); // CI-GATE-2026-09-28
