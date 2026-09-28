@@ -225,11 +225,11 @@ try {
   }
   await page.locator('#dForm').evaluate(form => form.requestSubmit());
   await page.waitForFunction(code => {
-    const d = JSON.parse(localStorage.getItem('mta-deteni-demo-v2') || '{}');
+    const d = window.MTADeteniStateKernel?.read?.() || {};
     return (d.detainees || []).some(x => x.code === code);
   }, crudCode, { timeout: 5000 });
   let crudState = await page.evaluate(code => {
-    const d = JSON.parse(localStorage.getItem('mta-deteni-demo-v2') || '{}');
+    const d = window.MTADeteniStateKernel?.read?.() || {};
     const x = (d.detainees || []).find(v => v.code === code);
     return { id:x?.id, name:x?.name, placement:x?.placement, audits:(d.audit||[]).filter(a=>a.resourceId===x?.id).map(a=>a.action) };
   }, crudCode);
