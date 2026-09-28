@@ -42,20 +42,26 @@ const hydrateAuthSession=async()=>{
   authHydrationPromise=(async()=>{
     // INITIAL_SESSION can arrive before the persisted storage adapter has
     // completed hydration. Never treat that transient null as a logout.
-    for(let attempt=0;attempt<3;attempt++){
+    // A hard refresh is allowed a longer hydration window because the
+    // browser may restore storage and the auth client may need one refresh
+    // round before getSession() exposes the persisted session.
+    for(let attempt=0;attempt<8;attempt++){
       try{
         const result=await getSessionWithTimeout();
-        const session=result?.data?.session||null;
+        const session=result?.data?.session||pendingAuthSession||null;
         if(session){
           authHydrationResolved=true;
           pendingAuthSession=null;
           await syncSession(session,true);
           return session;
         }
-        if(attempt<2) await new Promise(r=>setTimeout(r,350));
+        if(attempt<7) await new Promise(r=>setTimeout(r,500));
       }catch(err){
-        if(attempt===2) throw err;
-        await new Promise(r=>setTimeout(r,350));
+        if(attempt<7) await new Promise(r=>setTimeout(r,500));
+        else{
+          authHydrationResolved=false;
+          throw err;
+        }
       }
     }
     authHydrationResolved=true;
