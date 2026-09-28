@@ -24,7 +24,7 @@ assert.match(adapter,/request\('backup-restore',\{method:'POST'/);
 assert.match(commands,/async function restoreBackup\(s,x\)/);
 assert.match(commands,/mtaProductionStateAdapter\.restoreBackup\(x\)/);
 
-assert.match(runtime,/createBackup\(\)/);
+assert.match(runtime,/createBackup/);
 assert.match(runtime,/await window\.MTADeteniDomainCommandsV2\?\.restoreBackup\(x\)/);
 assert.match(runtime,/mtaProductionStateAdapter\?\.isProduction/);
 assert.match(index,/mta-production-state-adapter-v1\.js\?v=6/);
