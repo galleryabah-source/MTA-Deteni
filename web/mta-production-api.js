@@ -9,7 +9,14 @@
   function setAccessToken(token){accessToken=token||null}
   async function request(resource,{method='GET',id,body}={}){
     const path=CONFIG.apiBase+'/'+encodeURIComponent(resource)+(id?'/'+encodeURIComponent(id):'');
-    const response=await fetch(path,{method,headers:{'Content-Type':'application/json',...(accessToken?{Authorization:'Bearer '+accessToken}:{})},body:body===undefined?undefined:JSON.stringify(body)});
+    const init=()=>({method,headers:{'Content-Type':'application/json',...(accessToken?{Authorization:'Bearer '+accessToken}:{})},body:body===undefined?undefined:JSON.stringify(body)});
+    let response=await fetch(path,init());
+    if(response.status===401&&global.mtaAuth?.refreshSession){
+      try{
+        const refreshed=await global.mtaAuth.refreshSession();
+        if(refreshed?.access_token){accessToken=refreshed.access_token;response=await fetch(path,init());}
+      }catch{}
+    }
     const data=await response.json().catch(()=>({ok:false,error:'INVALID_JSON'}));
     if(!response.ok) throw Object.assign(new Error(data.error||'API_ERROR'),{status:response.status,data});
     return data;
