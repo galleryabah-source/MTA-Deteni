@@ -1,3 +1,32 @@
+# MTA DETENI — PostgreSQL Persistence Activation Checkpoint (2026-09-28)
+
+The PostgreSQL persistence activation has begun at the canonical runtime boundary. This checkpoint does **not** claim full-domain completion yet.
+
+Implemented in repository:
+- Production mutation gate enabled in `web/mta-production-state-adapter-v1.js`.
+- Generic authenticated `Command → API → PostgreSQL → Audit → Hydrate` resource mutation seam added.
+- Detainee create/update/archive remains on the canonical PostgreSQL adapter.
+- Leave creation now routes through PostgreSQL in production mode.
+- Room QR lifecycle now persists QR state in the existing room `metadata` JSONB field in production mode.
+- Leave QR lifecycle now persists QR state in the existing leave `metadata` JSONB field in production mode.
+- Production state kernel now rejects browser `localStorage` persistence with `PRODUCTION_BROWSER_STORAGE_FORBIDDEN`; production reads come from hydrated PostgreSQL state.
+- Runtime cache versions were advanced for the new persistence boundary.
+- P2 regression contract was extended for the PostgreSQL mutation seam and browser-storage prohibition.
+
+Remaining before declaring **FULL POSTGRESQL SOURCE-OF-TRUTH**:
+- Master Block/Room write path.
+- Placement write path and atomic placement/detainee consistency boundary.
+- Remaining Movement UI writers.
+- Leave status-transition writer.
+- Document lifecycle/revision/generation writer.
+- Backup/restore persistence boundary.
+- Administrator system/catalog/branding persistence boundary.
+- Final two-session/two-computer shared-state verification.
+
+Important: no claim of full production certification is made by this checkpoint. The repository currently contains a staged activation path; live deployment/runtime verification and the remaining mutation surfaces must be completed before the application can truthfully be declared fully PostgreSQL-backed.
+
+---
+
 # MTA DETENI — P2 Canonical Persistence Hardening Addendum (2026-09-28)
 
 ## Data Deteni persistence seam
