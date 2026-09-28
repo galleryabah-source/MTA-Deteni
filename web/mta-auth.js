@@ -8,7 +8,8 @@ const supabase=createClient(
       persistSession:true,
       autoRefreshToken:true,
       detectSessionInUrl:true,
-      storageKey:'mta-deteni-auth-session'
+      storageKey:'mta-deteni-auth-session',
+      storage:window.localStorage
     }
   }
 );
