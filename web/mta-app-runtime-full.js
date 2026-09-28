@@ -292,7 +292,7 @@ async function loadAuthenticatedRuntime(){
   if(window.__mtaRuntimeLoading)return window.__mtaRuntimeLoading;
   const scripts=[
     '/mta-production-state-adapter-v1.js?v=4',
-    '/mta-state-kernel-v1.js?v=4',
+    '/mta-state-kernel-v1.js?v=5',
     '/mta-domain-commands-v2.js?v=3',
     '/offline-v1.js?v=2',
     '/offline-queue-v1.js?v=2',
