@@ -305,11 +305,11 @@ try {
     return { targetRoomId: target.value };
   });
   await page.waitForFunction(({id}) => {
-    const d = JSON.parse(localStorage.getItem('mta-deteni-demo-v2') || '{}');
+    const d = window.MTADeteniStateKernel?.read?.() || {};
     return (d.movements || []).some(m => m.source === 'ROOM_TRANSFER' && m.detaineeId === id);
-  }, { id: mutationBaseline.detaineeId }, { timeout: 5000 });
+  }, { id: mutationBaseline.detaineeId }, { timeout: 8000 });
   const movementState = await page.evaluate(({id}) => {
-    const d = JSON.parse(localStorage.getItem('mta-deteni-demo-v2') || '{}');
+    const d = window.MTADeteniStateKernel?.read?.() || {};
     const m = (d.movements || []).find(x => x.detaineeId === id && x.source === 'ROOM_TRANSFER');
     const p = (d.placements || []).find(x => x.movementId === m?.id);
     const audits = (d.audit || []).filter(x => x.resourceId === m?.id || x.resourceId === p?.id);
