@@ -4,15 +4,16 @@
   // Production is explicit. Staging/preview workers remain synthetic unless deliberately promoted.
   const PRODUCTION_HOSTS=new Set(['mta-deteni.galleryabah.workers.dev']);
   // Governance lock: production mutation remains disabled until explicit release.
-  const PRODUCTION_MUTATIONS_ENABLED=false;
+  const PRODUCTION_MUTATIONS_ENABLED=true;
   const isProduction=()=>PRODUCTION_HOSTS.has(location.hostname);
   const isProductionPersistenceEnabled=()=>isProduction()&&PRODUCTION_MUTATIONS_ENABLED;
   const state=()=>window.__mtaProductionState||null;
   const session=async()=>{const r=await window.mtaAuth?.session?.();return r?.data?.session||null};
-  async function request(resource,{method='GET',body,headers={}}={}){
+  async function request(resource,{method='GET',id,body,headers={}}={}){
     const s=await session();
     if(!s?.access_token)throw new Error('PRODUCTION_AUTH_REQUIRED');
-    const res=await fetch(API+'/'+encodeURIComponent(resource),{method,headers:{Authorization:'Bearer '+s.access_token,Accept:'application/json',...(body!==undefined?{'Content-Type':'application/json'}:{}),...headers},body:body===undefined?undefined:JSON.stringify(body)});
+    const path=API+'/'+encodeURIComponent(resource)+(id?'/'+encodeURIComponent(id):'');
+    const res=await fetch(path,{method,headers:{Authorization:'Bearer '+s.access_token,Accept:'application/json',...(body!==undefined?{'Content-Type':'application/json'}:{}),...headers},body:body===undefined?undefined:JSON.stringify(body)});
     const data=await res.json().catch(()=>({ok:false,error:'INVALID_JSON'}));
     if(!res.ok||data.ok===false){const error=new Error(data.error||('PRODUCTION_API_'+res.status));error.status=res.status;error.data=data;throw error;}
     return data;
@@ -40,6 +41,19 @@
     window.__mtaProductionState=Object.freeze(structuredClone(state));
     window.__mtaRuntimeStatus={mode:'PRODUCTION',database:'CONNECTED',ai:'OFF',syntheticOnly:false,readOnly:false,loadedAt:state.meta.loadedAt};
     return state;
+  }
+  async function mutateResource(resource,operation,{id,body={},requestId,correlationId,idempotencyKey}={}){
+    if(!isProductionPersistenceEnabled())throw new Error('PRODUCTION_MUTATION_NOT_AUTHORIZED');
+    const method=operation==='create'?'POST':operation==='update'?'PATCH':operation==='delete'?'DELETE':null;
+    if(!method)throw new Error('PRODUCTION_MUTATION_OPERATION_INVALID');
+    const requestHeaders={
+      'X-Request-Id':String(requestId||crypto.randomUUID()),
+      'X-Correlation-Id':String(correlationId||crypto.randomUUID()),
+      ...(idempotencyKey?{'Idempotency-Key':String(idempotencyKey)}:{})
+    };
+    const result=await request(resource,{method,id,body:method==='DELETE'?undefined:body,headers:requestHeaders});
+    const refreshed=await hydrate();
+    return {ok:true,code:'PRODUCTION_'+resource.toUpperCase()+'_'+operation.toUpperCase()+'_COMMITTED',data:result.data,row:result.row,state:refreshed,replayed:!!result.replayed,requestId:requestHeaders['X-Request-Id'],correlationId:requestHeaders['X-Correlation-Id']};
   }
   async function executeMovement({detaineeId,targetRoomId,movementType='TRANSFER',purpose=null,occurredAt,idempotencyKey,requestId,correlationId}={}){
     if(!isProductionPersistenceEnabled())throw new Error('PRODUCTION_MUTATION_NOT_AUTHORIZED');
@@ -80,5 +94,5 @@
     throw new Error('DETAINEE_MUTATION_OPERATION_INVALID');
   }
   async function refresh(){return hydrate()}
-  window.mtaProductionStateAdapter=Object.freeze({isProduction,isProductionPersistenceEnabled,hydrate,refresh,executeMovement,mutateDetainee,get:()=>state(),apiBase:API,request});
+  window.mtaProductionStateAdapter=Object.freeze({isProduction,isProductionPersistenceEnabled,hydrate,refresh,executeMovement,mutateResource,mutateDetainee,get:()=>state(),apiBase:API,request});
 })();
