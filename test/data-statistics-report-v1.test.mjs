@@ -5,7 +5,7 @@ import fs from "node:fs";
 const index=fs.readFileSync("web/index.html","utf8");
 const report=fs.readFileSync("web/data-statistics-report-v1.js","utf8");
 
-test("data statistics menu and reporting module are wired",()=>{
+test("data statistics module is syntactically valid JavaScript",()=>{\n  assert.doesNotThrow(()=>new Function(report));\n});\n\ntest("data statistics menu and reporting module are wired",()=>{
   assert.match(index,/data-view="detainee-statistics">Data Statistik/);
   assert.match(index,/data-statistics-report-v1\.js\?v=1/);
   assert.match(report,/mtaProductionStateAdapter/);
