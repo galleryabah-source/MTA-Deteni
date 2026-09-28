@@ -34,7 +34,8 @@ test("H3 archive/status mutation has one canonical owner",()=>{
   const start=runtime.indexOf("async function archiveDetainee(id){");
   const end=runtime.indexOf("function placement(v)",start);
   const block=runtime.slice(start,end);
-  assert.match(block,/window\.MTADeteniDomainCommandsV2\.archiveDetainee/);
+  assert.match(block,/const command=window\.MTADeteniDomainCommandsV2/);
+  assert.match(block,/await command\.archiveDetainee/);
   assert.doesNotMatch(block,/\.status='NONAKTIF'/);
   assert.match(commands,/function archiveDetainee/);
   assert.match(commands,/DETAINEE_ARCHIVE/);
@@ -51,6 +52,6 @@ test("H4 legacy movement entrypoint is neutralized",()=>{
 });
 
 test("canonical v2 command module is wired before runtime feature modules",()=>{
-  const index=read("web/index.html");
-  assert.match(index,/mta-domain-commands-v2\.js\?v=5/);
+  const runtime=read("web/mta-app-runtime-full.js");
+  assert.match(runtime,/mta-domain-commands-v2\.js\?v=5/);
 });
