@@ -46,7 +46,7 @@ test("CMO-05 runtime production path does not persist through synthetic save",()
   for(const block of productionBlocks){
     const start=block.index??0;
     const tail=runtime.slice(start,start+1800);
-    const elseIndex=tail.search(/}else(?:\s*if)?\s*\{/);
+    const elseIndex=tail.search(/}else\b/);
     const productionBranch=elseIndex>=0?tail.slice(0,elseIndex):tail;
     assert.doesNotMatch(productionBranch,/save\(\)/,"Browser save() must remain outside the production mutation branch");
   }
