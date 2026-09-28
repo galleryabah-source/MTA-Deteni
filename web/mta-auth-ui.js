@@ -145,6 +145,7 @@
       const app=document.querySelector('.app');
       if(app)app.style.removeProperty('display');
       gate.classList.remove('open');
+      gate.style.display='none';
       renderHeader(true,event.detail.user);
       // Protected API metadata is resolved by the authenticated runtime using the bearer token.
     }else{
@@ -152,6 +153,7 @@
       document.body.classList.add('mta-auth-locked');
       const app=document.querySelector('.app');
       if(app)app.style.setProperty('display','none','important');
+      gate.style.removeProperty('display');
       gate.classList.add('open');
       renderHeader(false,null);
     }
@@ -188,7 +190,7 @@
     window.__mtaAuthModuleLoading=new Promise((resolve,reject)=>{
       const s=document.createElement('script');
       s.type='module';
-      s.src='/mta-auth.js?v=6';
+      s.src='/mta-auth.js?v=7';
       s.onload=()=>resolve();
       s.onerror=()=>reject(new Error('AUTH_MODULE_LOAD_FAILED'));
       document.head.appendChild(s);
