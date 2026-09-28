@@ -27,7 +27,7 @@ async function loadActor(){
 function table(){
  if(!rows.length)return '<div class="umempty">Belum ada user yang dapat ditampilkan.</div>';
  return '<div class="umtable"><table><thead><tr><th>No</th><th>Email</th><th>Nama</th><th>Role</th><th>Scope Efektif</th><th>Status</th><th>Dibuat</th><th>Aksi</th></tr></thead><tbody>'+
- rows.map((u,i)=>'<tr><td>'+(i+1)+'</td><td>'+esc(u.email||'-')+'</td><td>'+esc(u.display_name||'-')+'</td><td><span class="umrole">'+esc(u.role||'VIEWER')+'</span></td><td><span class="umscope">'+esc(ROLE_SCOPE[u.role]||'READ ONLY')+'</span></td><td><span class="umbadge '+(u.active?'active':'')+'">'+(u.active?'AKTIF':'NONAKTIF')+'</span></td><td>'+esc(u.created_at?new Date(u.created_at).toLocaleString('id-ID'):'-')+'</td><td><button class="btn small" onclick="window.MTAUserManagementView.edit(\''+esc(u.id)+'\')">Edit</button></td></tr>').join('')+
+ rows.map((u,i)=>'<tr><td>'+(i+1)+'</td><td>'+esc(u.email||'-')+'</td><td>'+esc(u.display_name||'-')+'</td><td><span class="umrole">'+esc(u.role||'VIEWER')+'</span></td><td><span class="umscope">'+esc(ROLE_SCOPE[u.role]||'READ ONLY')+'</span></td><td><span class="umbadge '+(u.active?'active':'')+'">'+(u.active?'AKTIF':'NONAKTIF')+'</span></td><td>'+esc(u.created_at?new Date(u.created_at).toLocaleString('id-ID'):'-')+'</td><td><div style="display:flex;gap:5px;flex-wrap:wrap"><button class="btn small" onclick="window.MTAUserManagementView.edit(\'\'+esc(u.id)+\'\')">Edit</button><button class="btn small" onclick="window.MTAUserManagementView.resetPassword(\'\'+esc(u.id)+\'\')">Reset Password</button></div></td></tr>').join('')+
  '</tbody></table></div>';
 }
 function renderBase(message='',error=false){
@@ -59,6 +59,25 @@ function add(){
  const f=document.getElementById('umForm'),role=f.querySelector('[name=role]'),scope=document.getElementById('umScope');
  role.onchange=()=>scope.textContent=ROLE_SCOPE[role.value]||'READ ONLY';
  f.onsubmit=async e=>{e.preventDefault();const data=Object.fromEntries(new FormData(f).entries());if(String(data.password||'').length<12){toast('Password minimal 12 karakter.');return}const b=f.querySelector('button[type=submit]');if(b)b.disabled=true;try{await api().create('admin-users',data);auditLocal('USER_CREATE','USER','API');closeModal();toast('User berhasil dibuat melalui protected admin API.');await render()}catch(err){toast('Gagal membuat user: '+(err?.data?.error||err?.message||'API_ERROR'))}finally{if(b)b.disabled=false}};
+}
+async function resetPassword(id){
+ if(!canManage())return toast('Hanya OWNER/ADMIN yang dapat reset password.');
+ const u=rows.find(x=>x.id===id);if(!u)return;
+ if(String(u.id)===String(actor?.user?.id))return toast('Gunakan menu Profil & Keamanan untuk mengganti password akun sendiri.');
+ const targetRole=String(u.role||'VIEWER').toUpperCase();
+ if(targetRole==='OWNER'&&currentRole()!=='OWNER')return toast('Password OWNER hanya dapat direset oleh OWNER.');
+ if(!confirm('Reset password untuk '+(u.email||u.display_name||'user ini')+'? User akan dipaksa mengganti password saat login berikutnya.'))return;
+ try{
+  const r=await api().post('admin-users',id,{});
+  const temporaryPassword=r?.data?.temporaryPassword;
+  if(!temporaryPassword)throw new Error('TEMPORARY_PASSWORD_NOT_RETURNED');
+  openModal('<div class="dialoghead"><h2>Password Sementara</h2><button class="x" onclick="closeModal()">×</button></div>'+
+   '<div class="notice" style="margin-bottom:12px">Password ini hanya ditampilkan sekali. Sampaikan melalui kanal yang aman. User wajib menggantinya setelah login.</div>'+
+   '<div class="field"><label>User</label><div class="notice">'+esc(u.email||u.display_name||'-')+'</div></div>'+
+   '<div class="field" style="margin-top:10px"><label>Password sementara</label><div style="display:flex;gap:7px"><div id="mtaTemporaryPassword" class="notice" style="flex:1;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-weight:800;word-break:break-all">'+esc(temporaryPassword)+'</div><button type="button" class="btn" onclick="navigator.clipboard?.writeText(document.getElementById(\'mtaTemporaryPassword\').textContent);toast(\'Password disalin ke clipboard.\')">Salin</button></div></div>'+
+   '<div class="actions"><button class="btn primary" onclick="closeModal();window.MTAUserManagementView.render()">Selesai</button></div>');
+  toast('Password user berhasil direset.');
+ }catch(err){toast('Gagal reset password: '+(err?.data?.error||err?.message||'API_ERROR'))}
 }
 function edit(id){
  if(!canManage())return;
