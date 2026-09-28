@@ -17,8 +17,8 @@ assert.match(rbac,/create policy mta_detainees_insert_editor/);
 assert.match(rbac,/create policy mta_detainees_update_editor/);
 
 assert.match(api,/if\(req\.method==="POST"\)/);
-assert.match(api,/supabase\.from\(table\)\.insert\(body\)\.select\("\*"\)\.single\(\)/);
-assert.match(api,/supabase\.from\(table\)\.update\(body\)\.eq\("id",id\)\.select\("\*"\)\.single\(\)/);
+assert.match(api,/mta_execute_idempotent_mutation/);
+assert.match(api,/p_where:req\.method==="POST"\?\{\}:\{id\}/);
 assert.match(api,/mta_detainees/);
 
 assert.match(adapter,/mapDetainee/);
