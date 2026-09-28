@@ -6,6 +6,7 @@ const BRANDING_KEY='mta-deteni-branding-v1';
 const clone=v=>JSON.parse(JSON.stringify(v));
 const uid=p=>p+'-'+crypto.randomUUID().slice(0,10).toUpperCase();
 const now=()=>new Date().toISOString();
+const isProductionHost=()=>window.mtaProductionStateAdapter?.isProduction?.()===true;
 function normalize(state){
   if(!state||typeof state!=='object')throw new Error('STATE_INVALID');
   state=clone(state);
@@ -44,6 +45,7 @@ function normalize(state){
 }
 function read(){
   try{
+    if(isProductionHost())return clone(window.__mtaProductionState||{});
     const raw=localStorage.getItem(KEY);
     const state=normalize(raw?JSON.parse(raw):{});
     try{const b=JSON.parse(localStorage.getItem(BRANDING_KEY)||'null');if(b){state.adminSettings=state.adminSettings||{};state.adminSettings.branding=b}}catch{}
@@ -51,6 +53,7 @@ function read(){
   }catch(err){console.error('[MTA] state read failed',err);return {}}
 }
 function persist(state){
+  if(isProductionHost())throw new Error('PRODUCTION_BROWSER_STORAGE_FORBIDDEN');
   if(!state||typeof state!=='object')throw new Error('STATE_NOT_OBJECT');
   const branding=state.adminSettings?.branding;
   const copy=clone(state);
