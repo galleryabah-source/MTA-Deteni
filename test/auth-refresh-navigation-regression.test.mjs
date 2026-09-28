@@ -26,7 +26,7 @@ test("refresh does not leave the inline login gate visible after authenticated h
 test("auth UI does not treat unresolved refresh hydration as logout",()=>{
   assert.match(authUi,/if\(!resolved\)\{/);
   assert.match(authUi,/document\.body\.classList\.add\('mta-auth-locked'\)/);
-  assert.match(authUi,/Keep the authenticated shell hidden while Supabase restores the persisted\s+session/);
+  assert.match(authUi,/Keep the authenticated shell hidden while Supabase restores the persisted\s*\/\/\s*session/);
 });
 
 test("last operational view is restored after hard refresh",()=>{
