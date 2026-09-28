@@ -38,7 +38,7 @@ test("H3 archive/status mutation has one canonical owner",()=>{
   assert.match(block,/await command\.archiveDetainee/);
   assert.doesNotMatch(block,/\.status='NONAKTIF'/);
   assert.match(commands,/function archiveDetainee/);
-  assert.match(commands,/DETAINEE_ARCHIVE/);
+  assert.match(commands,/productionDetaineeMutation\('archive'/);
 });
 
 test("H4 legacy movement entrypoint is neutralized",()=>{
