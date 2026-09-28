@@ -50,7 +50,8 @@ Deno.serve(async(req)=>{
         const listed=await admin.auth.admin.listUsers({page:1,perPage:1000});
         if(listed.error) return json(req,{ok:false,error:"ADMIN_AUTH_USERS_READ_FAILED"},500);
         const emails=new Map((listed.data.users||[]).map(u=>[u.id,u.email||null]));
-        const data=(profiles||[]).map(p=>({...p,email:emails.get(p.id)||null}));
+        const visibleProfiles=role==="OWNER"?(profiles||[]):(profiles||[]).filter(p=>String(p.role||"VIEWER").toUpperCase()!=="OWNER");
+        const data=visibleProfiles.map(p=>({...p,email:emails.get(p.id)||null}));
         return json(req,{ok:true,resource,data});
       }
       if(req.method==="POST"){
@@ -80,6 +81,7 @@ Deno.serve(async(req)=>{
         const target=await admin.from("mta_profiles").select("id,role,display_name,active").eq("id",id).single();
         if(target.error||!target.data) return json(req,{ok:false,error:"USER_NOT_FOUND"},404);
         const targetRole=String(target.data.role||"VIEWER").toUpperCase();
+        if(targetRole==="OWNER" && role!=="OWNER") return json(req,{ok:false,error:"OWNER_USER_MANAGEMENT_DENIED"},403);
         const nextRole=body.role===undefined?targetRole:String(body.role).toUpperCase();
         const allowedRoles=role==="OWNER"?new Set(["OWNER","ADMIN","EDITOR","REVIEWER","AUDITOR","VIEWER"]):new Set(["EDITOR","REVIEWER","AUDITOR","VIEWER"]);
         if(!allowedRoles.has(targetRole)||!allowedRoles.has(nextRole)) return json(req,{ok:false,error:"USER_ROLE_NOT_ALLOWED"},403);

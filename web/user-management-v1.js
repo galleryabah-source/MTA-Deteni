@@ -45,7 +45,8 @@ async function render(){
   await loadActor();
   if(!canManage()){rows=[];renderBase('Akses ditolak: hanya OWNER/ADMIN yang dapat mengelola user.',true);return}
   const r=await api().list('admin-users');
-  rows=Array.isArray(r?.data)?r.data:[];
+  const allRows=Array.isArray(r?.data)?r.data:[];
+  rows=currentRole()==="OWNER"?allRows:allRows.filter(u=>String(u.role||"VIEWER").toUpperCase()!=="OWNER");
   renderBase();
  }catch(err){
   rows=[];
@@ -63,6 +64,7 @@ function edit(id){
  if(!canManage())return;
  const u=rows.find(x=>x.id===id);if(!u)return;
  const actorRole=currentRole();
+ if(String(u.role||"VIEWER").toUpperCase()==="OWNER" && actorRole!=="OWNER"){toast('Akun OWNER tidak dapat dilihat atau dikelola oleh role ini.');return;}
  openModal('<div class="dialoghead"><h2>Edit User</h2><button class="x" onclick="closeModal()">×</button></div><form id="umEditForm" class="formgrid"><div class="field full"><label>Email</label><div class="notice">'+esc(u.email||'-')+'</div></div><div class="field"><label>Nama Tampilan</label><input name="display_name" value="'+esc(u.display_name||'')+'" maxlength="120" required></div><div class="field"><label>Role</label><select name="role">'+roleOptions(u.role||'VIEWER',false)+'</select></div><div class="field"><label>Status</label><select name="active"><option value="true" '+(u.active?'selected':'')+'>AKTIF</option><option value="false" '+(!u.active?'selected':'')+'>NONAKTIF</option></select></div><div class="field"><label>Scope Efektif</label><div id="umEditScope" class="notice">'+esc(ROLE_SCOPE[u.role]||'READ ONLY')+'</div></div><div class="actions full"><button type="button" class="btn" onclick="closeModal()">Batal</button><button class="btn primary">Simpan Perubahan</button></div></form>');
  const f=document.getElementById('umEditForm'),role=f.querySelector('[name=role]'),scope=document.getElementById('umEditScope');role.onchange=()=>scope.textContent=ROLE_SCOPE[role.value]||'READ ONLY';
  f.onsubmit=async e=>{e.preventDefault();const data={display_name:String(new FormData(f).get('display_name')||'').trim(),role:role.value,active:new FormData(f).get('active')==='true'};try{await api().update('admin-users',id,data);auditLocal('USER_UPDATE','USER',id);closeModal();toast('Profile user diperbarui.');await render()}catch(err){toast('Gagal memperbarui user: '+(err?.data?.error||err?.message||'API_ERROR'))}};
