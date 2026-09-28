@@ -177,6 +177,31 @@ Deno.serve(async(req)=>{
     }
   }
 
+  if(resource==="admin-config"){
+    if(!new Set(["OWNER","ADMIN"]).has(role)) return json(req,{ok:false,error:"RBAC_ADMIN_CONFIG_DENIED",role},403);
+    const adminKey=Deno.env.get("SUPABASE_SERVICE_ROLE_KEY"); if(!adminKey) return json(req,{ok:false,error:"SERVER_CONFIGURATION_ERROR"},503);
+    const admin=createClient(Deno.env.get("SUPABASE_URL")!,adminKey,{auth:{autoRefreshToken:false,persistSession:false}});
+    try{
+      const scoped=await admin.from("mta_profile_scopes").select("scope_id").eq("profile_id",user.id).eq("active",true).limit(1).maybeSingle();
+      if(scoped.error||!scoped.data?.scope_id)return json(req,{ok:false,error:"SCOPE_REQUIRED"},409);
+      const scopeId=scoped.data.scope_id;
+      const current=await admin.from("mta_scopes").select("id,code,name,metadata").eq("id",scopeId).single();
+      if(current.error||!current.data)return json(req,{ok:false,error:"SCOPE_NOT_FOUND"},404);
+      if(req.method==="GET")return json(req,{ok:true,resource,role,data:{scopeId:current.data.id,code:current.data.code,name:current.data.name,settings:current.data.metadata?.adminSettings||{}}});
+      if(req.method==="PATCH"){
+        const body=await req.json().catch(()=>({}));
+        const previous=current.data.metadata&&typeof current.data.metadata==="object"?current.data.metadata:{};
+        const settings={...(previous.adminSettings||{}),...(body.settings&&typeof body.settings==="object"?body.settings:{})};
+        const metadata={...previous,adminSettings:settings};
+        const updated=await admin.from("mta_scopes").update({metadata,updated_at:new Date().toISOString()}).eq("id",scopeId).select("id,code,name,metadata").single();
+        if(updated.error)return json(req,{ok:false,error:"ADMIN_CONFIG_UPDATE_FAILED"},400);
+        await admin.from("mta_audit_events").insert({action:"ADMIN_CONFIG_UPDATE",resource_type:"ADMIN_CONFIG",resource_id:scopeId,result:"SUCCESS",actor_user_id:user.id,request_id:req.headers.get("X-Request-Id")||crypto.randomUUID(),correlation_id:req.headers.get("X-Correlation-Id")||crypto.randomUUID(),metadata:{keys:Object.keys(settings)}});
+        return json(req,{ok:true,resource,role,data:{scopeId:updated.data.id,code:updated.data.code,name:updated.data.name,settings:updated.data.metadata?.adminSettings||{}}});
+      }
+      return json(req,{ok:false,error:"METHOD_NOT_ALLOWED"},405);
+    }catch(e){return json(req,{ok:false,error:"ADMIN_CONFIG_ERROR"},500)}
+  }
+
   if(resource==="ai-config"){
     if(!new Set(["OWNER","ADMIN"]).has(role)) return json(req,{ok:false,error:"RBAC_AI_ADMIN_DENIED",role},403);
     const adminKey=Deno.env.get("SUPABASE_SERVICE_ROLE_KEY"); if(!adminKey) return json(req,{ok:false,error:"SERVER_CONFIGURATION_ERROR"},503);
