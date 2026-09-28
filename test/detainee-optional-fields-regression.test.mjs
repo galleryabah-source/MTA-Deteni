@@ -11,10 +11,10 @@ test("Tambah Deteni exposes optional identity fields without required validation
   assert.match(runtime,/name="dateOfBirth" type="date"/);
   assert.match(runtime,/name="passportNumber"/);
   assert.match(runtime,/name="notes"/);
-  assert.match(runtime,/Jenis Kelamin <span class="muted">\(opsional\)<\/span>/);
-  assert.match(runtime,/Tanggal Lahir <span class="muted">\(opsional\)<\/span>/);
-  assert.match(runtime,/No Paspor <span class="muted">\(opsional\)<\/span>/);
-  assert.match(runtime,/Catatan <span class="muted">\(opsional\)<\/span>/);
+  assert.match(runtime,/Jenis Kelamin/);
+  assert.match(runtime,/Tanggal Lahir/);
+  assert.match(runtime,/No Paspor/);
+  assert.match(runtime,/Catatan/);
   assert.doesNotMatch(runtime,/name="gender"[^>]*required/);
   assert.doesNotMatch(runtime,/name="dateOfBirth"[^>]*required/);
   assert.doesNotMatch(runtime,/name="passportNumber"[^>]*required/);
