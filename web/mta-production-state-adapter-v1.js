@@ -55,7 +55,7 @@
     return result;
   }
   async function mutateDetainee(operation,{id,code,name,nationality,status,placement,gender,dateOfBirth,passportNumber,notes,correlationId,requestId}={}){
-    if(!isProduction())throw new Error('PRODUCTION_COMMAND_OUTSIDE_PRODUCTION');
+    if(!isProductionPersistenceEnabled())throw new Error('PRODUCTION_MUTATION_NOT_AUTHORIZED');
     const correlation=String(correlationId||crypto.randomUUID());
     const clean={code:String(code||'').trim(),name:String(name||'').trim(),nationality:String(nationality||'').trim(),status:String(status||'AKTIF'),placement:String(placement||'').trim(),updated_at:new Date().toISOString(),metadata:{gender:String(gender||''),dateOfBirth:String(dateOfBirth||''),passportNumber:String(passportNumber||''),notes:String(notes||''),correlationId:correlation,source:'PRODUCTION_RUNTIME'}};
     if(operation==='create'){
