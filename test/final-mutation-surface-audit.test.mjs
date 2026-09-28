@@ -34,7 +34,7 @@ test("CMO-05 canonical production mutation surface is centralized",()=>{
   const commands=fs.readFileSync("web/mta-domain-commands-v2.js","utf8");
   const adapter=fs.readFileSync("web/mta-production-state-adapter-v1.js","utf8");
   for(const resource of ["placements","leaves","documents","blocks","rooms"]){
-    assert.match(commands,new RegExp("productionResourceMutation\\\\('"+resource+"'"),resource+" lacks canonical production mutation seam");
+    assert.match(commands,new RegExp("productionResourceMutation\\('"+resource+"'"),resource+" lacks canonical production mutation seam");
   }
   assert.match(commands,/productionDetaineeMutation/);
   assert.match(adapter,/async function mutateDetainee/);
