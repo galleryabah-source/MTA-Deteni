@@ -19,6 +19,7 @@
     list:(resource)=>request(resource),
     get:(resource,id)=>request(resource,{id}),
     create:(resource,body)=>request(resource,{method:'POST',body}),
+    post:(resource,id,body)=>request(resource,{method:'POST',id,body}),
     update:(resource,id,body)=>request(resource,{method:'PATCH',id,body}),
     remove:(resource,id)=>request(resource,{method:'DELETE',id})
   });

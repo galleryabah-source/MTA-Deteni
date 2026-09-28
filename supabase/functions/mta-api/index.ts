@@ -24,7 +24,7 @@ Deno.serve(async(req)=>{
   const supabase=createClient(Deno.env.get("SUPABASE_URL")!,Deno.env.get("SUPABASE_ANON_KEY")!,{global:{headers:{Authorization:authorization}}});
   const {data:{user},error:userError}=await supabase.auth.getUser();
   if(userError||!user) { emit("WARN","request.denied",{status:401,outcome:"DENIED",errorCode:"AUTH_INVALID",durationMs:performance.now()-startedAt}); return json(req,{ok:false,error:"AUTH_INVALID"},401,{requestId,correlationId}); }
-  const {data:profile,error:profileError}=await supabase.from("mta_profiles").select("id,role,display_name,active").eq("id",user.id).single();
+  const {data:profile,error:profileError}=await supabase.from("mta_profiles").select("id,role,display_name,active,must_change_password,password_changed_at,password_reset_at").eq("id",user.id).single();
   if(profileError||!profile?.active) { emit("WARN","request.denied",{status:403,outcome:"DENIED",errorCode:"RBAC_PROFILE_MISSING_OR_INACTIVE",durationMs:performance.now()-startedAt}); return json(req,{ok:false,error:"RBAC_PROFILE_MISSING_OR_INACTIVE"},403,{requestId,correlationId}); }
   const role=String(profile.role||"").toUpperCase();
   const url=new URL(req.url);
@@ -35,7 +35,51 @@ Deno.serve(async(req)=>{
   const functionIndex=parts.indexOf("mta-api");
   const routeParts=functionIndex>=0?parts.slice(functionIndex+1):parts;
   const resource=routeParts[0],id=routeParts[1];
-  if(resource==="me" && req.method==="GET") return json(req,{ok:true,user:{id:user.id,email:user.email},profile,role});
+  if(resource==="me"){
+    if(req.method==="GET") return json(req,{ok:true,user:{id:user.id,email:user.email},profile,role});
+    const adminKey=Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+    if(!adminKey) return json(req,{ok:false,error:"SERVER_CONFIGURATION_ERROR"},503);
+    const admin=createClient(Deno.env.get("SUPABASE_URL")!,adminKey,{auth:{autoRefreshToken:false,persistSession:false}});
+    try{
+      if(req.method==="PATCH"){
+        const body=await req.json().catch(()=>null)||{};
+        const displayName=String(body.display_name||"").trim();
+        if(!displayName) return json(req,{ok:false,error:"PROFILE_DISPLAY_NAME_REQUIRED"},400);
+        if(displayName.length>120) return json(req,{ok:false,error:"PROFILE_DISPLAY_NAME_TOO_LONG"},400);
+        const updated=await admin.from("mta_profiles").update({display_name:displayName}).eq("id",user.id).select("id,role,display_name,active,must_change_password,password_changed_at,password_reset_at").single();
+        if(updated.error) return json(req,{ok:false,error:"PROFILE_UPDATE_FAILED"},400);
+        await admin.from("mta_audit_events").insert({action:"USER_PROFILE_UPDATE",resource_type:"USER",resource_id:user.id,result:"SUCCESS",actor_user_id:user.id,request_id:requestId,correlation_id:correlationId,metadata:{changedFields:["display_name"]}});
+        return json(req,{ok:true,resource,data:updated.data});
+      }
+      if(req.method==="POST"){
+        const body=await req.json().catch(()=>null)||{};
+        const currentPassword=String(body.current_password||"");
+        const newPassword=String(body.new_password||"");
+        const confirmation=String(body.confirm_password||"");
+        if(newPassword.length<12) return json(req,{ok:false,error:"PASSWORD_POLICY_INVALID"},400);
+        if(newPassword!==confirmation) return json(req,{ok:false,error:"PASSWORD_CONFIRMATION_MISMATCH"},400);
+        if(currentPassword===newPassword) return json(req,{ok:false,error:"PASSWORD_REUSE_FORBIDDEN"},400);
+        if(!user.email) return json(req,{ok:false,error:"PASSWORD_EMAIL_UNAVAILABLE"},400);
+        const verifier=createClient(Deno.env.get("SUPABASE_URL")!,Deno.env.get("SUPABASE_ANON_KEY")!,{auth:{autoRefreshToken:false,persistSession:false}});
+        const verified=await verifier.auth.signInWithPassword({email:user.email,password:currentPassword});
+        if(verified.error||!verified.data.user) return json(req,{ok:false,error:"CURRENT_PASSWORD_INVALID"},401);
+        const changed=await admin.auth.admin.updateUserById(user.id,{password:newPassword});
+        if(changed.error) return json(req,{ok:false,error:"PASSWORD_CHANGE_FAILED"},400);
+        const now=new Date().toISOString();
+        const updated=await admin.from("mta_profiles").update({must_change_password:false,password_changed_at:now}).eq("id",user.id).select("id,role,display_name,active,must_change_password,password_changed_at,password_reset_at").single();
+        if(updated.error) return json(req,{ok:false,error:"PASSWORD_STATE_UPDATE_FAILED"},500);
+        await supabase.auth.signOut({scope:"global"}).catch(()=>{});
+        await admin.from("mta_audit_events").insert({action:"USER_PASSWORD_CHANGE",resource_type:"USER",resource_id:user.id,result:"SUCCESS",actor_user_id:user.id,request_id:requestId,correlation_id:correlationId,metadata:{forcedChange:!!profile.must_change_password}});
+        return json(req,{ok:true,resource,data:{...updated.data,sessionRevoked:true}});
+      }
+      return json(req,{ok:false,error:"METHOD_NOT_ALLOWED"},405);
+    }catch(e){
+      emit("ERROR","identity.profile.failed",{status:500,outcome:"FAILED",errorCode:"IDENTITY_PROFILE_ERROR"});
+      return json(req,{ok:false,error:"IDENTITY_PROFILE_ERROR"},500);
+    }
+  }
+
+  if(profile.must_change_password) return json(req,{ok:false,error:"PASSWORD_CHANGE_REQUIRED",role},428);
 
 
   if(resource==="admin-users"){
@@ -45,7 +89,7 @@ Deno.serve(async(req)=>{
     const admin=createClient(Deno.env.get("SUPABASE_URL")!,adminKey,{auth:{autoRefreshToken:false,persistSession:false}});
     try{
       if(req.method==="GET"){
-        const {data:profiles,error:pe}=await admin.from("mta_profiles").select("id,role,display_name,active,created_at,updated_at").order("created_at",{ascending:true});
+        const {data:profiles,error:pe}=await admin.from("mta_profiles").select("id,role,display_name,active,must_change_password,created_at,updated_at").order("created_at",{ascending:true});
         if(pe) return json(req,{ok:false,error:"ADMIN_USERS_READ_FAILED"},500);
         const listed=await admin.auth.admin.listUsers({page:1,perPage:1000});
         if(listed.error) return json(req,{ok:false,error:"ADMIN_AUTH_USERS_READ_FAILED"},500);
@@ -67,13 +111,41 @@ Deno.serve(async(req)=>{
         const created=await admin.auth.admin.createUser({email,password,email_confirm:true,user_metadata:{full_name:displayName}});
         if(created.error||!created.data.user) return json(req,{ok:false,error:"ADMIN_USER_CREATE_FAILED"},400);
         const uid=created.data.user.id;
-        const prof=await admin.from("mta_profiles").upsert({id:uid,role:requestedRole,display_name:displayName||email,active:true},{onConflict:"id"}).select("id,role,display_name,active,created_at,updated_at").single();
+        const prof=await admin.from("mta_profiles").upsert({id:uid,role:requestedRole,display_name:displayName||email,active:true,must_change_password:true},{onConflict:"id"}).select("id,role,display_name,active,created_at,updated_at").single();
         if(prof.error){
           await admin.auth.admin.deleteUser(uid);
           return json(req,{ok:false,error:"ADMIN_PROFILE_CREATE_FAILED"},500);
         }
         await admin.from("mta_audit_events").insert({action:"USER_CREATE",resource_type:"USER",resource_id:uid,result:"SUCCESS",actor_user_id:user.id,request_id:requestId,correlation_id:correlationId,metadata:{role:requestedRole,email}});
-        return json(req,{ok:true,resource,data:{...prof.data,email,temporaryCredentialIssued:true}});
+        return json(req,{ok:true,resource,data:{...prof.data,email,temporaryCredentialIssued:true,must_change_password:true}});
+      }
+      if(req.method==="POST"&&id&&routeParts[2]==="password-reset"){
+        if(!new Set(["OWNER","ADMIN"]).has(role)) return json(req,{ok:false,error:"RBAC_PASSWORD_RESET_DENIED"},403);
+        const target=await admin.from("mta_profiles").select("id,role,display_name,active").eq("id",id).single();
+        if(target.error||!target.data) return json(req,{ok:false,error:"TARGET_USER_NOT_FOUND"},404);
+        const targetRole=String(target.data.role||"VIEWER").toUpperCase();
+        if(targetRole==="OWNER"&&role!=="OWNER") return json(req,{ok:false,error:"OWNER_PASSWORD_RESET_DENIED"},403);
+        if(!target.data.active) return json(req,{ok:false,error:"TARGET_USER_INACTIVE"},409);
+        const listed=await admin.auth.admin.getUserById(id);
+        if(listed.error||!listed.data.user?.email) return json(req,{ok:false,error:"TARGET_AUTH_USER_NOT_FOUND"},404);
+        const lower="abcdefghijkmnopqrstuvwxyz", upper="ABCDEFGHJKLMNPQRSTUVWXYZ", digits="23456789", symbols="!@#$%&*";
+        const pick=(chars)=>chars[crypto.getRandomValues(new Uint32Array(1))[0]%chars.length];
+        const pool=lower+upper+digits+symbols;
+        const chars=[pick(lower),pick(upper),pick(digits),pick(symbols)];
+        const random=new Uint32Array(20); crypto.getRandomValues(random);
+        for(let i=chars.length;i<20;i++) chars.push(pool[random[i]%pool.length]);
+        for(let i=chars.length-1;i>0;i--){const j=random[i%random.length]%(i+1);[chars[i],chars[j]]=[chars[j],chars[i]];}
+        const temporaryPassword=chars.join("");
+        const changed=await admin.auth.admin.updateUserById(id,{password:temporaryPassword});
+        if(changed.error) return json(req,{ok:false,error:"PASSWORD_RESET_FAILED"},400);
+        const now=new Date().toISOString();
+        const updated=await admin.from("mta_profiles").update({must_change_password:true,password_reset_at:now,password_reset_by:user.id}).eq("id",id).select("id,role,display_name,active,must_change_password,password_changed_at,password_reset_at").single();
+        if(updated.error){
+          return json(req,{ok:false,error:"PASSWORD_RESET_STATE_UPDATE_FAILED"},500);
+        }
+        const audit=await admin.from("mta_audit_events").insert({action:"USER_PASSWORD_RESET",resource_type:"USER",resource_id:id,result:"SUCCESS",actor_user_id:user.id,request_id:requestId,correlation_id:correlationId,metadata:{targetRole,forcedChange:true}});
+        if(audit.error) emit("WARN","identity.password_reset.audit_failed",{status:500,outcome:"FAILED",errorCode:"AUDIT_WRITE_FAILED"});
+        return json(req,{ok:true,resource,data:{id,role:updated.data.role,display_name:updated.data.display_name,active:updated.data.active,must_change_password:true,temporaryPassword,sessionRevoked:true}});
       }
       if(req.method==="PATCH"&&id){
         const body=await req.json().catch(()=>null)||{};
