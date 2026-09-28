@@ -9,6 +9,31 @@ const audit=(s,action,type,id,result='SUCCESS',correlationId)=>{
   s.audit=Array.isArray(s.audit)?s.audit:[];
   s.audit.unshift({id:uid('AUD'),action,resourceType:type,resourceId:id||'',result,occurredAt:now(),actor:'DEMO-OPERATOR',requestId:uid('REQ'),correlationId:correlationId||uid('COR'),policyVersion:'AUTHZ-1.0'});
 };
+async function productionDetaineeMutation(operation,o={}){
+  const adapter=window.mtaProductionStateAdapter;
+  if(!adapter?.isProduction?.())return null;
+  if(typeof adapter.mutateDetainee!=='function')return{ok:false,code:'PRODUCTION_DETAINEE_ADAPTER_NOT_READY'};
+  try{
+    return await adapter.mutateDetainee(operation,o);
+  }catch(err){
+    return{ok:false,code:err?.data?.error||err?.message||'PRODUCTION_DETAINEE_MUTATION_FAILED',error:err};
+  }
+}
+function createDetainee(s,o={}){
+  if(window.mtaProductionStateAdapter?.isProduction?.())return productionDetaineeMutation('create',o);
+  if(typeof window.MTADeteniDomainCommands?.createDetainee==='function')return window.MTADeteniDomainCommands.createDetainee(s,o);
+  return{ok:false,code:'CANONICAL_DETAINEE_COMMAND_NOT_READY'};
+}
+function updateDetainee(s,o={}){
+  if(window.mtaProductionStateAdapter?.isProduction?.())return productionDetaineeMutation('update',o);
+  if(typeof window.MTADeteniDomainCommands?.updateDetainee==='function')return window.MTADeteniDomainCommands.updateDetainee(s,o);
+  return{ok:false,code:'CANONICAL_DETAINEE_COMMAND_NOT_READY'};
+}
+function archiveDetainee(s,id,o={}){
+  if(window.mtaProductionStateAdapter?.isProduction?.())return productionDetaineeMutation('archive',{...o,id});
+  if(typeof window.MTADeteniDomainCommands?.archiveDetainee==='function')return window.MTADeteniDomainCommands.archiveDetainee(s,id,o);
+  return{ok:false,code:'CANONICAL_DETAINEE_COMMAND_NOT_READY'};
+}
 function createLeave(s,o={}){
   const d=s||{}, detaineeId=String(o.detaineeId||''), destination=String(o.destination||'').trim(), startAt=new Date(String(o.startAt||''));
   if(!detaineeId||!destination||Number.isNaN(startAt.getTime()))return{ok:false,code:'LEAVE_INPUT_INVALID'};
@@ -81,5 +106,5 @@ function assignPlacement(s,o={}){const d=s||{};d.detainees=Array.isArray(d.detai
 function createMovement(s,o={}){const d=s||{},detaineeId=String(o.detaineeId||''),roomId=String(o.roomId||''),occurredAt=new Date(String(o.occurredAt||'')),requestKey=String(o.requestKey||('ROOM_TRANSFER:'+detaineeId+':'+roomId+':'+String(o.occurredAt||'')));if(!detaineeId||!roomId||Number.isNaN(occurredAt.getTime()))return{ok:false,code:'MOVEMENT_INPUT_INVALID'};if((d.movements||[]).some(x=>x.requestKey===requestKey))return{ok:true,code:'MOVEMENT_ALREADY_PROCESSED',requestKey};const det=(d.detainees||[]).find(x=>x.id===detaineeId),target=(d.rooms||[]).find(x=>x.id===roomId),current=(d.placements||[]).filter(x=>x.detaineeId===detaineeId).sort((a,b)=>String(b.since||'').localeCompare(String(a.since||'')))[0]||null,from=current?((d.rooms||[]).find(x=>x.id===current.roomId)||current):null;if(!det||det.status!=='AKTIF')return{ok:false,code:'DETAINEE_INACTIVE'};if(!target||target.status!=='ACTIVE')return{ok:false,code:'ROOM_INACTIVE'};if(from?.id===target.id)return{ok:false,code:'SAME_ROOM'};if(typeof window.mtaUnifiedValidateMovement==='function'){const check=window.mtaUnifiedValidateMovement(d,detaineeId,roomId);if(!check.ok)return{ok:false,code:check.code}}const correlationId=String(o.correlationId||uid('COR')),movement={id:o.id||uid('MOV'),detaineeId,detaineeCode:det.code,type:String(o.type||'TRANSFER_KAMAR'),fromRoom:from?(from.block+' / '+from.room):'UNMAPPED',toRoom:target.block+' / '+target.room,fromRoomId:from?.id||null,toRoomId:target.id,note:String(o.note||''),occurredAt:occurredAt.toISOString(),createdAt:now(),source:'ROOM_TRANSFER',requestKey,correlationId};const placement=assignPlacement(d,{detaineeId,roomId,since:movement.occurredAt,source:'ROOM_TRANSFER',movementId:movement.id,requestKey:'PLACEMENT:'+detaineeId+':'+roomId+':'+movement.occurredAt,correlationId});if(!placement.ok)return{ok:false,code:placement.code,correlationId};d.movements=Array.isArray(d.movements)?d.movements:[];d.movements.unshift(movement);audit(d,'MOVEMENT_CREATE','MOVEMENT',movement.id,'SUCCESS',correlationId);d.lastMutation={key:requestKey,action:'ROOM_TRANSFER',completedAt:now()};return{ok:true,code:'MOVEMENT_CREATED',movement,placement:placement.placement,correlationId}}
 function advanceLeave(s,id){const d=s||{},leave=(d.leaves||[]).find(x=>x.id===id);if(!leave)return{ok:false,code:'LEAVE_NOT_FOUND'};const next={DRAFT:'SUBMITTED',SUBMITTED:'APPROVED',APPROVED:'DEPARTED',DEPARTED:'RETURNED',RETURNED:'COMPLETED'}[leave.status];if(!next)return{ok:false,code:'INVALID_LEAVE_STATE'};const requestKey='LEAVE:'+id+':'+next;if(leave.lastMutationKey===requestKey)return{ok:true,code:'LEAVE_ALREADY_PROCESSED',next};const check=typeof window.mtaUnifiedValidateLeave==='function'?window.mtaUnifiedValidateLeave(d,id,next):{ok:true};if(!check.ok){const correlationId=uid('COR');audit(d,'LEAVE_'+next+'_BLOCKED','LEAVE',id,'DENIED',correlationId);return{ok:false,code:check.code,correlationId}}const detainee=d.detainees.find(x=>x.id===leave.detaineeId);if(!detainee||detainee.status!=='AKTIF'){const correlationId=uid('COR');audit(d,'LEAVE_'+next+'_BLOCKED','LEAVE',id,'DENIED',correlationId);return{ok:false,code:'DETAINEE_INACTIVE',correlationId}}const before=leave.status,correlationId=leave.correlationId||uid('COR');leave.status=next;leave.updatedAt=now();leave.lastMutationKey=requestKey;leave.correlationId=correlationId;d.lastMutation={key:requestKey,action:'LEAVE_TRANSITION',completedAt:now(),from:before,to:next};audit(d,'LEAVE_'+next,'LEAVE',id,'SUCCESS',correlationId);return{ok:true,code:'LEAVE_TRANSITIONED',from:before,to:next,correlationId}}
 
-window.MTADeteniDomainCommandsV2=Object.freeze({createLeave,roomQrState,issueLeaveQr,revokeLeaveQr,updateSystem,updateAi,updateBranding,uploadBranding,catalogCreate,catalogRemove,createBlock,updateBlock,createRoom,updateRoom,assignPlacement,createMovement,advanceLeave,createDocument,transitionDocument,applyGeneratedDocument,createDocumentRevision,restoreBackup});
+window.MTADeteniDomainCommandsV2=Object.freeze({createDetainee,updateDetainee,archiveDetainee,createLeave,roomQrState,issueLeaveQr,revokeLeaveQr,updateSystem,updateAi,updateBranding,uploadBranding,catalogCreate,catalogRemove,createBlock,updateBlock,createRoom,updateRoom,assignPlacement,createMovement,advanceLeave,createDocument,transitionDocument,applyGeneratedDocument,createDocumentRevision,restoreBackup});
 })();
