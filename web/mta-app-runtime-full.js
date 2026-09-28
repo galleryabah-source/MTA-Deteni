@@ -210,7 +210,7 @@ function generateReport(){
 }
 async function validateReport(id){
   const r=documentById(id);if(!r)return;
-  try{window.mtaDailyGuardReport.validate(r);validateReportEvidence(r);const result=await window.MTADeteniDomainCommandsV2?.transitionDocument(db,id,'VALIDATED');if(!result?.ok)throw new Error(result?.code||'DOCUMENT_TRANSITION_FAILED');if(!save())return;render();previewReport(id);toast('Validation PASS — dokumen VALIDATED')}catch(err){audit('DOCUMENT_VALIDATE_FAILED','DOCUMENT',id,'FAILED');toast('Validation gagal: '+err.message)}
+  try{window.mtaDailyGuardReport.validate(r);validateReportEvidence(r);const result=await window.MTADeteniDomainCommandsV2?.transitionDocument(db,id,'VALIDATED');if(!result?.ok)throw new Error(result?.code||'DOCUMENT_TRANSITION_FAILED');if(window.mtaProductionStateAdapter?.isProduction?.()){if(result?.state)db=structuredClone(result.state)}else if(!save())return;render();previewReport(id);toast('Validation PASS — dokumen VALIDATED')}catch(err){audit('DOCUMENT_VALIDATE_FAILED','DOCUMENT',id,'FAILED');toast('Validation gagal: '+err.message)}
 }
 async function generateValidatedReport(id){
   const r=documentById(id);if(!r)return;
@@ -221,7 +221,7 @@ async function generateValidatedReport(id){
     const prepared=await window.mtaDailyGuardReport.prepare(source);
     const result=await window.MTADeteniDomainCommandsV2?.applyGeneratedDocument(db,id,prepared);
     if(!result?.ok)throw new Error(result?.code||'DOCUMENT_GENERATE_FAILED');
-    if(!save())return;render();previewReport(id);toast('Dokumen generated — siap Review');
+    if(window.mtaProductionStateAdapter?.isProduction?.()){if(result?.state)db=structuredClone(result.state)}else if(!save())return;render();previewReport(id);toast('Dokumen generated — siap Review');
   }catch(err){
     if(r.status==='GENERATED'&&!r.integrityHash)r.status='VALIDATED';
     toast('Generate gagal: '+err.message)
@@ -233,26 +233,26 @@ function workflowNote(title,submitLabel,callback){
 }
 async function startReview(id){
   const r=documentById(id);if(!r)return;
-  workflowNote('Mulai Review','Masuk Review',note=>{try{const result=await window.MTADeteniDomainCommandsV2?.transitionDocument(db,id,'IN_REVIEW',note);if(!result?.ok)throw new Error(result?.code||'DOCUMENT_TRANSITION_FAILED');if(!save())return;closeModal();render();previewReport(id);toast('Dokumen masuk IN_REVIEW')}catch(err){toast('Review gagal: '+err.message)}});
+  workflowNote('Mulai Review','Masuk Review',note=>{try{const result=await window.MTADeteniDomainCommandsV2?.transitionDocument(db,id,'IN_REVIEW',note);if(!result?.ok)throw new Error(result?.code||'DOCUMENT_TRANSITION_FAILED');if(window.mtaProductionStateAdapter?.isProduction?.()){if(result?.state)db=structuredClone(result.state)}else if(!save())return;closeModal();render();previewReport(id);toast('Dokumen masuk IN_REVIEW')}catch(err){toast('Review gagal: '+err.message)}});
 }
 async function approveReport(id){
   const r=documentById(id);if(!r)return;
-  workflowNote('Approve Laporan','Approve',note=>{try{const result=await window.MTADeteniDomainCommandsV2?.transitionDocument(db,id,'APPROVED',note);if(!result?.ok)throw new Error(result?.code||'DOCUMENT_TRANSITION_FAILED');if(!save())return;closeModal();render();previewReport(id);toast('Dokumen APPROVED — siap Finalize')}catch(err){toast('Approve gagal: '+err.message)}});
+  workflowNote('Approve Laporan','Approve',note=>{try{const result=await window.MTADeteniDomainCommandsV2?.transitionDocument(db,id,'APPROVED',note);if(!result?.ok)throw new Error(result?.code||'DOCUMENT_TRANSITION_FAILED');if(window.mtaProductionStateAdapter?.isProduction?.()){if(result?.state)db=structuredClone(result.state)}else if(!save())return;closeModal();render();previewReport(id);toast('Dokumen APPROVED — siap Finalize')}catch(err){toast('Approve gagal: '+err.message)}});
 }
 async function requestReportChanges(id){
   const r=documentById(id);if(!r)return;
-  workflowNote('Request Changes','Minta Perubahan',note=>{try{const result=await window.MTADeteniDomainCommandsV2?.transitionDocument(db,id,'CHANGES_REQUESTED',note);if(!result?.ok)throw new Error(result?.code||'DOCUMENT_TRANSITION_FAILED');if(!save())return;closeModal();render();toast('Perubahan diminta — buat revision baru')}catch(err){toast('Request Changes gagal: '+err.message)}});
+  workflowNote('Request Changes','Minta Perubahan',note=>{try{const result=await window.MTADeteniDomainCommandsV2?.transitionDocument(db,id,'CHANGES_REQUESTED',note);if(!result?.ok)throw new Error(result?.code||'DOCUMENT_TRANSITION_FAILED');if(window.mtaProductionStateAdapter?.isProduction?.()){if(result?.state)db=structuredClone(result.state)}else if(!save())return;closeModal();render();toast('Perubahan diminta — buat revision baru')}catch(err){toast('Request Changes gagal: '+err.message)}});
 }
 async function reviseReport(id){
   const source=documentById(id);if(!source)return;
   try{
     if(source.status!=='CHANGES_REQUESTED')throw new Error('REPORT_NOT_IN_CHANGES_REQUESTED');
-    const result=await window.MTADeteniDomainCommandsV2?.createDocumentRevision(db,id);if(!result?.ok)throw new Error(result?.code||'DOCUMENT_REVISION_FAILED');const revision=result.document;if(!save())return;render();previewReport(revision.documentId);toast('Revision '+revision.revision+' dibuat sebagai DRAFT');
+    const result=await window.MTADeteniDomainCommandsV2?.createDocumentRevision(db,id);if(!result?.ok)throw new Error(result?.code||'DOCUMENT_REVISION_FAILED');const revision=result.document;if(window.mtaProductionStateAdapter?.isProduction?.()){if(result?.state)db=structuredClone(result.state)}else if(!save())return;render();previewReport(revision.documentId);toast('Revision '+revision.revision+' dibuat sebagai DRAFT');
   }catch(err){toast('Revision gagal: '+err.message)}
 }
 async function finalizeReport(id){
   const r=documentById(id);if(!r)return;
-  try{const result=await window.MTADeteniDomainCommandsV2?.transitionDocument(db,id,'FINAL');if(!result?.ok)throw new Error(result?.code||'DOCUMENT_TRANSITION_FAILED');if(!save())return;render();toast('Dokumen FINAL dan immutable')}catch(err){toast('Finalize gagal: '+err.message)}
+  try{const result=await window.MTADeteniDomainCommandsV2?.transitionDocument(db,id,'FINAL');if(!result?.ok)throw new Error(result?.code||'DOCUMENT_TRANSITION_FAILED');if(window.mtaProductionStateAdapter?.isProduction?.()){if(result?.state)db=structuredClone(result.state)}else if(!save())return;render();toast('Dokumen FINAL dan immutable')}catch(err){toast('Finalize gagal: '+err.message)}
 }
 function downloadReport(id){
   const r=documentById(id);if(!r)return;
