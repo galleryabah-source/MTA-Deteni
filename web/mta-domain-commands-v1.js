@@ -9,7 +9,7 @@ function audit(state,action,type,id,result='SUCCESS',correlationId){
   throw new Error('CANONICAL_AUDIT_KERNEL_REQUIRED');
 }
 function createDetainee(state,options={}){
-  const d=state||{},code=String(options.code||'').trim(),name=String(options.name||'').trim(),nationality=String(options.nationality||'').trim(),status=String(options.status||'AKTIF'),roomId=String(options.roomId||'');
+  const d=state||{},code=String(options.code||'').trim(),name=String(options.name||'').trim(),nationality=String(options.nationality||'').trim(),gender=String(options.gender||'').trim(),dateOfBirth=String(options.dateOfBirth||'').trim(),passportNumber=String(options.passportNumber||'').trim(),notes=String(options.notes||'').trim(),status=String(options.status||'AKTIF'),roomId=String(options.roomId||'');
   if(!code||!name)return{ok:false,code:'DETAINEE_INPUT_INVALID'};
   d.detainees=Array.isArray(d.detainees)?d.detainees:[];
   if(d.detainees.some(x=>String(x.code||'').trim().toLowerCase()===code.toLowerCase()))return{ok:false,code:'DETAINEE_CODE_EXISTS'};
@@ -20,7 +20,7 @@ function createDetainee(state,options={}){
     if(guard&&!guard.ok)return{ok:false,code:guard.code||'ROOM_INVALID'};
   }
   const id=options.id||uid('DET'),correlationId=options.correlationId||uid('COR');
-  const detainee={id,code,name,nationality,status,placement:room?room.block+' / '+room.room:'',createdAt:options.createdAt||now(),correlationId};
+  const detainee={id,code,name,nationality,gender,dateOfBirth,passportNumber,notes,status,placement:room?room.block+' / '+room.room:'',createdAt:options.createdAt||now(),correlationId};
   d.detainees.unshift(detainee);
   audit(d,'DETAINEE_CREATE','DETAINEE',id,'SUCCESS',correlationId);
   if(room){
@@ -34,14 +34,14 @@ function createDetainee(state,options={}){
 function updateDetainee(state,options={}){
   const d=state||{},id=String(options.id||''),x=(d.detainees||[]).find(v=>v.id===id);
   if(!x)return{ok:false,code:'DETAINEE_NOT_FOUND'};
-  const code=String(options.code??x.code).trim(),name=String(options.name??x.name).trim(),nationality=String(options.nationality??x.nationality).trim(),status=String(options.status??x.status);
+  const code=String(options.code??x.code).trim(),name=String(options.name??x.name).trim(),nationality=String(options.nationality??x.nationality).trim(),gender=String(options.gender??x.gender??'').trim(),dateOfBirth=String(options.dateOfBirth??x.dateOfBirth??'').trim(),passportNumber=String(options.passportNumber??x.passportNumber??'').trim(),notes=String(options.notes??x.notes??'').trim(),status=String(options.status??x.status);
   if(!code||!name)return{ok:false,code:'DETAINEE_INPUT_INVALID'};
   if((d.detainees||[]).some(v=>v.id!==id&&String(v.code||'').trim().toLowerCase()===code.toLowerCase()))return{ok:false,code:'DETAINEE_CODE_EXISTS'};
   if(status==='AKTIF'){
     const placement=(d.placements||[]).filter(p=>p.detaineeId===id).sort((a,b)=>String(b.since||'').localeCompare(String(a.since||'')))[0];
     if(!placement)return{ok:false,code:'PLACEMENT_REQUIRED'};
   }
-  Object.assign(x,{code,name,nationality,status,updatedAt:now()});
+  Object.assign(x,{code,name,nationality,gender,dateOfBirth,passportNumber,notes,status,updatedAt:now()});
   const correlationId=options.correlationId||x.correlationId||uid('COR');x.correlationId=correlationId;
   audit(d,'DETAINEE_UPDATE','DETAINEE',id,'SUCCESS',correlationId);
   d.lastMutation={key:'DETAINEE_UPDATE:'+id+':'+x.updatedAt,action:'DETAINEE_UPDATE',completedAt:now()};
