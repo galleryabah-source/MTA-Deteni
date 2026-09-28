@@ -47,7 +47,7 @@ test("H7 admin master mutations delegate to canonical domain commands",()=>{
 
 test("H8 canonical mutation module is wired into runtime",()=>{
   const runtime=read("web/mta-app-runtime-full.js");
-  assert.match(runtime,/mta-domain-commands-v2\.js\?v=1/);
+  assert.match(runtime,/mta-domain-commands-v2\.js\?v=5/);
 });
 
 test("H9 document lifecycle and backup restore use canonical domain commands",()=>{
