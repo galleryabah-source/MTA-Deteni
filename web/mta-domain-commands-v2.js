@@ -20,19 +20,19 @@ async function productionDetaineeMutation(operation,o={}){
     return{ok:false,code:err?.data?.error||err?.message||'PRODUCTION_DETAINEE_MUTATION_FAILED',error:err};
   }
 }
-function createDetainee(s,o={}){
+async function createDetainee(s,o={}){
   if(window.mtaProductionStateAdapter?.isProduction?.())return productionDetaineeMutation('create',o);
-  if(typeof window.MTADeteniDomainCommands?.createDetainee==='function')return window.MTADeteniDomainCommands.createDetainee(s,o);
+  if(typeof window.MTADeteniDomainCommands?.createDetainee==='function')return await window.MTADeteniDomainCommands.createDetainee(s,o);
   return{ok:false,code:'CANONICAL_DETAINEE_COMMAND_NOT_READY'};
 }
-function updateDetainee(s,o={}){
+async function updateDetainee(s,o={}){
   if(window.mtaProductionStateAdapter?.isProduction?.())return productionDetaineeMutation('update',o);
-  if(typeof window.MTADeteniDomainCommands?.updateDetainee==='function')return window.MTADeteniDomainCommands.updateDetainee(s,o);
+  if(typeof window.MTADeteniDomainCommands?.updateDetainee==='function')return await window.MTADeteniDomainCommands.updateDetainee(s,o);
   return{ok:false,code:'CANONICAL_DETAINEE_COMMAND_NOT_READY'};
 }
-function archiveDetainee(s,id,o={}){
+async function archiveDetainee(s,id,o={}){
   if(window.mtaProductionStateAdapter?.isProduction?.())return productionDetaineeMutation('archive',{...o,id});
-  if(typeof window.MTADeteniDomainCommands?.archiveDetainee==='function')return window.MTADeteniDomainCommands.archiveDetainee(s,id,o);
+  if(typeof window.MTADeteniDomainCommands?.archiveDetainee==='function')return await window.MTADeteniDomainCommands.archiveDetainee(s,id,o);
   return{ok:false,code:'CANONICAL_DETAINEE_COMMAND_NOT_READY'};
 }
 async function createLeave(s,o={}){const d=s||{},detaineeId=String(o.detaineeId||''),destination=String(o.destination||'').trim(),startAt=new Date(String(o.startAt||''));if(!detaineeId||!destination||Number.isNaN(startAt.getTime()))return{ok:false,code:'LEAVE_INPUT_INVALID'};const det=(d.detainees||[]).find(x=>x.id===detaineeId);if(!det||det.status!=='AKTIF')return{ok:false,code:'DETAINEE_INACTIVE'};const requestKey=String(o.requestKey||('LEAVE_CREATE:'+detaineeId+':'+destination+':'+startAt.toISOString()));const existing=(d.leaves||[]).find(x=>x.requestKey===requestKey);if(existing)return{ok:true,code:'LEAVE_ALREADY_PROCESSED',leave:existing,correlationId:existing.correlationId};const correlationId=String(o.correlationId||'COR-'+crypto.randomUUID().slice(0,8).toUpperCase());if(window.mtaProductionStateAdapter?.isProduction?.()){const result=await productionResourceMutation('leaves','create',{body:{detainee_id:detaineeId,destination,purpose:String(o.purpose||''),start_at:startAt.toISOString(),status:'DRAFT',metadata:{requestKey,correlationId,source:'PRODUCTION_RUNTIME'}},correlationId,idempotencyKey:requestKey});if(result?.ok)return{...result,code:'LEAVE_CREATED',leave:result.data,correlationId,state:result.state};return result}const leave={id:o.id||uid('LV'),detaineeId,destination,purpose:String(o.purpose||''),startAt:startAt.toISOString(),status:'DRAFT',createdAt:now(),requestKey,correlationId};d.leaves=Array.isArray(d.leaves)?d.leaves:[];d.leaves.unshift(leave);d.lastMutation={key:requestKey,action:'LEAVE_CREATE',completedAt:now()};audit(d,'LEAVE_CREATE','LEAVE',leave.id,'SUCCESS',correlationId);return{ok:true,code:'LEAVE_CREATED',leave,correlationId};}
