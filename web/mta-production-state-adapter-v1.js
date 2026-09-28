@@ -16,7 +16,10 @@
   }
   const mapBlock=b=>({id:b.id,code:b.code,name:b.name,status:b.status,scopeId:b.scope_id,metadata:b.metadata||{},createdAt:b.created_at,updatedAt:b.updated_at,source:'PRODUCTION_DB'});
   const mapRoom=r=>({id:r.id,code:r.code,blockId:r.block_id,block:null,room:r.name,name:r.name,capacity:Number(r.capacity)||0,status:r.status,type:r.type||'STANDARD',gender:r.gender||'UMUM',scopeId:r.scope_id,version:r.version||1,metadata:r.metadata||{},createdAt:r.created_at,updatedAt:r.updated_at,source:'PRODUCTION_DB'});
-  const mapDetainee=d=>({id:d.id,code:d.code,name:d.name,nationality:d.nationality||'',status:d.status,placement:d.placement||'',scopeId:d.scope_id,metadata:d.metadata||{},createdAt:d.created_at,updatedAt:d.updated_at,source:'PRODUCTION_DB'});
+  const mapDetainee=d=>{
+    const metadata=d.metadata&&typeof d.metadata==='object'?d.metadata:{};
+    return {id:d.id,code:d.code,name:d.name,nationality:d.nationality||'',status:d.status,placement:d.placement||'',gender:String(metadata.gender||''),dateOfBirth:String(metadata.dateOfBirth||''),passportNumber:String(metadata.passportNumber||''),notes:String(metadata.notes||''),scopeId:d.scope_id,metadata,correlationId:String(metadata.correlationId||''),createdAt:d.created_at,updatedAt:d.updated_at,source:'PRODUCTION_DB'};
+  };
   const mapPlacement=p=>({id:p.id,detaineeId:p.detainee_id,blockId:p.block_id,roomId:p.room_id,block:p.block||'',room:p.room||'',since:p.since,until:p.until||null,movementId:p.movement_id||null,correlationId:p.correlation_id||null,requestKey:p.request_key||null,metadata:p.metadata||{},createdAt:p.created_at,source:'PRODUCTION_DB'});
   const mapMovement=m=>({id:m.id,detaineeId:m.detainee_id,type:m.movement_type,destination:m.destination||'',purpose:m.purpose||'',occurredAt:m.occurred_at,createdAt:m.created_at,metadata:m.metadata||{},source:'PRODUCTION_DB'});
   const mapLeave=l=>({id:l.id,detaineeId:l.detainee_id,destination:l.destination||'',purpose:l.purpose||'',startAt:l.start_at,status:l.status,metadata:l.metadata||{},createdAt:l.created_at,updatedAt:l.updated_at,source:'PRODUCTION_DB'});
@@ -48,7 +51,28 @@
     window.__mtaRuntimeStatus={...(window.__mtaRuntimeStatus||{}),readOnly:false,lastCommand:{command:'MOVE_DETAINEE',movementId:result.data?.movementId||null,placementId:result.data?.placementId||null,auditEventId:result.data?.auditEventId||null,replayed:!!result.replayed,requestId:reqId,correlationId:result.data?.correlationId||correlation,idempotencyKey:requestKey,committedAt:new Date().toISOString()}};
     return result;
   }
+  async function mutateDetainee(operation,{id,code,name,nationality,status,placement,gender,dateOfBirth,passportNumber,notes,correlationId,requestId}={}){
+    if(!isProduction())throw new Error('PRODUCTION_COMMAND_OUTSIDE_PRODUCTION');
+    const clean={code:String(code||'').trim(),name:String(name||'').trim(),nationality:String(nationality||'').trim(),status:String(status||'AKTIF'),placement:String(placement||'').trim(),metadata:{gender:String(gender||''),dateOfBirth:String(dateOfBirth||''),passportNumber:String(passportNumber||''),notes:String(notes||''),correlationId:String(correlationId||crypto.randomUUID()),source:'PRODUCTION_RUNTIME'}};
+    if(!clean.code||!clean.name)throw new Error('DETAINEE_INPUT_INVALID');
+    if(operation==='create'){
+      const result=await request('detainees',{method:'POST',body:clean,headers:{'X-Request-Id':String(requestId||crypto.randomUUID()),'X-Correlation-Id':clean.metadata.correlationId}});
+      const refreshed=await hydrate();
+      return {ok:true,code:'DETAINEE_CREATED',data:result.data,state:refreshed,correlationId:clean.metadata.correlationId};
+    }
+    if(!id)throw new Error('DETAINEE_ID_REQUIRED');
+    if(operation==='update'){
+      const result=await request('detainees',{method:'PATCH',id:String(id),body:clean,headers:{'X-Request-Id':String(requestId||crypto.randomUUID()),'X-Correlation-Id':clean.metadata.correlationId}});
+      const refreshed=await hydrate();
+      return {ok:true,code:'DETAINEE_UPDATED',data:result.data,state:refreshed,correlationId:clean.metadata.correlationId};
+    }
+    if(operation==='archive'){
+      const result=await request('detainees',{method:'PATCH',id:String(id),body:{status:'NONAKTIF',updated_at:new Date().toISOString(),metadata:{...clean.metadata,archiveReason:'USER_ARCHIVE'}},headers:{'X-Request-Id':String(requestId||crypto.randomUUID()),'X-Correlation-Id':clean.metadata.correlationId}});
+      const refreshed=await hydrate();
+      return {ok:true,code:'DETAINEE_ARCHIVED',data:result.data,state:refreshed,correlationId:clean.metadata.correlationId};
+    }
+    throw new Error('DETAINEE_MUTATION_OPERATION_INVALID');
+  }
   async function refresh(){return hydrate()}
-  function assertProductionReadOnly(){if(isProduction())throw new Error('PRODUCTION_FOUNDATION_READ_ONLY')}
-  window.mtaProductionStateAdapter=Object.freeze({isProduction,hydrate,refresh,executeMovement,get:()=>state(),apiBase:API,request});
+  window.mtaProductionStateAdapter=Object.freeze({isProduction,hydrate,refresh,executeMovement,mutateDetainee,get:()=>state(),apiBase:API,request});
 })();
