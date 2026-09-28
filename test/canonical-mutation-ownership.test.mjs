@@ -37,7 +37,7 @@ test("H3 archive/status mutation has one canonical owner",()=>{
   assert.match(block,/const command=window\.MTADeteniDomainCommandsV2/);
   assert.match(block,/await command\.archiveDetainee/);
   assert.doesNotMatch(block,/\.status='NONAKTIF'/);
-  assert.match(commands,/function archiveDetainee/);
+  assert.match(commands,/archiveDetainee\\(s,id,o=\\{\\}\\)/);
   assert.match(commands,/productionDetaineeMutation\('archive'/);
 });
 
