@@ -17,6 +17,12 @@ test("auth session is configured for persisted browser hydration",()=>{
   assert.match(auth,/INITIAL_SESSION\/null entirely inside the hydration boundary/);
 });
 
+test("refresh does not leave the inline login gate visible after authenticated hydration",()=>{
+  assert.match(index,/id="mtaAuthGate"[^>]*style="display:none"/);
+  assert.match(authUi,/gate\.style\.display='none'/);
+  assert.match(authUi,/gate\.style\.removeProperty\('display'\)/);
+});
+
 test("auth UI does not treat unresolved refresh hydration as logout",()=>{
   assert.match(authUi,/if\(!resolved\)\{/);
   assert.match(authUi,/document\.body\.classList\.add\('mta-auth-locked'\)/);
@@ -31,7 +37,7 @@ test("last operational view is restored after hard refresh",()=>{
 });
 
 test("refresh fix is cache-busted through the authenticated runtime chain",()=>{
-  assert.match(index,/mta-auth-ui\.js\?v=8/);
+  assert.match(index,/mta-auth-ui\.js\?v=9/);
   assert.match(index,/mta-app-runtime\.js\?v=12/);
   assert.match(index,/mta-app-runtime-full\.js\?v=23/);
   assert.match(fs.readFileSync("web/mta-app-runtime.js","utf8"),/mta-app-runtime-full\.js\?v=23/);
