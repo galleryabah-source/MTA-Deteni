@@ -5,6 +5,8 @@ import fs from "node:fs";
 const admin=fs.readFileSync("web/admin-settings-v9.js","utf8");
 const shell=fs.readFileSync("web/mta-unified-shell-v2.js","utf8");
 const runtime=fs.readFileSync("web/mta-app-runtime-full.js","utf8");
+const index=fs.readFileSync("web/index.html","utf8");
+const desktop=fs.readFileSync("web/desktop-shell-v2.js","utf8");
 
 test("settings navigation handler is exposed before unified shell routing",()=>{
   assert.match(admin,/window\.p9openSettings=\(\)=>settings\(\)/);
@@ -25,7 +27,7 @@ test("all navigation menus receive deterministic SVG icon contract",()=>{
   for (const view of [
     "dashboard","detainee","placement","movement","leave","documents","audit","p9settings",
     "monitor","ops-queue","qr-center","camera-scan","room-ops","reports"
-  ]) assert.ok(shell.includes(view+":") || shell.includes("\'"+view+"\'") || shell.includes('"'+view+'"'));
+  ]) assert.ok(shell.includes(view+":" ) || shell.includes("'"+view+"'") || shell.includes('"'+view+'"'));
   assert.match(shell,/NAV_ICONS=/);
   assert.match(shell,/function ensureNavIcon\(b\)/);
   assert.match(shell,/class="mta-nav-icon"/);
@@ -45,7 +47,6 @@ test("sidebar navigation is canonical and duplicate-free by source contract",()=
   const roomOps=fs.readFileSync("web/room-ops-v9.js","utf8");
   const preview5=fs.readFileSync("web/preview-v5.js","utf8");
   const preview6=fs.readFileSync("web/preview-v6.js","utf8");
-  const desktop=fs.readFileSync("web/desktop-shell-v2.js","utf8");
   assert.doesNotMatch(roomOps,/id='p9rooms'|data-view='p9rooms'/);
   assert.doesNotMatch(preview5,/p5m.*Monitor.*p5monitor/);
   assert.doesNotMatch(preview6,/p6r.*Room Ops.*p6rooms/);
@@ -54,4 +55,13 @@ test("sidebar navigation is canonical and duplicate-free by source contract",()=
   assert.match(shell,/nav\('room-ops','Room Ops','room'\)/);
   assert.match(desktop,/NAV_ORDER=\[/);
   assert.match(desktop,/groupNav\(nav\)/);
+});
+
+test("Data Statistik is wired through index and desktop navigation",()=>{
+  assert.match(index,/data-view="detainee-statistics">Data Statistik<\/button>/);
+  assert.match(index,/detainee-statistics-v1\.js\?v=1/);
+  assert.match(index,/data-statistics-report-v1\.js\?v=1/);
+  assert.match(desktop,/'detainee-statistics':'DATA & PENEMPATAN'/);
+  assert.match(desktop,/'detainee-statistics'/);
+  assert.match(desktop,/NAV_ORDER=\[[\s\S]*'detainee-statistics'/);
 });
