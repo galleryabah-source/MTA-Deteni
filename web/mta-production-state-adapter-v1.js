@@ -53,23 +53,26 @@
   }
   async function mutateDetainee(operation,{id,code,name,nationality,status,placement,gender,dateOfBirth,passportNumber,notes,correlationId,requestId}={}){
     if(!isProduction())throw new Error('PRODUCTION_COMMAND_OUTSIDE_PRODUCTION');
-    const clean={code:String(code||'').trim(),name:String(name||'').trim(),nationality:String(nationality||'').trim(),status:String(status||'AKTIF'),placement:String(placement||'').trim(),metadata:{gender:String(gender||''),dateOfBirth:String(dateOfBirth||''),passportNumber:String(passportNumber||''),notes:String(notes||''),correlationId:String(correlationId||crypto.randomUUID()),source:'PRODUCTION_RUNTIME'}};
-    if(!clean.code||!clean.name)throw new Error('DETAINEE_INPUT_INVALID');
+    const correlation=String(correlationId||crypto.randomUUID());
+    const clean={code:String(code||'').trim(),name:String(name||'').trim(),nationality:String(nationality||'').trim(),status:String(status||'AKTIF'),placement:String(placement||'').trim(),updated_at:new Date().toISOString(),metadata:{gender:String(gender||''),dateOfBirth:String(dateOfBirth||''),passportNumber:String(passportNumber||''),notes:String(notes||''),correlationId:correlation,source:'PRODUCTION_RUNTIME'}};
     if(operation==='create'){
+      if(!clean.code||!clean.name)throw new Error('DETAINEE_INPUT_INVALID');
       const result=await request('detainees',{method:'POST',body:clean,headers:{'X-Request-Id':String(requestId||crypto.randomUUID()),'X-Correlation-Id':clean.metadata.correlationId}});
       const refreshed=await hydrate();
-      return {ok:true,code:'DETAINEE_CREATED',data:result.data,state:refreshed,correlationId:clean.metadata.correlationId};
+      return {ok:true,code:'DETAINEE_CREATED',data:result.data,state:refreshed,correlationId};
     }
     if(!id)throw new Error('DETAINEE_ID_REQUIRED');
     if(operation==='update'){
       const result=await request('detainees',{method:'PATCH',id:String(id),body:clean,headers:{'X-Request-Id':String(requestId||crypto.randomUUID()),'X-Correlation-Id':clean.metadata.correlationId}});
       const refreshed=await hydrate();
-      return {ok:true,code:'DETAINEE_UPDATED',data:result.data,state:refreshed,correlationId:clean.metadata.correlationId};
+      return {ok:true,code:'DETAINEE_UPDATED',data:result.data,state:refreshed,correlationId};
     }
     if(operation==='archive'){
-      const result=await request('detainees',{method:'PATCH',id:String(id),body:{status:'NONAKTIF',updated_at:new Date().toISOString(),metadata:{...clean.metadata,archiveReason:'USER_ARCHIVE'}},headers:{'X-Request-Id':String(requestId||crypto.randomUUID()),'X-Correlation-Id':clean.metadata.correlationId}});
+      const current=state()?.detainees?.find(x=>String(x.id)===String(id));
+      const metadata={...(current?.metadata||{}),archiveReason:'USER_ARCHIVE',archivedAt:new Date().toISOString(),correlationId:correlation};
+      const result=await request('detainees',{method:'PATCH',id:String(id),body:{status:'NONAKTIF',updated_at:new Date().toISOString(),metadata},headers:{'X-Request-Id':String(requestId||crypto.randomUUID()),'X-Correlation-Id':correlation}});
       const refreshed=await hydrate();
-      return {ok:true,code:'DETAINEE_ARCHIVED',data:result.data,state:refreshed,correlationId:clean.metadata.correlationId};
+      return {ok:true,code:'DETAINEE_ARCHIVED',data:result.data,state:refreshed,correlationId};
     }
     throw new Error('DETAINEE_MUTATION_OPERATION_INVALID');
   }
