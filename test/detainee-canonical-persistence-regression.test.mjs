@@ -8,6 +8,7 @@ const index=fs.readFileSync('web/index.html','utf8');
 const api=fs.readFileSync('supabase/functions/mta-api/index.ts','utf8');
 const foundation=fs.readFileSync('supabase/migrations/20260921060500_mta_deteni_production_activation_foundation.sql','utf8');
 const rbac=fs.readFileSync('supabase/migrations/20260921070000_mta_production_auth_rbac_v1.sql','utf8');
+const stateKernel=fs.readFileSync('web/mta-state-kernel-v1.js','utf8');
 
 assert.match(foundation,/create table if not exists public\.mta_detainees/);
 assert.match(foundation,/metadata jsonb not null default '\{\}'::jsonb/);
@@ -52,6 +53,9 @@ assert.match(runtime,/mta-production-state-adapter-v1\.js\?v=4/);
 assert.match(runtime,/mta-domain-commands-v2\.js\?v=3/);
 
 assert.match(index,/mta-production-state-adapter-v1\.js\?v=4/);
+assert.match(stateKernel,/isProductionHost/);
+assert.match(stateKernel,/PRODUCTION_BROWSER_STORAGE_FORBIDDEN/);
+assert.match(stateKernel,/if\(isProductionHost\(\)\)return clone\(window\.__mtaProductionState\|\|\{\}\)/);
 
 assert.match(commands,/async function createLeave/);
 assert.match(commands,/productionResourceMutation\('leaves'/);
