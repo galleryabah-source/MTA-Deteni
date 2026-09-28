@@ -1,3 +1,31 @@
+# MTA DETENI — P2 Canonical Persistence Hardening Addendum (2026-09-28)
+
+## Data Deteni persistence seam
+
+Implementation has been added for the canonical production persistence path:
+
+`Data Deteni Command → Production API → Supabase `mta_detainees` → database audit trigger → hydrate`
+
+Implemented:
+- `web/mta-production-state-adapter-v1.js`: production detainee create/update/archive mutation adapter and DB-to-runtime hydration.
+- `web/mta-domain-commands-v2.js`: canonical production-aware detainee command boundary.
+- `web/mta-app-runtime-full.js`: Data Deteni form now awaits canonical command results and hydrates the refreshed production state instead of writing browser storage in production mode.
+- Optional detainee fields are persisted in the existing `mta_detainees.metadata` JSONB field; no schema migration was introduced.
+- `test/detainee-canonical-persistence-regression.test.mjs`: static persistence seam regression contract.
+- Production DB audit remains database-trigger based through the existing `mta_audit_row_change` trigger.
+
+Verification boundary:
+- Repository implementation: **STAGED**
+- Live production DB mutation: **NOT EXECUTED**
+- Two-computer/two-user browser verification: **PENDING AUTHORIZED DEPLOYMENT/TEST STATION**
+- Migration Freeze remains **TRUE**.
+- AI remains **OFF**.
+- Repository data remains **SYNTHETIC ONLY**.
+
+The implementation is deliberately not certified as live multi-client persistence until the deployed runtime is exercised with two authenticated users against the same database.
+
+---
+
 # MTA DETENI — Global Canonical Pipeline Certification Closure (2026-09-27)
 
 ## Certification result — GREEN
