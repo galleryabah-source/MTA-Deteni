@@ -42,6 +42,11 @@
     window.__mtaRuntimeStatus={mode:'PRODUCTION',database:'CONNECTED',ai:'OFF',syntheticOnly:false,readOnly:false,loadedAt:state.meta.loadedAt};
     return state;
   }
+  async function writeAudit({action,resourceType,resourceId,result='SUCCESS',correlationId,metadata={}}={}){
+    if(!isProduction())return {ok:false,code:'NOT_PRODUCTION'};
+    const response=await request('audit-event',{method:'POST',body:{action,resource_type:resourceType,resource_id:resourceId,result,metadata},headers:{'X-Correlation-Id':String(correlationId||crypto.randomUUID())}});
+    return {ok:true,code:'AUDIT_COMMITTED',data:response.data};
+  }
   async function mutateResource(resource,operation,{id,body={},requestId,correlationId,idempotencyKey}={}){
     if(!isProductionPersistenceEnabled())throw new Error('PRODUCTION_MUTATION_NOT_AUTHORIZED');
     const method=operation==='create'?'POST':operation==='update'?'PATCH':operation==='delete'?'DELETE':null;
@@ -94,5 +99,5 @@
     throw new Error('DETAINEE_MUTATION_OPERATION_INVALID');
   }
   async function refresh(){return hydrate()}
-  window.mtaProductionStateAdapter=Object.freeze({isProduction,isProductionPersistenceEnabled,hydrate,refresh,executeMovement,mutateResource,mutateDetainee,get:()=>state(),apiBase:API,request});
+  window.mtaProductionStateAdapter=Object.freeze({isProduction,isProductionPersistenceEnabled,hydrate,refresh,executeMovement,mutateResource,writeAudit,mutateDetainee,get:()=>state(),apiBase:API,request});
 })();
