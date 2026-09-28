@@ -1,3 +1,58 @@
+# MTA DETENI — Server-side Backup/Restore + Browser Writer Hardening Addendum (2026-09-28)
+
+## Current technical stage
+
+The next hardening sequence is now active:
+
+1. **Server-side Backup/Restore seam**
+2. **Final mutation audit**
+3. **Static sweep of browser persistence writers**
+4. **Two-computer/two-user PostgreSQL verification**
+
+### Backup/Restore implementation status
+
+**Implemented in repository; live DB operation not executed.**
+
+- `GET /backup` now builds the backup snapshot server-side from PostgreSQL resources.
+- Backup includes a schema-versioned manifest and SHA-256 payload fingerprint.
+- `POST /backup-restore` is OWNER-only and verifies the payload fingerprint before restore.
+- Production browser backup/restore now routes through the server adapter; production runtime does not call `save()` for these operations.
+- Transactional restore SQL is defined in `supabase/operations/mta_backup_restore_transaction_v1.sql`.
+- The SQL operation is deliberately **not applied automatically** because the project migration/governance lock remains active.
+- Restore is fail-closed until the transactional database function is provisioned.
+- The transactional design uses one PostgreSQL transaction, advisory request locking, cardinality limits, FK-safe restore order, and explicit service-role-only execution.
+- The existing `audit-event` endpoint guard was corrected so the runtime audit seam is reachable.
+
+### Browser persistence sweep
+
+Added `test/production-browser-storage-sweep.test.mjs`.
+
+The sweep:
+- scans all `web/**/*.js` and `web/**/*.html` browser persistence writers;
+- rejects new `localStorage`, `sessionStorage`, IndexedDB, Cache API, and cookie writers unless explicitly allowlisted;
+- verifies the production state kernel fails closed with `PRODUCTION_BROWSER_STORAGE_FORBIDDEN`;
+- verifies the main production UI modules do not directly write `localStorage`.
+
+Allowlisted browser persistence is currently limited to:
+- synthetic state kernel storage;
+- navigation-collapse UI preference;
+- route/admin-tab session UI state.
+
+These are not treated as the production application database.
+
+### Verification boundary
+
+- Repository implementation: **STAGED / CONTRACT TESTS ADDED**
+- Live PostgreSQL backup/restore execution: **NOT EXECUTED**
+- Transactional restore DB function: **DEFINED, NOT PROVISIONED**
+- Browser writer sweep: **TEST ADDED; CI execution pending**
+- Two-computer/two-user shared PostgreSQL verification: **PENDING**
+- CI PASS for the new commits: **NOT YET CLAIMED**
+
+Governance locks remain unchanged unless explicitly cleared.
+
+---
+
 # P2 PostgreSQL Persistence Expansion Checkpoint — 2026-09-28 13:51 WIB
 
 Continued canonical persistence migration across the requested domain order.
