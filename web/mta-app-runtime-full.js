@@ -229,19 +229,19 @@ async function generateValidatedReport(id){
 }
 function workflowNote(title,submitLabel,callback){
   openModal(`<div class="dialoghead"><h2>${esc(title)}</h2><button class="x" onclick="closeModal()">×</button></div><form id="workflowNoteForm"><div class="field"><label>Catatan</label><textarea name="note" rows="5" required></textarea></div><div class="actions"><button type="button" class="btn" onclick="closeModal()">Batal</button><button class="btn primary">${esc(submitLabel)}</button></div></form>`);
-  document.getElementById('workflowNoteForm').onsubmit=e=>{e.preventDefault();const note=new FormData(e.target).get('note');callback(String(note||'').trim())};
+  document.getElementById('workflowNoteForm').onsubmit=async e=>{e.preventDefault();const note=new FormData(e.target).get('note');await callback(String(note||'').trim())};
 }
 async function startReview(id){
   const r=documentById(id);if(!r)return;
-  workflowNote('Mulai Review','Masuk Review',note=>{try{const result=await window.MTADeteniDomainCommandsV2?.transitionDocument(db,id,'IN_REVIEW',note);if(!result?.ok)throw new Error(result?.code||'DOCUMENT_TRANSITION_FAILED');if(window.mtaProductionStateAdapter?.isProduction?.()){if(result?.state)db=structuredClone(result.state)}else if(!save())return;closeModal();render();previewReport(id);toast('Dokumen masuk IN_REVIEW')}catch(err){toast('Review gagal: '+err.message)}});
+  workflowNote('Mulai Review','Masuk Review',async note=>{try{const result=await window.MTADeteniDomainCommandsV2?.transitionDocument(db,id,'IN_REVIEW',note);if(!result?.ok)throw new Error(result?.code||'DOCUMENT_TRANSITION_FAILED');if(window.mtaProductionStateAdapter?.isProduction?.()){if(result?.state)db=structuredClone(result.state)}else if(!save())return;closeModal();render();previewReport(id);toast('Dokumen masuk IN_REVIEW')}catch(err){toast('Review gagal: '+err.message)}});
 }
 async function approveReport(id){
   const r=documentById(id);if(!r)return;
-  workflowNote('Approve Laporan','Approve',note=>{try{const result=await window.MTADeteniDomainCommandsV2?.transitionDocument(db,id,'APPROVED',note);if(!result?.ok)throw new Error(result?.code||'DOCUMENT_TRANSITION_FAILED');if(window.mtaProductionStateAdapter?.isProduction?.()){if(result?.state)db=structuredClone(result.state)}else if(!save())return;closeModal();render();previewReport(id);toast('Dokumen APPROVED — siap Finalize')}catch(err){toast('Approve gagal: '+err.message)}});
+  workflowNote('Approve Laporan','Approve',async note=>{try{const result=await window.MTADeteniDomainCommandsV2?.transitionDocument(db,id,'APPROVED',note);if(!result?.ok)throw new Error(result?.code||'DOCUMENT_TRANSITION_FAILED');if(window.mtaProductionStateAdapter?.isProduction?.()){if(result?.state)db=structuredClone(result.state)}else if(!save())return;closeModal();render();previewReport(id);toast('Dokumen APPROVED — siap Finalize')}catch(err){toast('Approve gagal: '+err.message)}});
 }
 async function requestReportChanges(id){
   const r=documentById(id);if(!r)return;
-  workflowNote('Request Changes','Minta Perubahan',note=>{try{const result=await window.MTADeteniDomainCommandsV2?.transitionDocument(db,id,'CHANGES_REQUESTED',note);if(!result?.ok)throw new Error(result?.code||'DOCUMENT_TRANSITION_FAILED');if(window.mtaProductionStateAdapter?.isProduction?.()){if(result?.state)db=structuredClone(result.state)}else if(!save())return;closeModal();render();toast('Perubahan diminta — buat revision baru')}catch(err){toast('Request Changes gagal: '+err.message)}});
+  workflowNote('Request Changes','Minta Perubahan',async note=>{try{const result=await window.MTADeteniDomainCommandsV2?.transitionDocument(db,id,'CHANGES_REQUESTED',note);if(!result?.ok)throw new Error(result?.code||'DOCUMENT_TRANSITION_FAILED');if(window.mtaProductionStateAdapter?.isProduction?.()){if(result?.state)db=structuredClone(result.state)}else if(!save())return;closeModal();render();toast('Perubahan diminta — buat revision baru')}catch(err){toast('Request Changes gagal: '+err.message)}});
 }
 async function reviseReport(id){
   const source=documentById(id);if(!source)return;
