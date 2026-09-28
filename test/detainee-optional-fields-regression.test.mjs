@@ -21,7 +21,7 @@ test("Tambah Deteni exposes optional identity fields without required validation
   assert.doesNotMatch(runtime,/name="notes"[^>]*required/);
 });
 
-test("canonical detainee command persists optional fields and accepts them blank",()=>{
+test("canonical detainee command persists optional fields and accepts them blank",async()=>{
   const audit=[];
   const context={
     window:{
@@ -38,7 +38,7 @@ test("canonical detainee command persists optional fields and accepts them blank
   const api=context.window.MTADeteniDomainCommands;
   const state={detainees:[],rooms:[],placements:[],audit:[]};
 
-  const created=api.createDetainee(state,{
+  const created=await api.createDetainee(state,{
     code:"DET-OPTIONAL-01",
     name:"Synthetic Optional",
     nationality:"Contoh",
@@ -55,7 +55,7 @@ test("canonical detainee command persists optional fields and accepts them blank
   assert.equal(created.detainee.passportNumber,"");
   assert.equal(created.detainee.notes,"");
 
-  const updated=api.updateDetainee(state,{
+  const updated=await api.updateDetainee(state,{
     id:created.detainee.id,
     code:"DET-OPTIONAL-01",
     name:"Synthetic Optional Updated",
