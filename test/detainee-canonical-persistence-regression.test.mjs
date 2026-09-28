@@ -51,6 +51,7 @@ assert.match(runtime,/result\.state/);
 assert.match(runtime,/Data tersimpan ke database/);
 assert.match(runtime,/mta-production-state-adapter-v1\.js\?v=4/);
 assert.match(runtime,/mta-domain-commands-v2\.js\?v=3/);
+assert.match(runtime,/mta-state-kernel-v1\.js\?v=5/);
 
 assert.match(index,/mta-production-state-adapter-v1\.js\?v=4/);
 assert.match(stateKernel,/isProductionHost/);
