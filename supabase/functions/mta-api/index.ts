@@ -68,7 +68,7 @@ Deno.serve(async(req)=>{
         const now=new Date().toISOString();
         const updated=await admin.from("mta_profiles").update({must_change_password:false,password_changed_at:now}).eq("id",user.id).select("id,role,display_name,active,must_change_password,password_changed_at,password_reset_at").single();
         if(updated.error) return json(req,{ok:false,error:"PASSWORD_STATE_UPDATE_FAILED"},500);
-        await admin.auth.admin.signOut(user.id,"global").catch(()=>{});
+        await supabase.auth.signOut({scope:"global"}).catch(()=>{});
         await admin.from("mta_audit_events").insert({action:"USER_PASSWORD_CHANGE",resource_type:"USER",resource_id:user.id,result:"SUCCESS",actor_user_id:user.id,request_id:requestId,correlation_id:correlationId,metadata:{forcedChange:!!profile.must_change_password}});
         return json(req,{ok:true,resource,data:{...updated.data,sessionRevoked:true}});
       }
@@ -111,13 +111,13 @@ Deno.serve(async(req)=>{
         const created=await admin.auth.admin.createUser({email,password,email_confirm:true,user_metadata:{full_name:displayName}});
         if(created.error||!created.data.user) return json(req,{ok:false,error:"ADMIN_USER_CREATE_FAILED"},400);
         const uid=created.data.user.id;
-        const prof=await admin.from("mta_profiles").upsert({id:uid,role:requestedRole,display_name:displayName||email,active:true},{onConflict:"id"}).select("id,role,display_name,active,created_at,updated_at").single();
+        const prof=await admin.from("mta_profiles").upsert({id:uid,role:requestedRole,display_name:displayName||email,active:true,must_change_password:true},{onConflict:"id"}).select("id,role,display_name,active,created_at,updated_at").single();
         if(prof.error){
           await admin.auth.admin.deleteUser(uid);
           return json(req,{ok:false,error:"ADMIN_PROFILE_CREATE_FAILED"},500);
         }
         await admin.from("mta_audit_events").insert({action:"USER_CREATE",resource_type:"USER",resource_id:uid,result:"SUCCESS",actor_user_id:user.id,request_id:requestId,correlation_id:correlationId,metadata:{role:requestedRole,email}});
-        return json(req,{ok:true,resource,data:{...prof.data,email,temporaryCredentialIssued:true}});
+        return json(req,{ok:true,resource,data:{...prof.data,email,temporaryCredentialIssued:true,must_change_password:true}});
       }
       if(req.method==="POST"&&id&&routeParts[2]==="password-reset"){
         if(!new Set(["OWNER","ADMIN"]).has(role)) return json(req,{ok:false,error:"RBAC_PASSWORD_RESET_DENIED"},403);
@@ -141,10 +141,8 @@ Deno.serve(async(req)=>{
         const now=new Date().toISOString();
         const updated=await admin.from("mta_profiles").update({must_change_password:true,password_reset_at:now,password_reset_by:user.id}).eq("id",id).select("id,role,display_name,active,must_change_password,password_changed_at,password_reset_at").single();
         if(updated.error){
-          await admin.auth.admin.signOut(id,"global").catch(()=>{});
           return json(req,{ok:false,error:"PASSWORD_RESET_STATE_UPDATE_FAILED"},500);
         }
-        await admin.auth.admin.signOut(id,"global").catch(()=>{});
         const audit=await admin.from("mta_audit_events").insert({action:"USER_PASSWORD_RESET",resource_type:"USER",resource_id:id,result:"SUCCESS",actor_user_id:user.id,request_id:requestId,correlation_id:correlationId,metadata:{targetRole,forcedChange:true}});
         if(audit.error) emit("WARN","identity.password_reset.audit_failed",{status:500,outcome:"FAILED",errorCode:"AUDIT_WRITE_FAILED"});
         return json(req,{ok:true,resource,data:{id,role:updated.data.role,display_name:updated.data.display_name,active:updated.data.active,must_change_password:true,temporaryPassword,sessionRevoked:true}});
