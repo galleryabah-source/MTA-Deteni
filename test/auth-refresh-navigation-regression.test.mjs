@@ -11,6 +11,7 @@ test("auth session is configured for persisted browser hydration",()=>{
   assert.match(auth,/persistSession:true/);
   assert.match(auth,/autoRefreshToken:true/);
   assert.match(auth,/storageKey:'mta-deteni-auth-session'/);
+  assert.match(auth,/storage:window\.localStorage/);
   assert.match(auth,/for\(let attempt=0;attempt<8;attempt\+\+\)/);
   assert.match(auth,/pendingAuthSession\|\|null/);
   assert.match(auth,/INITIAL_SESSION\/null entirely inside the hydration boundary/);
