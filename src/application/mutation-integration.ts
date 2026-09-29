@@ -71,7 +71,7 @@ export async function executeCriticalMutation<T>(
     const audit = { auditId: input.auditId, commandType: input.commandType, aggregateId: input.aggregateId, requestHash: input.requestHash, executionContext: context, outcome: "COMMITTED" as const, recordedAt: input.occurredAt };
     assertCriticalMutationContextContinuity(context, { audit: audit.executionContext });
     stores.appendAudit(audit);
-    const event = createOutboxEvent({ eventId: input.eventId, aggregateType: input.commandType, aggregateId: input.aggregateId, eventType: `${input.commandType}_COMMITTED`, executionContext: context, payload: input.payload, payloadFingerprint: input.payloadFingerprint, occurredAt: input.occurredAt });
+    const event = createOutboxEvent({ eventId: input.eventId, aggregateType: input.commandType, aggregateId: input.aggregateId, eventType: `${input.commandType}_COMMITTED`, idempotencyKey: context.idempotencyKey, executionContext: context, payload: input.payload, payloadFingerprint: input.payloadFingerprint, occurredAt: input.occurredAt });
     assertCriticalMutationContextContinuity(context, { outbox: event.executionContext });
     const outboxDisposition = await appendMandatoryOutboxEvent(stores, event);
     if (outboxDisposition === "CONFLICT") throw new Error("OUTBOX_EVENT_ID_CONFLICT");
