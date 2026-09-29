@@ -1,0 +1,54 @@
+{
+  "checkpoint": "P9.6_FINAL_CERTIFICATION",
+  "status": "CERTIFIED_CONTROLLED_NONPROD",
+  "productionMutation": false,
+  "productionScopeProvisioning": false,
+  "productionMigrationExecuted": false,
+  "migrationFreeze": true,
+  "evidence": {
+    "schemaContract": {
+      "status": "PASS",
+      "source": "p9.6/database-contract.mjs",
+      "localReconciliationRun": 102,
+      "runId": 36510889589
+    },
+    "scopeProvisioningContract": {
+      "status": "PASS",
+      "source": "p9.6/canonical-scope-provisioning.mjs",
+      "rehearsal": "CONTROLLED_NONPROD_ONLY",
+      "productionAllowed": false
+    },
+    "authorizationMatrix": {
+      "status": "PASS",
+      "positiveAuthorization": ["OWNER", "ADMIN"],
+      "negativeAuthorization": [
+        "SCOPE_REQUIRED",
+        "SCOPE_DENIED",
+        "WRONG_SCOPE",
+        "INACTIVE_MEMBERSHIP",
+        "ROLE_DRIFT",
+        "CROSS_SCOPE_ACCESS"
+      ]
+    },
+    "pr251": {
+      "status": "MERGED",
+      "headSha": "2f4853f48f23f27305714672af7fb4f7f92d10f8",
+      "mergeSha": "a083050761487a0895cfb8c5c98a0ec24c4725ef",
+      "prNumber": 251
+    },
+    "pr251Certification": {
+      "status": "PASS",
+      "domainCiRun": 2800,
+      "domainCiRunId": 36510889427,
+      "p96ReconciliationRun": 102,
+      "p96ReconciliationRunId": 36510889589
+    },
+    "productionScope": {
+      "status": "UNTOUCHED",
+      "basis": "P9.6 production schema/data audit recorded zero mta_scopes rows and zero mta_profile_scopes rows before this certification.",
+      "currentCertificationAction": "READ_ONLY_RECORD; NO_PRODUCTION_MUTATION"
+    }
+  },
+  "nextCheckpoint": "CONTROLLED_PRODUCTION_RECONCILIATION_REVIEW",
+  "p97Unlocked": false
+}
