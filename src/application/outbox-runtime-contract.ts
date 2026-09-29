@@ -1,45 +1,63 @@
 import type { ExecutionContext } from "./execution-context-contract.js";
+import type { OutboxEvent, OutboxEnqueueCommand, OutboxStatus } from "./outbox-contract.js";
+import { validateOutboxEnqueue, validateOutboxEvent } from "./outbox-contract.js";
 
-export type OutboxEventStatus = "PENDING" | "DISPATCHED" | "FAILED";
-
-export type OutboxEventContract = Readonly<{
-  eventId: string;
-  aggregateType: string;
-  aggregateId: string;
-  eventType: string;
+export type CanonicalOutboxEvent = Readonly<OutboxEvent & {
   executionContext: ExecutionContext;
-  payload: Readonly<Record<string, unknown>>;
-  payloadFingerprint: string;
-  occurredAt: string;
-  status: OutboxEventStatus;
-  attemptCount: number;
 }>;
 
 export type OutboxDisposition = "ADMIT" | "REPLAY" | "CONFLICT";
 
 export type OutboxStoreContract = Readonly<{
-  appendPending: (event: OutboxEventContract) => Promise<OutboxDisposition>;
+  appendPending: (event: CanonicalOutboxEvent) => Promise<OutboxDisposition>;
 }>;
 
-export function validateOutboxEvent(event: OutboxEventContract): void {
-  const required = [event.eventId, event.aggregateType, event.aggregateId, event.eventType, event.payloadFingerprint, event.occurredAt];
-  if (required.some((value) => !value.trim())) throw new Error("OUTBOX_IDENTITY_REQUIRED");
-  if (!event.executionContext.requestId.trim() || !event.executionContext.correlationId.trim() || !event.executionContext.transactionId.trim() || !event.executionContext.idempotencyKey.trim()) {
+export function createOutboxEvent(
+  command: OutboxEnqueueCommand,
+  executionContext: ExecutionContext,
+  timestamps: { availableAt: string; createdAt: string },
+): CanonicalOutboxEvent {
+  validateOutboxEnqueue(command);
+  if (!executionContext.requestId.trim() ||
+      !executionContext.correlationId.trim() ||
+      !executionContext.transactionId.trim() ||
+      !executionContext.idempotencyKey.trim()) {
     throw new Error("OUTBOX_EXECUTION_CONTEXT_REQUIRED");
   }
-  if (!Number.isInteger(event.attemptCount) || event.attemptCount < 0) throw new Error("OUTBOX_ATTEMPT_COUNT_INVALID");
-  if (event.status !== "PENDING") throw new Error("OUTBOX_APPEND_REQUIRES_PENDING");
+  if (executionContext.idempotencyKey !== command.idempotencyKey) {
+    throw new Error("OUTBOX_IDEMPOTENCY_CONTEXT_MISMATCH");
+  }
+
+  const event: CanonicalOutboxEvent = Object.freeze({
+    ...command,
+    executionContext,
+    status: "PENDING",
+    attempts: 0,
+    availableAt: timestamps.availableAt,
+    createdAt: timestamps.createdAt,
+  });
+  validateOutboxEvent(event);
+  return event;
 }
 
-export function createOutboxEvent(event: Omit<OutboxEventContract, "status" | "attemptCount">): OutboxEventContract {
-  const pending = Object.freeze({ ...event, status: "PENDING" as const, attemptCount: 0 });
-  validateOutboxEvent(pending);
-  return pending;
+export function transitionOutboxEvent(
+  event: CanonicalOutboxEvent,
+  status: OutboxStatus,
+  patch: Partial<Pick<CanonicalOutboxEvent, "availableAt" | "lockedAt" | "publishedAt" | "lastError">> = {},
+): CanonicalOutboxEvent {
+  const next: CanonicalOutboxEvent = Object.freeze({
+    ...event,
+    ...patch,
+    status,
+    attempts: status === "PROCESSING" ? event.attempts + 1 : event.attempts,
+  });
+  validateOutboxEvent(next);
+  return next;
 }
 
 export async function appendMandatoryOutboxEvent(
   store: OutboxStoreContract,
-  event: OutboxEventContract,
+  event: CanonicalOutboxEvent,
 ): Promise<OutboxDisposition> {
   validateOutboxEvent(event);
   return store.appendPending(event);
