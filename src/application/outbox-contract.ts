@@ -31,6 +31,17 @@ const requiredText = (value: string | undefined, code: string): void => {
   if (!value?.trim()) throw new Error(code);
 };
 
+export function createOutboxEvent(command: OutboxEnqueueCommand): OutboxEvent {
+  validateOutboxEnqueue(command);
+  return Object.freeze({
+    ...command,
+    status: "PENDING" as const,
+    attempts: 0,
+    availableAt: command.occurredAt,
+    createdAt: command.occurredAt,
+  });
+}
+
 export function validateOutboxEnqueue(command: OutboxEnqueueCommand): void {
   requiredText(command.eventId, "OUTBOX_EVENT_ID_REQUIRED");
   requiredText(command.eventType, "OUTBOX_EVENT_TYPE_REQUIRED");
