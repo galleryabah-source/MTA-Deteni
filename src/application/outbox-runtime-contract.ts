@@ -7,6 +7,8 @@ export type OutboxEventContract = Readonly<OutboxEvent & {
   payloadFingerprint: string;
 }>;
 
+export { validateOutboxEvent } from "./outbox-contract.js";
+
 export type OutboxDisposition = "ADMIT" | "REPLAY" | "CONFLICT";
 
 export type OutboxStoreContract = Readonly<{
