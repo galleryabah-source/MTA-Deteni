@@ -1,5 +1,6 @@
 import fs from "node:fs/promises";
 import path from "node:path";
+import { P96_CONTRACT } from "../p9.6/database-contract.mjs";
 import { buildReconciliationRows, deriveEffectivePolicies, summarize, uniqueLower } from "./p9.6-reconciliation-engine.mjs";
 
 const root = process.cwd();
@@ -8,18 +9,18 @@ const migrationDir = path.join(root, "supabase/migrations");
 const files = (await fs.readdir(migrationDir)).filter((file) => file.endsWith(".sql")).sort();
 const sql = (await Promise.all(files.map((file) => fs.readFile(path.join(migrationDir, file), "utf8")))).join("\n");
 
-const expectedTables = uniqueLower(
-  [...sql.matchAll(/create\s+table\s+if\s+not\s+exists\s+public\.([a-z0-9_]+)/gi)].map((match) => "public." + match[1]),
-);
-const expectedIndexes = uniqueLower(
-  [...sql.matchAll(/create\s+index\s+if\s+not\s+exists\s+([a-z0-9_]+)/gi)].map((match) => match[1]),
-);
-const expectedFunctions = uniqueLower(
-  [...sql.matchAll(/create\s+(?:or\s+replace\s+)?function\s+(?:public|private)\.([a-z0-9_]+)/gi)].map((match) => match[1]),
-);
-const expectedTriggers = uniqueLower(
-  [...sql.matchAll(/create\s+trigger\s+([a-z0-9_]+)/gi)].map((match) => match[1]),
-);
+const expectedTables = uniqueLower([
+  ...sql.matchAll(/create\s+table\s+if\s+not\s+exists\s+public\.([a-z0-9_]+)/gi),
+].map((match) => "public." + match[1]));
+const expectedIndexes = uniqueLower([
+  ...sql.matchAll(/create\s+(?:unique\s+)?index\s+(?:if\s+not\s+exists\s+)?([a-z0-9_]+)/gi),
+].map((match) => match[1]));
+const expectedFunctions = uniqueLower([
+  ...sql.matchAll(/create\s+(?:or\s+replace\s+)?function\s+(?:public|private)\.([a-z0-9_]+)/gi),
+].map((match) => match[1]));
+const expectedTriggers = uniqueLower([
+  ...sql.matchAll(/create\s+trigger\s+([a-z0-9_]+)/gi),
+].map((match) => match[1]));
 const expectedPolicies = deriveEffectivePolicies(sql);
 
 const actualTables = uniqueLower(
@@ -34,22 +35,55 @@ const actualFunctions = uniqueLower(
 const actualTriggers = uniqueLower((actual.triggers ?? []).map((row) => row.trigger_name));
 const actualPolicies = uniqueLower((actual.policies ?? []).map((row) => row.policyname));
 
-const constraintBackedIndexes = uniqueLower(
-  (actual.constraints ?? [])
-    .filter((row) => row.schema_name === "public" && ["p", "u"].includes(row.constraint_type))
-    .map((row) => row.constraint_name),
+const expectedContractColumns = uniqueLower(
+  Object.entries(P96_CONTRACT.columns).flatMap(([table, columns]) => columns.map((column) => table + "." + column)),
 );
+const actualContractColumns = uniqueLower(
+  (actual.columns ?? [])
+    .filter((row) => P96_CONTRACT.tables.includes(row.table_schema + "." + row.table_name))
+    .map((row) => row.table_schema + "." + row.table_name + "." + row.column_name),
+);
+
+const expectedForeignKeys = Object.keys(P96_CONTRACT.foreignKeys);
+const actualForeignKeys = (actual.constraints ?? [])
+  .filter((row) => row.constraint_type === "f")
+  .reduce((map, row) => {
+    map.set(row.constraint_name.toLowerCase(), row.definition);
+    return map;
+  }, new Map());
 
 const all = [
   ...buildReconciliationRows(expectedTables, actualTables, "table"),
   ...buildReconciliationRows(expectedIndexes, actualIndexes, "index", {
-    justifiedActual: constraintBackedIndexes,
+    justifiedActual: uniqueLower(
+      (actual.constraints ?? [])
+        .filter((row) => row.schema_name === "public" && ["p", "u"].includes(row.constraint_type))
+        .map((row) => row.constraint_name),
+    ),
     justification: "postgresql-auto-index-for-primary-key-or-unique-constraint",
   }),
   ...buildReconciliationRows(expectedFunctions, actualFunctions, "function"),
   ...buildReconciliationRows(expectedTriggers, actualTriggers, "trigger"),
   ...buildReconciliationRows(expectedPolicies, actualPolicies, "policy"),
+  ...buildReconciliationRows(expectedContractColumns, actualContractColumns, "column"),
 ];
+
+for (const [constraintName, expectedDefinition] of Object.entries(P96_CONTRACT.foreignKeys)) {
+  const actualDefinition = actualForeignKeys.get(constraintName.toLowerCase());
+  all.push({
+    object_type: "foreign_key",
+    object: constraintName.toLowerCase(),
+    expected: true,
+    actual: actualDefinition !== undefined,
+    status: actualDefinition === undefined
+      ? "MISSING"
+      : actualDefinition.replace(/\s+/g, " ").trim().toLowerCase() === expectedDefinition.replace(/\s+/g, " ").trim().toLowerCase()
+        ? "MATCH"
+        : "CONFLICT",
+    expected_definition: expectedDefinition,
+    actual_definition: actualDefinition ?? null,
+  });
+}
 
 const summary = summarize(all);
 const out = path.join(root, "artifacts/p9.6/schema-reconciliation-matrix.json");
@@ -59,16 +93,16 @@ await fs.writeFile(
   JSON.stringify(
     {
       generatedAt: new Date().toISOString(),
-      basis: "repository migration effective-state evidence vs disposable local PostgreSQL introspection",
+      basis: "repository migration effective-state evidence + explicit P9.6 contract manifest vs disposable local PostgreSQL introspection",
       migrationFiles: files,
-      replayBaselineNote: "mta_current_role is provisioned only in the disposable compatibility layer because the earlier private-helper migration assumes an existing baseline function.",
-      reconciliationEngineVersion: "P9.6-R1",
+      reconciliationEngineVersion: "P9.6-R2",
+      contractManifest: "p9.6/database-contract.mjs",
       policyModel: "effective-final-state-after-sequential-drop-create-lifecycle",
       indexModel: "constraint-backed PostgreSQL indexes are justified by primary-key/unique constraints",
       unsupportedSemanticStatuses: {
-        CONFLICT: "not inferable from object-name-only evidence; requires definition-level reconciliation",
-        UNSAFE: "requires security/integrity rule evaluation beyond object-name-only evidence",
-        UNKNOWN: "used only when required evidence is unavailable; current name-level comparisons do not manufacture UNKNOWN findings",
+        CONFLICT: "used when a required foreign-key definition exists but differs from the canonical contract.",
+        UNSAFE: "requires security/integrity rule evaluation beyond this structural matrix.",
+        UNKNOWN: "used only when required evidence is unavailable.",
       },
       summary,
       rows: all,
