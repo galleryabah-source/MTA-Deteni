@@ -51,6 +51,8 @@ jobs:
         run: node --test test/p9.6-reconciliation-engine.test.mjs
       - name: Run P9.6 database contract manifest tests
         run: node --test test/p9.6-db-contract-manifest.test.mjs
+      - name: Run P9.6 canonical scope provisioning contract tests
+        run: node --test test/p9.6-canonical-scope-provisioning.test.mjs
       - name: Run DB-001 through DB-020 negative contract gate
         run: npx tsx --test test/p9.6-db-negative-contract.test.ts
       - name: Replay repository migrations into disposable PostgreSQL
