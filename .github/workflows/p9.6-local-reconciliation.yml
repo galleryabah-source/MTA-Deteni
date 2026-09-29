@@ -64,6 +64,9 @@ jobs:
             psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f "$f"
           done
           echo LOCAL_REPLAY_SUCCESS > artifacts/p9.6/local-replay-success.txt
+      - name: Run controlled non-production scope provisioning rehearsal
+        run: |
+          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f p9.6/controlled-scope-provisioning.sql
       - name: Run read-only PostgreSQL introspection
         run: bash scripts/p9.6-run-introspection.sh
       - name: Build expected-vs-actual reconciliation matrix
