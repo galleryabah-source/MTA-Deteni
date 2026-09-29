@@ -45,10 +45,15 @@ test("P9.8 rejects non-canonical DISPATCHED state", () => {
   );
 });
 
-test("P9.8 rejects attemptCount as a substitute for attempts", () => {
-  const legacy = { ...event(), attemptCount: 0 };
-  assert.equal("attemptCount" in legacy, true);
-  assert.equal("attempts" in legacy, true);
+test("P9.8 canonical event exposes attempts and lease timestamps, not legacy status vocabulary", () => {
+  const canonical = event();
+  assert.equal("attempts" in canonical, true);
+  assert.equal("availableAt" in canonical, true);
+  assert.equal("attemptCount" in canonical, false);
+  assert.throws(
+    () => validateOutboxEvent({ ...canonical, status: "DISPATCHED" as never }),
+    /OUTBOX_STATUS_INVALID/,
+  );
 });
 
 test("P9.8 retry preserves identity and increments attempts only when claimed", () => {
