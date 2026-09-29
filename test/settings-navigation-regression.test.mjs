@@ -8,6 +8,12 @@ const runtime=fs.readFileSync("web/mta-app-runtime-full.js","utf8");
 const index=fs.readFileSync("web/index.html","utf8");
 const desktop=fs.readFileSync("web/desktop-shell-v2.js","utf8");
 
+test("master block create form satisfies canonical block input contract",()=>{
+  assert.match(admin,/id="p9bcode"[^>]*required/);
+  assert.match(admin,/createBlock\(d,\{code,name,status\}\)/);
+  assert.match(admin,/Kode dan nama blok wajib diisi/);
+});
+
 test("settings navigation handler is exposed before unified shell routing",()=>{
   assert.match(admin,/window\.p9openSettings=\(\)=>settings\(\)/);
   assert.match(admin,/\['OWNER','ADMIN'\]\.includes\(String\(d\.adminSettings\.role\|\|''\)\.toUpperCase\(\)\)/);
