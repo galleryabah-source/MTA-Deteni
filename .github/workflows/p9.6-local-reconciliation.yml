@@ -8,6 +8,7 @@ on:
       - "supabase/migrations/**"
       - "scripts/p9.6-*"
       - "p9.6/**"
+      - "test/p9.6-*"
       - "src/application/database-adapter-contract.ts"
       - "src/infrastructure/database/p9.6-database-adapter.ts"
 
@@ -53,6 +54,8 @@ jobs:
         run: node --test test/p9.6-db-contract-manifest.test.mjs
       - name: Run P9.6 canonical scope provisioning contract tests
         run: node --test test/p9.6-canonical-scope-provisioning.test.mjs
+      - name: Run P9.6 authorization matrix tests
+        run: node --test test/p9.6-authorization-matrix.test.mjs
       - name: Run DB-001 through DB-020 negative contract gate
         run: npx tsx --test test/p9.6-db-negative-contract.test.ts
       - name: Replay repository migrations into disposable PostgreSQL
