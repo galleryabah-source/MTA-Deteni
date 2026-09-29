@@ -18,7 +18,7 @@ const command = () => ({
 
 const event = () => ({
   ...command(),
-  status: "PENDING" as const,
+  status: "PENDING",
   attempts: 0,
   availableAt: "2026-09-29T00:00:00.000Z",
   createdAt: "2026-09-29T00:00:00.000Z",
@@ -34,13 +34,13 @@ test("P9.8 canonical state machine uses PROCESSING and PUBLISHED", () => {
   assert.equal(processing.status, "PROCESSING");
   assert.equal(processing.attempts, 1);
 
-  const published = { ...processing, status: "PUBLISHED" as const };
+  const published = { ...processing, status: "PUBLISHED" };
   assert.doesNotThrow(() => validateOutboxEvent(published));
 });
 
 test("P9.8 rejects non-canonical DISPATCHED state", () => {
   assert.throws(
-    () => validateOutboxEvent({ ...event(), status: "DISPATCHED" as never }),
+    () => validateOutboxEvent({ ...event(), status: "DISPATCHED" }),
     /OUTBOX_STATUS_INVALID/,
   );
 });
@@ -51,7 +51,7 @@ test("P9.8 canonical event exposes attempts and lease timestamps, not legacy sta
   assert.equal("availableAt" in canonical, true);
   assert.equal("attemptCount" in canonical, false);
   assert.throws(
-    () => validateOutboxEvent({ ...canonical, status: "DISPATCHED" as never }),
+    () => validateOutboxEvent({ ...canonical, status: "DISPATCHED" }),
     /OUTBOX_STATUS_INVALID/,
   );
 });
