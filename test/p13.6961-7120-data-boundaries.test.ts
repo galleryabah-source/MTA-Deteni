@@ -38,8 +38,8 @@ test("P13.7100 transaction context is mandatory", async () => {
 });
 
 test("P13.7120 outbox payload drift is rejected", () => {
-  const event = createOutboxEvent({ eventId: "event-1", aggregateType: "LEAVE", aggregateId: "leave-1", eventType: "LEAVE_RECEIVED", payload: "{}", payloadFingerprint: "fp-a", occurredAt: "2026-09-15T00:00:00Z", status: "PENDING", attemptCount: 0 });
-  assert.equal(nextOutboxAttempt(event, "PUBLISHED").attemptCount, 1);
-  const drift = createOutboxEvent({ ...event, payloadFingerprint: "fp-b" });
+  const event = createOutboxEvent({ eventId: "event-1", aggregateType: "LEAVE", aggregateId: "leave-1", eventType: "LEAVE_RECEIVED", payload: { synthetic: true }, idempotencyKey: "idem-1", occurredAt: "2026-09-15T00:00:00Z" });
+  assert.equal(nextOutboxAttempt(event, "PROCESSING").attempts, 1);
+  const drift = { ...event, payload: { synthetic: false } };
   assert.throws(() => assertOutboxReplaySafe(event, drift), /payload drift/i);
 });
