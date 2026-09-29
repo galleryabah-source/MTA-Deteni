@@ -9,6 +9,9 @@ on:
       - 'wrangler*.toml'
       - 'scripts/mta-production-readiness-gate.mjs'
       - 'docs/03-implementation/**'
+      - 'supabase/migrations/**'
+      - 'p9.6/**'
+      - 'scripts/p9.6-*'
       - '.github/workflows/cloudflare-*.yml'
       - '.github/workflows/mta-production-readiness.yml'
   workflow_dispatch:
