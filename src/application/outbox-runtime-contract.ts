@@ -2,50 +2,62 @@ import type { ExecutionContext } from "./execution-context-contract.js";
 import type { OutboxEvent, OutboxEnqueueCommand, OutboxStatus } from "./outbox-contract.js";
 import { validateOutboxEnqueue, validateOutboxEvent } from "./outbox-contract.js";
 
-export type CanonicalOutboxEvent = Readonly<OutboxEvent & {
+export type OutboxEventContract = Readonly<OutboxEvent & {
   executionContext: ExecutionContext;
+  payloadFingerprint: string;
 }>;
 
 export type OutboxDisposition = "ADMIT" | "REPLAY" | "CONFLICT";
 
 export type OutboxStoreContract = Readonly<{
-  appendPending: (event: CanonicalOutboxEvent) => Promise<OutboxDisposition>;
+  appendPending: (event: OutboxEventContract) => Promise<OutboxDisposition>;
 }>;
 
-export function createOutboxEvent(
-  command: OutboxEnqueueCommand,
-  executionContext: ExecutionContext,
-  timestamps: { availableAt: string; createdAt: string },
-): CanonicalOutboxEvent {
-  validateOutboxEnqueue(command);
-  if (!executionContext.requestId.trim() ||
-      !executionContext.correlationId.trim() ||
-      !executionContext.transactionId.trim() ||
-      !executionContext.idempotencyKey.trim()) {
+// Application evidence envelope over the canonical production outbox event.
+// executionContext and payloadFingerprint are not a second persistence model.
+export type CanonicalOutboxCreateInput = Readonly<OutboxEnqueueCommand & {
+  executionContext: ExecutionContext;
+  payloadFingerprint: string;
+}>;
+
+export function createOutboxEvent(input: CanonicalOutboxCreateInput): OutboxEventContract {
+  validateOutboxEnqueue(input);
+  if (!input.executionContext.requestId.trim() ||
+      !input.executionContext.correlationId.trim() ||
+      !input.executionContext.transactionId.trim() ||
+      !input.executionContext.idempotencyKey.trim()) {
     throw new Error("OUTBOX_EXECUTION_CONTEXT_REQUIRED");
   }
-  if (executionContext.idempotencyKey !== command.idempotencyKey) {
+  if (input.executionContext.idempotencyKey !== input.idempotencyKey) {
     throw new Error("OUTBOX_IDEMPOTENCY_CONTEXT_MISMATCH");
   }
+  if (!input.payloadFingerprint.trim()) throw new Error("OUTBOX_PAYLOAD_FINGERPRINT_REQUIRED");
 
-  const event: CanonicalOutboxEvent = Object.freeze({
-    ...command,
-    executionContext,
+  const event: OutboxEventContract = Object.freeze({
+    eventId: input.eventId,
+    eventType: input.eventType,
+    aggregateType: input.aggregateType,
+    ...(input.aggregateId === undefined ? {} : { aggregateId: input.aggregateId }),
+    payload: input.payload,
+    idempotencyKey: input.idempotencyKey,
+    occurredAt: input.occurredAt,
+    executionContext: input.executionContext,
+    payloadFingerprint: input.payloadFingerprint,
     status: "PENDING",
     attempts: 0,
-    availableAt: timestamps.availableAt,
-    createdAt: timestamps.createdAt,
+    availableAt: input.occurredAt,
+    createdAt: input.occurredAt,
   });
   validateOutboxEvent(event);
   return event;
 }
 
 export function transitionOutboxEvent(
-  event: CanonicalOutboxEvent,
+  event: OutboxEventContract,
   status: OutboxStatus,
-  patch: Partial<Pick<CanonicalOutboxEvent, "availableAt" | "lockedAt" | "publishedAt" | "lastError">> = {},
-): CanonicalOutboxEvent {
-  const next: CanonicalOutboxEvent = Object.freeze({
+  patch: Partial<Pick<OutboxEventContract, "availableAt" | "lockedAt" | "publishedAt" | "lastError">> = {},
+): OutboxEventContract {
+  const next: OutboxEventContract = Object.freeze({
     ...event,
     ...patch,
     status,
@@ -57,8 +69,9 @@ export function transitionOutboxEvent(
 
 export async function appendMandatoryOutboxEvent(
   store: OutboxStoreContract,
-  event: CanonicalOutboxEvent,
+  event: OutboxEventContract,
 ): Promise<OutboxDisposition> {
   validateOutboxEvent(event);
+  if (!event.payloadFingerprint.trim()) throw new Error("OUTBOX_PAYLOAD_FINGERPRINT_REQUIRED");
   return store.appendPending(event);
 }
