@@ -153,12 +153,13 @@ test("outbox conflict rolls back idempotency and audit state", async () => {
     aggregateType: "DETAINEE_REGISTER",
     aggregateId: "d-001",
     eventType: "DETAINEE_REGISTER_COMMITTED",
-    executionContext: context(),
     payload: { source: "synthetic", action: "existing" },
-    payloadFingerprint: "existing-fp",
+    idempotencyKey: "idem-001",
     occurredAt: "2026-09-16T00:00:00.000Z",
     status: "PENDING",
-    attemptCount: 0,
+    attempts: 0,
+    availableAt: "2026-09-16T00:00:00.000Z",
+    createdAt: "2026-09-16T00:00:00.000Z",
   });
   await assert.rejects(() => execute(harness), /OUTBOX_EVENT_ID_CONFLICT/);
   assert.equal(harness.idempotency.size, 0);
