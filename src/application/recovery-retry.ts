@@ -1,15 +1,10 @@
-import type { OutboxEvent } from "./outbox-contract.js";
+import type { OutboxEventContract } from "./outbox-runtime-contract.js";
 import type { ReportingSnapshot } from "../domain/reporting/snapshot.js";
 
 export type RecoveryRetryDecision = "RETRY" | "SKIP_DUPLICATE" | "REVIEW_REQUIRED";
 
 export type RecoveryRetryRecord = Readonly<{
-  retryKey: string;
-  targetId: string;
-  attempt: number;
-  decision: RecoveryRetryDecision;
-  sourceFingerprint: string;
-  syntheticOnly: true;
+  retryKey: string; targetId: string; attempt: number; decision: RecoveryRetryDecision; sourceFingerprint: string; syntheticOnly: true;
 }>;
 
 export function createRecoveryRetryKey(commandId: string, sourceFingerprint: string): string {
@@ -30,7 +25,7 @@ export function assertRecoveryRetryKeyBinding(retry: RecoveryRetryRecord, comman
   if (retry.sourceFingerprint !== sourceFingerprint) throw new Error("Recovery retry source fingerprint mismatch.");
 }
 
-export function assertOutboxRetryBinding(event: OutboxEvent, retry: RecoveryRetryRecord): void {
+export function assertOutboxRetryBinding(event: OutboxEventContract, retry: RecoveryRetryRecord): void {
   if (event.eventId !== retry.targetId && event.aggregateId !== retry.targetId) throw new Error("Outbox retry target binding mismatch.");
   if (!event.payloadFingerprint.trim() || event.payloadFingerprint !== retry.sourceFingerprint) throw new Error("Outbox retry fingerprint mismatch.");
 }
