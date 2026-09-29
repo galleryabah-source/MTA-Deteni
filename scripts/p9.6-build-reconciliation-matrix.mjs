@@ -44,6 +44,12 @@ const actualContractColumns = uniqueLower(
     .map((row) => row.table_schema + "." + row.table_name + "." + row.column_name),
 );
 
+const normalizeConstraintDefinition = (definition) => definition
+  .replace(/\bpublic\./gi, "")
+  .replace(/\s+/g, " ")
+  .trim()
+  .toLowerCase();
+
 const expectedForeignKeys = Object.keys(P96_CONTRACT.foreignKeys);
 const actualForeignKeys = (actual.constraints ?? [])
   .filter((row) => row.constraint_type === "f")
@@ -77,7 +83,7 @@ for (const [constraintName, expectedDefinition] of Object.entries(P96_CONTRACT.f
     actual: actualDefinition !== undefined,
     status: actualDefinition === undefined
       ? "MISSING"
-      : actualDefinition.replace(/\s+/g, " ").trim().toLowerCase() === expectedDefinition.replace(/\s+/g, " ").trim().toLowerCase()
+      : normalizeConstraintDefinition(actualDefinition) === normalizeConstraintDefinition(expectedDefinition)
         ? "MATCH"
         : "CONFLICT",
     expected_definition: expectedDefinition,
