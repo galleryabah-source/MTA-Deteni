@@ -8,6 +8,7 @@ on:
       - "supabase/migrations/**"
       - "scripts/p9.6-*"
       - "p9.6/**"
+      - "test/p9.6-*"
       - "src/application/database-adapter-contract.ts"
       - "src/infrastructure/database/p9.6-database-adapter.ts"
 
@@ -45,7 +46,7 @@ jobs:
           psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -c "select current_database(), current_user, inet_server_addr(), inet_server_port();"
       - name: Install local Supabase compatibility objects
         run: |
-          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -c "do \$\$ begin if not exists (select 1 from pg_roles where rolname='anon') then create role anon noinherit nologin; end if; if not exists (select 1 from pg_roles where rolname='authenticated') then create role authenticated noinherit nologin; end if; if not exists (select 1 from pg_roles where rolname='service_role') then create role service_role noinherit nologin; end if; end \$\$;"
+          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -c "do $$ begin if not exists (select 1 from pg_roles where rolname='anon') then create role anon noinherit nologin; end if; if not exists (select 1 from pg_roles where rolname='authenticated') then create role authenticated noinherit nologin; end if; if not exists (select 1 from pg_roles where rolname='service_role') then create role service_role noinherit nologin; end if; end $$;"
           psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f p9.6/00-local-supabase-compat.sql
       - name: Run P9.6 reconciliation engine regression tests
         run: node --test test/p9.6-reconciliation-engine.test.mjs
@@ -53,6 +54,8 @@ jobs:
         run: node --test test/p9.6-db-contract-manifest.test.mjs
       - name: Run P9.6 canonical scope provisioning contract tests
         run: node --test test/p9.6-canonical-scope-provisioning.test.mjs
+      - name: Run P9.6 authorization matrix tests
+        run: node --test test/p9.6-authorization-matrix.test.mjs
       - name: Run DB-001 through DB-020 negative contract gate
         run: npx tsx --test test/p9.6-db-negative-contract.test.ts
       - name: Replay repository migrations into disposable PostgreSQL
