@@ -49,10 +49,11 @@
     try{
       adminConfig=await request('admin-config');
     }catch(error){
-      // admin-config is role/scope protected. 403 (RBAC) and 409 (scope not
-      // provisioned) are expected boundaries for non-admin operational users;
-      // 404/5xx remain hard failures so route/config regressions cannot hide.
-      if(error?.status!==403&&error?.status!==409)throw error;
+      // admin-config is optional for operational hydration. 403/409 are
+      // authorization boundaries and 404 means this deployment has no
+      // admin-config route; none of these conditions may block the canonical
+      // operational runtime from reaching CONNECTED/LOADED.
+      if(error?.status!==403&&error?.status!==404&&error?.status!==409)throw error;
       adminConfig={ok:true,data:{settings:{}},skipped:true,reason:error?.data?.error||error?.message||'ADMIN_CONFIG_UNAVAILABLE'};
     }
     const byBlock=new Map(blocks.data.map(mapBlock).map(b=>[b.id,b]));
