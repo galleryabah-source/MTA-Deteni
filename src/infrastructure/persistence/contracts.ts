@@ -1,5 +1,6 @@
-export type VersionedEntity = Readonly<{ version: number }>;
+import type { OutboxEventContract } from "../../application/outbox-runtime-contract.js";
 
+export type VersionedEntity = Readonly<{ version: number }>;
 export type RepositoryResult = "CREATED" | "UPDATED" | "CONFLICT";
 
 export type VersionedRepository<T extends VersionedEntity> = {
@@ -13,16 +14,8 @@ export type AppendOnlyRepository<T> = {
   list(aggregateId: string): Promise<readonly T[]>;
 };
 
-export type OutboxMessage = Readonly<{
-  id: string;
-  topic: string;
-  aggregateId: string;
-  payload: Readonly<Record<string, unknown>>;
-  createdAt: string;
-}>;
-
 export type OutboxRepository = {
-  enqueue(message: OutboxMessage): Promise<"ENQUEUED" | "DUPLICATE">;
-  claim(limit: number): Promise<readonly OutboxMessage[]>;
-  acknowledge(id: string): Promise<void>;
+  enqueue(event: OutboxEventContract): Promise<"ENQUEUED" | "DUPLICATE">;
+  claim(limit: number): Promise<readonly OutboxEventContract[]>;
+  acknowledge(eventId: string): Promise<void>;
 };
