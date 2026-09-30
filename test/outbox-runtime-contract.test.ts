@@ -36,9 +36,9 @@ test("creates an immutable pending outbox event with canonical execution context
 
 test("rejects invalid outbox identity, context and non-pending append state", () => {
   assert.throws(() => validateOutboxEvent({ ...createOutboxEvent(input), eventId: "" }), /OUTBOX_EVENT_ID_REQUIRED/);
-  assert.throws(() => validateOutboxEvent({ ...createOutboxEvent(input), executionContext: { ...executionContext, requestId: "" } }), /OUTBOX_EXECUTION_CONTEXT_REQUIRED/);
+  assert.throws(() => validateOutboxEvent({ ...createOutboxEvent(input), executionContext: { ...executionContext, requestId: "" } } as unknown as OutboxEventContract), /OUTBOX_EXECUTION_CONTEXT_REQUIRED/);
   assert.throws(() => validateOutboxEvent({ ...createOutboxEvent(input), attempts: -1 }), /OUTBOX_ATTEMPTS_INVALID/);
-  assert.throws(() => validateOutboxEvent({ ...createOutboxEvent(input), status: "DISPATCHED" }), /OUTBOX_STATUS_INVALID/);
+  assert.throws(() => validateOutboxEvent({ ...createOutboxEvent(input), status: "DISPATCHED" } as unknown as OutboxEventContract), /OUTBOX_STATUS_INVALID/);
 });
 
 test("appends only through the mandatory pending boundary", async () => {
