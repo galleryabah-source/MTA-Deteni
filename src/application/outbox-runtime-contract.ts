@@ -22,6 +22,18 @@ export type CanonicalOutboxCreateInput = Readonly<OutboxEnqueueCommand & {
   payloadFingerprint: string;
 }>;
 
+function validateExecutionContext(event: OutboxEventContract): void {
+  if (!event.executionContext.requestId.trim() ||
+      !event.executionContext.correlationId.trim() ||
+      !event.executionContext.transactionId.trim() ||
+      !event.executionContext.idempotencyKey.trim()) {
+    throw new Error("OUTBOX_EXECUTION_CONTEXT_REQUIRED");
+  }
+  if (event.executionContext.idempotencyKey !== event.idempotencyKey) {
+    throw new Error("OUTBOX_IDEMPOTENCY_CONTEXT_MISMATCH");
+  }
+}
+
 export function createOutboxEvent(input: CanonicalOutboxCreateInput): OutboxEventContract {
   validateOutboxEnqueue(input);
   if (!input.executionContext.requestId.trim() ||
