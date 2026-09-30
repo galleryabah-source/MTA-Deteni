@@ -41,5 +41,5 @@ test("P13.7120 outbox payload drift is rejected", () => {
   const event = createOutboxEvent({ eventId: "event-1", aggregateType: "LEAVE", aggregateId: "leave-1", eventType: "LEAVE_RECEIVED", payload: { synthetic: true }, idempotencyKey: "idem-1", occurredAt: "2026-09-15T00:00:00Z" });
   assert.equal(nextOutboxAttempt(event, "PROCESSING").attempts, 1);
   const drift = { ...event, payload: { synthetic: false } };
-  assert.throws(() => assertOutboxReplaySafe(event, drift), /payload drift/i);
+  assert.throws(() => assertOutboxReplaySafe(event, drift), /OUTBOX_EVENT_PAYLOAD_DRIFT/);
 });
