@@ -389,17 +389,34 @@ Deno.serve(async(req)=>{
     const correlationId=req.headers.get("X-Correlation-Id")||requestId;
     const idempotencyKey=req.headers.get("Idempotency-Key")||crypto.randomUUID();
     let body=req.method==="DELETE"?{}:await req.json().catch(()=>({}));
-    if(req.method==="POST"&&resource==="blocks"&&!body.scope_id){
+    let canonicalScopeId=null;
+    if(["blocks","rooms"].includes(resource)){
       const scoped=await admin.from("mta_profile_scopes").select("scope_id").eq("profile_id",user.id).eq("active",true).limit(1).maybeSingle();
       if(scoped.error||!scoped.data?.scope_id)return json(req,{ok:false,error:"SCOPE_REQUIRED"},409);
-      body={...body,scope_id:scoped.data.scope_id};
+      canonicalScopeId=scoped.data.scope_id;
     }
-    if(req.method==="POST"&&resource==="rooms"&&!body.scope_id){
-      const blockId=String(body.block_id||"");
-      if(!blockId)return json(req,{ok:false,error:"ROOM_BLOCK_REQUIRED"},400);
-      const block=await admin.from("mta_blocks").select("scope_id").eq("id",blockId).single();
-      if(block.error||!block.data?.scope_id)return json(req,{ok:false,error:"BLOCK_NOT_FOUND"},404);
-      body={...body,scope_id:block.data.scope_id};
+    if(resource==="blocks"){
+      if(req.method==="POST"){
+        body={...body,scope_id:canonicalScopeId};
+      }else if(id){
+        const current=await admin.from("mta_blocks").select("scope_id").eq("id",id).single();
+        if(current.error||!current.data)return json(req,{ok:false,error:"BLOCK_NOT_FOUND"},404);
+        if(current.data.scope_id!==canonicalScopeId)return json(req,{ok:false,error:"WRONG_SCOPE"},403);
+      }
+    }
+    if(resource==="rooms"){
+      if(req.method==="POST"){
+        const blockId=String(body.block_id||"");
+        if(!blockId)return json(req,{ok:false,error:"ROOM_BLOCK_REQUIRED"},400);
+        const block=await admin.from("mta_blocks").select("scope_id").eq("id",blockId).single();
+        if(block.error||!block.data?.scope_id)return json(req,{ok:false,error:"BLOCK_NOT_FOUND"},404);
+        if(block.data.scope_id!==canonicalScopeId)return json(req,{ok:false,error:"WRONG_SCOPE"},403);
+        body={...body,scope_id:canonicalScopeId};
+      }else if(id){
+        const current=await admin.from("mta_rooms").select("scope_id").eq("id",id).single();
+        if(current.error||!current.data)return json(req,{ok:false,error:"ROOM_NOT_FOUND"},404);
+        if(current.data.scope_id!==canonicalScopeId)return json(req,{ok:false,error:"WRONG_SCOPE"},403);
+      }
     }
     if(req.method==="POST" && resource==="movements" && body?.command==="MOVE_DETAINEE"){
       const requestHash=await sha256Hex(stableJson({method:req.method,resource,body}));
