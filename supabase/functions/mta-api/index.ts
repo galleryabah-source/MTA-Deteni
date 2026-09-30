@@ -40,9 +40,17 @@ Deno.serve(async(req)=>{
       const diagnosticAdminKey=Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
       if(!diagnosticAdminKey) return json(req,{ok:false,error:"SERVER_CONFIGURATION_ERROR"},503);
       const diagnosticAdmin=createClient(Deno.env.get("SUPABASE_URL")!,diagnosticAdminKey,{auth:{autoRefreshToken:false,persistSession:false}});
-      const {data:scopeRows,error:scopeError}=await diagnosticAdmin.from("mta_profile_scopes").select("scope_id,active,mta_scopes(id,code,name,active)").eq("profile_id",user.id).order("scope_id",{ascending:true});
-      if(scopeError) return json(req,{ok:false,error:"IDENTITY_SCOPE_EVIDENCE_FAILED"},500);
-      const scopeMemberships=(scopeRows||[]).map(row=>({scopeId:row.scope_id,active:!!row.active,scope:row.mta_scopes?{id:row.mta_scopes.id,code:row.mta_scopes.code,name:row.mta_scopes.name,active:!!row.mta_scopes.active}:null}));
+      const {data:scopeRows,error:scopeError}=await diagnosticAdmin.from("mta_profile_scopes").select("scope_id,active").eq("profile_id",user.id).order("scope_id",{ascending:true});
+      if(scopeError) return json(req,{ok:false,error:"IDENTITY_SCOPE_MEMBERSHIP_READ_FAILED",detail:String(scopeError.message||"UNKNOWN")},500);
+      const scopeIds=(scopeRows||[]).map(row=>row.scope_id).filter(Boolean);
+      let scopeRowsFull=[];
+      if(scopeIds.length){
+        const {data:scopes,error:scopesError}=await diagnosticAdmin.from("mta_scopes").select("id,code,name,active").in("id",scopeIds);
+        if(scopesError) return json(req,{ok:false,error:"IDENTITY_SCOPE_CATALOG_READ_FAILED",detail:String(scopesError.message||"UNKNOWN")},500);
+        scopeRowsFull=scopes||[];
+      }
+      const scopeById=new Map(scopeRowsFull.map(scope=>[scope.id,scope]));
+      const scopeMemberships=(scopeRows||[]).map(row=>({scopeId:row.scope_id,active:!!row.active,scope:scopeById.get(row.scope_id)||null}));
       return json(req,{ok:true,user:{id:user.id,email:user.email},profile,role,identityEvidence:{authUserId:user.id,profileId:profile.id,profileMatchesAuthUser:profile.id===user.id,role,profileActive:!!profile.active,scopeMemberships}});
     }
     const adminKey=Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
