@@ -14,6 +14,13 @@ const event = {
   payload: { synthetic: true },
   idempotencyKey: "IDEMP-SYN",
   occurredAt: "2026-09-15T00:00:00Z",
+  executionContext: {
+    requestId: "REQ-SYN",
+    correlationId: "CORR-SYN",
+    transactionId: "TX-SYN",
+    idempotencyKey: "IDEMP-SYN",
+  },
+  payloadFingerprint: "FP-SYN",
   status: "PENDING",
   attempts: 0,
   availableAt: "2026-09-15T00:00:00Z",
