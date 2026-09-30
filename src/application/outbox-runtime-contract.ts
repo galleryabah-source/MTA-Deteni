@@ -1,6 +1,6 @@
 import type { ExecutionContext } from "./execution-context-contract.js";
 import type { OutboxEvent, OutboxEnqueueCommand, OutboxStatus } from "./outbox-contract.js";
-import { validateOutboxEnqueue, validateOutboxEvent as validateCanonicalOutboxEvent } from "./outbox-contract.js";
+import { validateOutboxEnqueue, validateOutboxEvent as validateCanonicalOutboxEvent } from "./outbox-contract.ts";
 
 export type OutboxEventContract = Readonly<OutboxEvent & {
   executionContext: ExecutionContext;
