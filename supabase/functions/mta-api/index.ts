@@ -36,7 +36,15 @@ Deno.serve(async(req)=>{
   const routeParts=functionIndex>=0?parts.slice(functionIndex+1):parts;
   const resource=routeParts[0],id=routeParts[1];
   if(resource==="me"){
-    if(req.method==="GET") return json(req,{ok:true,user:{id:user.id,email:user.email},profile,role});
+    if(req.method==="GET"){
+      const diagnosticAdminKey=Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+      if(!diagnosticAdminKey) return json(req,{ok:false,error:"SERVER_CONFIGURATION_ERROR"},503);
+      const diagnosticAdmin=createClient(Deno.env.get("SUPABASE_URL")!,diagnosticAdminKey,{auth:{autoRefreshToken:false,persistSession:false}});
+      const {data:scopeRows,error:scopeError}=await diagnosticAdmin.from("mta_profile_scopes").select("scope_id,active,mta_scopes(id,code,name,active)").eq("profile_id",user.id).order("scope_id",{ascending:true});
+      if(scopeError) return json(req,{ok:false,error:"IDENTITY_SCOPE_EVIDENCE_FAILED"},500);
+      const scopeMemberships=(scopeRows||[]).map(row=>({scopeId:row.scope_id,active:!!row.active,scope:row.mta_scopes?{id:row.mta_scopes.id,code:row.mta_scopes.code,name:row.mta_scopes.name,active:!!row.mta_scopes.active}:null}));
+      return json(req,{ok:true,user:{id:user.id,email:user.email},profile,role,identityEvidence:{authUserId:user.id,profileId:profile.id,profileMatchesAuthUser:profile.id===user.id,role,profileActive:!!profile.active,scopeMemberships}});
+    }
     const adminKey=Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
     if(!adminKey) return json(req,{ok:false,error:"SERVER_CONFIGURATION_ERROR"},503);
     const admin=createClient(Deno.env.get("SUPABASE_URL")!,adminKey,{auth:{autoRefreshToken:false,persistSession:false}});
