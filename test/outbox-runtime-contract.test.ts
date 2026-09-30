@@ -23,21 +23,22 @@ const input = {
   payload: { synthetic: true },
   payloadFingerprint: "fp-001",
   occurredAt: "2026-09-16T00:00:00.000Z",
+  idempotencyKey: executionContext.idempotencyKey,
 };
 
 test("creates an immutable pending outbox event with canonical execution context", () => {
   const event = createOutboxEvent(input);
   assert.equal(event.status, "PENDING");
-  assert.equal(event.attemptCount, 0);
+  assert.equal(event.attempts, 0);
   assert.deepEqual(event.executionContext, executionContext);
   assert.equal(Object.isFrozen(event), true);
 });
 
 test("rejects invalid outbox identity, context and non-pending append state", () => {
-  assert.throws(() => validateOutboxEvent({ ...createOutboxEvent(input), eventId: "" }), /OUTBOX_IDENTITY_REQUIRED/);
-  assert.throws(() => validateOutboxEvent({ ...createOutboxEvent(input), executionContext: { ...executionContext, requestId: "" } }), /OUTBOX_EXECUTION_CONTEXT_REQUIRED/);
-  assert.throws(() => validateOutboxEvent({ ...createOutboxEvent(input), attemptCount: -1 }), /OUTBOX_ATTEMPT_COUNT_INVALID/);
-  assert.throws(() => validateOutboxEvent({ ...createOutboxEvent(input), status: "DISPATCHED" }), /OUTBOX_APPEND_REQUIRES_PENDING/);
+  assert.throws(() => validateOutboxEvent({ ...createOutboxEvent(input), eventId: "" }), /OUTBOX_EVENT_ID_REQUIRED/);
+  assert.throws(() => validateOutboxEvent({ ...createOutboxEvent(input), executionContext: { ...executionContext, requestId: "" } } as unknown as OutboxEventContract), /OUTBOX_EXECUTION_CONTEXT_REQUIRED/);
+  assert.throws(() => validateOutboxEvent({ ...createOutboxEvent(input), attempts: -1 }), /OUTBOX_ATTEMPTS_INVALID/);
+  assert.throws(() => validateOutboxEvent({ ...createOutboxEvent(input), status: "DISPATCHED" } as unknown as OutboxEventContract), /OUTBOX_STATUS_INVALID/);
 });
 
 test("appends only through the mandatory pending boundary", async () => {
