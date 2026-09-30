@@ -1,15 +1,19 @@
 import type { ExecutionContext } from "./execution-context-contract.js";
 import type { OutboxEvent, OutboxEnqueueCommand, OutboxStatus } from "./outbox-contract.js";
-import { validateOutboxEnqueue, validateOutboxEvent } from "./outbox-contract.js";
+import { validateOutboxEnqueue, validateOutboxEvent as validateCanonicalOutboxEvent } from "./outbox-contract.js";
 
 export type OutboxEventContract = Readonly<OutboxEvent & {
   executionContext: ExecutionContext;
   payloadFingerprint: string;
 }>;
 
-export { validateOutboxEvent } from "./outbox-contract.js";
-
 export type OutboxDisposition = "ADMIT" | "REPLAY" | "CONFLICT";
+
+export function validateOutboxEvent(event: OutboxEventContract): void {
+  validateCanonicalOutboxEvent(event);
+  validateExecutionContext(event);
+  if (!event.payloadFingerprint.trim()) throw new Error("OUTBOX_PAYLOAD_FINGERPRINT_REQUIRED");
+}
 
 export type OutboxStoreContract = Readonly<{
   appendPending: (event: OutboxEventContract) => Promise<OutboxDisposition>;
