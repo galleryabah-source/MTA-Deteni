@@ -303,7 +303,7 @@ async function loadAuthenticatedRuntime(){
     '/mobile-shell-v1.js?v=3',
     '/daily-guard-report-v2.js',
     '/daily-guard-report-d57.js',
-    '/admin-settings-v9.js?v=5',
+    '/admin-settings-v9.js?v=6',
     '/mta-unified-shell-v2.js?v=12',
     '/mta-system-audit-v1.js?v=2'
   ];  const criticalRuntimeScripts=new Set(['/desktop-shell-v2.js','/mta-unified-shell-v2.js']);
