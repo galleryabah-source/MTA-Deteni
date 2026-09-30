@@ -36,7 +36,39 @@ Deno.serve(async(req)=>{
   const routeParts=functionIndex>=0?parts.slice(functionIndex+1):parts;
   const resource=routeParts[0],id=routeParts[1];
   if(resource==="me"){
-    if(req.method==="GET") return json(req,{ok:true,user:{id:user.id,email:user.email},profile,role});
+    if(req.method==="GET"){
+      let scopeMemberships=[];
+      let scopeDiagnostic={status:"NOT_ATTEMPTED"};
+      try{
+        let diagnosticAdminKey=null;
+        const secretKeysRaw=Deno.env.get("SUPABASE_SECRET_KEYS");
+        if(secretKeysRaw){
+          try{
+            const secretKeys=JSON.parse(secretKeysRaw);
+            diagnosticAdminKey=secretKeys?.default||null;
+          }catch{}
+        }
+        if(!diagnosticAdminKey) diagnosticAdminKey=Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")||null;
+        if(!diagnosticAdminKey) throw new Error("ADMIN_KEY_UNAVAILABLE");
+        const diagnosticAdmin=createClient(Deno.env.get("SUPABASE_URL")!,diagnosticAdminKey,{auth:{autoRefreshToken:false,persistSession:false}});
+        const {data:scopeRows,error:scopeError}=await diagnosticAdmin.from("mta_profile_scopes").select("scope_id,active").eq("profile_id",user.id).order("scope_id",{ascending:true});
+        if(scopeError) throw new Error("MEMBERSHIP_READ:"+String(scopeError.message||"UNKNOWN"));
+        const scopeIds=(scopeRows||[]).map(row=>row.scope_id).filter(Boolean);
+        let scopeRowsFull=[];
+        if(scopeIds.length){
+          const {data:scopes,error:scopesError}=await diagnosticAdmin.from("mta_scopes").select("id,code,name,active").in("id",scopeIds);
+          if(scopesError) throw new Error("CATALOG_READ:"+String(scopesError.message||"UNKNOWN"));
+          scopeRowsFull=scopes||[];
+        }
+        const scopeById=new Map(scopeRowsFull.map(scope=>[scope.id,scope]));
+        scopeMemberships=(scopeRows||[]).map(row=>({scopeId:row.scope_id,active:!!row.active,scope:scopeById.get(row.scope_id)||null}));
+        scopeDiagnostic={status:"OK",source:"PRIVILEGED_DB_READ"};
+      }catch(error){
+        scopeDiagnostic={status:"ERROR",error:String(error?.message||error||"UNKNOWN").slice(0,240)};
+        console.error(JSON.stringify({service:"mta-api",event:"identity.scope.diagnostic_failed",requestId,correlationId,error:scopeDiagnostic.error}));
+      }
+      return json(req,{ok:true,user:{id:user.id,email:user.email},profile,role,identityEvidence:{authUserId:user.id,profileId:profile.id,profileMatchesAuthUser:profile.id===user.id,role,profileActive:!!profile.active,scopeMemberships,scopeDiagnostic}});
+    }
     const adminKey=Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
     if(!adminKey) return json(req,{ok:false,error:"SERVER_CONFIGURATION_ERROR"},503);
     const admin=createClient(Deno.env.get("SUPABASE_URL")!,adminKey,{auth:{autoRefreshToken:false,persistSession:false}});
