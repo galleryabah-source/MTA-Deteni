@@ -12,7 +12,11 @@ export type ProjectionResult = Readonly<{
 
 /** Event-driven projection boundary: the canonical committed outbox event is the source for eventual read-model updates. */
 export class OutboxReadModelProjector<T> {
-  constructor(private readonly projection: ReadModelProjectionPort<T>) {}
+  private readonly projection: ReadModelProjectionPort<T>;
+
+  constructor(projection: ReadModelProjectionPort<T>) {
+    this.projection = projection;
+  }
 
   async project(event: OutboxEventContract): Promise<ProjectionResult> {
     if (!event.eventId.trim() || !event.eventType.trim() || !event.aggregateId?.trim()) {
