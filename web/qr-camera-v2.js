@@ -6,21 +6,30 @@ function ensureCss(){if(document.querySelector('link[data-mta-qr-css]'))return;c
 function load(){ensureCss();if(window.Html5Qrcode)return Promise.resolve();if(ready)return ready;ready=new Promise((resolve,reject)=>{const s=document.createElement('script');s.src=LIB;s.async=true;s.onload=()=>resolve();s.onerror=()=>reject(new Error('QR scanner engine failed to load'));document.head.appendChild(s)});return ready}
 function close(){try{active?.stop?.()}catch{}try{active?.clear?.()}catch{}active=null;lastRaw='';lastAt=0;document.getElementById('mtaQrScannerModal')?.remove()}
 function resolve(raw){
+  const value=String(raw||'').trim();
+  if(!value){close();return}
+  // The unified shell owns the production QR resolve contract. Prefer it over the
+  // legacy P5 resolver so a camera scan returns its result to the active scanner page.
+  if(typeof window.mtaUnifiedResolve==='function'){
+    close();
+    window.mtaUnifiedResolve(value);
+    return;
+  }
   const input=document.querySelector('#p5scanin');
-  if(input&&typeof window.p5resolve==='function'){input.value=raw;window.p5resolve();close();return}
+  if(input&&typeof window.p5resolve==='function'){input.value=value;window.p5resolve();close();return}
   if(typeof window.show==='function'&&typeof window.p5resolve==='function'){
     close();
     window.show('p5scan');
     setTimeout(()=>{
       const target=document.querySelector('#p5scanin');
       if(!target){status('Scan Center tidak siap. Coba lagi.');return}
-      target.value=raw;
+      target.value=value;
       window.p5resolve();
     },80);
     return;
   }
   close();
-  window.dispatchEvent(new CustomEvent('mta:qr-detected',{detail:{raw}}));
+  window.dispatchEvent(new CustomEvent('mta:qr-detected',{detail:{raw:value}}));
 }
 function ui(){if(document.getElementById('mtaQrScannerModal'))return;const m=document.createElement('div');m.id='mtaQrScannerModal';m.innerHTML=`<div class="mta-qr-shell" role="dialog" aria-modal="true" aria-label="QR Scanner"><header class="mta-qr-head"><div class="mta-qr-title">Scan QR Code</div><button class="mta-qr-iconbtn" id="mtaQrClose" aria-label="Tutup scanner">×</button></header><div class="mta-qr-status" id="mtaQrStatus">Arahkan kamera ke QR code</div><main class="mta-qr-stage"><div id="mtaQrReader"></div><div class="mta-qr-frame" id="mtaQrFrame"><i class="mta-qr-corner tl"></i><i class="mta-qr-corner tr"></i><i class="mta-qr-corner bl"></i><i class="mta-qr-corner br"></i><i class="mta-qr-line"></i></div><div class="mta-qr-hint" id="mtaQrHint">Posisikan QR di dalam kotak. Kamera belakang akan diprioritaskan.</div></main><footer class="mta-qr-bottom"><select class="mta-qr-select" id="mtaQrCamera" aria-label="Pilih kamera"></select><button id="mtaQrTorch" type="button">Flash</button><button id="mtaQrFile" type="button">Galeri</button><button class="primary" id="mtaQrStop" type="button">Tutup</button><input class="mta-qr-hidden-file" id="mtaQrFileInput" type="file" accept="image/*" capture="environment"></footer></div>`;document.body.appendChild(m);m.querySelector('#mtaQrClose').onclick=close;m.querySelector('#mtaQrStop').onclick=close;m.querySelector('#mtaQrFile').onclick=()=>m.querySelector('#mtaQrFileInput').click();m.querySelector('#mtaQrFileInput').onchange=async e=>{const f=e.target.files?.[0];if(!f)return;try{await active?.scanFile?.(f,true)}catch(err){status('QR tidak terbaca dari gambar. Coba foto lebih dekat dan terang.');console.warn(err)}};return m}
 function status(t){const x=document.getElementById('mtaQrStatus');if(x)x.textContent=t}
