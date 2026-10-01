@@ -105,7 +105,7 @@ window.mtaAuth=Object.freeze({
   client:supabase,
   async signIn(nip,password){
     const normalized=String(nip||'').trim();
-    if(!/^\\d{18}$/.test(normalized))return {data:{session:null,user:null},error:{message:'NIP harus tepat 18 digit',code:'NIP_INVALID'}};
+    if(!/^\d{18}$/.test(normalized))return {data:{session:null,user:null},error:{message:'NIP harus tepat 18 digit',code:'NIP_INVALID'}};
     const response=await fetch('/api/mta-login',{
       method:'POST',
       headers:{'Content-Type':'application/json'},
