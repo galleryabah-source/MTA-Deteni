@@ -83,7 +83,7 @@ function settings(){
   if(!app)return;
   if(!['OWNER','ADMIN'].includes(String(d.adminSettings.role||'').toUpperCase())){
     app.innerHTML=shell('Pengaturan','Akses dibatasi untuk Administrator.',
-      '<div class="p6card"><div class="notice p6danger">ADMIN ONLY · Role synthetic saat ini: '+E(d.adminSettings.role||'UNSET')+'</div></div>');
+      '<div class="p6card"><div class="notice p6danger">ADMIN ONLY · Role saat ini: '+E(d.adminSettings.role||'UNSET')+'</div></div>');
     return;
   }
 
@@ -137,7 +137,7 @@ function settings(){
       '<div class="field"><label>Migration Freeze</label><input value="'+(d.adminSettings.migrationFreeze?'TRUE':'FALSE')+'" disabled></div>'+
     '</div><div class="actions"><button class="btn primary" onclick="window.p9saveSystem()">Simpan System</button></div></div></div>'+
 
-    '<div class="mta-admin-panel" data-panel="security"><div class="p6card"><h2>Security &amp; Governance</h2><div class="notice">Role synthetic: <b>'+E(d.adminSettings.role)+
+    '<div class="mta-admin-panel" data-panel="security"><div class="p6card"><h2>Security &amp; Governance</h2><div class="notice">Role: <b>'+E(d.adminSettings.role)+
       '</b><br>QR Policy: <b>'+E(d.adminSettings.qrPolicy)+'</b><br>Real data: <b>DISALLOWED IN PREVIEW</b></div><p class="p6mini">User, role, permission, scope, duty assignment, dan policy produksi tetap mengikuti authorization boundary; password/secret produksi tidak disimpan di runtime preview.</p></div></div>'+
 
     '<div class="mta-admin-panel" data-panel="blocks"><div class="p6card"><div class="toolbar"><h2 style="margin-right:auto">Master Blok</h2><button class="btn primary" onclick="window.p9addBlock()">+ Tambah Blok</button></div><div class="tablewrap"><table class="table"><thead><tr><th>Blok</th><th>Status</th><th>Jumlah Kamar</th><th>Aksi</th></tr></thead><tbody>'+
@@ -169,7 +169,7 @@ function settings(){
 
   app.innerHTML=shell(
     'Pengaturan Administrator',
-    'Control plane untuk master data dan konfigurasi operasional. Runtime tetap synthetic/local.',
+    'Control plane untuk master data dan konfigurasi operasional. Runtime production terhubung ke database.',
     body
   );
 }
