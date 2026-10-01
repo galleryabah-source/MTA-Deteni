@@ -9,9 +9,13 @@ const api=fs.readFileSync('supabase/functions/mta-api/index.ts','utf8');
 const foundation=fs.readFileSync('supabase/migrations/20260921060500_mta_deteni_production_activation_foundation.sql','utf8');
 const rbac=fs.readFileSync('supabase/migrations/20260921070000_mta_production_auth_rbac_v1.sql','utf8');
 const stateKernel=fs.readFileSync('web/mta-state-kernel-v1.js','utf8');
+const grants=fs.readFileSync('supabase/migrations/20261001071000_mta_p97_service_role_dml_grants_v1.sql','utf8');
 
 assert.match(foundation,/create table if not exists public\.mta_detainees/);
 assert.match(foundation,/metadata jsonb not null default '\{\}'::jsonb/);
+assert.match(grants,/grant select, insert, update, delete on table/);
+assert.match(grants,/public\.mta_detainees/);
+assert.match(grants,/to service_role/);
 assert.match(rbac,/create policy mta_detainees_select_auth/);
 assert.match(rbac,/create policy mta_detainees_insert_editor/);
 assert.match(rbac,/create policy mta_detainees_update_editor/);
