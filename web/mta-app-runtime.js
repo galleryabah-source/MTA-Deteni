@@ -39,10 +39,10 @@
   provenance.dataset.mtaProvenance='1';
   provenance.onload=()=>{
     const s=document.createElement('script');
-    s.src='/mta-app-runtime-full.js?v=24';
+    s.src='/mta-app-runtime-full.js?v=23';
     s.async=true;
     s.dataset.mtaOperationalRuntime='1';
-    s.onload=()=>console.info('[MTA] operational runtime loaded v24');
+    s.onload=()=>console.info('[MTA] operational runtime loaded v23');
     s.onerror=err=>console.warn('[MTA] operational runtime unavailable; core dashboard remains active',err);
     document.body.appendChild(s);
   };
