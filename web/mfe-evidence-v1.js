@@ -13,7 +13,8 @@ function normalize(input){
   return {evidenceId,capturedAt,actorId,eventType,sourceKind,location:input.location?String(input.location):undefined,rawNote:input.rawNote?String(input.rawNote):undefined,photoRefs:Array.isArray(input.photoRefs)?input.photoRefs.map(String):[],includeInReport:input.includeInReport!==false,eventRef:input.eventRef?String(input.eventRef):undefined,sequence:Number.isFinite(input.sequence)?input.sequence:0,syntheticOnly:true};
 }
 async function capture(input){
-  if(!queue()?.put)throw new Error('MFE_OFFLINE_QUEUE_UNAVAILABLE');
+  if(window.mtaProductionStateAdapter?.isProduction?.())throw new Error('SYNTHETIC_EVIDENCE_DISABLED_IN_PRODUCTION');
+  if(!queue()?.putthrow new Error('MFE_OFFLINE_QUEUE_UNAVAILABLE');
   const evidence=normalize(input);
   return queue().put({...evidence,operation:'MFE_EVIDENCE_CAPTURE',idempotencyKey:PREFIX+evidence.evidenceId,correlationId:evidence.evidenceId});
 }
