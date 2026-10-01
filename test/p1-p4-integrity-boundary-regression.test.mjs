@@ -34,6 +34,7 @@ assert.match(migration,/row_number\(\) over \(order by occurred_at asc, id asc\)
 assert.match(migration,/new\.audit_sequence := nextval\('public\.mta_audit_sequence_seq'::regclass\)/);
 assert.match(migration,/order by audit_sequence desc/);
 assert.match(migration,/order by audit_sequence asc/);
+assert.match(migration,/coalesce\(\(select max\(audit_sequence\) from public\.mta_audit_events\),1\)/);
 assert.match(migration,/AUDIT_SEQUENCE_GAP_OR_REORDER/);
 
 console.log('P4 audit_sequence migration contract PASS');
