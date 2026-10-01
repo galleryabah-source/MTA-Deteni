@@ -24,5 +24,6 @@ assert.match(authUi,/mtaAuthNip/);
 assert.match(authUi,/NIP harus tepat 18 digit/);
 assert.match(users,/name="nip"/);
 assert.match(users,/NIP wajib tepat 18 angka/);
+assert.match(users,/u\.nip\|\|u\.display_name/);
 assert.match(identity,/label>NIP</);
 console.log('NIP authentication contract: PASS');
