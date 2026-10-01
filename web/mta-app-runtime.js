@@ -33,11 +33,19 @@
 
   // Operational runtime is deliberately non-blocking.
   // Cache-bust after the persistence/branding fixes; this must load the current full runtime.
-  const s=document.createElement('script');
-  s.src='/mta-app-runtime-full.js?v=23';
-  s.async=true;
-  s.dataset.mtaOperationalRuntime='1';
-  s.onload=()=>console.info('[MTA] operational runtime loaded v22');
-  s.onerror=err=>console.warn('[MTA] operational runtime unavailable; core dashboard remains active',err);
-  document.body.appendChild(s);
+  const provenance=document.createElement('script');
+  provenance.src='/mta-provenance-v1.js?v=1';
+  provenance.async=false;
+  provenance.dataset.mtaProvenance='1';
+  provenance.onload=()=>{
+    const s=document.createElement('script');
+    s.src='/mta-app-runtime-full.js?v=23';
+    s.async=true;
+    s.dataset.mtaOperationalRuntime='1';
+    s.onload=()=>console.info('[MTA] operational runtime loaded v23');
+    s.onerror=err=>console.warn('[MTA] operational runtime unavailable; core dashboard remains active',err);
+    document.body.appendChild(s);
+  };
+  provenance.onerror=err=>console.error('[MTA] provenance contract unavailable; operational runtime blocked',err);
+  document.body.appendChild(provenance);
 })();

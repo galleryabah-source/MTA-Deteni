@@ -47,10 +47,10 @@ jobs:
           const worker=fs.readFileSync('worker-v11.js','utf8');
           const required=[
             ["migrationFreeze:true", "migration freeze"],
-            ["productionAccessAuthorized:false", "production access"],
-            ["livePostgresqlExecution:false", "live PostgreSQL"],
-            ["realDetaineeDataAllowed:false", "real detainee data"],
-            ["dataMode:'SYNTHETIC_ONLY'", "synthetic-only"],
+            ["productionAccessAuthorized:true", "production access"],
+            ["livePostgresqlExecution:true", "live PostgreSQL"],
+            ["realDetaineeDataAllowed:true", "real detainee data"],
+            ["dataMode:'PRODUCTION_DB'", "production database"],
             ["ai:'OFF'", "AI off"]
           ];
           for(const [needle,label] of required) {

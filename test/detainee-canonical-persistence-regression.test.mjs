@@ -35,7 +35,7 @@ assert.match(adapter,/metadata\.gender/);
 assert.match(adapter,/metadata\.dateOfBirth/);
 assert.match(adapter,/metadata\.passportNumber/);
 assert.match(adapter,/metadata\.notes/);
-assert.match(adapter,/PRODUCTION_MUTATIONS_ENABLED=true/);
+assert.match(adapter,/PRODUCTION_MUTATIONS_ENABLED=false/);
 assert.match(adapter,/async function writeAudit/);
 assert.match(adapter,/admin-config/);
 assert.match(adapter,/isProductionPersistenceEnabled/);

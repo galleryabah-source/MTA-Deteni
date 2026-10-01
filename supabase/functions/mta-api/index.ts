@@ -9,6 +9,55 @@ const requestStarts=new WeakMap();
 const json=(req,body,status=200,context={})=>{const requestId=context.requestId||req.headers.get("X-Request-Id")||crypto.randomUUID();const correlationId=context.correlationId||req.headers.get("X-Correlation-Id")||requestId;const durationMs=requestStarts.has(req)?performance.now()-requestStarts.get(req):undefined;const event=(()=>{try{return serializeObservabilityEvent(createObservabilityEvent({level:status>=500?"ERROR":status>=400?"WARN":"INFO",service:"mta-api",event:status>=500?"request.failed":"request.completed",requestId,correlationId,method:req.method,route:new URL(req.url).pathname,status,durationMs,outcome:status>=500?"FAILED":status>=400?"DENIED":"SUCCESS",errorCode:body?.error}));}catch{return null;}})();if(event)console.log(event);return new Response(JSON.stringify(body),{status,headers:{...cors(req),"X-Request-Id":requestId,"X-Correlation-Id":correlationId}});};
 const stableJson=(value)=>{if(value===null||typeof value!=="object")return JSON.stringify(value);if(Array.isArray(value))return "["+value.map(stableJson).join(",")+"]";return "{"+Object.keys(value).sort().map((k)=>JSON.stringify(k)+":"+stableJson(value[k])).join(",")+"}";};
 const sha256Hex=async(value)=>{const bytes=new TextEncoder().encode(value),hash=await crypto.subtle.digest("SHA-256",bytes);return Array.from(new Uint8Array(hash)).map((b)=>b.toString(16).padStart(2,"0")).join("");};
+const productionWritesEnabled=()=>Deno.env.get("MTA_PRODUCTION_WRITES_ENABLED")==="true";
+const WRITE_METHODS=new Set(["POST","PATCH","DELETE"]);
+const AUTHZ_POLICY_VERSION="AUTHZ-DB-RLS-v1";
+const MUTATION_ROLE_POLICY={
+  detainees:{POST:new Set(["OWNER","ADMIN","EDITOR"]),PATCH:new Set(["OWNER","ADMIN","EDITOR"]),DELETE:new Set(["OWNER","ADMIN"])},
+  placements:{POST:new Set(["OWNER","ADMIN","EDITOR"]),PATCH:new Set(["OWNER","ADMIN","EDITOR"]),DELETE:new Set(["OWNER","ADMIN"])},
+  movements:{POST:new Set(["OWNER","ADMIN","EDITOR"]),PATCH:new Set(["OWNER","ADMIN","EDITOR"]),DELETE:new Set(["OWNER","ADMIN"])},
+  leaves:{POST:new Set(["OWNER","ADMIN","EDITOR"]),PATCH:new Set(["OWNER","ADMIN","EDITOR"]),DELETE:new Set(["OWNER","ADMIN"])},
+  documents:{POST:new Set(["OWNER","ADMIN","EDITOR"]),PATCH:new Set(["OWNER","ADMIN","EDITOR"]),DELETE:new Set(["OWNER","ADMIN"])},
+  blocks:{POST:new Set(["OWNER","ADMIN"]),PATCH:new Set(["OWNER","ADMIN"]),DELETE:new Set(["OWNER","ADMIN"])},
+  rooms:{POST:new Set(["OWNER","ADMIN"]),PATCH:new Set(["OWNER","ADMIN"]),DELETE:new Set(["OWNER","ADMIN"])}
+};
+const SCOPED_MUTATION_RESOURCES=new Set(["detainees","placements","movements","leaves"]);
+const denyAuthorization=(reasonCode)=>({allowed:false,reasonCode,policyVersion:AUTHZ_POLICY_VERSION});
+const allowAuthorization=()=>({allowed:true,reasonCode:"ALLOW",policyVersion:AUTHZ_POLICY_VERSION});
+
+const authorizeGenericMutation=async({admin,userId,role,resource,method,id,body})=>{
+  const methodRoles=MUTATION_ROLE_POLICY[resource]?.[method];
+  if(!methodRoles) return denyAuthorization("RESOURCE_ACTION_DENIED");
+  if(!methodRoles.has(role)) return denyAuthorization("PERMISSION_DENIED");
+  if(!SCOPED_MUTATION_RESOURCES.has(resource)) return allowAuthorization();
+  if(role==="OWNER"||role==="ADMIN") return allowAuthorization();
+
+  const scoped=await admin.from("mta_profile_scopes").select("scope_id").eq("profile_id",userId).eq("active",true).limit(1).maybeSingle();
+  if(scoped.error||!scoped.data?.scope_id) return denyAuthorization("SCOPE_DENIED");
+  const scopeId=scoped.data.scope_id;
+
+  let current=null;
+  if(method!=="POST"){
+    const currentColumns=resource==="detainees"?"detainee_id,scope_id":"detainee_id";
+    const currentResult=await admin.from("mta_"+resource).select(currentColumns).eq("id",id).maybeSingle();
+    if(currentResult.error||!currentResult.data) return denyAuthorization("RESOURCE_NOT_FOUND");
+    current=currentResult.data;
+  }
+  const requestedDetaineeId=body?.detainee_id??body?.detaineeId??current?.detainee_id??null;
+  if(resource==="detainees"){
+    const requestedScopeId=body?.scope_id??current?.scope_id??null;
+    if(requestedScopeId!==scopeId) return denyAuthorization("SCOPE_DENIED");
+    return allowAuthorization();
+  }
+  if(!requestedDetaineeId) return denyAuthorization("SCOPE_REQUIRED");
+  const detainee=await admin.from("mta_detainees").select("id,scope_id").eq("id",requestedDetaineeId).maybeSingle();
+  if(detainee.error||!detainee.data) return denyAuthorization("RESOURCE_NOT_FOUND");
+  if(detainee.data.scope_id!==scopeId) return denyAuthorization("SCOPE_DENIED");
+  if(resource!=="detainees" && current?.detainee_id && current.detainee_id!==requestedDetaineeId){
+    return denyAuthorization("RESOURCE_SCOPE_REBIND_DENIED");
+  }
+  return allowAuthorization();
+};
 
 Deno.serve(async(req)=>{
   const startedAt=performance.now();
@@ -81,6 +130,13 @@ Deno.serve(async(req)=>{
 
   if(profile.must_change_password) return json(req,{ok:false,error:"PASSWORD_CHANGE_REQUIRED",role},428);
 
+  // Operational writes are fail-closed. The release gate is server-side and
+  // cannot be bypassed by changing browser state or calling the Edge Function directly.
+  // Password/profile self-service remains available through /me so operators can recover credentials.
+  if(WRITE_METHODS.has(req.method) && resource!=="me" && !productionWritesEnabled()) {
+    emit("WARN","mutation.locked",{status:423,outcome:"DENIED",errorCode:"PRODUCTION_WRITE_LOCKED"});
+    return json(req,{ok:false,error:"PRODUCTION_WRITE_LOCKED",role},423,{requestId,correlationId});
+  }
 
   if(resource==="admin-users"){
     if(!new Set(["OWNER","ADMIN"]).has(role)) return json(req,{ok:false,error:"RBAC_USER_ADMIN_DENIED"},403);
@@ -369,16 +425,9 @@ Deno.serve(async(req)=>{
     }
   }
   if(!TABLES.has(resource)) return json(req,{ok:false,error:"RESOURCE_NOT_FOUND"},404);
-  if(resource==="audit-event" && req.method==="POST"){
-    if(!WRITE_ROLES.has(role))return json(req,{ok:false,error:"RBAC_WRITE_DENIED",role},403);
-    const body=await req.json().catch(()=>({}));
-    const requestId=req.headers.get("X-Request-Id")||crypto.randomUUID(),correlationId=req.headers.get("X-Correlation-Id")||crypto.randomUUID();
-    const adminKey=Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");if(!adminKey)return json(req,{ok:false,error:"SERVER_CONFIGURATION_ERROR"},503);
-    const admin=createClient(Deno.env.get("SUPABASE_URL")!,adminKey,{auth:{autoRefreshToken:false,persistSession:false}});
-    const inserted=await admin.from("mta_audit_events").insert({action:String(body.action||"RUNTIME_EVENT"),resource_type:String(body.resource_type||"RUNTIME"),resource_id:body.resource_id?String(body.resource_id):null,result:String(body.result||"SUCCESS"),actor_user_id:user.id,request_id:requestId,correlation_id:correlationId,metadata:body.metadata&&typeof body.metadata==="object"?body.metadata:{}}).select("*").single();
-    if(inserted.error)return json(req,{ok:false,error:"AUDIT_WRITE_FAILED"},400);
-    return json(req,{ok:true,resource,data:inserted.data});
-  }
+  // Audit events are server-generated inside canonical mutation boundaries.
+  // There is deliberately no client-facing audit write endpoint.
+  if(resource==="audit-event") return json(req,{ok:false,error:"AUDIT_WRITE_DISABLED"},405);
 
   if(resource==="audit" && req.method!=="GET") return json(req,{ok:false,error:"AUDIT_READ_ONLY"},405);
   if(["POST","PATCH","DELETE"].includes(req.method)&&!WRITE_ROLES.has(role)) return json(req,{ok:false,error:"RBAC_WRITE_DENIED",role},403);
@@ -397,7 +446,8 @@ Deno.serve(async(req)=>{
     const admin=createClient(Deno.env.get("SUPABASE_URL")!,adminKey,{auth:{autoRefreshToken:false,persistSession:false}});
     const requestId=req.headers.get("X-Request-Id")||crypto.randomUUID();
     const correlationId=req.headers.get("X-Correlation-Id")||requestId;
-    const idempotencyKey=req.headers.get("Idempotency-Key")||crypto.randomUUID();
+    const idempotencyKey=String(req.headers.get("Idempotency-Key")||"").trim();
+    if(WRITE_METHODS.has(req.method) && !idempotencyKey) return json(req,{ok:false,error:"IDEMPOTENCY_KEY_REQUIRED"},400,{requestId,correlationId});
     let body=req.method==="DELETE"?{}:await req.json().catch(()=>({}));
     let canonicalScopeId=null;
     if(["blocks","rooms","detainees"].includes(resource)){
@@ -473,6 +523,11 @@ Deno.serve(async(req)=>{
         return json(req,{ok:false,error:"TRANSACTIONAL_MOVEMENT_REJECTED",command:"MOVE_DETAINEE",requestId,correlationId},400);
       }
       return json(req,{ok:true,resource,role,command:"MOVE_DETAINEE",data,replayed:!!data?.replayed},data?.replayed?200:201);
+    }
+    const authorizationDecision=await authorizeGenericMutation({admin,userId:user.id,role,resource,method:req.method,id,body});
+    if(!authorizationDecision.allowed){
+      emit("WARN","authorization.denied",{status:403,outcome:"DENIED",errorCode:authorizationDecision.reasonCode,policyVersion:authorizationDecision.policyVersion,resource});
+      return json(req,{ok:false,error:authorizationDecision.reasonCode,policyVersion:authorizationDecision.policyVersion},403,{requestId,correlationId});
     }
     const operation=req.method==="POST"?"INSERT":req.method==="PATCH"?"UPDATE":"DELETE";
     const requestHash=await sha256Hex(stableJson({method:req.method,resource,id:id||null,body}));

@@ -4,7 +4,7 @@
   // Production is explicit. Staging/preview workers remain synthetic unless deliberately promoted.
   const PRODUCTION_HOSTS=new Set(['mta-deteni.galleryabah.workers.dev']);
   // Governance lock: production mutation remains disabled until explicit release.
-  const PRODUCTION_MUTATIONS_ENABLED=true;
+  const PRODUCTION_MUTATIONS_ENABLED=false;
   const isProduction=()=>PRODUCTION_HOSTS.has(location.hostname);
   const isProductionPersistenceEnabled=()=>isProduction()&&PRODUCTION_MUTATIONS_ENABLED;
   const state=()=>window.__mtaProductionState||null;
@@ -100,15 +100,17 @@
     window.__mtaRuntimeStatus={mode:'PRODUCTION',database:'CONNECTED',ai:'OFF',syntheticOnly:false,readOnly:false,identity:'VALIDATED',adminConfig:adminConfig.skipped?'RBAC_BOUNDARY':'LOADED',loadedAt:state.meta.loadedAt};
     return state;
   }
-  async function writeAudit({action,resourceType,resourceId,result='SUCCESS',correlationId,metadata={}}={}){
-    if(!isProduction())return {ok:false,code:'NOT_PRODUCTION'};
-    const response=await request('audit-event',{method:'POST',body:{action,resource_type:resourceType,resource_id:resourceId,result,metadata},headers:{'X-Correlation-Id':String(correlationId||crypto.randomUUID())}});
-    return {ok:true,code:'AUDIT_COMMITTED',data:response.data};
+  async function writeAudit(){
+    // Client-originated audit writes are intentionally disabled. Audit records
+    // must be emitted by the server-side canonical mutation transaction.
+    return {ok:false,code:'AUDIT_WRITE_DISABLED'};
   }
   async function mutateResource(resource,operation,{id,body={},requestId,correlationId,idempotencyKey}={}){
     if(!isProductionPersistenceEnabled())throw new Error('PRODUCTION_MUTATION_NOT_AUTHORIZED');
     const method=operation==='create'?'POST':operation==='update'?'PATCH':operation==='delete'?'DELETE':null;
     if(!method)throw new Error('PRODUCTION_MUTATION_OPERATION_INVALID');
+    const key=String(idempotencyKey||'').trim();
+    if(!key)throw new Error('IDEMPOTENCY_KEY_REQUIRED');
     const requestHeaders={
       'X-Request-Id':String(requestId||crypto.randomUUID()),
       'X-Correlation-Id':String(correlationId||crypto.randomUUID()),
@@ -122,7 +124,7 @@
     if(!isProductionPersistenceEnabled())throw new Error('PRODUCTION_MUTATION_NOT_AUTHORIZED');
     const cleanDetaineeId=String(detaineeId||'').trim(),cleanRoomId=String(targetRoomId||'').trim();
     if(!cleanDetaineeId||!cleanRoomId)throw new Error('MOVE_DETAINEE_IDENTIFIERS_REQUIRED');
-    const requestKey=String(idempotencyKey||('MOVE_DETAINEE:'+cleanDetaineeId+':'+cleanRoomId+':'+String(occurredAt||''))).trim();
+    const requestKey=String(idempotencyKey||'').trim();
     const correlation=String(correlationId||crypto.randomUUID()).trim(),reqId=String(requestId||crypto.randomUUID()).trim();
     if(requestKey.length<8)throw new Error('MOVE_DETAINEE_IDEMPOTENCY_KEY_INVALID');
     const body={command:'MOVE_DETAINEE',detaineeId:cleanDetaineeId,targetRoomId:cleanRoomId,movementType:String(movementType||'TRANSFER'),purpose:purpose===null||purpose===undefined?null:String(purpose),occurredAt:occurredAt||new Date().toISOString()};
@@ -131,26 +133,28 @@
     window.__mtaRuntimeStatus={...(window.__mtaRuntimeStatus||{}),readOnly:false,lastCommand:{command:'MOVE_DETAINEE',movementId:result.data?.movementId||null,placementId:result.data?.placementId||null,auditEventId:result.data?.auditEventId||null,replayed:!!result.replayed,requestId:reqId,correlationId:result.data?.correlationId||correlation,idempotencyKey:requestKey,committedAt:new Date().toISOString()}};
     return result;
   }
-  async function mutateDetainee(operation,{id,code,name,nationality,status,placement,gender,dateOfBirth,passportNumber,notes,correlationId,requestId}={}){
+  async function mutateDetainee(operation,{id,code,name,nationality,status,placement,gender,dateOfBirth,passportNumber,notes,correlationId,requestId,idempotencyKey}={}){
     if(!isProductionPersistenceEnabled())throw new Error('PRODUCTION_MUTATION_NOT_AUTHORIZED');
     const correlation=String(correlationId||crypto.randomUUID());
+    const key=String(idempotencyKey||'').trim();
+    if(!key)throw new Error('IDEMPOTENCY_KEY_REQUIRED');
     const clean={code:String(code||'').trim(),name:String(name||'').trim(),nationality:String(nationality||'').trim(),status:String(status||'AKTIF'),placement:String(placement||'').trim(),updated_at:new Date().toISOString(),metadata:{gender:String(gender||''),dateOfBirth:String(dateOfBirth||''),passportNumber:String(passportNumber||''),notes:String(notes||''),correlationId:correlation,source:'PRODUCTION_RUNTIME'}};
     if(operation==='create'){
       if(!clean.code||!clean.name)throw new Error('DETAINEE_INPUT_INVALID');
-      const result=await request('detainees',{method:'POST',body:clean,headers:{'X-Request-Id':String(requestId||crypto.randomUUID()),'X-Correlation-Id':clean.metadata.correlationId}});
+      const result=await request('detainees',{method:'POST',body:clean,headers:{'X-Request-Id':String(requestId||crypto.randomUUID()),'X-Correlation-Id':clean.metadata.correlationId,'Idempotency-Key':key}});
       const refreshed=await hydrate();
       return {ok:true,code:'DETAINEE_CREATED',data:result.data,state:refreshed,correlationId};
     }
     if(!id)throw new Error('DETAINEE_ID_REQUIRED');
     if(operation==='update'){
-      const result=await request('detainees',{method:'PATCH',id:String(id),body:clean,headers:{'X-Request-Id':String(requestId||crypto.randomUUID()),'X-Correlation-Id':clean.metadata.correlationId}});
+      const result=await request('detainees',{method:'PATCH',id:String(id),body:clean,headers:{'X-Request-Id':String(requestId||crypto.randomUUID()),'X-Correlation-Id':clean.metadata.correlationId,'Idempotency-Key':key}});
       const refreshed=await hydrate();
       return {ok:true,code:'DETAINEE_UPDATED',data:result.data,state:refreshed,correlationId};
     }
     if(operation==='archive'){
       const current=state()?.detainees?.find(x=>String(x.id)===String(id));
       const metadata={...(current?.metadata||{}),archiveReason:'USER_ARCHIVE',archivedAt:new Date().toISOString(),correlationId:correlation};
-      const result=await request('detainees',{method:'PATCH',id:String(id),body:{status:'NONAKTIF',updated_at:new Date().toISOString(),metadata},headers:{'X-Request-Id':String(requestId||crypto.randomUUID()),'X-Correlation-Id':correlation}});
+      const result=await request('detainees',{method:'PATCH',id:String(id),body:{status:'NONAKTIF',updated_at:new Date().toISOString(),metadata},headers:{'X-Request-Id':String(requestId||crypto.randomUUID()),'X-Correlation-Id':correlation,'Idempotency-Key':key}});
       const refreshed=await hydrate();
       return {ok:true,code:'DETAINEE_ARCHIVED',data:result.data,state:refreshed,correlationId};
     }
@@ -163,7 +167,9 @@
   async function restoreBackup(snapshot){
     if(!isProductionPersistenceEnabled())throw new Error('PRODUCTION_MUTATION_NOT_AUTHORIZED');
     if(!snapshot||typeof snapshot!=='object')throw new Error('BACKUP_INVALID');
-    const response=await request('backup-restore',{method:'POST',body:snapshot,headers:{'X-Request-Id':crypto.randomUUID(),'X-Correlation-Id':crypto.randomUUID(),'Idempotency-Key':String(snapshot?.manifest?.backupId||crypto.randomUUID())}});
+    const restoreKey=String(snapshot?.manifest?.backupId||'').trim();
+    if(!restoreKey)throw new Error('IDEMPOTENCY_KEY_REQUIRED');
+    const response=await request('backup-restore',{method:'POST',body:snapshot,headers:{'X-Request-Id':crypto.randomUUID(),'X-Correlation-Id':crypto.randomUUID(),'Idempotency-Key':restoreKey}});
     const refreshed=await hydrate();
     return {...response,state:refreshed,replayed:!!response.replayed};
   }

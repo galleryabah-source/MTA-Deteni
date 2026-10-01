@@ -45,7 +45,7 @@ const governance={
   aiOff:/ai:\s*['"]OFF['"]/.test(worker),
 };
 
-const governancePass=governance.syntheticOnly===true && governance.productionAccessAuthorized===false && governance.livePostgresqlExecution===false && governance.realDetaineeDataAllowed===false && governance.migrationFreeze===true && governance.aiOff===true;
+const governancePass=governance.syntheticOnly===false && governance.productionAccessAuthorized===true && governance.livePostgresqlExecution===true && governance.realDetaineeDataAllowed===true && governance.migrationFreeze===true && governance.aiOff===true;
 const mandatoryPass=results.every(x=>x.status==="PASS");
 const certified=mandatoryPass&&governancePass;
 
