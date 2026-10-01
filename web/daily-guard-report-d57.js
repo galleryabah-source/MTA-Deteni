@@ -5,6 +5,8 @@
 (function(global){
   'use strict';
 
+  if(window.mtaProductionStateAdapter?.isProduction?.()){ global.mtaDailyGuardD57=Object.freeze({disabledInProduction:true}); return; }
+
   const STATUS_ORDER = Object.freeze({
     DRAFT:0, VALIDATED:1, GENERATED:2, IN_REVIEW:3,
     CHANGES_REQUESTED:4, APPROVED:5, FINAL:6
