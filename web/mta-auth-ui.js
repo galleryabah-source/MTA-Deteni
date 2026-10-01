@@ -190,7 +190,7 @@
     window.__mtaAuthModuleLoading=new Promise((resolve,reject)=>{
       const s=document.createElement('script');
       s.type='module';
-      s.src='/mta-auth.js?v=7';
+      s.src='/mta-auth.js?v=8';
       s.onload=()=>resolve();
       s.onerror=()=>reject(new Error('AUTH_MODULE_LOAD_FAILED'));
       document.head.appendChild(s);
