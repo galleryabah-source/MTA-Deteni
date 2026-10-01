@@ -29,4 +29,8 @@
   window.MTAProvenance=Object.freeze({VERSION,isProduction,status,assert,applyChrome});
   try{assert();}catch(error){console.error('[MTA] provenance contract failed',error);}
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',applyChrome,{once:true});else applyChrome();
+  let last='';
+  const reconcile=()=>{const p=status();const key=[p.mode,p.source,p.database,p.syntheticOnly].join('|');if(key!==last){last=key;try{assert();}catch(error){console.error('[MTA] provenance contract failed',error);}applyChrome();}};
+  window.addEventListener('mta-runtime-status',reconcile);
+  const timer=setInterval(()=>{reconcile();if(window.__mtaRuntimeStatus?.database==='CONNECTED'||!isProduction())clearInterval(timer);},250);
 })();
