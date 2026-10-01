@@ -29,7 +29,7 @@ function profileHtml(forced){
  '<div class="mta-id-security">'+
  (forced?'<div class="mta-id-warning"><strong>Password perlu diganti.</strong><br>Password akun ini baru saja direset oleh administrator. Selesaikan penggantian password sebelum mengakses operasi aplikasi.</div>':'')+
  '<section class="security-card"><div class="security-title">Profil Saya</div><div class="security-sub">Identitas akun berasal dari authentication boundary dan profile canonical MTA DETENI.</div>'+
- '<div class="formgrid" style="margin-top:10px"><div class="field"><label>Email</label><div class="notice mta-id-readonly">'+esc(u.email||'-')+'</div></div>'+
+ '<div class="formgrid" style="margin-top:10px"><div class="field"><label>NIP</label><div class="notice mta-id-readonly">'+esc(p.nip||'-')+'</div></div>'+
  '<div class="field"><label>Role</label><div class="notice mta-id-readonly">'+esc(p.role||'-')+'</div></div>'+
  '<div class="field"><label>Nama Tampilan</label><input id="mtaIdDisplayName" maxlength="120" value="'+esc(p.display_name||'')+'" '+(forced?'disabled':'')+'></div>'+
  '<div class="field"><label>Scope Efektif</label><div class="notice mta-id-readonly">'+esc(scope(p.role))+'</div></div></div>'+

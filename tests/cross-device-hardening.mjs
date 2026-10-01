@@ -21,10 +21,11 @@ export function createClient(){
     async signInWithPassword({email,password}){
       if(email!=='synthetic@example.test'||password!=='synthetic-password')
         return {data:{session:null,user:null},error:{message:'INVALID_SYNTHETIC_CREDENTIALS'}};
-      session={access_token:'synthetic-browser-token',user:{id:'synthetic-browser-user',email}};
+      session={access_token:'synthetic-browser-token',refresh_token:'synthetic-browser-refresh',user:{id:'synthetic-browser-user',email}};
       authListener?.('SIGNED_IN',session);
       return {data:{session,user:session.user},error:null};
     },
+    async setSession({access_token,refresh_token}){session={access_token,refresh_token,user:{id:'synthetic-browser-user',email:'synthetic@example.test'}};authListener?.('SIGNED_IN',session);return {data:{session,user:session.user},error:null};},
     async signOut(){session=null;authListener?.('SIGNED_OUT',null);return {error:null};},
     async getUser(){return {data:{user:session?.user||null},error:null};}
   }};
@@ -54,7 +55,8 @@ for(const cfg of targets){
     await page.route('https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.js',route=>route.fulfill({status:200,contentType:'application/javascript',body:QR_STUB}));
     await page.goto('http://127.0.0.1:4173/',{waitUntil:'domcontentloaded'});
     await page.locator('#mtaAuthGate.open').waitFor({state:'visible',timeout:10000});
-    await page.locator('#mtaAuthEmail').fill('synthetic@example.test');
+    await page.route('**/api/mta-login', async route => {const body=route.request().postDataJSON?.()||{};if(body.nip!=='198008142008011001'||body.password!=='synthetic-password') return route.fulfill({status:401,contentType:'application/json',body:JSON.stringify({ok:false,error:'INVALID_LOGIN'})});const user={id:'synthetic-browser-user',email:'synthetic@example.test'};return route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({ok:true,data:{session:{access_token:'synthetic-browser-token',refresh_token:'synthetic-browser-refresh',user},user}})});});
+    await page.locator('#mtaAuthNip').fill('198008142008011001');
     await page.locator('#mtaAuthPassword').fill('synthetic-password');
     await page.locator('#mtaAuthSubmit').click();
     await page.locator('body.mta-auth-ready').waitFor({state:'attached',timeout:10000});

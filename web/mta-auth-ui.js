@@ -51,7 +51,7 @@
           
         </div>
         <form id="mtaAuthForm">
-          <div class="mta-auth-field"><label>Email</label><input id="mtaAuthEmail" type="email" autocomplete="email" required></div>
+          <div class="mta-auth-field"><label>NIP</label><input id="mtaAuthNip" name="nip" type="text" inputmode="numeric" autocomplete="username" required minlength="18" maxlength="18" pattern="[0-9]{18}" title="NIP harus tepat 18 digit"></div>
           <div class="mta-auth-field"><label>Password</label><input id="mtaAuthPassword" type="password" autocomplete="current-password" required minlength="6"></div>
           <button class="mta-auth-submit" id="mtaAuthSubmit" type="submit">Login</button>
           <div class="mta-auth-message" id="mtaAuthMessage"></div>
@@ -104,9 +104,10 @@
       const signup=false;
       submit.disabled=true; msg.className='mta-auth-message'; msg.textContent='Memproses...';
       try{
-        const email=document.getElementById('mtaAuthEmail').value.trim();
+        const nip=document.getElementById('mtaAuthNip').value.trim();
         const password=document.getElementById('mtaAuthPassword').value;
-        const r=await window.mtaAuth.signIn(email,password);
+        if(!/^\d{18}$/.test(nip)) throw new Error('NIP harus tepat 18 digit');
+        const r=await window.mtaAuth.signIn(nip,password);
         if(r?.error) throw r.error;
         if(!r?.data?.session) throw new Error('AUTH_SESSION_NOT_RETURNED');
         msg.className='mta-auth-message ok';
@@ -122,7 +123,7 @@
         // Runtime loading is owned by index.html's single authenticated loader.
       }catch(err){
         msg.className='mta-auth-message error';
-        msg.textContent='Email atau password tidak valid, atau autentikasi belum dapat diproses.';
+        msg.textContent=err?.message==='NIP harus tepat 18 digit' ? err.message : 'NIP atau password tidak valid, atau autentikasi belum dapat diproses.';
       }finally{submit.disabled=false}
     };
     mode(false);
@@ -190,7 +191,7 @@
     window.__mtaAuthModuleLoading=new Promise((resolve,reject)=>{
       const s=document.createElement('script');
       s.type='module';
-      s.src='/mta-auth.js?v=7';
+      s.src='/mta-auth.js?v=8';
       s.onload=()=>resolve();
       s.onerror=()=>reject(new Error('AUTH_MODULE_LOAD_FAILED'));
       document.head.appendChild(s);

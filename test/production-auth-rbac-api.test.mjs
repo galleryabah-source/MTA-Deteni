@@ -6,6 +6,7 @@ const rbac=fs.readFileSync('supabase/migrations/20260921070000_mta_production_au
 const edge=fs.readFileSync('supabase/functions/mta-api/index.ts','utf8');
 const client=fs.readFileSync('web/mta-production-api.js','utf8');
 const auth=fs.readFileSync('web/mta-auth.js','utf8');
+const nipLogin=fs.readFileSync('supabase/functions/mta-login/index.ts','utf8');
 
 assert.match(rbac,/create table if not exists public\.mta_profiles/);
 assert.match(rbac,/check \(role in \('OWNER','ADMIN','EDITOR','REVIEWER','AUDITOR','VIEWER'\)\)/);
@@ -26,7 +27,8 @@ assert.doesNotMatch(edge,/detail:error\.message/);
 assert.doesNotMatch(edge,/detail:String\(error\)/);
 
 assert.match(client,/mtaProductionApi/);
-assert.match(auth,/signInWithPassword/);
+assert.match(nipLogin,/signInWithPassword/);
+assert.match(auth,/api\/mta-login/);
 assert.doesNotMatch(auth,/supabase\.auth\.signUp/);
 assert.match(auth,/onAuthStateChange/);
 assert.match(migration,/production activation/i);

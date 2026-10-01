@@ -103,7 +103,24 @@ const refreshSession=async()=>{
 
 window.mtaAuth=Object.freeze({
   client:supabase,
-  async signIn(email,password){return supabase.auth.signInWithPassword({email,password})},
+  async signIn(nip,password){
+    const normalized=String(nip||'').trim();
+    if(!/^\d{18}$/.test(normalized))return {data:{session:null,user:null},error:{message:'NIP harus tepat 18 digit',code:'NIP_INVALID'}};
+    const response=await fetch('/api/mta-login',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({nip:normalized,password})
+    });
+    const data=await response.json().catch(()=>({ok:false,error:'INVALID_LOGIN'}));
+    if(!response.ok||!data?.ok||!data?.data?.session){
+      return {data:{session:null,user:null},error:{message:data?.error||'INVALID_LOGIN',code:data?.error||'INVALID_LOGIN'}};
+    }
+    const sessionResult=await supabase.auth.setSession({
+      access_token:data.data.session.access_token,
+      refresh_token:data.data.session.refresh_token
+    });
+    return {data:sessionResult.data,error:sessionResult.error};
+  },
   async signUp(){throw new Error("SELF_REGISTRATION_DISABLED")},
   async signOut(){return supabase.auth.signOut()},
   async session(){return supabase.auth.getSession()},

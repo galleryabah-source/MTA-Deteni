@@ -1,6 +1,19 @@
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
+    // Pre-authentication NIP login boundary. This route is intentionally public;
+    // the Edge Function performs the actual NIP/password verification.
+    if (url.pathname === '/api/mta-login') {
+      const upstream = new URL('https://tmmhxqgzelgrsrxbbfzh.supabase.co/functions/v1/mta-login');
+      upstream.search = url.search;
+      const headers = new Headers(request.headers);
+      headers.set('Cache-Control','no-store');
+      return fetch(new Request(upstream.toString(), {
+        method: request.method,
+        headers,
+        body: ['GET','HEAD'].includes(request.method) ? undefined : request.body
+      }));
+    }
     if (url.pathname.startsWith('/api/mta/')) {
       const authorization = request.headers.get('Authorization') || '';
       if (!/^Bearer\s+\S+$/i.test(authorization)) {
