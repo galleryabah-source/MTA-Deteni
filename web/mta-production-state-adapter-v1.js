@@ -100,10 +100,10 @@
     window.__mtaRuntimeStatus={mode:'PRODUCTION',database:'CONNECTED',ai:'OFF',syntheticOnly:false,readOnly:false,identity:'VALIDATED',adminConfig:adminConfig.skipped?'RBAC_BOUNDARY':'LOADED',loadedAt:state.meta.loadedAt};
     return state;
   }
-  async function writeAudit({action,resourceType,resourceId,result='SUCCESS',correlationId,metadata={}}={}){
-    if(!isProduction())return {ok:false,code:'NOT_PRODUCTION'};
-    const response=await request('audit-event',{method:'POST',body:{action,resource_type:resourceType,resource_id:resourceId,result,metadata},headers:{'X-Correlation-Id':String(correlationId||crypto.randomUUID())}});
-    return {ok:true,code:'AUDIT_COMMITTED',data:response.data};
+  async function writeAudit(){
+    // Client-originated audit writes are intentionally disabled. Audit records
+    // must be emitted by the server-side canonical mutation transaction.
+    return {ok:false,code:'AUDIT_WRITE_DISABLED'};
   }
   async function mutateResource(resource,operation,{id,body={},requestId,correlationId,idempotencyKey}={}){
     if(!isProductionPersistenceEnabled())throw new Error('PRODUCTION_MUTATION_NOT_AUTHORIZED');
