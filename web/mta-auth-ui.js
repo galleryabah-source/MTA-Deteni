@@ -51,7 +51,7 @@
           
         </div>
         <form id="mtaAuthForm">
-          <div class="mta-auth-field"><label>Email</label><input id="mtaAuthEmail" type="email" autocomplete="email" required></div>
+          <div class="mta-auth-field"><label>NIP</label><input id="mtaAuthNip" name="nip" type="text" inputmode="numeric" autocomplete="username" required minlength="18" maxlength="18" pattern="[0-9]{18}" title="NIP harus tepat 18 digit"></div>
           <div class="mta-auth-field"><label>Password</label><input id="mtaAuthPassword" type="password" autocomplete="current-password" required minlength="6"></div>
           <button class="mta-auth-submit" id="mtaAuthSubmit" type="submit">Login</button>
           <div class="mta-auth-message" id="mtaAuthMessage"></div>
