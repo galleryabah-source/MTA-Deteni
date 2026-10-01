@@ -136,7 +136,7 @@
   async function mutateDetainee(operation,{id,code,name,nationality,status,placement,gender,dateOfBirth,passportNumber,notes,correlationId,requestId,idempotencyKey}={}){
     if(!isProductionPersistenceEnabled())throw new Error('PRODUCTION_MUTATION_NOT_AUTHORIZED');
     const correlation=String(correlationId||crypto.randomUUID());
-    const key=String(idempotencyKey||('DETAINEE:'+operation+':'+String(id||code||''))).trim();
+    const key=String(idempotencyKey||'').trim();
     if(!key)throw new Error('IDEMPOTENCY_KEY_REQUIRED');
     const clean={code:String(code||'').trim(),name:String(name||'').trim(),nationality:String(nationality||'').trim(),status:String(status||'AKTIF'),placement:String(placement||'').trim(),updated_at:new Date().toISOString(),metadata:{gender:String(gender||''),dateOfBirth:String(dateOfBirth||''),passportNumber:String(passportNumber||''),notes:String(notes||''),correlationId:correlation,source:'PRODUCTION_RUNTIME'}};
     if(operation==='create'){
