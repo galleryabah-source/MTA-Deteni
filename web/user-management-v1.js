@@ -66,14 +66,14 @@ async function resetPassword(id){
  if(String(u.id)===String(actor?.user?.id))return toast('Gunakan menu Profil & Keamanan untuk mengganti password akun sendiri.');
  const targetRole=String(u.role||'VIEWER').toUpperCase();
  if(targetRole==='OWNER'&&currentRole()!=='OWNER')return toast('Password OWNER hanya dapat direset oleh OWNER.');
- if(!confirm('Reset password untuk '+(u.email||u.display_name||'user ini')+'? User akan dipaksa mengganti password saat login berikutnya.'))return;
+ if(!confirm('Reset password untuk '+(u.nip||u.display_name||'user ini')+'? User akan dipaksa mengganti password saat login berikutnya.'))return;
  try{
   const r=await api().post('admin-users',id,{});
   const temporaryPassword=r?.data?.temporaryPassword;
   if(!temporaryPassword)throw new Error('TEMPORARY_PASSWORD_NOT_RETURNED');
   openModal('<div class="dialoghead"><h2>Password Sementara</h2><button class="x" onclick="closeModal()">×</button></div>'+
    '<div class="notice" style="margin-bottom:12px">Password ini hanya ditampilkan sekali. Sampaikan melalui kanal yang aman. User wajib menggantinya setelah login.</div>'+
-   '<div class="field"><label>User</label><div class="notice">'+esc(u.email||u.display_name||'-')+'</div></div>'+
+   '<div class="field"><label>User</label><div class="notice">'+esc(u.nip||u.display_name||'-')+'</div></div>'+
    '<div class="field" style="margin-top:10px"><label>Password sementara</label><div style="display:flex;gap:7px"><div id="mtaTemporaryPassword" class="notice" style="flex:1;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-weight:800;word-break:break-all">'+esc(temporaryPassword)+'</div><button type="button" class="btn" onclick="navigator.clipboard?.writeText(document.getElementById(\'mtaTemporaryPassword\').textContent);toast(\'Password disalin ke clipboard.\')">Salin</button></div></div>'+
    '<div class="actions"><button class="btn primary" onclick="closeModal();window.MTAUserManagementView.render()">Selesai</button></div>');
   toast('Password user berhasil direset.');
