@@ -43,7 +43,7 @@
     for(const d of (detainees||[])){
       if(d?.status!=='AKTIF'||!d?.placement||existing.has(String(d.id)))continue;
       const raw=String(d.placement).trim();
-      const parts=raw.split(/\\s*\\/\\s*/);
+      const parts=raw.split(/\s*\/\s*/);
       if(parts.length!==2)continue;
       const blockName=norm(parts[0]),roomName=norm(parts[1]);
       const room=rooms.find(r=>norm(r?.room)===roomName&&norm(r?.block)===blockName)
