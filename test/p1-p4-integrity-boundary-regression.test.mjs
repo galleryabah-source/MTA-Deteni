@@ -30,6 +30,8 @@ console.log('All critical adapter mutation paths require explicit idempotency ke
 const migration=fs.readFileSync('supabase/migrations/20261002040000_mta_audit_sequence_v1.sql','utf8');
 assert.match(migration,/create sequence if not exists public\.mta_audit_sequence_seq/);
 assert.match(migration,/add column if not exists audit_sequence bigint/);
+assert.match(migration,/drop trigger if exists mta_audit_immutable_update/);
+assert.match(migration,/create trigger mta_audit_immutable_update/);
 assert.match(migration,/row_number\(\) over \(order by occurred_at asc, id asc\)/);
 assert.match(migration,/new\.audit_sequence := nextval\('public\.mta_audit_sequence_seq'::regclass\)/);
 assert.match(migration,/order by audit_sequence desc/);
