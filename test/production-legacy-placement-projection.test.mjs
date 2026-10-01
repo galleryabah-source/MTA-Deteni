@@ -12,3 +12,5 @@ assert.match(adapter,/legacyPlacementProjectionCount:legacyProjected\.length/);
 assert.match(runtime,/mta-production-state-adapter-v1\.js\?v=7/);
 
 console.log('PRODUCTION LEGACY PLACEMENT PROJECTION CONTRACT: PASS');
+
+// Production compatibility projection is intentionally read-only and cache-busted.
