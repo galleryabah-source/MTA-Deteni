@@ -39,7 +39,7 @@ select
       'UTF8'
     ),
     'sha256'
-  ),
+  )),
   encode(extensions.digest(
     convert_to(
       coalesce(
@@ -52,7 +52,7 @@ select
       'UTF8'
     ),
     'sha256'
-  ),
+  )),
   (select count(*) from public.mta_audit_events)
 from (select 1) seed
 where not exists(select 1 from public.mta_audit_chain_epochs where epoch_id=1);
