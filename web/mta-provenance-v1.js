@@ -41,9 +41,15 @@
     }
     window.dispatchEvent(new CustomEvent('mta-provenance-status',{detail:p}));
   }
-  window.MTAProvenance=Object.freeze({VERSION,isProduction,status,assert,applyChrome});
+  const observeProductionLabels=()=>{
+    if(!isProduction()||!document.body)return;
+    const observer=new MutationObserver(()=>{if(status().mode==='PRODUCTION')applyChrome();});
+    observer.observe(document.body,{subtree:true,childList:true,characterData:true});
+    window.__mtaProvenanceObserver=observer;
+  };
+  window.MTAProvenance=Object.freeze({VERSION,isProduction,status,assert,applyChrome,observeProductionLabels});
   try{assert();}catch(error){console.error('[MTA] provenance contract failed',error);}
-  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',applyChrome,{once:true});else applyChrome();
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>{applyChrome();observeProductionLabels();},{once:true});else {applyChrome();observeProductionLabels();}
   let last='';
   const reconcile=()=>{const p=status();const key=[p.mode,p.source,p.database,p.syntheticOnly].join('|');if(key!==last){last=key;try{assert();}catch(error){console.error('[MTA] provenance contract failed',error);}applyChrome();}};
   window.addEventListener('mta-runtime-status',reconcile);
