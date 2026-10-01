@@ -36,6 +36,38 @@
   const mapLeave=l=>({id:l.id,detaineeId:l.detainee_id,destination:l.destination||'',purpose:l.purpose||'',startAt:l.start_at,status:l.status,metadata:l.metadata||{},createdAt:l.created_at,updatedAt:l.updated_at,source:'PRODUCTION_DB'});
   const mapDocument=d=>({id:d.id,documentId:d.document_id,documentType:d.document_type,reportDate:d.report_date,reguId:d.regu_id,shiftId:d.shift_id,status:d.status,revision:d.revision,revisionOf:d.revision_of,templateVersion:d.template_version,integrityHash:d.integrity_hash,filename:d.filename,payload:d.payload||{},createdAt:d.created_at,validatedAt:d.validated_at,generatedAt:d.generated_at,reviewStartedAt:d.review_started_at,approvedAt:d.approved_at,finalizedAt:d.finalized_at,createdBy:d.created_by,updatedAt:d.updated_at,source:'PRODUCTION_DB'});
   const mapAudit=a=>({id:a.id,action:a.action,resourceType:a.resource_type,resourceId:a.resource_id,result:a.result,actor:a.actor_user_id||'',requestId:a.request_id||'',correlationId:a.correlation_id||'',occurredAt:a.occurred_at,metadata:a.metadata||{},previousHash:a.previous_hash||null,eventHash:a.event_hash||null,hashVersion:a.hash_version||null,source:'PRODUCTION_DB'});
+  const norm=v=>String(v||'').trim().toLowerCase().replace(/\\s+/g,' ');
+  function projectLegacyPlacements(detainees,rooms,placements){
+    const existing=new Set((placements||[]).map(p=>String(p?.detaineeId||'')));
+    const projected=[];
+    for(const d of (detainees||[])){
+      if(d?.status!=='AKTIF'||!d?.placement||existing.has(String(d.id)))continue;
+      const raw=String(d.placement).trim();
+      const parts=raw.split(/\s*\/\s*/);
+      if(parts.length!==2)continue;
+      const blockName=norm(parts[0]),roomName=norm(parts[1]);
+      const room=rooms.find(r=>norm(r?.room)===roomName&&norm(r?.block)===blockName)
+        ||rooms.find(r=>norm(r?.room)===roomName&&(!r?.block||!blockName));
+      if(!room)continue;
+      projected.push({
+        id:'LEGACY-PLACEMENT-'+String(d.id),
+        detaineeId:d.id,
+        blockId:room.blockId||null,
+        roomId:room.id,
+        block:room.block||parts[0].trim(),
+        room:room.room||parts[1].trim(),
+        since:d.updatedAt||d.createdAt||new Date().toISOString(),
+        until:null,
+        movementId:null,
+        correlationId:d.correlationId||null,
+        requestKey:null,
+        metadata:{legacyProjection:true,sourceField:'mta_detainees.placement',sourceValue:raw},
+        createdAt:d.createdAt||null,
+        source:'PRODUCTION_DB_LEGACY_PLACEMENT'
+      });
+    }
+    return projected;
+  }
   async function hydrate(){
     if(!isProduction())return null;
     // Canonical hydration order is explicit: authenticated API identity first,
@@ -60,7 +92,9 @@
     const rs=rooms.data.map(mapRoom).map(r=>({...r,block:byBlock.get(r.blockId)?.name||''}));
     const ds=detainees.data.map(mapDetainee);
     const ps=placements.data.map(mapPlacement).map(p=>{const room=rs.find(r=>r.id===p.roomId);return {...p,block:p.block||room?.block||'',room:p.room||room?.room||''}});
-    const state={meta:{version:4,mode:'PRODUCTION',loadedAt:new Date().toISOString()},blocks:blocks.data.map(mapBlock),rooms:rs,detainees:ds,placements:ps,movements:movements.data.map(mapMovement),leaves:leaves.data.map(mapLeave),documents:documents.data.map(mapDocument),audit:audit.data.map(mapAudit),adminSettings:{...(adminConfig.data?.settings||{}),role:String(me.role||me.profile?.role||'').toUpperCase()}};
+    const legacyProjected=projectLegacyPlacements(ds,rs,ps);
+    const effectivePlacements=[...ps,...legacyProjected];
+    const state={meta:{version:4,mode:'PRODUCTION',loadedAt:new Date().toISOString()},blocks:blocks.data.map(mapBlock),rooms:rs,detainees:ds,placements:effectivePlacements,movements:movements.data.map(mapMovement),leaves:leaves.data.map(mapLeave),documents:documents.data.map(mapDocument),audit:audit.data.map(mapAudit),adminSettings:{...(adminConfig.data?.settings||{}),role:String(me.role||me.profile?.role||'').toUpperCase()},legacyPlacementProjectionCount:legacyProjected.length};
     for(const k of ['blocks','rooms','detainees','placements','movements','leaves','documents','audit'])if(!Array.isArray(state[k]))state[k]=[];
     window.__mtaProductionState=Object.freeze(structuredClone(state));
     window.__mtaRuntimeStatus={mode:'PRODUCTION',database:'CONNECTED',ai:'OFF',syntheticOnly:false,readOnly:false,identity:'VALIDATED',adminConfig:adminConfig.skipped?'RBAC_BOUNDARY':'LOADED',loadedAt:state.meta.loadedAt};
