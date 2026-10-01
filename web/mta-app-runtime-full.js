@@ -335,6 +335,23 @@ async function loadAuthenticatedRuntime(){
   });
   return window.__mtaRuntimeLoading;
 }
+function reconcileLegacyPlacementSlashBlocks(state){
+  if(!state||!Array.isArray(state.detainees)||!Array.isArray(state.rooms)||!Array.isArray(state.placements))return state;
+  const norm=v=>String(v??'').trim().toLowerCase().replace(/\\s+/g,' ');
+  const existing=new Set(state.placements.map(p=>String(p?.detaineeId||'')));
+  const additions=[];
+  for(const d of state.detainees){
+    if(d?.status!=='AKTIF'||!d?.placement||existing.has(String(d.id)))continue;
+    const raw=String(d.placement).trim(),separator=raw.lastIndexOf('/');
+    if(separator<=0||separator>=raw.length-1)continue;
+    const blockName=norm(raw.slice(0,separator)),roomName=norm(raw.slice(separator+1));
+    const room=state.rooms.find(r=>norm(r?.room)===roomName&&norm(r?.block)===blockName)
+      ||state.rooms.find(r=>norm(r?.room)===roomName&&(!r?.block||!blockName));
+    if(!room)continue;
+    additions.push({id:'LEGACY-PLACEMENT-'+String(d.id),detaineeId:d.id,blockId:room.blockId||null,roomId:room.id,block:room.block||raw.slice(0,separator).trim(),room:room.room||raw.slice(separator+1).trim(),since:d.updatedAt||d.createdAt||new Date().toISOString(),until:null,movementId:null,correlationId:d.correlationId||null,requestKey:null,metadata:{legacyProjection:true,sourceField:'mta_detainees.placement',sourceValue:raw},createdAt:d.createdAt||null,source:'PRODUCTION_DB_LEGACY_PLACEMENT'});
+  }
+  return additions.length?{...state,placements:[...state.placements,...additions],legacyPlacementProjectionCount:(Number(state.legacyPlacementProjectionCount)||0)+additions.length}:state;
+}
 async function bootMtaApp(){
   if(window.__mtaAppBooted)return;
   const authState=window.__mtaAuthState||{};
@@ -344,7 +361,7 @@ async function bootMtaApp(){
   // Core dashboard must not wait for optional/operational enhancement scripts.
   // Render immediately after authentication; load enhancements in the background.
   try{
-    if(window.mtaProductionStateAdapter?.isProduction()) await window.mtaProductionStateAdapter.hydrate();
+    if(window.mtaProductionStateAdapter?.isProduction()) await window.mtaProductionStateAdapter.hydrate();\n    if(window.mtaProductionStateAdapter?.isProduction()&&window.__mtaProductionState){window.__mtaProductionState=Object.freeze(reconcileLegacyPlacementSlashBlocks(structuredClone(window.__mtaProductionState)));}
     syncRuntimeChrome();
     db=load();
     window.__mtaAppBooted=true;
