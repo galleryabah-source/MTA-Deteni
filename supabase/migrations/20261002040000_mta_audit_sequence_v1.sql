@@ -11,6 +11,11 @@ create sequence if not exists public.mta_audit_sequence_seq
 alter table public.mta_audit_events
   add column if not exists audit_sequence bigint;
 
+-- Historical audit rows are immutable after insertion. The sequence column is
+-- a new structural ordering attribute, so its one-time backfill must occur
+-- inside this migration transaction with the UPDATE guard temporarily removed.
+drop trigger if exists mta_audit_immutable_update on public.mta_audit_events;
+
 with ordered as (
   select id,
          row_number() over (order by occurred_at asc, id asc) as seq
@@ -20,6 +25,11 @@ update public.mta_audit_events a
 set audit_sequence=ordered.seq
 from ordered
 where a.id=ordered.id;
+
+create trigger mta_audit_immutable_update
+before update on public.mta_audit_events
+for each row
+execute function private.mta_audit_immutable();
 
 alter table public.mta_audit_events
   alter column audit_sequence set not null;
