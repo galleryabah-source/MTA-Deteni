@@ -4,7 +4,7 @@
   // Production is explicit. Staging/preview workers remain synthetic unless deliberately promoted.
   const PRODUCTION_HOSTS=new Set(['mta-deteni.galleryabah.workers.dev']);
   // Governance lock: production mutation remains disabled until explicit release.
-  const PRODUCTION_MUTATIONS_ENABLED=true;
+  const PRODUCTION_MUTATIONS_ENABLED=false;
   const isProduction=()=>PRODUCTION_HOSTS.has(location.hostname);
   const isProductionPersistenceEnabled=()=>isProduction()&&PRODUCTION_MUTATIONS_ENABLED;
   const state=()=>window.__mtaProductionState||null;
@@ -109,6 +109,8 @@
     if(!isProductionPersistenceEnabled())throw new Error('PRODUCTION_MUTATION_NOT_AUTHORIZED');
     const method=operation==='create'?'POST':operation==='update'?'PATCH':operation==='delete'?'DELETE':null;
     if(!method)throw new Error('PRODUCTION_MUTATION_OPERATION_INVALID');
+    const key=String(idempotencyKey||'').trim();
+    if(!key)throw new Error('IDEMPOTENCY_KEY_REQUIRED');
     const requestHeaders={
       'X-Request-Id':String(requestId||crypto.randomUUID()),
       'X-Correlation-Id':String(correlationId||crypto.randomUUID()),
