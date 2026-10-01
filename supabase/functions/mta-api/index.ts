@@ -38,7 +38,8 @@ const authorizeGenericMutation=async({admin,userId,role,resource,method,id,body}
 
   let current=null;
   if(method!=="POST"){
-    const currentResult=await admin.from("mta_"+resource).select("detainee_id,scope_id").eq("id",id).maybeSingle();
+    const currentColumns=resource==="detainees"?"detainee_id,scope_id":"detainee_id";
+    const currentResult=await admin.from("mta_"+resource).select(currentColumns).eq("id",id).maybeSingle();
     if(currentResult.error||!currentResult.data) return denyAuthorization("RESOURCE_NOT_FOUND");
     current=currentResult.data;
   }
@@ -52,7 +53,9 @@ const authorizeGenericMutation=async({admin,userId,role,resource,method,id,body}
   const detainee=await admin.from("mta_detainees").select("id,scope_id").eq("id",requestedDetaineeId).maybeSingle();
   if(detainee.error||!detainee.data) return denyAuthorization("RESOURCE_NOT_FOUND");
   if(detainee.data.scope_id!==scopeId) return denyAuthorization("SCOPE_DENIED");
-  if(current?.scope_id && current.scope_id!==scopeId) return denyAuthorization("SCOPE_DENIED");
+  if(resource!=="detainees" && current?.detainee_id && current.detainee_id!==requestedDetaineeId){
+    return denyAuthorization("RESOURCE_SCOPE_REBIND_DENIED");
+  }
   return allowAuthorization();
 };
 
