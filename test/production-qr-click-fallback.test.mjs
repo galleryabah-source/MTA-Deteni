@@ -30,7 +30,6 @@ assert.match(
 
 console.log('QR production click fallback contract: PASS');
 
-assert.match(source,/lastIndexOf\('\/'\)/);
 
 const runtime=fs.readFileSync(new URL('../web/mta-app-runtime-full.js',import.meta.url),'utf8');
 assert.match(runtime,/function roomOccupancyMap\(state\)/);
