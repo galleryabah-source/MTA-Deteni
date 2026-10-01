@@ -35,7 +35,7 @@ export default {
     });
     if (url.pathname === '/api/runtime') return Response.json({
       mode:'PRODUCTION_RUNTIME', source:'PRODUCTION_DB', database:'CONNECTED', syntheticOnly:false, persistence:'SUPABASE_PRODUCTION_READ_ONLY+INDEXED_DB_QUEUE',
-      nextAdapter:'SUPABASE_PRODUCTION_AUTH_RBAC', authorization:'BLOCKED_UNTIL_AUTH_RBAC',
+      nextAdapter:'SUPABASE_PRODUCTION_AUTH_RBAC', authorization:'ENFORCED_SERVER_SIDE_RBAC',
       productionDatabase:'CONNECTED', productionStorage:'PRIVATE_BUCKET_READY', ai:'OFF',
       audit:'SERVER_CANONICAL_EVENT_LEDGER', migrationFreeze:true, productionAccessAuthorized:true,
       livePostgresqlExecution:true, previewVersion:'v16', masterRoomContract:'v10',
