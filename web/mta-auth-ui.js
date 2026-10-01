@@ -104,9 +104,10 @@
       const signup=false;
       submit.disabled=true; msg.className='mta-auth-message'; msg.textContent='Memproses...';
       try{
-        const email=document.getElementById('mtaAuthEmail').value.trim();
+        const nip=document.getElementById('mtaAuthNip').value.trim();
         const password=document.getElementById('mtaAuthPassword').value;
-        const r=await window.mtaAuth.signIn(email,password);
+        if(!/^\d{18}$/.test(nip)) throw new Error('NIP harus tepat 18 digit');
+        const r=await window.mtaAuth.signIn(nip,password);
         if(r?.error) throw r.error;
         if(!r?.data?.session) throw new Error('AUTH_SESSION_NOT_RETURNED');
         msg.className='mta-auth-message ok';
@@ -122,7 +123,7 @@
         // Runtime loading is owned by index.html's single authenticated loader.
       }catch(err){
         msg.className='mta-auth-message error';
-        msg.textContent='Email atau password tidak valid, atau autentikasi belum dapat diproses.';
+        msg.textContent=err?.message==='NIP harus tepat 18 digit' ? err.message : 'NIP atau password tidak valid, atau autentikasi belum dapat diproses.';
       }finally{submit.disabled=false}
     };
     mode(false);
