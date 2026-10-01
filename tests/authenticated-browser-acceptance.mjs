@@ -28,7 +28,17 @@ export function createClient(){
         }
         session = {
           access_token: 'synthetic-browser-token',
+          refresh_token: 'synthetic-browser-refresh',
           user: { id: 'synthetic-browser-user', email }
+        };
+        authListener?.('SIGNED_IN', session);
+        return { data: { session, user: session.user }, error: null };
+      },
+      async setSession({access_token,refresh_token}){
+        session = {
+          access_token,
+          refresh_token,
+          user: { id: 'synthetic-browser-user', email: 'synthetic@example.test' }
         };
         authListener?.('SIGNED_IN', session);
         return { data: { session, user: session.user }, error: null };
@@ -70,6 +80,20 @@ try {
   await page.route('https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.js', route =>
     route.fulfill({ status: 200, contentType: 'application/javascript', body: QR_STUB })
   );
+  await page.route('**/api/mta-login', async route => {
+    const body = route.request().postDataJSON?.() || {};
+    if (body.nip !== '198008142008011001' || body.password !== 'synthetic-password') {
+      return route.fulfill({ status: 401, contentType: 'application/json', body: JSON.stringify({ ok:false, error:'INVALID_LOGIN' }) });
+    }
+    const user = { id:'synthetic-browser-user', email:'synthetic@example.test' };
+    return route.fulfill({ status:200, contentType:'application/json', body:JSON.stringify({
+      ok:true,
+      data:{
+        session:{access_token:'synthetic-browser-token',refresh_token:'synthetic-browser-refresh',user},
+        user
+      }
+    }) });
+  });
 
   stage = 'goto';
   await page.goto(BASE_URL, { waitUntil: 'domcontentloaded' });
@@ -86,7 +110,7 @@ try {
   }
 
   stage = 'login-submit';
-  await page.locator('#mtaAuthEmail').fill('synthetic@example.test');
+  await page.locator('#mtaAuthNip').fill('198008142008011001');
   await page.locator('#mtaAuthPassword').fill('synthetic-password');
   await page.locator('#mtaAuthSubmit').click();
 
