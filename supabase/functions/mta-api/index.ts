@@ -89,7 +89,7 @@ Deno.serve(async(req)=>{
     const admin=createClient(Deno.env.get("SUPABASE_URL")!,adminKey,{auth:{autoRefreshToken:false,persistSession:false}});
     try{
       if(req.method==="GET"){
-        const {data:profiles,error:pe}=await admin.from("mta_profiles").select("id,role,display_name,active,must_change_password,created_at,updated_at").order("created_at",{ascending:true});
+        const {data:profiles,error:pe}=await admin.from("mta_profiles").select("id,nip,role,display_name,active,must_change_password,created_at,updated_at").order("created_at",{ascending:true});
         if(pe) return json(req,{ok:false,error:"ADMIN_USERS_READ_FAILED"},500);
         const listed=await admin.auth.admin.listUsers({page:1,perPage:1000});
         if(listed.error) return json(req,{ok:false,error:"ADMIN_AUTH_USERS_READ_FAILED"},500);
@@ -100,18 +100,21 @@ Deno.serve(async(req)=>{
       }
       if(req.method==="POST"){
         const body=await req.json().catch(()=>null)||{};
-        const email=String(body.email||"").trim().toLowerCase();
+        const nip=String(body.nip||"").trim();
         const password=String(body.password||"");
         const displayName=String(body.display_name||"").trim();
         const requestedRole=String(body.role||"VIEWER").toUpperCase();
-        if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return json(req,{ok:false,error:"USER_EMAIL_INVALID"},400);
+        if(!/^\d{18}$/.test(nip)) return json(req,{ok:false,error:"USER_NIP_INVALID"},400);
         if(password.length<12) return json(req,{ok:false,error:"USER_PASSWORD_TOO_WEAK"},400);
+        const existingNip=await admin.from("mta_profiles").select("id").eq("nip",nip).maybeSingle();
+        if(existingNip.data?.id) return json(req,{ok:false,error:"USER_NIP_ALREADY_EXISTS"},409);
+        const email=`${nip}@auth.mta-deteni.internal`;
         const allowedRoles=role==="OWNER"?new Set(["OWNER","ADMIN","EDITOR","REVIEWER","AUDITOR","VIEWER"]):new Set(["EDITOR","REVIEWER","AUDITOR","VIEWER"]);
         if(!allowedRoles.has(requestedRole)) return json(req,{ok:false,error:"USER_ROLE_NOT_ALLOWED"},403);
         const created=await admin.auth.admin.createUser({email,password,email_confirm:true,user_metadata:{full_name:displayName}});
         if(created.error||!created.data.user) return json(req,{ok:false,error:"ADMIN_USER_CREATE_FAILED"},400);
         const uid=created.data.user.id;
-        const prof=await admin.from("mta_profiles").upsert({id:uid,role:requestedRole,display_name:displayName||email,active:true,must_change_password:true},{onConflict:"id"}).select("id,role,display_name,active,created_at,updated_at").single();
+        const prof=await admin.from("mta_profiles").upsert({id:uid,nip,role:requestedRole,display_name:displayName||nip,active:true,must_change_password:true},{onConflict:"id"}).select("id,nip,role,display_name,active,created_at,updated_at").single();
         if(prof.error){
           await admin.auth.admin.deleteUser(uid);
           return json(req,{ok:false,error:"ADMIN_PROFILE_CREATE_FAILED"},500);
@@ -121,7 +124,7 @@ Deno.serve(async(req)=>{
       }
       if(req.method==="POST"&&id&&routeParts[2]==="password-reset"){
         if(!new Set(["OWNER","ADMIN"]).has(role)) return json(req,{ok:false,error:"RBAC_PASSWORD_RESET_DENIED"},403);
-        const target=await admin.from("mta_profiles").select("id,role,display_name,active").eq("id",id).single();
+        const target=await admin.from("mta_profiles").select("id,nip,role,display_name,active").eq("id",id).single();
         if(target.error||!target.data) return json(req,{ok:false,error:"TARGET_USER_NOT_FOUND"},404);
         const targetRole=String(target.data.role||"VIEWER").toUpperCase();
         if(targetRole==="OWNER"&&role!=="OWNER") return json(req,{ok:false,error:"OWNER_PASSWORD_RESET_DENIED"},403);
@@ -149,6 +152,12 @@ Deno.serve(async(req)=>{
       }
       if(req.method==="PATCH"&&id){
         const body=await req.json().catch(()=>null)||{};
+        if(body.nip!==undefined && !/^\d{18}$/.test(String(body.nip||"").trim())) return json(req,{ok:false,error:"USER_NIP_INVALID"},400);
+        if(body.nip!==undefined){
+          const nextNip=String(body.nip||"").trim();
+          const dup=await admin.from("mta_profiles").select("id").eq("nip",nextNip).neq("id",id).maybeSingle();
+          if(dup.data?.id) return json(req,{ok:false,error:"USER_NIP_ALREADY_EXISTS"},409);
+        }
         if(id===user.id && body.active===false) return json(req,{ok:false,error:"SELF_DISABLE_FORBIDDEN"},409);
         const target=await admin.from("mta_profiles").select("id,role,display_name,active").eq("id",id).single();
         if(target.error||!target.data) return json(req,{ok:false,error:"USER_NOT_FOUND"},404);
@@ -160,11 +169,12 @@ Deno.serve(async(req)=>{
         if(role==="ADMIN"&&targetRole==="ADMIN") return json(req,{ok:false,error:"ADMIN_CANNOT_MANAGE_ADMIN"},403);
         if(id===user.id&&nextRole!==targetRole) return json(req,{ok:false,error:"SELF_ROLE_CHANGE_FORBIDDEN"},409);
         const patch={};
+        if(body.nip!==undefined)patch.nip=String(body.nip||"").trim();
         if(body.role!==undefined)patch.role=nextRole;
         if(body.display_name!==undefined)patch.display_name=String(body.display_name||"").trim()||target.data.display_name;
         if(body.active!==undefined)patch.active=!!body.active;
         if(!Object.keys(patch).length)return json(req,{ok:false,error:"USER_UPDATE_EMPTY"},400);
-        const updated=await admin.from("mta_profiles").update(patch).eq("id",id).select("id,role,display_name,active,created_at,updated_at").single();
+        const updated=await admin.from("mta_profiles").update(patch).eq("id",id).select("id,nip,role,display_name,active,created_at,updated_at").single();
         if(updated.error)return json(req,{ok:false,error:"ADMIN_USER_UPDATE_FAILED"},400);
         if(patch.active===false)await admin.auth.admin.signOut(id,"global").catch(()=>{});
         await admin.from("mta_audit_events").insert({action:"USER_UPDATE",resource_type:"USER",resource_id:id,result:"SUCCESS",actor_user_id:user.id,request_id:requestId,correlation_id:correlationId,metadata:{changedFields:Object.keys(patch),role:nextRole,active:patch.active}});
