@@ -11,6 +11,50 @@ const stableJson=(value)=>{if(value===null||typeof value!=="object")return JSON.
 const sha256Hex=async(value)=>{const bytes=new TextEncoder().encode(value),hash=await crypto.subtle.digest("SHA-256",bytes);return Array.from(new Uint8Array(hash)).map((b)=>b.toString(16).padStart(2,"0")).join("");};
 const productionWritesEnabled=()=>Deno.env.get("MTA_PRODUCTION_WRITES_ENABLED")==="true";
 const WRITE_METHODS=new Set(["POST","PATCH","DELETE"]);
+const AUTHZ_POLICY_VERSION="AUTHZ-DB-RLS-v1";
+const MUTATION_ROLE_POLICY={
+  detainees:{POST:new Set(["OWNER","ADMIN","EDITOR"]),PATCH:new Set(["OWNER","ADMIN","EDITOR"]),DELETE:new Set(["OWNER","ADMIN"])},
+  placements:{POST:new Set(["OWNER","ADMIN","EDITOR"]),PATCH:new Set(["OWNER","ADMIN","EDITOR"]),DELETE:new Set(["OWNER","ADMIN"])},
+  movements:{POST:new Set(["OWNER","ADMIN","EDITOR"]),PATCH:new Set(["OWNER","ADMIN","EDITOR"]),DELETE:new Set(["OWNER","ADMIN"])},
+  leaves:{POST:new Set(["OWNER","ADMIN","EDITOR"]),PATCH:new Set(["OWNER","ADMIN","EDITOR"]),DELETE:new Set(["OWNER","ADMIN"])},
+  documents:{POST:new Set(["OWNER","ADMIN","EDITOR"]),PATCH:new Set(["OWNER","ADMIN","EDITOR"]),DELETE:new Set(["OWNER","ADMIN"])},
+  blocks:{POST:new Set(["OWNER","ADMIN"]),PATCH:new Set(["OWNER","ADMIN"]),DELETE:new Set(["OWNER","ADMIN"])},
+  rooms:{POST:new Set(["OWNER","ADMIN"]),PATCH:new Set(["OWNER","ADMIN"]),DELETE:new Set(["OWNER","ADMIN"])}
+};
+const SCOPED_MUTATION_RESOURCES=new Set(["detainees","placements","movements","leaves"]);
+const denyAuthorization=(reasonCode)=>({allowed:false,reasonCode,policyVersion:AUTHZ_POLICY_VERSION});
+const allowAuthorization=()=>({allowed:true,reasonCode:"ALLOW",policyVersion:AUTHZ_POLICY_VERSION});
+
+const authorizeGenericMutation=async({admin,userId,role,resource,method,id,body})=>{
+  const methodRoles=MUTATION_ROLE_POLICY[resource]?.[method];
+  if(!methodRoles) return denyAuthorization("RESOURCE_ACTION_DENIED");
+  if(!methodRoles.has(role)) return denyAuthorization("PERMISSION_DENIED");
+  if(!SCOPED_MUTATION_RESOURCES.has(resource)) return allowAuthorization();
+  if(role==="OWNER"||role==="ADMIN") return allowAuthorization();
+
+  const scoped=await admin.from("mta_profile_scopes").select("scope_id").eq("profile_id",userId).eq("active",true).limit(1).maybeSingle();
+  if(scoped.error||!scoped.data?.scope_id) return denyAuthorization("SCOPE_DENIED");
+  const scopeId=scoped.data.scope_id;
+
+  let current=null;
+  if(method!=="POST"){
+    const currentResult=await admin.from("mta_"+resource).select("detainee_id,scope_id").eq("id",id).maybeSingle();
+    if(currentResult.error||!currentResult.data) return denyAuthorization("RESOURCE_NOT_FOUND");
+    current=currentResult.data;
+  }
+  const requestedDetaineeId=body?.detainee_id??body?.detaineeId??current?.detainee_id??null;
+  if(resource==="detainees"){
+    const requestedScopeId=body?.scope_id??current?.scope_id??null;
+    if(requestedScopeId!==scopeId) return denyAuthorization("SCOPE_DENIED");
+    return allowAuthorization();
+  }
+  if(!requestedDetaineeId) return denyAuthorization("SCOPE_REQUIRED");
+  const detainee=await admin.from("mta_detainees").select("id,scope_id").eq("id",requestedDetaineeId).maybeSingle();
+  if(detainee.error||!detainee.data) return denyAuthorization("RESOURCE_NOT_FOUND");
+  if(detainee.data.scope_id!==scopeId) return denyAuthorization("SCOPE_DENIED");
+  if(current?.scope_id && current.scope_id!==scopeId) return denyAuthorization("SCOPE_DENIED");
+  return allowAuthorization();
+};
 
 Deno.serve(async(req)=>{
   const startedAt=performance.now();
@@ -476,6 +520,11 @@ Deno.serve(async(req)=>{
         return json(req,{ok:false,error:"TRANSACTIONAL_MOVEMENT_REJECTED",command:"MOVE_DETAINEE",requestId,correlationId},400);
       }
       return json(req,{ok:true,resource,role,command:"MOVE_DETAINEE",data,replayed:!!data?.replayed},data?.replayed?200:201);
+    }
+    const authorizationDecision=await authorizeGenericMutation({admin,userId:user.id,role,resource,method:req.method,id,body});
+    if(!authorizationDecision.allowed){
+      emit("WARN","authorization.denied",{status:403,outcome:"DENIED",errorCode:authorizationDecision.reasonCode,policyVersion:authorizationDecision.policyVersion,resource});
+      return json(req,{ok:false,error:authorizationDecision.reasonCode,policyVersion:authorizationDecision.policyVersion},403,{requestId,correlationId});
     }
     const operation=req.method==="POST"?"INSERT":req.method==="PATCH"?"UPDATE":"DELETE";
     const requestHash=await sha256Hex(stableJson({method:req.method,resource,id:id||null,body}));
