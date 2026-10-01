@@ -26,7 +26,7 @@ alter table public.mta_audit_events
 
 select setval(
   'public.mta_audit_sequence_seq',
-  coalesce((select max(audit_sequence) from public.mta_audit_events),0),
+  coalesce((select max(audit_sequence) from public.mta_audit_events),1),
   (select count(*)>0 from public.mta_audit_events)
 );
 
