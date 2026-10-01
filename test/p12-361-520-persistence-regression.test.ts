@@ -6,7 +6,26 @@ import { RebuildableReadModel } from "../src/application/p12-481-520-projection-
 import { OutboxReadModelProjector } from "../src/application/p12-321-344-outbox-read-model-projector.js";
 
 const metadata = { transactionId: "TX-SYN", actorId: "ACT-SYN", correlationId: "CORR-SYN", aggregateId: "DET-SYN" };
-const message = { id: "MSG-SYN", topic: "detainee.updated", aggregateId: "DET-SYN", payload: { synthetic: true }, createdAt: "2026-09-15T00:00:00Z" } as const;
+const event = {
+  eventId: "EVT-SYN",
+  eventType: "detainee.updated",
+  aggregateType: "detainee",
+  aggregateId: "DET-SYN",
+  payload: { synthetic: true },
+  idempotencyKey: "IDEMP-SYN",
+  occurredAt: "2026-09-15T00:00:00Z",
+  executionContext: {
+    requestId: "REQ-SYN",
+    correlationId: "CORR-SYN",
+    transactionId: "TX-SYN",
+    idempotencyKey: "IDEMP-SYN",
+  },
+  payloadFingerprint: "FP-SYN",
+  status: "PENDING",
+  attempts: 0,
+  availableAt: "2026-09-15T00:00:00Z",
+  createdAt: "2026-09-15T00:00:00Z",
+} as const;
 
 test("P12.361-420 rolls back when transactional work fails", async () => {
   let committed = false; let rolledBack = false;
@@ -26,7 +45,7 @@ test("P12.421-480 rejects missing outbox consumer context", async () => {
 test("P12.481-520 replays committed outbox evidence deterministically", async () => {
   const applied: string[] = []; const checkpoints: number[] = [];
   const projector = new OutboxReadModelProjector({ project: async () => undefined });
-  const rebuild = new RebuildableReadModel(projector, { apply: async (item) => { applied.push(item.id); }, checkpoint: async (cp) => { checkpoints.push(cp.projectedCount); } });
-  const result = await rebuild.replay([message], "consumer-syn");
-  assert.deepEqual(applied, ["MSG-SYN"]); assert.deepEqual(checkpoints, [1]); assert.equal(result.lastMessageId, "MSG-SYN");
+  const rebuild = new RebuildableReadModel(projector, { apply: async (item) => { applied.push(item.eventId); }, checkpoint: async (cp) => { checkpoints.push(cp.projectedCount); } });
+  const result = await rebuild.replay([event], "consumer-syn");
+  assert.deepEqual(applied, ["EVT-SYN"]); assert.deepEqual(checkpoints, [1]); assert.equal(result.lastEventId, "EVT-SYN");
 });
