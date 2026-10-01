@@ -31,3 +31,9 @@ console.log('P1 authorization-kernel regression contract PASS');
 console.log('Role policy source: existing Supabase RLS mutation policies');
 console.log('Scope policy: authenticated profile scope for scoped resources');
 console.log('Generic service-role mutation cannot execute before authorization decision');
+
+const adapter=fs.readFileSync('web/mta-production-state-adapter-v1.js','utf8');
+assert.match(adapter,/const key=String\(idempotencyKey\|\|'\'\)\.trim\(\)/);
+assert.doesNotMatch(adapter,/idempotencyKey\|\|\(['"](?:DETAINEE|MOVE_DETAINEE)/);
+assert.doesNotMatch(adapter,/backupId\|\|crypto\.randomUUID/);
+console.log('P1 client idempotency-key strictness PASS');
