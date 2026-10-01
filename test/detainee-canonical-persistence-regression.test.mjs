@@ -20,6 +20,11 @@ assert.match(api,/if\(req\.method==="POST"\)/);
 assert.match(api,/mta_execute_idempotent_mutation/);
 assert.match(api,/p_where:req\.method==="POST"\?\{\}:\{id\}/);
 assert.match(api,/const table=resource==="audit"\?"mta_audit_events":"mta_"\+resource/);
+assert.match(api,/\["blocks","rooms","detainees"\]\.includes\(resource\)/);
+assert.match(api,/resource==="detainees"/);
+assert.match(api,/body=\{\.\.\.body,scope_id:canonicalScopeId\}/);
+assert.match(api,/DETAINEE_NOT_FOUND/);
+assert.match(api,/WRONG_SCOPE/);
 
 assert.match(adapter,/mapDetainee/);
 assert.match(adapter,/metadata\.gender/);
