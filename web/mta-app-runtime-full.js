@@ -361,7 +361,8 @@ async function bootMtaApp(){
   // Core dashboard must not wait for optional/operational enhancement scripts.
   // Render immediately after authentication; load enhancements in the background.
   try{
-    if(window.mtaProductionStateAdapter?.isProduction()) await window.mtaProductionStateAdapter.hydrate();\n    if(window.mtaProductionStateAdapter?.isProduction()&&window.__mtaProductionState){window.__mtaProductionState=Object.freeze(reconcileLegacyPlacementSlashBlocks(structuredClone(window.__mtaProductionState)));}
+    if(window.mtaProductionStateAdapter?.isProduction()) await window.mtaProductionStateAdapter.hydrate();
+    if(window.mtaProductionStateAdapter?.isProduction()&&window.__mtaProductionState){window.__mtaProductionState=Object.freeze(reconcileLegacyPlacementSlashBlocks(structuredClone(window.__mtaProductionState)));}
     syncRuntimeChrome();
     db=load();
     window.__mtaAppBooted=true;
