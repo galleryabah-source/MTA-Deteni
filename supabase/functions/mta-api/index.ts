@@ -390,10 +390,22 @@ Deno.serve(async(req)=>{
     const idempotencyKey=req.headers.get("Idempotency-Key")||crypto.randomUUID();
     let body=req.method==="DELETE"?{}:await req.json().catch(()=>({}));
     let canonicalScopeId=null;
-    if(["blocks","rooms"].includes(resource)){
+    if(["blocks","rooms","detainees"].includes(resource)){
       const scoped=await admin.from("mta_profile_scopes").select("scope_id").eq("profile_id",user.id).eq("active",true).limit(1).maybeSingle();
       if(scoped.error||!scoped.data?.scope_id)return json(req,{ok:false,error:"SCOPE_REQUIRED"},409);
       canonicalScopeId=scoped.data.scope_id;
+    }
+    if(resource==="detainees"){
+      if(req.method==="POST"){
+        // Detainee writes use the same canonical scope binding as the
+        // Master Block/Room mutation boundary. The client may not choose
+        // or omit scope_id because the API owns the authenticated scope.
+        body={...body,scope_id:canonicalScopeId};
+      }else if(id){
+        const current=await admin.from("mta_detainees").select("scope_id").eq("id",id).single();
+        if(current.error||!current.data)return json(req,{ok:false,error:"DETAINEE_NOT_FOUND"},404);
+        if(current.data.scope_id!==canonicalScopeId)return json(req,{ok:false,error:"WRONG_SCOPE"},403);
+      }
     }
     if(resource==="blocks"){
       if(req.method==="POST"){
