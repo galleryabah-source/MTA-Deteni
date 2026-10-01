@@ -24,6 +24,21 @@
       el.textContent=p.mode+' · '+p.source+' · '+p.database;
       el.dataset.mode=p.mode;
     });
+    if(p.mode==='PRODUCTION'){
+      const replacements=[
+        ['Runtime: SYNTHETIC','Runtime: PRODUCTION · PRODUCTION_DB'],
+        ['SYNTHETIC ONLY','PRODUCTION READ-ONLY'],
+        ['Synthetic runtime; bukan data operasional nyata.','Production DB runtime; data operasional read-only.'],
+        ['Provenance: synthetic-operational-runtime','Provenance: production-db-read-only'],
+        ['Generated from verified structured synthetic records. Restricted operational fields are excluded.','Generated from verified production database records. Restricted operational fields are excluded.'],
+        ['ADMIN ONLY · Role synthetic saat ini:','ADMIN ONLY · Role saat ini:'],
+        ['Role synthetic:','Role:'],
+        ['Runtime tetap synthetic/local.','Runtime production terhubung ke database.']
+      ];
+      const walker=document.createTreeWalker(document.body,NodeFilter.SHOW_TEXT);
+      const nodes=[];while(walker.nextNode())nodes.push(walker.currentNode);
+      for(const node of nodes){let value=node.nodeValue||'';for(const [from,to] of replacements)if(value.includes(from))value=value.split(from).join(to);if(value!==node.nodeValue)node.nodeValue=value;}
+    }
     window.dispatchEvent(new CustomEvent('mta-provenance-status',{detail:p}));
   }
   window.MTAProvenance=Object.freeze({VERSION,isProduction,status,assert,applyChrome});
