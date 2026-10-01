@@ -9,7 +9,7 @@ assert.match(adapter,/sourceField:'mta_detainees\.placement'/);
 assert.match(adapter,/PRODUCTION_DB_LEGACY_PLACEMENT/);
 assert.match(adapter,/const effectivePlacements=\[\.\.\.ps,\.\.\.legacyProjected\]/);
 assert.match(adapter,/legacyPlacementProjectionCount:legacyProjected\.length/);
-assert.match(runtime,/mta-production-state-adapter-v1\.js\?v=7/);
+assert.match(runtime,/mta-production-state-adapter-v1\.js\?v=6\&legacy-placement=1/);
 
 console.log('PRODUCTION LEGACY PLACEMENT PROJECTION CONTRACT: PASS');
 
