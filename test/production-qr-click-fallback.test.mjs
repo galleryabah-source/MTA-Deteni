@@ -29,3 +29,5 @@ assert.match(
 );
 
 console.log('QR production click fallback contract: PASS');
+
+assert.match(source,/lastIndexOf\('\/'\)/);
