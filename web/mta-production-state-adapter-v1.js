@@ -124,7 +124,7 @@
     if(!isProductionPersistenceEnabled())throw new Error('PRODUCTION_MUTATION_NOT_AUTHORIZED');
     const cleanDetaineeId=String(detaineeId||'').trim(),cleanRoomId=String(targetRoomId||'').trim();
     if(!cleanDetaineeId||!cleanRoomId)throw new Error('MOVE_DETAINEE_IDENTIFIERS_REQUIRED');
-    const requestKey=String(idempotencyKey||('MOVE_DETAINEE:'+cleanDetaineeId+':'+cleanRoomId+':'+String(occurredAt||''))).trim();
+    const requestKey=String(idempotencyKey||'').trim();
     const correlation=String(correlationId||crypto.randomUUID()).trim(),reqId=String(requestId||crypto.randomUUID()).trim();
     if(requestKey.length<8)throw new Error('MOVE_DETAINEE_IDEMPOTENCY_KEY_INVALID');
     const body={command:'MOVE_DETAINEE',detaineeId:cleanDetaineeId,targetRoomId:cleanRoomId,movementType:String(movementType||'TRANSFER'),purpose:purpose===null||purpose===undefined?null:String(purpose),occurredAt:occurredAt||new Date().toISOString()};
@@ -167,7 +167,9 @@
   async function restoreBackup(snapshot){
     if(!isProductionPersistenceEnabled())throw new Error('PRODUCTION_MUTATION_NOT_AUTHORIZED');
     if(!snapshot||typeof snapshot!=='object')throw new Error('BACKUP_INVALID');
-    const response=await request('backup-restore',{method:'POST',body:snapshot,headers:{'X-Request-Id':crypto.randomUUID(),'X-Correlation-Id':crypto.randomUUID(),'Idempotency-Key':String(snapshot?.manifest?.backupId||crypto.randomUUID())}});
+    const restoreKey=String(snapshot?.manifest?.backupId||'').trim();
+    if(!restoreKey)throw new Error('IDEMPOTENCY_KEY_REQUIRED');
+    const response=await request('backup-restore',{method:'POST',body:snapshot,headers:{'X-Request-Id':crypto.randomUUID(),'X-Correlation-Id':crypto.randomUUID(),'Idempotency-Key':restoreKey}});
     const refreshed=await hydrate();
     return {...response,state:refreshed,replayed:!!response.replayed};
   }
