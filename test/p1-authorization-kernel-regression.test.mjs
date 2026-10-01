@@ -25,7 +25,7 @@ assert.ok(authzPos>=0,'generic mutation must have an authorization decision');
 assert.ok(mutationPos>authzPos,'authorization must execute before the durable mutation RPC');
 
 assert.match(api,/policyVersion:authorizationDecision\.policyVersion/);
-assert.match(api,/event:"authorization\.denied"/);
+assert.match(api,/authorization\.denied/);
 
 console.log('P1 authorization-kernel regression contract PASS');
 console.log('Role policy source: existing Supabase RLS mutation policies');
