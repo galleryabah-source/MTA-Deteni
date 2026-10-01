@@ -29,14 +29,25 @@ console.log('All critical adapter mutation paths require explicit idempotency ke
 
 const migration=fs.readFileSync('supabase/migrations/20261002040000_mta_audit_sequence_v1.sql','utf8');
 assert.match(migration,/create sequence if not exists public\.mta_audit_sequence_seq/);
+assert.match(migration,/create table if not exists public\.mta_audit_chain_epochs/);
+assert.match(migration,/historical_anchor_digest text not null/);
+assert.match(migration,/genesis_hash text not null/);
+assert.match(migration,/add column if not exists audit_epoch bigint/);
 assert.match(migration,/add column if not exists audit_sequence bigint/);
-assert.match(migration,/drop trigger if exists mta_audit_immutable_update/);
-assert.match(migration,/create trigger mta_audit_immutable_update/);
-assert.match(migration,/row_number\(\) over \(order by occurred_at asc, id asc\)/);
+assert.match(migration,/string_agg\(/);
+assert.match(migration,/order by id/);
+assert.doesNotMatch(migration,/update public\.mta_audit_events a\s*set audit_sequence/);
+assert.doesNotMatch(migration,/alter column audit_sequence set not null/);
+assert.match(migration,/where audit_epoch is not null and audit_sequence is not null/);
+assert.match(migration,/new\.audit_epoch := v_epoch/);
 assert.match(migration,/new\.audit_sequence := nextval\('public\.mta_audit_sequence_seq'::regclass\)/);
-assert.match(migration,/order by audit_sequence desc/);
-assert.match(migration,/order by audit_sequence asc/);
-assert.match(migration,/coalesce\(\(select max\(audit_sequence\) from public\.mta_audit_events\),1\)/);
-assert.match(migration,/AUDIT_SEQUENCE_GAP_OR_REORDER/);
+assert.match(migration,/where audit_epoch=v_epoch/);
+assert.match(migration,/v_previous:=coalesce\(v_previous,v_genesis\)/);
+assert.match(migration,/HISTORICAL_EVENT_HASH_INVALID/);
+assert.match(migration,/historicalBranchPoints/);
+assert.match(migration,/INTEGRITY_VERIFIED_WITH_HISTORICAL_EVIDENCE_BOUNDARY/);
 
-console.log('P4 audit_sequence migration contract PASS');
+console.log('P4.1 historical audit boundary contract PASS');
+console.log('Legacy audit rows remain immutable evidence with no sequence backfill or reseal');
+console.log('New serialized epoch uses sequence + genesis anchor');
+console.log('Verifier distinguishes historical evidence from canonical active epoch');
