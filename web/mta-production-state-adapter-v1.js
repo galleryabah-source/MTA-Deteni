@@ -133,26 +133,28 @@
     window.__mtaRuntimeStatus={...(window.__mtaRuntimeStatus||{}),readOnly:false,lastCommand:{command:'MOVE_DETAINEE',movementId:result.data?.movementId||null,placementId:result.data?.placementId||null,auditEventId:result.data?.auditEventId||null,replayed:!!result.replayed,requestId:reqId,correlationId:result.data?.correlationId||correlation,idempotencyKey:requestKey,committedAt:new Date().toISOString()}};
     return result;
   }
-  async function mutateDetainee(operation,{id,code,name,nationality,status,placement,gender,dateOfBirth,passportNumber,notes,correlationId,requestId}={}){
+  async function mutateDetainee(operation,{id,code,name,nationality,status,placement,gender,dateOfBirth,passportNumber,notes,correlationId,requestId,idempotencyKey}={}){
     if(!isProductionPersistenceEnabled())throw new Error('PRODUCTION_MUTATION_NOT_AUTHORIZED');
     const correlation=String(correlationId||crypto.randomUUID());
+    const key=String(idempotencyKey||('DETAINEE:'+operation+':'+String(id||code||''))).trim();
+    if(!key)throw new Error('IDEMPOTENCY_KEY_REQUIRED');
     const clean={code:String(code||'').trim(),name:String(name||'').trim(),nationality:String(nationality||'').trim(),status:String(status||'AKTIF'),placement:String(placement||'').trim(),updated_at:new Date().toISOString(),metadata:{gender:String(gender||''),dateOfBirth:String(dateOfBirth||''),passportNumber:String(passportNumber||''),notes:String(notes||''),correlationId:correlation,source:'PRODUCTION_RUNTIME'}};
     if(operation==='create'){
       if(!clean.code||!clean.name)throw new Error('DETAINEE_INPUT_INVALID');
-      const result=await request('detainees',{method:'POST',body:clean,headers:{'X-Request-Id':String(requestId||crypto.randomUUID()),'X-Correlation-Id':clean.metadata.correlationId}});
+      const result=await request('detainees',{method:'POST',body:clean,headers:{'X-Request-Id':String(requestId||crypto.randomUUID()),'X-Correlation-Id':clean.metadata.correlationId,'Idempotency-Key':key}});
       const refreshed=await hydrate();
       return {ok:true,code:'DETAINEE_CREATED',data:result.data,state:refreshed,correlationId};
     }
     if(!id)throw new Error('DETAINEE_ID_REQUIRED');
     if(operation==='update'){
-      const result=await request('detainees',{method:'PATCH',id:String(id),body:clean,headers:{'X-Request-Id':String(requestId||crypto.randomUUID()),'X-Correlation-Id':clean.metadata.correlationId}});
+      const result=await request('detainees',{method:'PATCH',id:String(id),body:clean,headers:{'X-Request-Id':String(requestId||crypto.randomUUID()),'X-Correlation-Id':clean.metadata.correlationId,'Idempotency-Key':key}});
       const refreshed=await hydrate();
       return {ok:true,code:'DETAINEE_UPDATED',data:result.data,state:refreshed,correlationId};
     }
     if(operation==='archive'){
       const current=state()?.detainees?.find(x=>String(x.id)===String(id));
       const metadata={...(current?.metadata||{}),archiveReason:'USER_ARCHIVE',archivedAt:new Date().toISOString(),correlationId:correlation};
-      const result=await request('detainees',{method:'PATCH',id:String(id),body:{status:'NONAKTIF',updated_at:new Date().toISOString(),metadata},headers:{'X-Request-Id':String(requestId||crypto.randomUUID()),'X-Correlation-Id':correlation}});
+      const result=await request('detainees',{method:'PATCH',id:String(id),body:{status:'NONAKTIF',updated_at:new Date().toISOString(),metadata},headers:{'X-Request-Id':String(requestId||crypto.randomUUID()),'X-Correlation-Id':correlation,'Idempotency-Key':key}});
       const refreshed=await hydrate();
       return {ok:true,code:'DETAINEE_ARCHIVED',data:result.data,state:refreshed,correlationId};
     }
