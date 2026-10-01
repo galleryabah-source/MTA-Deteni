@@ -14,7 +14,7 @@ function normalize(input){
 }
 async function capture(input){
   if(window.mtaProductionStateAdapter?.isProduction?.())throw new Error('SYNTHETIC_EVIDENCE_DISABLED_IN_PRODUCTION');
-  if(!queue()?.putthrow new Error('MFE_OFFLINE_QUEUE_UNAVAILABLE');
+  if(!queue()?.put)throw new Error('MFE_OFFLINE_QUEUE_UNAVAILABLE');
   const evidence=normalize(input);
   return queue().put({...evidence,operation:'MFE_EVIDENCE_CAPTURE',idempotencyKey:PREFIX+evidence.evidenceId,correlationId:evidence.evidenceId});
 }
