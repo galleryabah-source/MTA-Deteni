@@ -8,6 +8,7 @@ const authUi=fs.readFileSync(new URL('../web/mta-auth-ui.js',import.meta.url),'u
 const users=fs.readFileSync(new URL('../web/user-management-v1.js',import.meta.url),'utf8');
 const identity=fs.readFileSync(new URL('../web/identity-security-v1.js',import.meta.url),'utf8');
 const migration=fs.readFileSync(new URL('../supabase/migrations/20261001090000_mta_nip_identity_contract_v1.sql',import.meta.url),'utf8');
+const worker=fs.readFileSync(new URL('../worker-v11.js',import.meta.url),'utf8');
 
 assert.match(migration,/add column if not exists nip text/i);
 assert.match(migration,/nip ~ '\^\[0-9\]\{18\}\$'/i);
@@ -18,6 +19,9 @@ assert.match(api,/^.*nip.*\^\\d\{18\}\$.*$/m);
 assert.match(login,/mta_profiles/);
 assert.match(login,/signInWithPassword/);
 assert.match(login,/^.*nip.*\^\\d\{18\}\$.*$/m);
+assert.match(worker,/url\.pathname === '\/api\/mta-login'/);
+assert.match(worker,/functions\/v1\/mta-login/);
+assert.match(worker,/Cache-Control','no-store'/);
 assert.match(auth,/api\/mta-login/);
 assert.match(auth,/setSession/);
 assert.match(authUi,/mtaAuthNip/);
