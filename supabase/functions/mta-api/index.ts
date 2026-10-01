@@ -9,6 +9,8 @@ const requestStarts=new WeakMap();
 const json=(req,body,status=200,context={})=>{const requestId=context.requestId||req.headers.get("X-Request-Id")||crypto.randomUUID();const correlationId=context.correlationId||req.headers.get("X-Correlation-Id")||requestId;const durationMs=requestStarts.has(req)?performance.now()-requestStarts.get(req):undefined;const event=(()=>{try{return serializeObservabilityEvent(createObservabilityEvent({level:status>=500?"ERROR":status>=400?"WARN":"INFO",service:"mta-api",event:status>=500?"request.failed":"request.completed",requestId,correlationId,method:req.method,route:new URL(req.url).pathname,status,durationMs,outcome:status>=500?"FAILED":status>=400?"DENIED":"SUCCESS",errorCode:body?.error}));}catch{return null;}})();if(event)console.log(event);return new Response(JSON.stringify(body),{status,headers:{...cors(req),"X-Request-Id":requestId,"X-Correlation-Id":correlationId}});};
 const stableJson=(value)=>{if(value===null||typeof value!=="object")return JSON.stringify(value);if(Array.isArray(value))return "["+value.map(stableJson).join(",")+"]";return "{"+Object.keys(value).sort().map((k)=>JSON.stringify(k)+":"+stableJson(value[k])).join(",")+"}";};
 const sha256Hex=async(value)=>{const bytes=new TextEncoder().encode(value),hash=await crypto.subtle.digest("SHA-256",bytes);return Array.from(new Uint8Array(hash)).map((b)=>b.toString(16).padStart(2,"0")).join("");};
+const productionWritesEnabled=()=>Deno.env.get("MTA_PRODUCTION_WRITES_ENABLED")==="true";
+const WRITE_METHODS=new Set(["POST","PATCH","DELETE"]);
 
 Deno.serve(async(req)=>{
   const startedAt=performance.now();
@@ -81,6 +83,13 @@ Deno.serve(async(req)=>{
 
   if(profile.must_change_password) return json(req,{ok:false,error:"PASSWORD_CHANGE_REQUIRED",role},428);
 
+  // Operational writes are fail-closed. The release gate is server-side and
+  // cannot be bypassed by changing browser state or calling the Edge Function directly.
+  // Password/profile self-service remains available through /me so operators can recover credentials.
+  if(WRITE_METHODS.has(req.method) && resource!=="me" && !productionWritesEnabled()) {
+    emit("WARN","mutation.locked",{status:423,outcome:"DENIED",errorCode:"PRODUCTION_WRITE_LOCKED"});
+    return json(req,{ok:false,error:"PRODUCTION_WRITE_LOCKED",role},423,{requestId,correlationId});
+  }
 
   if(resource==="admin-users"){
     if(!new Set(["OWNER","ADMIN"]).has(role)) return json(req,{ok:false,error:"RBAC_USER_ADMIN_DENIED"},403);
@@ -369,16 +378,9 @@ Deno.serve(async(req)=>{
     }
   }
   if(!TABLES.has(resource)) return json(req,{ok:false,error:"RESOURCE_NOT_FOUND"},404);
-  if(resource==="audit-event" && req.method==="POST"){
-    if(!WRITE_ROLES.has(role))return json(req,{ok:false,error:"RBAC_WRITE_DENIED",role},403);
-    const body=await req.json().catch(()=>({}));
-    const requestId=req.headers.get("X-Request-Id")||crypto.randomUUID(),correlationId=req.headers.get("X-Correlation-Id")||crypto.randomUUID();
-    const adminKey=Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");if(!adminKey)return json(req,{ok:false,error:"SERVER_CONFIGURATION_ERROR"},503);
-    const admin=createClient(Deno.env.get("SUPABASE_URL")!,adminKey,{auth:{autoRefreshToken:false,persistSession:false}});
-    const inserted=await admin.from("mta_audit_events").insert({action:String(body.action||"RUNTIME_EVENT"),resource_type:String(body.resource_type||"RUNTIME"),resource_id:body.resource_id?String(body.resource_id):null,result:String(body.result||"SUCCESS"),actor_user_id:user.id,request_id:requestId,correlation_id:correlationId,metadata:body.metadata&&typeof body.metadata==="object"?body.metadata:{}}).select("*").single();
-    if(inserted.error)return json(req,{ok:false,error:"AUDIT_WRITE_FAILED"},400);
-    return json(req,{ok:true,resource,data:inserted.data});
-  }
+  // Audit events are server-generated inside canonical mutation boundaries.
+  // There is deliberately no client-facing audit write endpoint.
+  if(resource==="audit-event") return json(req,{ok:false,error:"AUDIT_WRITE_DISABLED"},405);
 
   if(resource==="audit" && req.method!=="GET") return json(req,{ok:false,error:"AUDIT_READ_ONLY"},405);
   if(["POST","PATCH","DELETE"].includes(req.method)&&!WRITE_ROLES.has(role)) return json(req,{ok:false,error:"RBAC_WRITE_DENIED",role},403);
@@ -397,7 +399,8 @@ Deno.serve(async(req)=>{
     const admin=createClient(Deno.env.get("SUPABASE_URL")!,adminKey,{auth:{autoRefreshToken:false,persistSession:false}});
     const requestId=req.headers.get("X-Request-Id")||crypto.randomUUID();
     const correlationId=req.headers.get("X-Correlation-Id")||requestId;
-    const idempotencyKey=req.headers.get("Idempotency-Key")||crypto.randomUUID();
+    const idempotencyKey=String(req.headers.get("Idempotency-Key")||"").trim();
+    if(WRITE_METHODS.has(req.method) && !idempotencyKey) return json(req,{ok:false,error:"IDEMPOTENCY_KEY_REQUIRED"},400,{requestId,correlationId});
     let body=req.method==="DELETE"?{}:await req.json().catch(()=>({}));
     let canonicalScopeId=null;
     if(["blocks","rooms","detainees"].includes(resource)){
