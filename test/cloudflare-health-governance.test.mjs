@@ -3,9 +3,8 @@ import assert from 'node:assert/strict';
 import worker from '../worker-v11.js';
 
 test('Cloudflare health contract preserves production governance locks', async () => {
-  const response = await worker.fetch(new Request('https://mta-deteni.example/api/health'), {
-    ASSETS: { fetch: async () => new Response('not-used') }
-  }, { MTA_DEPLOY_COMMIT: 'test-commit-123' });
+  const env = { MTA_DEPLOY_COMMIT: 'test-commit-123', ASSETS: { fetch: async () => new Response('not-used') } };
+  const response = await worker.fetch(new Request('https://mta-deteni.example/api/health'), env);
   assert.equal(response.status, 200);
   const body = await response.json();
   assert.equal(body.ok, true);
@@ -21,9 +20,7 @@ test('Cloudflare health contract preserves production governance locks', async (
   assert.equal(body.externalTransportAllowed, false);
   assert.equal(body.durablePublicationAllowed, false);
 
-  const runtimeResponse = await worker.fetch(new Request('https://mta-deteni.example/api/runtime'), {
-    ASSETS: { fetch: async () => new Response('not-used') }
-  }, { MTA_DEPLOY_COMMIT: 'test-commit-123' });
+  const runtimeResponse = await worker.fetch(new Request('https://mta-deteni.example/api/runtime'), env);
   assert.equal(runtimeResponse.status, 200);
   const runtime = await runtimeResponse.json();
   assert.equal(runtime.mode, 'PRODUCTION_RUNTIME');
