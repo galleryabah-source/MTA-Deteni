@@ -39,14 +39,14 @@ function updateDetainee(state,options={}){
   if(Object.prototype.hasOwnProperty.call(options,'entryYear'))return{ok:false,code:'ENTRY_YEAR_IMMUTABLE'};
   const d=state||{},id=String(options.id||''),x=(d.detainees||[]).find(v=>v.id===id);
   if(!x)return{ok:false,code:'DETAINEE_NOT_FOUND'};
-  const code=String(options.code??x.code).trim(),name=String(options.name??x.name).trim(),nationality=String(options.nationality??x.nationality).trim(),gender=String(options.gender??x.gender??'').trim(),dateOfBirth=String(options.dateOfBirth??x.dateOfBirth??'').trim(),passportNumber=String(options.passportNumber??x.passportNumber??'').trim(),notes=String(options.notes??x.notes??'').trim(),status=String(options.status??x.status);
+  if(Object.prototype.hasOwnProperty.call(options,'code') && String(options.code??'').trim()!==String(x.code||'').trim())return{ok:false,code:'DETAINEE_CODE_IMMUTABLE'};
+  const code=String(x.code||'').trim(),name=String(options.name??x.name).trim(),nationality=String(options.nationality??x.nationality).trim(),gender=String(options.gender??x.gender??'').trim(),dateOfBirth=String(options.dateOfBirth??x.dateOfBirth??'').trim(),passportNumber=String(options.passportNumber??x.passportNumber??'').trim(),notes=String(options.notes??x.notes??'').trim(),status=String(options.status??x.status);
   if(!code||!name)return{ok:false,code:'DETAINEE_INPUT_INVALID'};
-  if((d.detainees||[]).some(v=>v.id!==id&&String(v.code||'').trim().toLowerCase()===code.toLowerCase()))return{ok:false,code:'DETAINEE_CODE_EXISTS'};
   if(status==='AKTIF'){
     const placement=(d.placements||[]).filter(p=>p.detaineeId===id).sort((a,b)=>String(b.since||'').localeCompare(String(a.since||'')))[0];
     if(!placement)return{ok:false,code:'PLACEMENT_REQUIRED'};
   }
-  Object.assign(x,{code,name,nationality,gender,dateOfBirth,passportNumber,notes,status,updatedAt:now()});
+  Object.assign(x,{name,nationality,gender,dateOfBirth,passportNumber,notes,status,updatedAt:now()});
   const correlationId=options.correlationId||x.correlationId||uid('COR');x.correlationId=correlationId;
   audit(d,'DETAINEE_UPDATE','DETAINEE',id,'SUCCESS',correlationId);
   d.lastMutation={key:'DETAINEE_UPDATE:'+id+':'+x.updatedAt,action:'DETAINEE_UPDATE',completedAt:now()};
