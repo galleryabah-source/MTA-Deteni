@@ -370,20 +370,52 @@ function reconcileLegacyPlacementSlashBlocks(state){
   }
   return additions.length?{...state,placements:[...state.placements,...additions],legacyPlacementProjectionCount:(Number(state.legacyPlacementProjectionCount)||0)+additions.length}:state;
 }
+function renderProductionBootFailure(err){
+  const view=document.getElementById('appView');
+  if(!view)return;
+  const code=String(err?.message||'PRODUCTION_RUNTIME_UNAVAILABLE');
+  view.innerHTML='<section class="hero"><h1>Runtime produksi belum siap</h1><p class="sub">Koneksi ke database produksi belum selesai. Tidak ada data sintetis yang ditampilkan sebagai pengganti data produksi.</p></section>'+
+    '<section class="grid stats" style="margin-top:12px">'+
+    '<div class="card"><div class="label">Authentication</div><div class="value" style="font-size:18px">AUTHENTICATED</div><span class="status">PASS</span></div>'+
+    '<div class="card"><div class="label">Data Mode</div><div class="value" style="font-size:18px">PRODUCTION</div><span class="status">BLOCKED</span></div>'+
+    '<div class="card"><div class="label">Database</div><div class="value" style="font-size:18px">UNAVAILABLE</div><span class="status">FAIL-CLOSED</span></div>'+
+    '<div class="card"><div class="label">Reason</div><div class="value" style="font-size:14px;word-break:break-word">'+esc(code)+'</div><span class="status">DIAGNOSTIC</span></div>'+
+    '</section><div class="toolbar" style="margin-top:12px"><button class="btn primary" type="button" onclick="location.reload()">Coba lagi</button></div>';
+  syncRuntimeChrome();
+}
+
 async function bootMtaApp(){
   if(window.__mtaAppBooted)return;
   const authState=window.__mtaAuthState||{};
   const authReady=document.body.classList.contains('mta-auth-ready');
   const authenticated=authState.authenticated===true || (authReady && authState.authenticated!==false);
   if(!authReady||!authenticated)return;
-  // Core dashboard must not wait for optional/operational enhancement scripts.
-  // Render immediately after authentication; load enhancements in the background.
+  window.__mtaAppBooted=true;
+  const production=window.mtaProductionStateAdapter?.isProduction?.()===true;
   try{
-    if(window.mtaProductionStateAdapter?.isProduction()) await window.mtaProductionStateAdapter.hydrate();
-    if(window.mtaProductionStateAdapter?.isProduction()&&window.__mtaProductionState){window.__mtaProductionState=Object.freeze(reconcileLegacyPlacementSlashBlocks(structuredClone(window.__mtaProductionState)));}
-    syncRuntimeChrome();
+    // Production bootstrap is fail-closed and non-blocking: never make the
+    // first authenticated paint wait indefinitely on database hydration.
+    if(production){
+      syncRuntimeChrome();
+      void window.mtaProductionStateAdapter.hydrate().then(()=>{
+        if(window.__mtaProductionState){
+          window.__mtaProductionState=Object.freeze(reconcileLegacyPlacementSlashBlocks(structuredClone(window.__mtaProductionState)));
+        }
+        syncRuntimeChrome();
+        db=load();
+        render();
+        void loadAuthenticatedRuntime().catch(err=>{
+          console.warn('[MTA] optional authenticated runtime incomplete',err);
+        });
+      }).catch(err=>{
+        console.error('[MTA] production runtime hydration failed',err);
+        renderProductionBootFailure(err);
+      });
+      return;
+    }
+
     db=load();
-    window.__mtaAppBooted=true;
+    syncRuntimeChrome();
     render();
     void loadAuthenticatedRuntime().catch(err=>{
       console.warn('[MTA] optional authenticated runtime incomplete',err);
