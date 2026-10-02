@@ -7,7 +7,7 @@ const read=p=>readFileSync(p,"utf8");
 
 test("NID application boundary rejects caller-supplied NID on create/update",async()=>{
   const source=read("web/mta-domain-commands-v1.js");
-  const context={window:{},crypto:{randomUUID:()=> "00000000-0000-4000-8000-000000000001"}};
+  const context={window:{MTADeteniStateKernel:{audit(){}}},crypto:{randomUUID:()=> "00000000-0000-4000-8000-000000000001"}};
   vm.runInNewContext(source,context,{filename:"mta-domain-commands-v1.js"});
   const api=context.window.MTADeteniDomainCommands;
   const state={detainees:[{id:"D1",code:"DET-001",name:"Existing",nationality:"Contoh",status:"NONAKTIF"}],placements:[],audit:[]};
