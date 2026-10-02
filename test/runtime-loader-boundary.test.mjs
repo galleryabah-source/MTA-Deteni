@@ -12,7 +12,7 @@ assert.match(loader,/loadProvenance\(\);/);
 assert.doesNotMatch(loader,/loadOperationalRuntime/);
 assert.doesNotMatch(loader,/operational runtime blocked/);
 assert.match(loader,/__mtaOperationalRuntimeAssetFailed/);
-assert.match(runtime,/window\.__mtaOperationalRuntimeLoaded=true/);
+assert.match(runtime,/window.__mtaOperationalRuntimeLoaded=false/);\nassert.match(runtime,/window.__mtaOperationalRuntimeLoaded=true;[\\s\\S]*window\.dispatchEvent\(new CustomEvent\('mta-operational-runtime-loaded'\)\)/);\nassert.ok(runtime.indexOf('window.__mtaOperationalRuntimeLoaded=false') < runtime.indexOf('window.__mtaOperationalRuntimeLoaded=true;'));
 assert.match(runtime,/mta-production-state-adapter-v1\.js\?v=7/);
 const adapter=fs.readFileSync('web/mta-production-state-adapter-v1.js','utf8');
 assert.match(adapter,/localStorage\?\.getItem\('mta-deteni-auth-session'\)/);
