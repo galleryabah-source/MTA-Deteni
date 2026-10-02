@@ -5,20 +5,27 @@
   const PRODUCTION_HOSTS=new Set(['mta-deteni.galleryabah.workers.dev']);
   // Governance lock: production mutation remains disabled until explicit release.
   const PRODUCTION_MUTATIONS_ENABLED=false;
+  const REQUEST_TIMEOUT_MS=10000;
   const isProduction=()=>PRODUCTION_HOSTS.has(location.hostname);
+  const withTimeout=async(promise,ms=REQUEST_TIMEOUT_MS,code='PRODUCTION_API_TIMEOUT')=>{
+    let timer;
+    try{
+      return await Promise.race([promise,new Promise((_,reject)=>{timer=setTimeout(()=>reject(new Error(code)),ms)})]);
+    }finally{clearTimeout(timer)}
+  };
   const isProductionPersistenceEnabled=()=>isProduction()&&PRODUCTION_MUTATIONS_ENABLED;
   const state=()=>window.__mtaProductionState||null;
   const session=async()=>{const r=await window.mtaAuth?.session?.();return r?.data?.session||null};
-  async function request(resource,{method='GET',id,body,headers={}}={}){
-    let s=await session();
+  async function request(resource,{method='GET',id,body,headers={},sessionOverride=null}={}){
+    let s=sessionOverride||await session();
     if(!s?.access_token)throw new Error('PRODUCTION_AUTH_REQUIRED');
     const path=API+'/'+encodeURIComponent(resource)+(id?'/'+encodeURIComponent(id):'');
     const init=()=>({method,headers:{Authorization:'Bearer '+s.access_token,Accept:'application/json',...(body!==undefined?{'Content-Type':'application/json'}:{}),...headers},body:body===undefined?undefined:JSON.stringify(body)});
-    let res=await fetch(path,init());
+    let res=await withTimeout(fetch(path,init()));
     if(res.status===401&&window.mtaAuth?.refreshSession){
       try{
         const refreshed=await window.mtaAuth.refreshSession();
-        if(refreshed?.access_token){s=refreshed;res=await fetch(path,init());}
+        if(refreshed?.access_token){s=refreshed;res=await withTimeout(fetch(path,init()));}
       }catch{}
     }
     const data=await res.json().catch(()=>({ok:false,error:'INVALID_JSON'}));
@@ -74,12 +81,15 @@
     // then the nine canonical resources. The privileged admin-config resource
     // is part of the contract but is not allowed to block operational hydration
     // when the authenticated user has no admin scope.
-    const me=await request('me');
+    const sessionToken=await session();
+    if(!sessionToken?.access_token)throw new Error('PRODUCTION_AUTH_REQUIRED');
+    const me=await request('me',{sessionOverride:sessionToken});
     if(!me?.user||!me?.profile)throw new Error('PRODUCTION_IDENTITY_INVALID');
-    const [blocks,rooms,detainees,placements,movements,leaves,documents,audit]=await Promise.all(['blocks','rooms','detainees','placements','movements','leaves','documents','audit'].map(resource=>request(resource)));
+    const resources=['blocks','rooms','detainees','placements','movements','leaves','documents','audit'];
+    const [blocks,rooms,detainees,placements,movements,leaves,documents,audit]=await Promise.all(resources.map(resource=>request(resource,{sessionOverride:sessionToken})));
     let adminConfig={ok:true,data:{settings:{}},skipped:false};
     try{
-      adminConfig=await request('admin-config');
+      adminConfig=await request('admin-config',{sessionOverride:sessionToken});
     }catch(error){
       // admin-config is optional for operational hydration. 403/409 are
       // authorization boundaries and 404 means this deployment has no
