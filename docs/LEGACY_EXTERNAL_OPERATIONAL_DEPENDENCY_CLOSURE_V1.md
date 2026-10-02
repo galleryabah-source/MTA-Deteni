@@ -38,6 +38,8 @@ Production catalog inspection found direct table privileges on `public.mta_detai
 
 The `authenticated` role is constrained by four `mta_detainees_*_scope` RLS policies, including INSERT/UPDATE role and scope checks. This is an authorization control, not proof that direct database/API write capability is unused.
 
+The deployed `mta-api` itself is currently fail-closed for operational writes unless `MTA_PRODUCTION_WRITES_ENABLED=true`, so the direct table grants are a separate database/API capability surface and remain relevant to X4.
+
 A bounded `postgres_logs` search for INSERT/UPDATE/DELETE statements referencing `mta_detainees` returned no matching rows in the inspected 24-hour window. The available Postgres telemetry therefore gives **no observed direct mutation evidence in that window**, but it does not establish historical zero usage or identify every credential/client that could exercise the grants.
 
 This makes X4 a concrete production closure item: identify which operational clients/credentials can use these grants and whether any such client supplies legacy `code`.
@@ -80,6 +82,12 @@ Map every detainee identity exchange as producer -> transport -> consumer for `i
 Identify production roles/users/service credentials that can INSERT or UPDATE `public.mta_detainees`, including whether `code` is required.
 
 ### X5 — Recovery inventory
+
+The deployed `mta-api` v24 exposes `GET /backup` with `schemaVersion: 1` and serializes `mta_detainees` with `select("*")`, so legacy `code` is currently carried in the backup payload. The restore endpoint `POST /backup-restore` requires OWNER and delegates to `mta_restore_backup_transaction`.
+
+Production catalog inspection found no function named `mta_restore_backup_transaction`. Therefore the current deployed restore path is **not provisioned at the database boundary** and must not be treated as a completed recovery capability. This is a concrete G1 recovery finding, not a reason to remove `code`.
+
+Operational backup archives, restore operators, and any external recovery procedures remain unverified.
 Identify backup producers, storage locations, restore operators, restore procedures, backup schema versions, and whether restore requires or merely preserves `code`.
 
 ## G1 decision
