@@ -1,6 +1,7 @@
 (()=>{
   const K='mta-deteni-demo-v2';
   const get=()=>JSON.parse(localStorage.getItem(K)||'{}');
+  const identity=x=>String(x?.nid||x?.code||x?.id||'');
   const esc=s=>String(s??'').replace(/[&<>\"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;',"'":'&#39;'}[c]));
   const audit=(id)=>{const d=get();d.audit=d.audit||[];d.audit.unshift({id:'AUD-'+crypto.randomUUID().slice(0,10).toUpperCase(),action:'QR_PRINT',resourceType:'QR',resourceId:id||'',result:'SUCCESS',occurredAt:new Date().toISOString(),actor:'DEMO-OPERATOR',requestId:'REQ-'+crypto.randomUUID().slice(0,10).toUpperCase(),correlationId:'COR-'+crypto.randomUUID().slice(0,10).toUpperCase(),policyVersion:'AUTHZ-1.0'});localStorage.setItem(K,JSON.stringify(d));};
   window.p6printQR=(kind,id)=>{
@@ -14,7 +15,7 @@
     g.addData(payload);g.make();
     const svg=g.createSvgTag(8,0);
     const heading=kind==='leave'?'QR LEAVE':kind==='room'?'QR ROOM':'QR DETENEE';
-    const primary=kind==='leave'?x.id:kind==='room'?x.block:x.code;
+    const primary=kind==='leave'?x.id:kind==='room'?x.block:identity(x);
     const secondary=kind==='leave'?x.destination:kind==='room'?x.room:x.name;
     const w=window.open('','_blank','width=520,height=720');
     if(!w){window.toast?.('Popup diblokir browser. Izinkan popup untuk mencetak QR.');return;}
