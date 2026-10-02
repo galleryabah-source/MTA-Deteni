@@ -165,8 +165,9 @@
     const correlation=String(correlationId||crypto.randomUUID());
     const key=String(idempotencyKey||'').trim();
     if(!key)throw new Error('IDEMPOTENCY_KEY_REQUIRED');
-    const clean={code:String(code||'').trim(),name:String(name||'').trim(),nationality:String(nationality||'').trim(),status:String(status||'AKTIF'),placement:String(placement||'').trim(),updated_at:new Date().toISOString(),metadata:{gender:String(gender||''),dateOfBirth:String(dateOfBirth||''),passportNumber:String(passportNumber||''),notes:String(notes||''),correlationId:correlation,source:'PRODUCTION_RUNTIME'}};
+    const clean={name:String(name||'').trim(),nationality:String(nationality||'').trim(),status:String(status||'AKTIF'),placement:String(placement||'').trim(),updated_at:new Date().toISOString(),metadata:{gender:String(gender||''),dateOfBirth:String(dateOfBirth||''),passportNumber:String(passportNumber||''),notes:String(notes||''),correlationId:correlation,source:'PRODUCTION_RUNTIME'}};
     if(operation==='create'){
+      clean.code=String(code||'').trim();
       if(!clean.code||!clean.name)throw new Error('DETAINEE_INPUT_INVALID');
       const normalizedEntryYear=Number(entryYear);
       if(!Number.isInteger(normalizedEntryYear)||normalizedEntryYear<2000||normalizedEntryYear>2099)throw new Error('ENTRY_YEAR_REQUIRED');
@@ -177,6 +178,10 @@
     }
     if(!id)throw new Error('DETAINEE_ID_REQUIRED');
     if(operation==='update'){
+      if(Object.prototype.hasOwnProperty.call(args,'code')){
+        const current=state()?.detainees?.find(x=>String(x.id)===String(id));
+        if(String(args.code??'').trim()!==String(current?.code||'').trim())return{ok:false,code:'DETAINEE_CODE_IMMUTABLE'};
+      }
       const result=await request('detainees',{method:'PATCH',id:String(id),body:clean,headers:{'X-Request-Id':String(requestId||crypto.randomUUID()),'X-Correlation-Id':clean.metadata.correlationId,'Idempotency-Key':key}});
       const refreshed=await hydrate();
       return {ok:true,code:'DETAINEE_UPDATED',data:result.data,state:refreshed,correlationId};
