@@ -149,3 +149,7 @@ G1-X5 — Recovery Operator Closure
 G1 final certification
 
 G2 Legacy Code replacement remains blocked until G1 is certified.
+
+## Evidence refresh
+
+This document was refreshed after correcting the PR base to the canonical G1 branch so inherited CI evaluates the same provenance chain.
