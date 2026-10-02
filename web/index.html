@@ -157,7 +157,27 @@ body:not(.mta-auth-ready) .app{display:none!important}body.mta-auth-ready .app{d
 <div class="layout"><aside class="side"><nav class="nav" id="nav"><button class="active" data-view="dashboard">Dashboard</button><button data-view="detainee">Data Deteni</button><button data-view="detainee-statistics">Data Statistik</button><button data-view="placement">Penempatan</button><button data-view="movement">Pergerakan</button><button data-view="leave">Izin</button><button data-view="documents">Dokumen</button><button data-view="audit">Audit Trail</button><button data-view="user-management">Manajemen User</button></nav></aside><main class="main"><div id="appView" class="view"></div></main></div>
 <footer class="footer"><span>MTA DETENI Digital · Controlled runtime · AI OFF</span><span id="clock"></span></footer>
 </div><div id="modal" class="modal"><div class="dialog" id="dialog"></div></div><div id="toast" class="toast"></div>
-<script defer src="/mta-production-api.js"></script><script defer src="/mta-production-state-adapter-v1.js?v=7&legacy-placement=1"></script><script defer src="/mta-domain-commands-v1.js?v=1"></script><script defer src="/mta-auth-ui.js?v=10"></script><script defer src="/mta-app-runtime-full.js?v=24" data-mta-operational-runtime="static"></script>
+<script>
+(function(){
+  if(window.__mtaRuntimeErrorBoundaryInstalled)return;
+  window.__mtaRuntimeErrorBoundaryInstalled=true;
+  window.addEventListener('error',function(e){
+    const source=String(e?.filename||'');
+    if(source.includes('/mta-app-runtime-full.js')){
+      window.__mtaOperationalRuntimeAssetFailed=true;
+      window.__mtaOperationalRuntimeError=String(e?.message||'MTA_APP_RUNTIME_FULL_EXECUTION_FAILED');
+    }
+  },true);
+  window.addEventListener('unhandledrejection',function(e){
+    const reason=e?.reason;
+    const stack=String(reason?.stack||reason?.message||reason||'');
+    if(stack.includes('mta-app-runtime-full.js')){
+      window.__mtaOperationalRuntimeAssetFailed=true;
+      window.__mtaOperationalRuntimeError=String(reason?.message||reason||'MTA_APP_RUNTIME_FULL_UNHANDLED_REJECTION');
+    }
+  });
+})();
+</script><script defer src="/mta-production-api.js"></script><script defer src="/mta-production-state-adapter-v1.js?v=7&legacy-placement=1"></script><script defer src="/mta-domain-commands-v1.js?v=1"></script><script defer src="/mta-auth-ui.js?v=10"></script><script defer src="/mta-app-runtime-full.js?v=24" data-mta-operational-runtime="static"></script>
 <script>
 (function(){
   window.addEventListener('error',function(e){
