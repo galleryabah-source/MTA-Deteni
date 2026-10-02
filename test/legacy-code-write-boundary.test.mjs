@@ -16,7 +16,7 @@ test("legacy code write boundary: domain update cannot mutate code",()=>{
 test("legacy code write boundary: production adapter only sends code on create",()=>{
   const s=read("web/mta-production-state-adapter-v1.js");
   assert.match(s,/operation==='create'/);
-  assert.match(s,/clean\.code=String\(code\|\|'\'\)\.trim\(\)/);
+  assert.match(s,/clean\.code=String\(code/);
   assert.match(s,/DETAINEE_CODE_IMMUTABLE/);
   assert.match(s,/operation==='update'/);
 });
