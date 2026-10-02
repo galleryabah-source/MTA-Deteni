@@ -15,7 +15,9 @@ test("authentication shell never presents synthetic operational dashboard",()=>{
 test("canonical runtime can take over after authenticated shell readiness",()=>{
   assert.match(runtime,/const authReady=document\.body\.classList\.contains\('mta-auth-ready'\)/);
   assert.match(runtime,/if\(!authReady\|\|!authenticated\)return/);
-  assert.match(runtime,/await window\.mtaProductionStateAdapter\.hydrate\(\)/);
+  assert.match(runtime,/void window\.mtaProductionStateAdapter\.hydrate\(\)\.then\(/);
+  assert.match(runtime,/if\(production\)\{[\s\S]*?return;/);
+  assert.doesNotMatch(runtime,/if\(production\)\{[\s\S]*?await window\.mtaProductionStateAdapter\.hydrate\(\)/);
 });
 
 test("bootstrap asset is cache-busted",()=>{

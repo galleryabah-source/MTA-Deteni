@@ -7,7 +7,7 @@ const index=fs.readFileSync("web/index.html","utf8");
 const authUi=fs.readFileSync("web/mta-auth-ui.js","utf8");
 
 test("production dashboard renders runtime status from canonical production adapter state",()=>{
-  assert.match(runtime,/function runtimeContext()/);
+  assert.match(runtime,/function runtimeContext\(\)/);
   assert.ok(runtime.includes("mtaProductionStateAdapter?.isProduction"));
   assert.ok(runtime.includes("database==='CONNECTED'"));
   assert.ok(runtime.includes("mode==='PRODUCTION'"));
@@ -23,7 +23,10 @@ test("production chrome has no hardcoded Local synthetic runtime label",()=>{
   assert.doesNotMatch(authUi,/Authentication boundary · AI OFF · Synthetic runtime/);
 });
 
-test("production boot hydrates canonical production state before dashboard render",()=>{
-  assert.match(runtime,/await window\.mtaProductionStateAdapter\.hydrate\(\)/);
-  assert.match(runtime,/syncRuntimeChrome\(\);\s*db=load\(\);\s*window\.__mtaAppBooted=true/);
+test("production boot hydrates canonical production state without blocking first paint",()=>{
+  assert.match(runtime,/renderProductionBootFailure/);
+  assert.match(runtime,/window\.mtaProductionStateAdapter\.hydrate\(\)\.then/);
+  assert.match(runtime,/Production bootstrap is fail-closed and non-blocking/);
+  assert.doesNotMatch(runtime,/if\(window\.mtaProductionStateAdapter\?\.isProduction\(\)\) await window\.mtaProductionStateAdapter\.hydrate\(\)/);
+  assert.match(runtime,/if\(production\)[\s\S]*?return;/);
 });
