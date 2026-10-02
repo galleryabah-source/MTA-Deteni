@@ -21,5 +21,5 @@ test("full runtime is the canonical operational renderer",()=>{
 });
 
 test("authenticated full runtime uses current production adapter cache version",()=>{
-  assert.match(full,/mta-production-state-adapter-v1\.js\?v=6/);
+  assert.match(full,/mta-production-state-adapter-v1\.js\?v=7/);
 });

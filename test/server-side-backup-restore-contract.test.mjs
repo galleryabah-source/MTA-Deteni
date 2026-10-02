@@ -27,7 +27,7 @@ assert.match(commands,/mtaProductionStateAdapter\.restoreBackup\(x\)/);
 assert.match(runtime,/createBackup/);
 assert.match(runtime,/await window\.MTADeteniDomainCommandsV2\?\.restoreBackup\(x\)/);
 assert.match(runtime,/mtaProductionStateAdapter\?\.isProduction/);
-assert.match(index,/mta-production-state-adapter-v1\.js\?v=6/);
+assert.match(index,/mta-production-state-adapter-v1\.js\?v=7/);
 assert.match(runtime,/mta-domain-commands-v2\.js\?v=5/);
 
 assert.match(sql,/create or replace function public\.mta_restore_backup_transaction/);
