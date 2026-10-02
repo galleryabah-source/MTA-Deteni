@@ -1,0 +1,16 @@
+name: G1-X2 Import Manual Procedure Closure
+on:
+  pull_request:
+    paths:
+      - "docs/G1_X2_IMPORT_MANUAL_PROCEDURE_CLOSURE_V1.md"
+      - "test/g1-x2-import-manual-procedure-closure.test.mjs"
+      - ".github/workflows/g1-x2-import-manual-procedure-closure.yml"
+jobs:
+  closure:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: node --test test/g1-x2-import-manual-procedure-closure.test.mjs
