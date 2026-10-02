@@ -9,6 +9,9 @@ function audit(state,action,type,id,result='SUCCESS',correlationId){
   throw new Error('CANONICAL_AUDIT_KERNEL_REQUIRED');
 }
 async function createDetainee(state,options={}){
+  if(Object.prototype.hasOwnProperty.call(options,'nid'))return{ok:false,code:'NID_SYSTEM_GENERATED'};
+  const entryYear=Number(options.entryYear);
+  if(!Number.isInteger(entryYear)||entryYear<2000||entryYear>2099)return{ok:false,code:'ENTRY_YEAR_REQUIRED'};
   const d=state||{},code=String(options.code||'').trim(),name=String(options.name||'').trim(),nationality=String(options.nationality||'').trim(),gender=String(options.gender||'').trim(),dateOfBirth=String(options.dateOfBirth||'').trim(),passportNumber=String(options.passportNumber||'').trim(),notes=String(options.notes||'').trim(),status=String(options.status||'AKTIF'),roomId=String(options.roomId||'');
   if(!code||!name)return{ok:false,code:'DETAINEE_INPUT_INVALID'};
   d.detainees=Array.isArray(d.detainees)?d.detainees:[];
@@ -20,7 +23,7 @@ async function createDetainee(state,options={}){
     if(guard&&!guard.ok)return{ok:false,code:guard.code||'ROOM_INVALID'};
   }
   const id=options.id||uid('DET'),correlationId=options.correlationId||uid('COR');
-  const detainee={id,code,name,nationality,gender,dateOfBirth,passportNumber,notes,status,placement:room?room.block+' / '+room.room:'',createdAt:options.createdAt||now(),correlationId};
+  const detainee={id,code,name,nationality,entryYear,gender,dateOfBirth,passportNumber,notes,status,placement:room?room.block+' / '+room.room:'',createdAt:options.createdAt||now(),correlationId};
   d.detainees.unshift(detainee);
   audit(d,'DETAINEE_CREATE','DETAINEE',id,'SUCCESS',correlationId);
   if(room){
@@ -32,6 +35,8 @@ async function createDetainee(state,options={}){
   return{ok:true,code:'DETAINEE_CREATED',detainee,correlationId};
 }
 function updateDetainee(state,options={}){
+  if(Object.prototype.hasOwnProperty.call(options,'nid'))return{ok:false,code:'NID_IMMUTABLE'};
+  if(Object.prototype.hasOwnProperty.call(options,'entryYear'))return{ok:false,code:'ENTRY_YEAR_IMMUTABLE'};
   const d=state||{},id=String(options.id||''),x=(d.detainees||[]).find(v=>v.id===id);
   if(!x)return{ok:false,code:'DETAINEE_NOT_FOUND'};
   const code=String(options.code??x.code).trim(),name=String(options.name??x.name).trim(),nationality=String(options.nationality??x.nationality).trim(),gender=String(options.gender??x.gender??'').trim(),dateOfBirth=String(options.dateOfBirth??x.dateOfBirth??'').trim(),passportNumber=String(options.passportNumber??x.passportNumber??'').trim(),notes=String(options.notes??x.notes??'').trim(),status=String(options.status??x.status);
