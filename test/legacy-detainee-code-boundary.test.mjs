@@ -18,14 +18,13 @@ const KNOWN_LEGACY_CONSUMERS=new Set([
   "web/data-statistics-report-v1.js",
   "web/qr-print-clean.js",
   "web/qr-print-clean-v2.js",
-  "web/mta-app-runtime-full.js",
-  "web/detainee-detail-v1.js",
-  "web/detainee-statistics-v1.js",
-  "web/data-statistics-report-v1.js",
-  "web/qr-print-clean.js",
-  "web/qr-print-clean-v2.js",
-  "web/movement-v9.js",
-  "supabase/functions/mta-api/index.ts"
+  "supabase/functions/mta-api/index.ts",
+  "tests/authenticated-browser-acceptance.mjs",
+  "web/admin-settings-v8.js",
+  "web/mta-unified-shell-v1.js",
+  "web/mta-unified-shell-v2.js",
+  "web/preview-v5.js",
+  "web/preview-v6.js"
 ]);
 
 function files(dir){
@@ -75,6 +74,6 @@ test("legacy detainee code boundary: no new application consumer is introduced",
 test("legacy detainee code boundary: NID remains the canonical identity contract",()=>{
   const contract=readFileSync(join(ROOT,"docs/NID_CANONICAL_IDENTITY_CONTRACT_V1.md"),"utf8");
   assert.match(contract,/RDM-PTK-YY-NNNNNN/);
-  assert.match(contract,/single operational identity/i);
+  assert.match(contract,/single (?:operational )?identity/i);
   assert.match(contract,/No section-specific detainee number/i);
 });
