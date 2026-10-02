@@ -62,3 +62,5 @@ jobs:
           path: artifacts/mta-evidence/nid-concurrency-certification.json
           if-no-files-found: error
           retention-days: 30
+
+# PR observable certification v2.
