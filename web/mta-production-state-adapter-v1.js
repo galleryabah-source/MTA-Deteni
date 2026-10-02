@@ -157,7 +157,10 @@
     window.__mtaRuntimeStatus={...(window.__mtaRuntimeStatus||{}),readOnly:false,lastCommand:{command:'MOVE_DETAINEE',movementId:result.data?.movementId||null,placementId:result.data?.placementId||null,auditEventId:result.data?.auditEventId||null,replayed:!!result.replayed,requestId:reqId,correlationId:result.data?.correlationId||correlation,idempotencyKey:requestKey,committedAt:new Date().toISOString()}};
     return result;
   }
-  async function mutateDetainee(operation,{id,code,name,nationality,status,placement,gender,dateOfBirth,passportNumber,notes,correlationId,requestId,idempotencyKey}={}){
+  async function mutateDetainee(operation,args={}){
+    if(Object.prototype.hasOwnProperty.call(args,'nid'))return{ok:false,code:operation==='create'?'NID_SYSTEM_GENERATED':'NID_IMMUTABLE'};
+    if(operation==='update'&&Object.prototype.hasOwnProperty.call(args,'entryYear'))return{ok:false,code:'ENTRY_YEAR_IMMUTABLE'};
+    const {id,code,name,nationality,status,placement,gender,dateOfBirth,passportNumber,notes,entryYear,correlationId,requestId,idempotencyKey}=args;
     if(!isProductionPersistenceEnabled())throw new Error('PRODUCTION_MUTATION_NOT_AUTHORIZED');
     const correlation=String(correlationId||crypto.randomUUID());
     const key=String(idempotencyKey||'').trim();
@@ -165,6 +168,9 @@
     const clean={code:String(code||'').trim(),name:String(name||'').trim(),nationality:String(nationality||'').trim(),status:String(status||'AKTIF'),placement:String(placement||'').trim(),updated_at:new Date().toISOString(),metadata:{gender:String(gender||''),dateOfBirth:String(dateOfBirth||''),passportNumber:String(passportNumber||''),notes:String(notes||''),correlationId:correlation,source:'PRODUCTION_RUNTIME'}};
     if(operation==='create'){
       if(!clean.code||!clean.name)throw new Error('DETAINEE_INPUT_INVALID');
+      const normalizedEntryYear=Number(entryYear);
+      if(!Number.isInteger(normalizedEntryYear)||normalizedEntryYear<2000||normalizedEntryYear>2099)throw new Error('ENTRY_YEAR_REQUIRED');
+      clean.entry_year=normalizedEntryYear;
       const result=await request('detainees',{method:'POST',body:clean,headers:{'X-Request-Id':String(requestId||crypto.randomUUID()),'X-Correlation-Id':clean.metadata.correlationId,'Idempotency-Key':key}});
       const refreshed=await hydrate();
       return {ok:true,code:'DETAINEE_CREATED',data:result.data,state:refreshed,correlationId};

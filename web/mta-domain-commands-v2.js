@@ -21,11 +21,15 @@ async function productionDetaineeMutation(operation,o={}){
   }
 }
 async function createDetainee(s,o={}){
+  if(Object.prototype.hasOwnProperty.call(o,'nid'))return{ok:false,code:'NID_SYSTEM_GENERATED'};
+  if(!Number.isInteger(Number(o.entryYear))||Number(o.entryYear)<2000||Number(o.entryYear)>2099)return{ok:false,code:'ENTRY_YEAR_REQUIRED'};
   if(window.mtaProductionStateAdapter?.isProduction?.())return productionDetaineeMutation('create',o);
   if(typeof window.MTADeteniDomainCommands?.createDetainee==='function')return await window.MTADeteniDomainCommands.createDetainee(s,o);
   return{ok:false,code:'CANONICAL_DETAINEE_COMMAND_NOT_READY'};
 }
 async function updateDetainee(s,o={}){
+  if(Object.prototype.hasOwnProperty.call(o,'nid'))return{ok:false,code:'NID_IMMUTABLE'};
+  if(Object.prototype.hasOwnProperty.call(o,'entryYear'))return{ok:false,code:'ENTRY_YEAR_IMMUTABLE'};
   if(window.mtaProductionStateAdapter?.isProduction?.())return productionDetaineeMutation('update',o);
   if(typeof window.MTADeteniDomainCommands?.updateDetainee==='function')return await window.MTADeteniDomainCommands.updateDetainee(s,o);
   return{ok:false,code:'CANONICAL_DETAINEE_COMMAND_NOT_READY'};

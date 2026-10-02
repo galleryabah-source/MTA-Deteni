@@ -456,12 +456,20 @@ Deno.serve(async(req)=>{
       canonicalScopeId=scoped.data.scope_id;
     }
     if(resource==="detainees"){
+      if(Object.prototype.hasOwnProperty.call(body,"nid")){
+        return json(req,{ok:false,error:req.method==="POST"?"NID_SYSTEM_GENERATED":"NID_IMMUTABLE"},400,{requestId,correlationId});
+      }
       if(req.method==="POST"){
-        // Detainee writes use the same canonical scope binding as the
-        // Master Block/Room mutation boundary. The client may not choose
-        // or omit scope_id because the API owns the authenticated scope.
-        body={...body,scope_id:canonicalScopeId};
+        const entryYear=Number(body?.entry_year??body?.entryYear);
+        if(!Number.isInteger(entryYear)||entryYear<2000||entryYear>2099){
+          return json(req,{ok:false,error:"ENTRY_YEAR_REQUIRED"},400,{requestId,correlationId});
+        }
+        delete body.entryYear;
+        body={...body,entry_year:entryYear,scope_id:canonicalScopeId};
       }else if(id){
+        if(Object.prototype.hasOwnProperty.call(body,"entry_year")||Object.prototype.hasOwnProperty.call(body,"entryYear")){
+          return json(req,{ok:false,error:"ENTRY_YEAR_IMMUTABLE"},400,{requestId,correlationId});
+        }
         const current=await admin.from("mta_detainees").select("scope_id").eq("id",id).single();
         if(current.error||!current.data)return json(req,{ok:false,error:"DETAINEE_NOT_FOUND"},404);
         if(current.data.scope_id!==canonicalScopeId)return json(req,{ok:false,error:"WRONG_SCOPE"},403);

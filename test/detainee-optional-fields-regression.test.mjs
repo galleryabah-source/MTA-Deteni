@@ -42,6 +42,7 @@ test("canonical detainee command persists optional fields and accepts them blank
     code:"DET-OPTIONAL-01",
     name:"Synthetic Optional",
     nationality:"Contoh",
+    entryYear:2026,
     gender:"",
     dateOfBirth:"",
     passportNumber:"",

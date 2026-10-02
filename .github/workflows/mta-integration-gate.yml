@@ -155,6 +155,20 @@ jobs:
           grep -Fq 'mta_verify_audit_integrity' supabase/migrations/20260923041000_mta_audit_hash_chain_v1.sql
           if grep -Fq '<script src="/admin-settings-v9.js' worker-v11.js; then echo "DUPLICATE_ADMIN_SETTINGS_INJECTION"; exit 1; fi
           echo "AUTH/RBAC/AUDIT/INJECTION SECURITY CONTRACT: PASS"
+      - name: Enforce canonical NID application/domain boundary
+        shell: bash
+        run: |
+          set -e
+          grep -Fq "NID_SYSTEM_GENERATED" web/mta-domain-commands-v1.js
+          grep -Fq "NID_IMMUTABLE" web/mta-domain-commands-v1.js
+          grep -Fq "hasOwnProperty.call(o,'nid')" web/mta-domain-commands-v2.js
+          grep -Fq "hasOwnProperty.call(args,'nid')" web/mta-production-state-adapter-v1.js
+          grep -Fq 'hasOwnProperty.call(body,"nid")' supabase/functions/mta-api/index.ts
+          grep -Fq "ENTRY_YEAR_REQUIRED" supabase/functions/mta-api/index.ts
+          grep -Fq "ENTRY_YEAR_IMMUTABLE" supabase/functions/mta-api/index.ts
+          node --test test/nid-application-domain-boundary.test.mjs test/nid-repository-boundary.test.mjs
+          echo "NID_APPLICATION_DOMAIN_BOUNDARY: PASS"
+
       - name: Enforce runtime boundaries
         shell: bash
         run: |
