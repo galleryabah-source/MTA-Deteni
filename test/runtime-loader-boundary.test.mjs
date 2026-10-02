@@ -6,6 +6,10 @@ const index=fs.readFileSync('web/index.html','utf8');
 
 assert.match(loader,/mta-app-runtime-full\.js\?v=23/);
 assert.match(loader,/mta-provenance-v1\.js\?v=2/);
+assert.match(loader,/mta-production-state-adapter-v1\.js\?v=7/);
+const adapter=fs.readFileSync('web/mta-production-state-adapter-v1.js','utf8');
+assert.match(adapter,/localStorage\?\.getItem\('mta-deteni-auth-session'\)/);
+assert.match(adapter,/const r=await window\.mtaAuth\?\.session\?\(\)/);
 assert.match(loader,/loadOperationalRuntime\(\);\s*loadProvenance\(\);/);
 assert.doesNotMatch(loader,/provenance\.onload\s*=\s*\(\)=>\s*\{/);
 assert.doesNotMatch(loader,/operational runtime blocked/);
