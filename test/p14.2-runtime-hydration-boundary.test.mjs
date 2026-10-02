@@ -13,7 +13,7 @@ assert.match(adapter,/Promise\.all\(resources\.map\(resource=>request\(resource,
 assert.match(runtime,/renderProductionBootFailure/);
 assert.match(runtime,/window\.mtaProductionStateAdapter\.hydrate\(\)\.then/);
 assert.match(runtime,/Production bootstrap is fail-closed and non-blocking/);
-assert.match(runtime,/if\(production\)[\\s\\S]*?return;/);
+assert.match(runtime,/if\(production\)[\s\S]*?return;/);
 assert.doesNotMatch(runtime,/if\(window\.mtaProductionStateAdapter\?\.isProduction\(\)\) await window\.mtaProductionStateAdapter\.hydrate\(\)/);
 
 console.log('P14.2 runtime hydration boundary regression: PASS');
