@@ -1,0 +1,64 @@
+name: MTA DETENI NID Concurrency Certification
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  nid-concurrency:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d postgres"
+          --health-interval 2s
+          --health-timeout 2s
+          --health-retries 20
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Verify PostgreSQL client
+        run: psql --version
+
+      - name: Run isolated concurrent NID certification
+        env:
+          PGHOST: 127.0.0.1
+          PGPORT: 5432
+          PGUSER: postgres
+          PGPASSWORD: postgres
+          PGDATABASE: postgres
+        run: bash scripts/nid-concurrency-certification.sh
+
+      - name: Verify certification evidence
+        run: |
+          test -s artifacts/mta-evidence/nid-concurrency-certification.json
+          node - <<'NODE'
+          const fs=require('fs');
+          const x=JSON.parse(fs.readFileSync('artifacts/mta-evidence/nid-concurrency-certification.json','utf8'));
+          if(x.status!=='PASS'||x.environment!=='controlled-nonprod'||x.syntheticOnly!==true||x.productionAccessAuthorized!==false) process.exit(1);
+          for(const [id,status] of Object.entries(x.controls)) if(status!=='PASS') process.exit(1);
+          console.log('NID-CONCURRENCY-CERTIFICATION='+x.status);
+          NODE
+
+      - name: Upload NID concurrency evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: mta-nid-concurrency-certification-${{ github.sha }}
+          path: artifacts/mta-evidence/nid-concurrency-certification.json
+          if-no-files-found: error
+          retention-days: 30
