@@ -114,7 +114,8 @@
         msg.textContent='Login berhasil. Membuka aplikasi...';
         // Do not depend solely on Supabase's asynchronous auth event.
         // Complete the UI handoff directly from the successful sign-in response.
-        const authDetail={authenticated:true,user:r.data.user||r.data.session.user||null};
+        const authDetail={resolved:true,authenticated:true,user:r.data.user||r.data.session.user||null};
+        window.__mtaAuthState=Object.freeze(authDetail);
         window.mtaProductionApi?.setAccessToken(r.data.session.access_token||null);
         activateAuthenticatedShell(authDetail.user);
         msg.textContent='Dashboard terbuka. Runtime operasional sedang dimuat...';
