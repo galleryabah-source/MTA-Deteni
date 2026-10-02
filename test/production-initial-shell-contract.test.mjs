@@ -3,8 +3,8 @@ import fs from 'node:fs';
 
 const index=fs.readFileSync('web/index.html','utf8');
 
-const styleOpen=(index.match(/<style\\b/gi)||[]).length;
-const styleClose=(index.match(/<\\/style>/gi)||[]).length;
+const styleOpen=index.split('<style').length-1;
+const styleClose=index.split('</style>').length-1;
 assert.equal(styleOpen,styleClose,'index.html style tags must be balanced');
 
 assert.match(index,/id="mtaAuthGate"[^>]*style="display:flex"/);
