@@ -31,29 +31,9 @@
   document.body.classList.add('mta-auth-ready');
   renderCore();
 
-  // Operational runtime is deliberately non-blocking and must not depend on
-  // provenance bootstrap completion. Provenance is governance metadata; it must
-  // never become a hard dependency that can strand the authenticated UI in the
-  // neutral bootstrap shell.
-  const loadOperationalRuntime=()=>{
-    if(window.__mtaOperationalRuntimeLoading||window.__mtaOperationalRuntimeLoaded)return;
-    const s=document.createElement('script');
-    s.src='/mta-app-runtime-full.js?v=23';
-    s.async=true;
-    s.dataset.mtaOperationalRuntime='1';
-    window.__mtaOperationalRuntimeLoading=true;
-    s.onload=()=>{
-      window.__mtaOperationalRuntimeLoaded=true;
-      window.__mtaOperationalRuntimeLoading=false;
-      console.info('[MTA] operational runtime loaded v23');
-    };
-    s.onerror=err=>{
-      window.__mtaOperationalRuntimeLoading=false;
-      console.error('[MTA] operational runtime unavailable',err);
-      window.dispatchEvent(new CustomEvent('mta-operational-runtime-failed',{detail:{code:'MTA_APP_RUNTIME_FULL_LOAD_FAILED'}}));
-    };
-    document.body.appendChild(s);
-  };
+  // Canonical operational runtime asset: /mta-app-runtime-full.js?v=24 (static deferred in index.html).
+  // It installs its auth-state listener before authenticated hydration can fire,
+  // eliminating the previous dynamically-injected async handoff race.
   const loadProvenance=()=>{
     if(window.MTAProvenance||document.querySelector('script[data-mta-provenance]'))return;
     const provenance=document.createElement('script');
@@ -64,6 +44,14 @@
     provenance.onerror=err=>console.warn('[MTA] provenance contract unavailable',err);
     document.body.appendChild(provenance);
   };
-  loadOperationalRuntime();
+  if(window.__mtaOperationalRuntimeAssetFailed){
+    const reason=String(window.__mtaOperationalRuntimeError||'MTA_APP_RUNTIME_FULL_UNAVAILABLE');
+    view.innerHTML='<section class="hero"><h1>Runtime operasional gagal dimuat</h1><p class="sub">Canonical runtime tidak berhasil dieksekusi. Tidak ada data sintetis yang dipromosikan sebagai pengganti production runtime.</p><div class="notice" style="margin-top:12px">Reason: '+escapeHtml(reason)+'</div><div class="toolbar"><button class="btn primary" type="button" onclick="location.reload()">Coba lagi</button></div></section>';
+  } else {
+    window.setTimeout(()=>{
+      if(window.__mtaOperationalRuntimeLoaded||window.__mtaOperationalRuntimeAssetFailed)return;
+      view.innerHTML='<section class="hero"><h1>Runtime operasional tidak merespons</h1><p class="sub">Bootstrap shell sudah aktif, tetapi canonical operational runtime belum terdaftar setelah 3 detik.</p><div class="notice" style="margin-top:12px">Boundary: AUTHENTICATED → CANONICAL_RUNTIME</div><div class="toolbar"><button class="btn primary" type="button" onclick="location.reload()">Coba lagi</button></div></section>';
+    },3000);
+  }
   loadProvenance();
 })();

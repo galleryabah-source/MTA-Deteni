@@ -135,7 +135,7 @@ jobs:
             exit 1
           fi
           grep -Fq "mta-state-kernel-v1.js?v=5" web/mta-app-runtime-full.js
-          grep -Fq "mta-app-runtime-full.js?v=23" web/mta-app-runtime.js
+          grep -Fq "mta-app-runtime-full.js?v=24" web/mta-app-runtime.js
           grep -Fq "admin-settings-v9.js?v=5" web/mta-app-runtime-full.js
           grep -Fq "mta-system-audit-v1.js?v=2" web/mta-app-runtime-full.js
           echo "SINGLE_DETAINEE_CRUD_OWNER: PASS"
