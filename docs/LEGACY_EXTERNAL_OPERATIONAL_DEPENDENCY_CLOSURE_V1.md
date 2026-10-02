@@ -126,3 +126,45 @@ G1 becomes GREEN only when X1-X5 each have explicit evidence or authoritative op
 
 ## Final statement
 G1 is not certified. Physical legacy `code` retirement remains blocked. No production mutation was performed by this audit.
+
+## G1-X4 deepening — database/API writer surface
+
+Additional production catalog evidence was collected on 2026-10-02:
+
+- `public.mta_detainees` grants INSERT and UPDATE to `authenticated` and `service_role`.
+- `authenticated` cannot bypass RLS; `service_role` can bypass RLS.
+- The four detainee RLS policies enforce role/scope checks for SELECT, INSERT, UPDATE and DELETE.
+- `postgres` is a login-capable administrative role and has table mutation privileges.
+- No separate public database function was found that generates or owns legacy detainee `code`; the inspected public routine inventory returned `mta_resolve_qr` as the only detainee-named routine.
+
+This narrows X4 but does not close it. The grants prove capability, while the bounded telemetry only proves no observed direct mutation in the inspected window. Credential-to-client provenance and historical usage remain unverified.
+
+## G1-X1/X3 runtime surface review
+
+The production project currently exposes three ACTIVE Edge Functions: `mta-api` v24, `mta-outbox-dispatcher` v2, and `mta-login` v1.
+
+- `mta-api` is the canonical operational API. Its deployed source routes detainee writes through the server-side idempotent mutation boundary and uses the service-role client for the mutation transaction.
+- `mta-outbox-dispatcher` consumes outbox events and calls `claim_outbox_events`, `complete_outbox_event`, and `release_outbox_event`; its deployed source does not directly read or mutate `mta_detainees`.
+- `mta-login` is authentication-only and does not access `mta_detainees`.
+
+This is runtime evidence for the known application surfaces, not an attestation that no external caller, scheduled job, operator script, ETL, or direct Data API client exists.
+
+## X2/X5 unresolved operational evidence
+
+No authoritative repository/runtime evidence currently establishes the existence or non-existence of an operational import/manual procedure, external ETL/integration, backup archive owner, restore operator, or historical source system for existing `code` values. These remain explicit UNVERIFIED blockers.
+
+The deployed backup contract remains schemaVersion 1 and carries `code` through the detainee snapshot. The deployed restore route references `mta_restore_backup_transaction`, but the production catalog does not contain that function. No restore rehearsal was performed.
+
+## Current G1 state after deepening
+
+```text
+X1 Production caller inventory       PARTIAL / UNVERIFIED external callers
+X2 Import/manual attestation         UNVERIFIED
+X3 Integration inventory             PARTIAL / UNVERIFIED external integrations
+X4 DB writer provenance              BLOCKED
+X5 Recovery operator/archive         UNVERIFIED / BLOCKED
+
+G1 CERTIFICATION                    BLOCKED
+```
+
+The evidence package remains audit-only: no production mutation, grant change, schema change, or restore operation was performed.
