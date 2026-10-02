@@ -1,0 +1,20 @@
+name: G1-X4 Privileged Writer Provenance
+
+on:
+  pull_request:
+    paths:
+      - "supabase/migrations/20261002223000_g1_x4_privileged_movement_execute_containment_v1.sql"
+      - "supabase/functions/mta-api/index.ts"
+      - "supabase/functions/mta-outbox-dispatcher/index.ts"
+      - "test/g1-x4-privileged-writer-provenance.test.mjs"
+      - ".github/workflows/g1-x4-privileged-writer-provenance.yml"
+
+jobs:
+  provenance-boundary:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: node --test test/g1-x4-privileged-writer-provenance.test.mjs
