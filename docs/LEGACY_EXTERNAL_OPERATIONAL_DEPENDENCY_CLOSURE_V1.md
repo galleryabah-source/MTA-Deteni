@@ -168,3 +168,16 @@ G1 CERTIFICATION                    BLOCKED
 ```
 
 The evidence package remains audit-only: no production mutation, grant change, schema change, or restore operation was performed.
+
+## G1-X4 containment implementation
+
+PR #299 (hardening: contain direct detainee DML at database boundary) passed its dedicated containment gate and Feature Verification:
+- G1 Detainee Direct Write Containment #1: `37023759289` — SUCCESS
+- MTA Feature Verification #555: `37023758739` — SUCCESS
+- merged into the G1 branch at `a86529ef2e41228ac31f3cd83bdd3c8a8ee385ad`.
+
+The repository migration is intentionally **not yet applied to production**. It revokes INSERT/UPDATE/DELETE from `authenticated` while preserving authenticated SELECT/RLS and the canonical `service_role` mutation path. This is a containment candidate that reduces the direct writer surface; it does not by itself close X4 because service credentials and any external operational clients still require provenance closure.
+
+Production ACL remains unchanged until the governed production rollout gate is satisfied.
+
+Recent production audit evidence also strengthens the canonical-path finding: 18 detainee audit mutations in the last 30 days were all tagged `P9.7-DURABLE-v1`, with no alternate transaction boundary observed in that audit sample. This is strong positive evidence for canonical usage, but not proof of historical zero direct-DML usage.
