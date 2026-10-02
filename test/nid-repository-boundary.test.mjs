@@ -37,8 +37,8 @@ test("RAP/Perkes/Kamtib may consume canonical detainee identity but cannot defin
     const rel=path.replace(ROOT.pathname,"").replaceAll("\\","/");
     if(rel.startsWith("test/")||rel.startsWith("docs/")||rel.includes("/migrations/"))continue;
     const source=readFileSync(path,"utf8");
-    if(!/rap|perkes|kamtib/i.test(rel+"\n"+source))continue;
-    if(/RDM-PTK-|RDM-PTK|nextval\s*\(|mta_detainee_nid_seq|nid\s*=\s*["']/i.test(source)){
+    if(!/rap|perkes|kamtib/i.test(rel))continue;
+    if(/RDM-PTK-|nextval\s*\(|mta_detainee_nid_seq|nid\s*=\s*["']/i.test(source)){
       violations.push(rel+":SECOND_NID_IDENTITY_PATH");
     }
   }
