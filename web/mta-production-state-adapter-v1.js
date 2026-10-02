@@ -15,7 +15,21 @@
   };
   const isProductionPersistenceEnabled=()=>isProduction()&&PRODUCTION_MUTATIONS_ENABLED;
   const state=()=>window.__mtaProductionState||null;
-  const session=async()=>{const r=await window.mtaAuth?.session?.();return r?.data?.session||null};
+  const session=async()=>{
+    // Production runtime only needs the bearer credential to call the
+    // server-side /me contract. Read the persisted raw session directly first
+    // so operational hydration does not re-enter the Supabase Auth SDK lock
+    // immediately after the authenticated shell has been restored.
+    try{
+      const raw=window.localStorage?.getItem('mta-deteni-auth-session');
+      if(raw){
+        const parsed=JSON.parse(raw);
+        if(parsed?.access_token)return parsed;
+      }
+    }catch{}
+    const r=await window.mtaAuth?.session?.();
+    return r?.data?.session||null;
+  };
   async function request(resource,{method='GET',id,body,headers={},sessionOverride=null}={}){
     let s=sessionOverride||await session();
     if(!s?.access_token)throw new Error('PRODUCTION_AUTH_REQUIRED');
