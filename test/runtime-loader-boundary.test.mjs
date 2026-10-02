@@ -5,7 +5,7 @@ const loader=fs.readFileSync('web/mta-app-runtime.js','utf8');
 const runtime=fs.readFileSync('web/mta-app-runtime-full.js','utf8');
 const index=fs.readFileSync('web/index.html','utf8');
 
-assert.doesNotMatch(loader,/mta-app-runtime-full\.js/);
+assert.match(loader,/mta-app-runtime-full\.js\?v=24 \(static deferred in index\.html\)/);
 assert.match(index,/mta-app-runtime-full\.js\?v=24/);
 assert.match(index,/data-mta-operational-runtime="static"/);
 assert.match(loader,/loadProvenance\(\);/);
