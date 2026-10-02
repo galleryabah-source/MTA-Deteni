@@ -20,7 +20,7 @@ const adapter=fs.readFileSync('web/mta-production-state-adapter-v1.js','utf8');
 assert.match(adapter,/localStorage\?\.getItem\('mta-deteni-auth-session'\)/);
 assert.match(adapter,/window\.mtaAuth\?\.session\?\.\(\)/);
 assert.match(index,/retired legacy runtime path/);
-assert.match(index,/__mtaOperationalRuntimeLoaded===false \|\| window\.__mtaOperationalRuntimeLoaded===true/);
+assert.match(index,/script\[data-mta-operational-runtime="static"\]/);
 assert.match(index,/mtaRuntimeErrorBoundaryInstalled/);
 assert.ok(index.indexOf('mtaRuntimeErrorBoundaryInstalled') < index.indexOf('mta-app-runtime-full.js?v=24'));
 assert.match(index,/mta-production-state-adapter-v1\.js\?v=7\&legacy-placement=1/);
