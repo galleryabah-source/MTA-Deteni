@@ -18,8 +18,12 @@ test("canonical runtime can take over after authenticated shell readiness",()=>{
   assert.match(runtime,/void window\.mtaProductionStateAdapter\.hydrate\(\)\.then\(/);
   assert.match(runtime,/if\(production\)\{[\s\S]*?return;/);
   assert.doesNotMatch(runtime,/if\(production\)\{[\s\S]*?await window\.mtaProductionStateAdapter\.hydrate\(\)/);
+  assert.match(runtime,/window\.__mtaOperationalRuntimeLoaded=true/);
 });
 
-test("bootstrap asset is cache-busted",()=>{
-  assert.match(index,/mta-app-runtime\.js\?v=13/);\n  assert.match(index,/mta-app-runtime-full\.js\?v=24/);\n  assert.match(index,/data-mta-operational-runtime="static"/);
+test("authenticated runtime assets are cache-busted and statically ordered",()=>{
+  assert.match(index,/mta-auth-ui\.js\?v=10/);
+  assert.match(index,/mta-app-runtime\.js\?v=13/);
+  assert.match(index,/mta-app-runtime-full\.js\?v=24/);
+  assert.match(index,/data-mta-operational-runtime="static"/);
 });
