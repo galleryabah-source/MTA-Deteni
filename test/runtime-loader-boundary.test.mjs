@@ -14,7 +14,7 @@ assert.match(adapter,/window\.mtaAuth\?\.session\?\.\(\)/);
 assert.match(loader,/loadOperationalRuntime\(\);\s*loadProvenance\(\);/);
 assert.doesNotMatch(loader,/provenance\.onload\s*=\s*\(\)=>\s*\{/);
 assert.doesNotMatch(loader,/operational runtime blocked/);
-assert.match(loader,/mta-operational-runtime-failed/);
+assert.match(loader,/__mtaOperationalRuntimeLoaded/);
 assert.match(index,/mta-app-runtime\.js\?v=13/);
 assert.match(index,/mta-production-state-adapter-v1\.js\?v=7\&legacy-placement=1/);
 
