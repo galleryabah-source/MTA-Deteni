@@ -1,0 +1,15 @@
+name: MTA DETENI Legacy Code Boundary Gate
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  legacy-code-boundary:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run legacy detainee code boundary guard
+        run: node --test test/legacy-detainee-code-boundary.test.mjs
