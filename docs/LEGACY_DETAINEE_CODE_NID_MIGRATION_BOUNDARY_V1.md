@@ -94,6 +94,19 @@ physical retirement migration
 - no second identity generator;
 - no automatic rewrite of existing reports/QR/documents.
 
+## NID-first read migration V1
+
+The following presentation surfaces are now NID-first while retaining a legacy fallback for records that do not yet expose NID:
+
+- production adapter maps `mta_detainees.nid` into runtime detainee state;
+- main detainee list and operational selectors display NID first;
+- detainee detail/document identity displays NID first;
+- statistics and data-statistics reports expose NID first;
+- detainee QR print labels use NID first;
+- movement presentation resolves detainee identity from the detainee record and prefers NID.
+
+The fallback `code` is deliberately retained only as a compatibility read path. This is not yet proof that `code` can be removed from production writes.
+
 ## V1 gate
 
 ```
