@@ -13,7 +13,7 @@ assert.doesNotMatch(loader,/loadOperationalRuntime/);
 assert.doesNotMatch(loader,/operational runtime blocked/);
 assert.match(loader,/__mtaOperationalRuntimeAssetFailed/);
 assert.match(runtime,/window.__mtaOperationalRuntimeLoaded=false/);
-assert.match(runtime,/window.__mtaOperationalRuntimeLoaded=true;[\\s\\S]*window\.dispatchEvent\(new CustomEvent\('mta-operational-runtime-loaded'\)\)/);
+assert.match(runtime,/window.__mtaOperationalRuntimeLoaded=true;[\s\S]*window\.dispatchEvent\(new CustomEvent\('mta-operational-runtime-loaded'\)\)/);
 assert.ok(runtime.indexOf('window.__mtaOperationalRuntimeLoaded=false') < runtime.indexOf('window.__mtaOperationalRuntimeLoaded=true;'));
 assert.match(runtime,/mta-production-state-adapter-v1\.js\?v=7/);
 const adapter=fs.readFileSync('web/mta-production-state-adapter-v1.js','utf8');
