@@ -38,14 +38,14 @@
   const loadOperationalRuntime=()=>{
     if(window.__mtaOperationalRuntimeLoading||window.__mtaOperationalRuntimeLoaded)return;
     const s=document.createElement('script');
-    s.src='/mta-app-runtime-full.js?v=24';
+    s.src='/mta-app-runtime-full.js?v=23';
     s.async=true;
     s.dataset.mtaOperationalRuntime='1';
     window.__mtaOperationalRuntimeLoading=true;
     s.onload=()=>{
       window.__mtaOperationalRuntimeLoaded=true;
       window.__mtaOperationalRuntimeLoading=false;
-      console.info('[MTA] operational runtime loaded v24');
+      console.info('[MTA] operational runtime loaded v23');
     };
     s.onerror=err=>{
       window.__mtaOperationalRuntimeLoading=false;
