@@ -31,21 +31,39 @@
   document.body.classList.add('mta-auth-ready');
   renderCore();
 
-  // Operational runtime is deliberately non-blocking.
-  // Cache-bust after the persistence/branding fixes; this must load the current full runtime.
-  const provenance=document.createElement('script');
-  provenance.src='/mta-provenance-v1.js?v=1';
-  provenance.async=false;
-  provenance.dataset.mtaProvenance='1';
-  provenance.onload=()=>{
+  // Operational runtime is deliberately non-blocking and must not depend on
+  // provenance bootstrap completion. Provenance is governance metadata; it must
+  // never become a hard dependency that can strand the authenticated UI in the
+  // neutral bootstrap shell.
+  const loadOperationalRuntime=()=>{
+    if(window.__mtaOperationalRuntimeLoading||window.__mtaOperationalRuntimeLoaded)return;
     const s=document.createElement('script');
-    s.src='/mta-app-runtime-full.js?v=23';
+    s.src='/mta-app-runtime-full.js?v=24';
     s.async=true;
     s.dataset.mtaOperationalRuntime='1';
-    s.onload=()=>console.info('[MTA] operational runtime loaded v23');
-    s.onerror=err=>console.warn('[MTA] operational runtime unavailable; core dashboard remains active',err);
+    window.__mtaOperationalRuntimeLoading=true;
+    s.onload=()=>{
+      window.__mtaOperationalRuntimeLoaded=true;
+      window.__mtaOperationalRuntimeLoading=false;
+      console.info('[MTA] operational runtime loaded v24');
+    };
+    s.onerror=err=>{
+      window.__mtaOperationalRuntimeLoading=false;
+      console.error('[MTA] operational runtime unavailable',err);
+      window.dispatchEvent(new CustomEvent('mta-operational-runtime-failed',{detail:{code:'MTA_APP_RUNTIME_FULL_LOAD_FAILED'}}));
+    };
     document.body.appendChild(s);
   };
-  provenance.onerror=err=>console.error('[MTA] provenance contract unavailable; operational runtime blocked',err);
-  document.body.appendChild(provenance);
+  const loadProvenance=()=>{
+    if(window.MTAProvenance||document.querySelector('script[data-mta-provenance]'))return;
+    const provenance=document.createElement('script');
+    provenance.src='/mta-provenance-v1.js?v=2';
+    provenance.async=true;
+    provenance.dataset.mtaProvenance='1';
+    provenance.onload=()=>console.info('[MTA] provenance contract loaded v2');
+    provenance.onerror=err=>console.warn('[MTA] provenance contract unavailable',err);
+    document.body.appendChild(provenance);
+  };
+  loadOperationalRuntime();
+  loadProvenance();
 })();
