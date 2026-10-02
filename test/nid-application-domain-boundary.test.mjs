@@ -23,7 +23,7 @@ test("NID application boundary rejects caller-supplied NID on create/update",asy
 
 test("entry year is create-only identity input; it cannot be changed after issuance",async()=>{
   const source=read("web/mta-domain-commands-v1.js");
-  const context={window:{},crypto:{randomUUID:()=> "00000000-0000-4000-8000-000000000002"}};
+  const context={window:{MTADeteniStateKernel:{audit(){}}},crypto:{randomUUID:()=> "00000000-0000-4000-8000-000000000002"}};
   vm.runInNewContext(source,context,{filename:"mta-domain-commands-v1.js"});
   const api=context.window.MTADeteniDomainCommands;
   const state={detainees:[],placements:[],audit:[]};
