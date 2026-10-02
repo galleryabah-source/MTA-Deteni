@@ -26,6 +26,7 @@ export default {
     }
     if (url.pathname === '/api/health') return Response.json({
       ok:true, app:'MTA DETENI', runtime:'cloudflare-static-adapter', preview:'operational-v16',
+      deploymentSource:'GITHUB_MAIN', deploymentCommit:env.MTA_DEPLOY_COMMIT||'UNBOUND',
       dataMode:'PRODUCTION_DB', database:'CONNECTED',
       storage:'PRIVATE_BUCKET_READY', ai:'OFF', migrationFreeze:true,
       productionAccessAuthorized:true, livePostgresqlExecution:true, realDetaineeDataAllowed:true,
@@ -34,7 +35,9 @@ export default {
       timestamp:new Date().toISOString()
     });
     if (url.pathname === '/api/runtime') return Response.json({
-      mode:'PRODUCTION_RUNTIME', source:'PRODUCTION_DB', database:'CONNECTED', syntheticOnly:false, persistence:'SUPABASE_PRODUCTION_READ_ONLY+INDEXED_DB_QUEUE',
+      mode:'PRODUCTION_RUNTIME', source:'PRODUCTION_DB', database:'CONNECTED', syntheticOnly:false,
+      deploymentSource:'GITHUB_MAIN', deploymentCommit:env.MTA_DEPLOY_COMMIT||'UNBOUND',
+      persistence:'SUPABASE_PRODUCTION_READ_ONLY+INDEXED_DB_QUEUE',
       nextAdapter:'SUPABASE_PRODUCTION_AUTH_RBAC', authorization:'ENFORCED_SERVER_SIDE_RBAC',
       productionDatabase:'CONNECTED', productionStorage:'PRIVATE_BUCKET_READY', ai:'OFF',
       audit:'SERVER_CANONICAL_EVENT_LEDGER', migrationFreeze:true, productionAccessAuthorized:true,
