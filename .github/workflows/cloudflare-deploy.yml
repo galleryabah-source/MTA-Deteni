@@ -77,7 +77,7 @@ jobs:
           CF_ACCOUNT_ID="$(printf '%s' "$CLOUDFLARE_ACCOUNT_ID" | tr -d '[:space:]')"
           CF_API_TOKEN="$(printf '%s' "$CLOUDFLARE_API_TOKEN" | sed 's/[[:space:]]*$//')"
           set +e
-          CLOUDFLARE_ACCOUNT_ID="$CF_ACCOUNT_ID" CLOUDFLARE_API_TOKEN="$CF_API_TOKEN" wrangler deploy --config wrangler.toml --name "$DEPLOY_WORKER_NAME" --var "MTA_DEPLOY_COMMIT:${GITHUB_SHA}" 2>&1 | tee cloudflare-deploy.log
+          CLOUDFLARE_ACCOUNT_ID="$CF_ACCOUNT_ID" CLOUDFLARE_API_TOKEN="$CF_API_TOKEN" wrangler deploy --config wrangler.toml --name "$DEPLOY_WORKER_NAME" --message "GITHUB_MAIN:${GITHUB_SHA}" --var "MTA_DEPLOY_COMMIT:${GITHUB_SHA}" 2>&1 | tee cloudflare-deploy.log
           DEPLOY_EXIT="${PIPESTATUS[0]}"
           set -e
           if test "$DEPLOY_EXIT" -ne 0; then
@@ -88,6 +88,17 @@ jobs:
               exit "$DEPLOY_EXIT"
             fi
           fi
+
+      - name: Verify Cloudflare deployment state
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          CF_ACCOUNT_ID="$(printf '%s' "$CLOUDFLARE_ACCOUNT_ID" | tr -d '[:space:]')"
+          CF_API_TOKEN="$(printf '%s' "$CLOUDFLARE_API_TOKEN" | sed 's/[[:space:]]*$//')"
+          CLOUDFLARE_ACCOUNT_ID="$CF_ACCOUNT_ID" CLOUDFLARE_API_TOKEN="$CF_API_TOKEN" wrangler versions list --name "$DEPLOY_WORKER_NAME" --json > cloudflare-versions.json
+          CLOUDFLARE_ACCOUNT_ID="$CF_ACCOUNT_ID" CLOUDFLARE_API_TOKEN="$CF_API_TOKEN" wrangler deployments list --name "$DEPLOY_WORKER_NAME" --json > cloudflare-deployments.json
+          node -e "const fs=require('fs'); const v=JSON.parse(fs.readFileSync('cloudflare-versions.json','utf8')); const d=JSON.parse(fs.readFileSync('cloudflare-deployments.json','utf8')); const vs=Array.isArray(v)?v:(v.result||v.versions||[]); const ds=Array.isArray(d)?d:(d.result||d.deployments||[]); const hit=vs.find(x=>JSON.stringify(x).includes(process.env.GITHUB_SHA)); console.log(JSON.stringify({expectedCommit:process.env.GITHUB_SHA,versionMatch:!!hit,latestVersions:vs.slice(0,3),latestDeployments:ds.slice(0,3)},null,2)); if(!hit) process.exit(1);"
 
       - name: Verify live Cloudflare runtime
         env:
