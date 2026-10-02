@@ -198,7 +198,7 @@ body:not(.mta-auth-ready) .app{display:none!important}body.mta-auth-ready .app{d
   function loadRuntime(){
     if(window.__mtaAppRuntimeLoading) return window.__mtaAppRuntimeLoading;
     // Canonical runtime is statically deferred in index.html; never inject the retired legacy runtime path.
-    if(window.__mtaOperationalRuntimeLoaded===false || window.__mtaOperationalRuntimeLoaded===true) return Promise.resolve();
+    if(document.querySelector('script[data-mta-operational-runtime="static"]')) return Promise.resolve();
     window.__mtaAppRuntimeLoading=new Promise(function(resolve,reject){
       var s=document.createElement('script');
       s.src='/mta-app-runtime.js?v=13';
