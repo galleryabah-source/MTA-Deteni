@@ -17,8 +17,8 @@ test("auth session is configured for persisted browser hydration",()=>{
   assert.match(auth,/INITIAL_SESSION\/null entirely inside the hydration boundary/);
 });
 
-test("refresh does not leave the inline login gate visible after authenticated hydration",()=>{
-  assert.match(index,/id="mtaAuthGate"[^>]*style="display:none"/);
+test("initial login gate is visible until authenticated hydration completes",()=>{
+  assert.match(index,/id="mtaAuthGate"[^>]*style="display:flex"/);
   assert.match(authUi,/gate\.style\.display='none'/);
   assert.match(authUi,/gate\.style\.removeProperty\('display'\)/);
 });
