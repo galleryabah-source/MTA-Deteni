@@ -22,11 +22,25 @@ PR #297 is GREEN.
 | G1-E04 | Last-24h telemetry: POST/PATCH/DELETE to `/functions/v1/mta-api/detainees` | OBSERVED: 0 rows |
 | G1-E05 | Last-24h mutation traffic through `mta-api` | OBSERVED: no detainee mutation |
 | G1-E06 | Runtime authenticated callers | OBSERVED |
-| G1-E07 | Direct DB writers outside application path | UNVERIFIED / BLOCKER |
+| G1-E07 | Direct DB writers outside application path | **BLOCKER** — `authenticated` and `service_role` have INSERT/UPDATE grants; RLS constrains `authenticated`, but grant existence means direct DB/API writer capability remains an open closure item |
 | G1-E08 | Import/manual procedures | UNVERIFIED / BLOCKER |
 | G1-E09 | External integrations / ETL / scheduled jobs | UNVERIFIED / BLOCKER |
 | G1-E10 | Backup/recovery operators and archives | UNVERIFIED / BLOCKER |
 | G1-E11 | Historical source of existing legacy `code` values | UNVERIFIED / BLOCKER |
+
+## Direct database writer evidence
+
+Production catalog inspection found direct table privileges on `public.mta_detainees`:
+
+- `authenticated`: SELECT, INSERT, UPDATE, DELETE;
+- `service_role`: SELECT, INSERT, UPDATE, DELETE;
+- `postgres`: full administrative table privileges.
+
+The `authenticated` role is constrained by four `mta_detainees_*_scope` RLS policies, including INSERT/UPDATE role and scope checks. This is an authorization control, not proof that direct database/API write capability is unused.
+
+A bounded `postgres_logs` search for INSERT/UPDATE/DELETE statements referencing `mta_detainees` returned no matching rows in the inspected 24-hour window. The available Postgres telemetry therefore gives **no observed direct mutation evidence in that window**, but it does not establish historical zero usage or identify every credential/client that could exercise the grants.
+
+This makes X4 a concrete production closure item: identify which operational clients/credentials can use these grants and whether any such client supplies legacy `code`.
 
 ## Production telemetry
 Supabase project: `tmmhxqgzelgrsrxbbfzh`. The bounded last-24-hour query against `function_edge_logs` used:
