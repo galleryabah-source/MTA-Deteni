@@ -74,6 +74,6 @@ test("legacy detainee code boundary: no new application consumer is introduced",
 test("legacy detainee code boundary: NID remains the canonical identity contract",()=>{
   const contract=readFileSync(join(ROOT,"docs/NID_CANONICAL_IDENTITY_CONTRACT_V1.md"),"utf8");
   assert.match(contract,/RDM-PTK-YY-NNNNNN/);
-  assert.match(contract,/single (?:operational )?identity/i);
+  assert.match(contract,/one canonical identity/i);
   assert.match(contract,/No section-specific detainee number/i);
 });
