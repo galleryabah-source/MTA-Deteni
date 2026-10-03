@@ -5,87 +5,76 @@ if(window.MTADeteniIdentityResolutionUIV1)return;
 const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const text=v=>String(v??'').trim();
 
-function mount({form,existing=false,db}={}){
-  if(!form||existing||!window.MTADeteniIdentityResolutionV1)return;
-  if(form.querySelector('[data-identity-resolution]'))return;
+function mount({form,existing=false}={}){
+  if(!form||existing)return null;
+  if(form.querySelector('[data-identity-resolution]'))return null;
 
   const panel=document.createElement('div');
   panel.className='field full';
-  panel.setAttribute('data-identity-resolution','v1');
+  panel.setAttribute('data-identity-resolution','v2');
+  panel.style.display='none';
   panel.innerHTML=`
     <div class="mta-identity-resolution">
       <div class="mta-ir-head">
         <div>
-          <span class="mta-ir-kicker">IDENTITY RESOLUTION</span>
-          <strong>Cari Riwayat Deteni</strong>
-          <small>Pastikan kedatangan ini belum memiliki NID sebelum membuat identitas baru.</small>
+          <span class="mta-ir-kicker">IDENTITY INTEGRITY GATE</span>
+          <strong>Identitas serupa ditemukan</strong>
+          <small>Sistem memeriksa identitas pada saat <b>Simpan</b>. Pembuatan Deteni baru dihentikan sampai operator memastikan kandidat bukan orang yang sama.</small>
         </div>
-        <span class="mta-ir-badge">READ ONLY</span>
-      </div>
-      <div class="mta-ir-actions">
-        <button type="button" class="btn primary" data-ir-search>Cari Riwayat Deteni</button>
-        <button type="button" class="btn" data-ir-clear>Reset</button>
+        <span class="mta-ir-badge">SAVE GATE</span>
       </div>
       <div class="mta-ir-message" data-ir-message role="status" aria-live="polite"></div>
       <div class="mta-ir-results" data-ir-results></div>
-      <input type="hidden" name="resolvedNid" data-ir-selected-nid value="">
+      <input type="hidden" name="identityDecision" data-ir-decision value="">
     </div>`;
-
-  const passportField=form.querySelector('[name="passportNumber"]')?.closest('.field');
-  const nationalityField=form.querySelector('[name="nationality"]')?.closest('.field');
-  (passportField||nationalityField||form.querySelector('.field.full'))?.after(panel);
+  const anchor=form.querySelector('[name="passportNumber"]')?.closest('.field')||form.querySelector('[name="nationality"]')?.closest('.field')||form.querySelector('.field.full');
+  anchor?.after(panel);
 
   const message=panel.querySelector('[data-ir-message]');
   const results=panel.querySelector('[data-ir-results]');
-  const selected=panel.querySelector('[data-ir-selected-nid]');
+  const decision=panel.querySelector('[data-ir-decision]');
   const submit=form.querySelector('button[type="submit"]');
 
-  function setMessage(value,type=''){
+  const setMessage=(value,type='')=>{
     message.textContent=value;
     message.className='mta-ir-message'+(type?' '+type:'');
-  }
+  };
 
-  function clearSelection(){
-    selected.value='';
-    if(submit)submit.disabled=false;
-    panel.querySelectorAll('[data-ir-selected]').forEach(el=>el.removeAttribute('data-ir-selected'));
-  }
-
-  function selectCandidate(candidate,button){
-    selected.value=candidate.nid;
-    panel.querySelectorAll('[data-ir-candidate]').forEach(el=>el.classList.remove('is-selected'));
-    button.closest('[data-ir-candidate]')?.classList.add('is-selected');
-    if(submit)submit.disabled=true;
-    setMessage('NID '+candidate.nid+' dipilih. Pembuatan Episode belum diaktifkan pada boundary V1; tidak ada Deteni baru yang akan dibuat.','selected');
-  }
-
-  function render(resultsData){
+  const clear=()=>{
+    decision.value='';
     results.innerHTML='';
-    if(resultsData.status==='NO_MATCH'){
-      setMessage('Tidak ditemukan kandidat pada data Deteni yang tersedia. Jalur ini dapat dilanjutkan sebagai Deteni baru.','ok');
-      results.innerHTML='<div class="mta-ir-empty"><strong>Tidak ada kandidat</strong><span>Identitas baru tetap menggunakan generator NID canonical saat disimpan.</span></div>';
+    panel.style.display='none';
+    if(submit)submit.disabled=false;
+    setMessage('');
+  };
+
+  const present=(result)=>{
+    const ir=result?.identityResolution;
+    if(!ir||ir.status!=='CANDIDATES_FOUND'){
+      clear();
       return;
     }
-    setMessage('Kandidat ditemukan. Konfirmasi manusia diperlukan sebelum identitas dapat digunakan kembali.','warn');
-    results.innerHTML=resultsData.candidates.map((c,i)=>`
+    decision.value='';
+    if(submit)submit.disabled=false;
+    panel.style.display='';
+    setMessage('Kandidat ditemukan. Pilih "Bukan Orang Ini" hanya setelah pemeriksaan operator.','warn');
+    results.innerHTML=(ir.candidates||[]).map((c,i)=>`
       <article class="mta-ir-candidate" data-ir-candidate>
-        <div class="mta-ir-candidate-main">
-          <div class="mta-ir-candidate-title">
-            <strong>${esc(c.nid||'NID belum tersedia')}</strong>
-            <span class="mta-ir-confidence">${esc(c.confidence)}</span>
-          </div>
-          <div class="mta-ir-grid">
-            <span><small>Nama</small><b>${esc(c.name||'—')}</b></span>
-            <span><small>Tanggal Lahir</small><b>${esc(c.dateOfBirth||'—')}</b></span>
-            <span><small>No Paspor</small><b>${esc(c.passportNumber||'—')}</b></span>
-            <span><small>Kebangsaan</small><b>${esc(c.nationality||'—')}</b></span>
-            <span><small>Status</small><b>${esc(c.status||'—')}</b></span>
-            <span><small>Evidence</small><b>${esc(c.matchBasis.join(' · ')||'—')}</b></span>
-          </div>
+        <div class="mta-ir-candidate-title">
+          <strong>${esc(c.nid||'NID belum tersedia')}</strong>
+          <span class="mta-ir-confidence">${esc(c.confidence||'REVIEW')}</span>
+        </div>
+        <div class="mta-ir-grid">
+          <span><small>Nama</small><b>${esc(c.name||'—')}</b></span>
+          <span><small>Tanggal Lahir</small><b>${esc(c.dateOfBirth||'—')}</b></span>
+          <span><small>No Paspor</small><b>${esc(c.passportNumber||'—')}</b></span>
+          <span><small>Kebangsaan</small><b>${esc(c.nationality||'—')}</b></span>
+          <span><small>Status</small><b>${esc(c.status||'—')}</b></span>
+          <span><small>Evidence</small><b>${esc((c.matchBasis||[]).join(' · ')||'—')}</b></span>
         </div>
         <div class="mta-ir-candidate-actions">
-          <button type="button" class="btn small" data-ir-history data-id="${esc(c.detaineeId)}">Lihat Riwayat</button>
-          <button type="button" class="btn small primary" data-ir-select>Pilih NID Ini</button>
+          <button type="button" class="btn small" data-ir-history data-id="${esc(c.detaineeId)}">Lihat Data</button>
+          <button type="button" class="btn small primary" data-ir-select>Gunakan NID Ini</button>
           <button type="button" class="btn small" data-ir-reject>Bukan Orang Ini</button>
         </div>
       </article>`).join('');
@@ -97,44 +86,26 @@ function mount({form,existing=false,db}={}){
       });
     });
     results.querySelectorAll('[data-ir-select]').forEach((btn,i)=>{
-      btn.addEventListener('click',()=>selectCandidate(resultsData.candidates[i],btn));
+      btn.addEventListener('click',()=>{
+        decision.value='';
+        if(submit)submit.disabled=true;
+        results.querySelectorAll('[data-ir-candidate]').forEach(el=>el.classList.remove('is-selected'));
+        btn.closest('[data-ir-candidate]')?.classList.add('is-selected');
+        setMessage('Identitas existing dipilih. Simpan sebagai Deteni baru tetap diblokir. Gunakan data existing tersebut.','error');
+      });
     });
     results.querySelectorAll('[data-ir-reject]').forEach(btn=>{
       btn.addEventListener('click',()=>{
-        btn.closest('[data-ir-candidate]')?.remove();
-        setMessage('Kandidat ditandai bukan orang ini. Kandidat lain tetap dapat ditinjau.','ok');
+        decision.value='NOT_SAME_PERSON';
+        if(submit)submit.disabled=false;
+        results.querySelectorAll('[data-ir-candidate]').forEach(el=>el.classList.remove('is-selected'));
+        btn.closest('[data-ir-candidate]')?.classList.add('is-selected');
+        setMessage('Operator menyatakan kandidat bukan orang ini. Tekan Simpan kembali untuk menjalankan gate server dengan keputusan tersebut.','selected');
       });
     });
-  }
+  };
 
-  panel.querySelector('[data-ir-search]').addEventListener('click',()=>{
-    const query={
-      name:text(form.querySelector('[name="name"]')?.value),
-      dateOfBirth:text(form.querySelector('[name="dateOfBirth"]')?.value),
-      passportNumber:text(form.querySelector('[name="passportNumber"]')?.value),
-      nationality:text(form.querySelector('[name="nationality"]')?.value)
-    };
-    if(!query.name&&!query.dateOfBirth&&!query.passportNumber&&!query.nationality){
-      setMessage('Isi minimal satu atribut identitas untuk melakukan pencarian.','error');
-      return;
-    }
-    clearSelection();
-    const result=window.MTADeteniIdentityResolutionV1.resolve(db||{},query);
-    render(result);
-  });
-
-  panel.querySelector('[data-ir-clear]').addEventListener('click',()=>{
-    clearSelection();
-    results.innerHTML='';
-    setMessage('');
-  });
-
-  form.addEventListener('submit',e=>{
-    if(selected.value){
-      e.preventDefault();
-      setMessage('NID existing telah dipilih. Simpan sebagai Deteni baru diblokir sampai Episode Domain tersedia.','error');
-    }
-  },true);
+  return Object.freeze({present,clear,getDecision:()=>text(decision.value)});
 }
 
 window.MTADeteniIdentityResolutionUIV1=Object.freeze({mount});

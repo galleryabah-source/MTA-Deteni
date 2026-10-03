@@ -160,12 +160,12 @@
   async function mutateDetainee(operation,args={}){
     if(Object.prototype.hasOwnProperty.call(args,'nid'))return{ok:false,code:operation==='create'?'NID_SYSTEM_GENERATED':'NID_IMMUTABLE'};
     if(operation==='update'&&Object.prototype.hasOwnProperty.call(args,'entryYear'))return{ok:false,code:'ENTRY_YEAR_IMMUTABLE'};
-    const {id,code,name,nationality,status,placement,gender,dateOfBirth,passportNumber,notes,entryYear,correlationId,requestId,idempotencyKey}=args;
+    const {id,code,name,nationality,status,placement,gender,dateOfBirth,passportNumber,notes,entryYear,identityDecision,correlationId,requestId,idempotencyKey}=args;
     if(!isProductionPersistenceEnabled())throw new Error('PRODUCTION_MUTATION_NOT_AUTHORIZED');
     const correlation=String(correlationId||crypto.randomUUID());
     const key=String(idempotencyKey||'').trim();
     if(!key)throw new Error('IDEMPOTENCY_KEY_REQUIRED');
-    const clean={code:String(code||'').trim(),name:String(name||'').trim(),nationality:String(nationality||'').trim(),status:String(status||'AKTIF'),placement:String(placement||'').trim(),updated_at:new Date().toISOString(),metadata:{gender:String(gender||''),dateOfBirth:String(dateOfBirth||''),passportNumber:String(passportNumber||''),notes:String(notes||''),correlationId:correlation,source:'PRODUCTION_RUNTIME'}};
+    const clean={code:String(code||'').trim(),name:String(name||'').trim(),nationality:String(nationality||'').trim(),status:String(status||'AKTIF'),placement:String(placement||'').trim(),updated_at:new Date().toISOString(),metadata:{gender:String(gender||''),dateOfBirth:String(dateOfBirth||''),passportNumber:String(passportNumber||''),notes:String(notes||''),correlationId:correlation,source:'PRODUCTION_RUNTIME'},identity_decision:String(identityDecision||'')};
     if(operation==='create'){
       if(!clean.code||!clean.name)throw new Error('DETAINEE_INPUT_INVALID');
       const normalizedEntryYear=Number(entryYear);

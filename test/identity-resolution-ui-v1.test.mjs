@@ -4,26 +4,29 @@ import fs from 'node:fs';
 
 const source=fs.readFileSync(new URL('../web/mta-identity-resolution-ui-v1.js',import.meta.url),'utf8');
 
-test('IRUI-001 UI boundary is read-only and delegates to canonical resolver',()=>{
-  assert.match(source,/MTADeteniIdentityResolutionV1\.resolve/);
-  assert.match(source,/READ ONLY/);
+test('IRUI-001 UI boundary is presentation-only for the Save identity gate',()=>{
+  assert.match(source,/IDENTITY INTEGRITY GATE/);
+  assert.match(source,/data-ir-decision/);
+  assert.doesNotMatch(source,/data-ir-search/);
+  assert.doesNotMatch(source,/Cari Riwayat Deteni/);
+  assert.doesNotMatch(source,/MTADeteniIdentityResolutionV1\.resolve/);
   assert.doesNotMatch(source,/generateNid/);
   assert.doesNotMatch(source,/createEpisode/);
 });
 
 test('IRUI-002 selecting an existing NID blocks new-person submit',()=>{
-  assert.match(source,/selected\.value=candidate\.nid/);
-  assert.match(source,/submit\.disabled=true/);
-  assert.match(source,/Simpan sebagai Deteni baru diblokir/);
+  assert.match(source,/data-ir-select/);
+  assert.match(source,/submit\)submit\.disabled=true/);
+  assert.match(source,/Simpan sebagai Deteni baru tetap diblokir/);
 });
 
-test('IRUI-003 no-match preserves canonical new-person path',()=>{
-  assert.match(source,/status==='NO_MATCH'/);
-  assert.match(source,/Identitas baru tetap menggunakan generator NID canonical/);
+test('IRUI-003 operator rejection creates an explicit new-person decision',()=>{
+  assert.match(source,/decision\.value='NOT_SAME_PERSON'/);
+  assert.match(source,/Tekan Simpan kembali/);
 });
 
-test('IRUI-004 candidate actions expose history, selection and rejection',()=>{
-  assert.match(source,/Lihat Riwayat/);
-  assert.match(source,/Pilih NID Ini/);
+test('IRUI-004 candidate actions expose data view, existing identity and rejection',()=>{
+  assert.match(source,/Lihat Data/);
+  assert.match(source,/Gunakan NID Ini/);
   assert.match(source,/Bukan Orang Ini/);
 });
