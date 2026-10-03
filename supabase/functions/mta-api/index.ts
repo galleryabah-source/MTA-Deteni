@@ -25,8 +25,8 @@ const SCOPED_MUTATION_RESOURCES=new Set(["detainees","placements","movements","l
 const denyAuthorization=(reasonCode)=>({allowed:false,reasonCode,policyVersion:AUTHZ_POLICY_VERSION});
 const allowAuthorization=()=>({allowed:true,reasonCode:"ALLOW",policyVersion:AUTHZ_POLICY_VERSION});
 
-const normalizeIdentityText=(value)=>String(value??'').normalize("NFKD").replace(/[\\u0300-\\u036f]/g,"").toLowerCase().replace(/[^a-z0-9]+/g," ").trim();
-const normalizeIdentityCompact=(value)=>normalizeIdentityText(value).replace(/\\s+/g,"");
+const normalizeIdentityText=(value)=>String(value??'').normalize("NFKD").replace(/[\u0300-\u036f]/g,"").toLowerCase().replace(/[^a-z0-9]+/g," ").trim();
+const normalizeIdentityCompact=(value)=>normalizeIdentityText(value).replace(/\s+/g,"");
 const normalizeIdentityPassport=(value)=>String(value??'').toUpperCase().replace(/[^A-Z0-9]/g,"");
 const identityLevenshtein=(a,b)=>{const aa=String(a||''),bb=String(b||'');if(aa===bb)return 0;if(!aa)return bb.length;if(!bb)return aa.length;let prev=Array.from({length:bb.length+1},(_,i)=>i);for(let i=1;i<=aa.length;i++){const cur=[i];for(let j=1;j<=bb.length;j++)cur[j]=Math.min(cur[j-1]+1,prev[j]+1,prev[j-1]+(aa[i-1]===bb[j-1]?0:1));prev=cur;}return prev[bb.length];};
 const identityNearName=(a,b)=>{const aa=normalizeIdentityText(a),bb=normalizeIdentityText(b);if(!aa||!bb||aa===bb)return false;const minLength=Math.min(aa.length,bb.length);if(minLength<8)return false;return identityLevenshtein(aa,bb)<=Math.max(1,Math.floor(minLength*0.06));};
