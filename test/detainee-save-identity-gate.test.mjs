@@ -48,6 +48,9 @@ test('SIG-004 UI has no standalone Cari Riwayat action and runtime forwards Save
   assert.match(uiSource,/data-ir-decision/);
   assert.match(runtimeSource,/identityDecision=String\(identityGate\?\.getDecision/);
   assert.match(runtimeSource,/identityDecision\}\)/);
+  assert.match(runtimeSource,/dataSet\.mtaIdempotencyKey|dataset\.mtaIdempotencyKey/);
+  assert.match(runtimeSource,/idempotencyKey=String\(e\.target\.dataset\.mtaIdempotencyKey/);
+  assert.match(runtimeSource,/identityDecision,idempotencyKey\}/);
 });
 
 test('SIG-005 server identity contract does not treat nationality-only evidence as a match',()=>{
