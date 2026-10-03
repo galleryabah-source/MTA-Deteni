@@ -42,7 +42,7 @@ function hasDetaineeCodePattern(source){
   return [
     /options\??\.code\b/,
     /\b[oO]\.code\b/,
-    /\b[A-Za-z_$][\w$]*(?:\?\.|\.)code\b/,
+    /\b[oOxXdD](?:\?\.|\.)code\b/,
     /\b[xX]\.code\b/,
     /\bdetaineeCode\b/,
     /\bname=["']code["']/,
