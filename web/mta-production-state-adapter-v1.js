@@ -5,6 +5,9 @@
   const PRODUCTION_HOSTS=new Set(['mta-deteni.galleryabah.workers.dev']);
   // Governance lock: production mutation remains disabled until explicit release.
   const PRODUCTION_MUTATIONS_ENABLED=false;
+  // UAT release: only the canonical detainee create/update boundary is enabled.
+  // Generic resource, movement, and backup-restore mutations remain locked.
+  const PRODUCTION_DETAINEE_MUTATIONS_ENABLED=true;
   const REQUEST_TIMEOUT_MS=10000;
   const isProduction=()=>PRODUCTION_HOSTS.has(location.hostname);
   const withTimeout=async(promise,ms=REQUEST_TIMEOUT_MS,code='PRODUCTION_API_TIMEOUT')=>{
@@ -161,7 +164,7 @@
     if(Object.prototype.hasOwnProperty.call(args,'nid'))return{ok:false,code:operation==='create'?'NID_SYSTEM_GENERATED':'NID_IMMUTABLE'};
     if(operation==='update'&&Object.prototype.hasOwnProperty.call(args,'entryYear'))return{ok:false,code:'ENTRY_YEAR_IMMUTABLE'};
     const {id,code,name,nationality,status,placement,gender,dateOfBirth,passportNumber,notes,entryYear,identityDecision,correlationId,requestId,idempotencyKey}=args;
-    if(!isProductionPersistenceEnabled())throw new Error('PRODUCTION_MUTATION_NOT_AUTHORIZED');
+    if(!isProduction()||!PRODUCTION_DETAINEE_MUTATIONS_ENABLED)throw new Error('PRODUCTION_MUTATION_NOT_AUTHORIZED');
     const correlation=String(correlationId||crypto.randomUUID());
     const key=String(idempotencyKey||'').trim();
     if(!key)throw new Error('IDEMPOTENCY_KEY_REQUIRED');
