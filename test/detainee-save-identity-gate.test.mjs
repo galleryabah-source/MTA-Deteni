@@ -47,7 +47,7 @@ test('SIG-004 UI has no standalone Cari Riwayat action and runtime forwards Save
   assert.doesNotMatch(uiSource,/data-ir-search|Cari Riwayat Deteni/);
   assert.match(uiSource,/data-ir-decision/);
   assert.match(runtimeSource,/identityDecision=String\(identityGate\?\.getDecision/);
-  assert.match(runtimeSource,/identityDecision\}\)/);
+  assert.match(runtimeSource,/identityDecision,idempotencyKey\}\)/);
   assert.match(runtimeSource,/dataSet\.mtaIdempotencyKey|dataset\.mtaIdempotencyKey/);
   assert.match(runtimeSource,/idempotencyKey=String\(e\.target\.dataset\.mtaIdempotencyKey/);
   assert.match(runtimeSource,/identityDecision,idempotencyKey\}/);
