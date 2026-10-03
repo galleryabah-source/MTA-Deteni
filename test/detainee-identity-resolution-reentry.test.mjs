@@ -11,8 +11,7 @@ const state={
   detainees:[
     {id:'1',nid:'RDM-PTK-26-000001',name:'Eman Samir Almorsallal',dateOfBirth:'1985-03-10',passportNumber:'P1234567',nationality:'XXX',status:'NONAKTIF'},
     {id:'2',nid:'RDM-PTK-26-000002',name:'Eman Samir Almorsallal',dateOfBirth:'1985-03-10',passportNumber:'P7654321',nationality:'XXX',status:'AKTIF'},
-    {id:'3',nid:'RDM-PTK-26-000003',name:'Ali Hassan',dateOfBirth:'1990-01-01',passportNumber:'',nationality:'YYY',status:'NONAKTIF'},
-    {id:'4',nid:'RDM-PTK-26-000004',name:'Eman Samir Almorsallai',dateOfBirth:'1987-12-01',passportNumber:'',nationality:'Suriah',status:'AKTIF'}
+    {id:'3',nid:'RDM-PTK-26-000003',name:'Ali Hassan',dateOfBirth:'1990-01-01',passportNumber:'',nationality:'YYY',status:'NONAKTIF'}
   ]
 };
 
@@ -67,7 +66,8 @@ test('IRR-007 NID remains the returned canonical identity',()=>{
 
 
 test('IRR-009 near-name typo remains discoverable without automatic identity binding',()=>{
-  const r=resolver.resolve({detainees:[state.detainees[3]]},{name:'Eman Samir Almorsalla'});
+  const nearNameState={detainees:[{id:'4',nid:'RDM-PTK-26-000004',name:'Eman Samir Almorsallai',dateOfBirth:'1987-12-01',passportNumber:'',nationality:'Suriah',status:'AKTIF'}]};
+  const r=resolver.resolve(nearNameState,{name:'Eman Samir Almorsalla'});
   assert.equal(r.status,'CANDIDATES_FOUND');
   assert.equal(r.candidates.length,1);
   assert.equal(r.candidates[0].nid,'RDM-PTK-26-000004');
