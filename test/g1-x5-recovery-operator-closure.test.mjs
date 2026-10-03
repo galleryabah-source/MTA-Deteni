@@ -7,12 +7,12 @@ const api=fs.readFileSync("supabase/functions/mta-api/index.ts","utf8");
 
 for (const marker of [
   "G1-X5 = BLOCKED / RECOVERY OPERATOR PROVENANCE NOT CLOSED",
-  "named backup archive owner",
-  "named restore operator",
+  "a named backup archive owner",
+  "a named restore operator",
   "Privileged recovery credential custody",
   "production restore function is confirmed absent",
   "syntheticOnly = true",
-  "production recovery rehearsal has not been performed",
+  "completed production recovery rehearsal",
   "G2 remains blocked"
 ]) assert.ok(doc.includes(marker), `Missing X5 marker: ${marker}`);
 
