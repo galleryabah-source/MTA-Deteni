@@ -85,6 +85,8 @@ Examples:
 
 Name-only matches are discovery candidates only. They MUST NOT be treated as confirmed identity.
 
+The resolver MAY also surface a conservative near-name candidate when the normalized name differs only by a small edit distance. Near-name evidence remains discovery-only and MUST NOT auto-link an identity.
+
 The exact evidence used for each candidate must be returned as `matchBasis`.
 
 ## 5. Candidate result contract
