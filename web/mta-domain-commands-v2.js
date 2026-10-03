@@ -17,7 +17,7 @@ async function productionDetaineeMutation(operation,o={}){
   try{
     return await adapter.mutateDetainee(operation,o);
   }catch(err){
-    return{ok:false,code:err?.data?.error||err?.message||'PRODUCTION_DETAINEE_MUTATION_FAILED',error:err};
+    return{ok:false,code:err?.data?.error||err?.message||'PRODUCTION_DETAINEE_MUTATION_FAILED',identityResolution:err?.data?.identityResolution||null,error:err};
   }
 }
 function identityPrecheck(s,o={}){
