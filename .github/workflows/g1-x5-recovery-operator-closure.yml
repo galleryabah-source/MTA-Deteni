@@ -1,0 +1,24 @@
+name: G1-X5 Recovery Operator Closure
+
+on:
+  push:
+    branches:
+      - audit/g1-x5-recovery-operator-closure-v1
+  pull_request:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  g1-x5:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+      - name: Verify G1-X5 evidence contract
+        run: node test/g1-x5-recovery-operator-closure.test.mjs
