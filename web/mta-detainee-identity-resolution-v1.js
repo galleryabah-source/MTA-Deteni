@@ -57,7 +57,7 @@ function resolve(state,query={}){
       confidence:c,
       matchBasis
     };
-  }).filter(Boolean).sort((a,b)=>(rank[b.confidence]-rank[a.confidence)||a.name.localeCompare(b.name,'id')));
+  }).filter(Boolean).sort((a,b)=>{ const byConfidence=rank[b.confidence]-rank[a.confidence]; return byConfidence||a.name.localeCompare(b.name,'id'); });
 
   return {
     ok:true,
