@@ -149,7 +149,32 @@ body:not(.mta-auth-ready) .app{display:none!important}body.mta-auth-ready .app{d
   .mta-room-summary-card strong{font-size:23px}
 }
 </style>
-</head>
+<style id="mta-identity-resolution-ui-v1">
+.mta-identity-resolution{margin-top:4px;padding:16px;border:1px solid #dbe3ec;border-radius:14px;background:#f8fafc}
+.mta-ir-head{display:flex;justify-content:space-between;gap:14px;align-items:flex-start}
+.mta-ir-kicker{display:block;font-size:9px;font-weight:800;letter-spacing:.12em;color:#0b63ce;margin-bottom:4px}
+.mta-ir-head strong{display:block;color:#172033;font-size:14px}
+.mta-ir-head small{display:block;margin-top:4px;color:#667085;font-size:11px;line-height:1.45}
+.mta-ir-badge,.mta-ir-confidence{display:inline-flex;align-items:center;border-radius:999px;padding:4px 8px;font-size:9px;font-weight:800;letter-spacing:.04em;background:#eef4ff;color:#0b63ce;white-space:nowrap}
+.mta-ir-actions{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap}
+.mta-ir-message{min-height:18px;margin-top:10px;font-size:11px;color:#667085}
+.mta-ir-message.ok{color:#16763b}.mta-ir-message.warn{color:#9a6700}.mta-ir-message.error{color:#b42318}.mta-ir-message.selected{color:#0b63ce}
+.mta-ir-results{display:grid;gap:10px;margin-top:10px}
+.mta-ir-candidate{padding:13px;border:1px solid #e1e7ef;border-radius:12px;background:#fff}
+.mta-ir-candidate.is-selected{border-color:#0b63ce;box-shadow:0 0 0 2px rgba(11,99,206,.08)}
+.mta-ir-candidate-title{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px}
+.mta-ir-candidate-title strong{font-size:13px;color:#172033}
+.mta-ir-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px}
+.mta-ir-grid span{min-width:0;padding:8px 9px;border:1px solid #edf0f4;border-radius:9px;background:#fafbfd}
+.mta-ir-grid small{display:block;color:#7b8798;font-size:9px;margin-bottom:3px}
+.mta-ir-grid b{display:block;color:#303640;font-size:10px;overflow-wrap:anywhere}
+.mta-ir-candidate-actions{display:flex;gap:7px;flex-wrap:wrap;margin-top:11px;padding-top:10px;border-top:1px solid #edf0f4}
+.mta-ir-empty{padding:13px;border:1px dashed #cfd8e3;border-radius:11px;background:#fff}
+.mta-ir-empty strong{display:block;color:#172033;font-size:12px}
+.mta-ir-empty span{display:block;margin-top:4px;color:#667085;font-size:10px}
+@media(max-width:700px){.mta-ir-grid{grid-template-columns:1fr 1fr}}
+@media(max-width:460px){.mta-ir-head{flex-direction:column}.mta-ir-grid{grid-template-columns:1fr}.mta-ir-actions .btn{flex:1}}
+</style></head>
 <body>
 <div id="mtaAuthGate" aria-label="Login MTA DETENI" style="display:flex"><div class="mta-auth-card"><div class="mta-auth-brand"><div class="mta-auth-logo">M</div><div><strong>MTA DETENI Digital</strong><small>Manajemen Terpadu Administrasi Deteni</small></div></div><h1 class="mta-auth-title">Masuk ke MTA DETENI</h1><p class="mta-auth-sub">Authentication diperlukan sebelum mengakses dashboard dan data operasional.</p><form id="mtaAuthForm" autocomplete="on"><div class="mta-auth-field"><label for="mtaAuthNip">NIP</label><input id="mtaAuthNip" name="nip" type="text" inputmode="numeric" autocomplete="username" minlength="18" maxlength="18" pattern="[0-9]{18}" title="NIP harus tepat 18 digit" required></div><div class="mta-auth-field"><label for="mtaAuthPassword">Password</label><input id="mtaAuthPassword" name="password" type="password" autocomplete="current-password" required minlength="8"></div><button class="mta-auth-submit" id="mtaAuthSubmit" type="submit">Login</button><div class="mta-auth-message" id="mtaAuthMessage" role="status" aria-live="polite"></div></form><div class="mta-auth-foot">MTA DETENI · Protected Authentication Boundary · AI OFF · Controlled runtime</div></div></div>
 <div class="app" style="display:none!important" data-mta-auth-boundary="locked">
@@ -177,7 +202,7 @@ body:not(.mta-auth-ready) .app{display:none!important}body.mta-auth-ready .app{d
     }
   });
 })();
-</script><script defer src="/mta-production-api.js"></script><script defer src="/mta-production-state-adapter-v1.js?v=7&legacy-placement=1"></script><script defer src="/mta-domain-commands-v1.js?v=1"></script><script defer src="/mta-auth-ui.js?v=10"></script><script defer src="/mta-app-runtime-full.js?v=24" data-mta-operational-runtime="static"></script>
+</script><script defer src="/mta-detainee-identity-resolution-v1.js?v=1"></script><script defer src="/mta-identity-resolution-ui-v1.js?v=1"></script><script defer src="/mta-production-api.js"></script><script defer src="/mta-production-state-adapter-v1.js?v=7&legacy-placement=1"></script><script defer src="/mta-domain-commands-v1.js?v=1"></script><script defer src="/mta-auth-ui.js?v=10"></script><script defer src="/mta-app-runtime-full.js?v=24" data-mta-operational-runtime="static"></script>
 <script>
 (function(){
   window.addEventListener('error',function(e){
