@@ -481,6 +481,7 @@ Deno.serve(async(req)=>{
     const idempotencyKey=String(req.headers.get("Idempotency-Key")||"").trim();
     if(WRITE_METHODS.has(req.method) && !idempotencyKey) return json(req,{ok:false,error:"IDEMPOTENCY_KEY_REQUIRED"},400,{requestId,correlationId});
     let body=req.method==="DELETE"?{}:await req.json().catch(()=>({}));
+    let identityDecisionForAudit="";
     let canonicalScopeId=null;
     if(["blocks","rooms","detainees"].includes(resource)){
       const scoped=await admin.from("mta_profile_scopes").select("scope_id").eq("profile_id",user.id).eq("active",true).limit(1).maybeSingle();
@@ -490,6 +491,7 @@ Deno.serve(async(req)=>{
     if(resource==="detainees" && req.method==="POST"){
       const identityResolution=await resolveDetaineeIdentityCandidates({admin,scopeId:canonicalScopeId,body});
       const identityDecision=String(body?.identity_decision||"").trim();
+      identityDecisionForAudit=identityDecision;
       if(identityResolution.status==="CANDIDATES_FOUND" && identityDecision!=="NOT_SAME_PERSON"){
         emit("WARN","identity.create.denied",{status:409,outcome:"DENIED",errorCode:"IDENTITY_REVIEW_REQUIRED",resource,identityCandidateCount:identityResolution.candidates.length});
         return json(req,{ok:false,error:"IDENTITY_REVIEW_REQUIRED",identityResolution,requestId,correlationId},409,{requestId,correlationId});
@@ -597,7 +599,7 @@ Deno.serve(async(req)=>{
         actorUserId:user.id,
         requestId,
         correlationId,
-        metadata:{role,resource,operation,idempotencyKey}
+        metadata:{role,resource,operation,idempotencyKey,...(resource==="detainees"&&req.method==="POST"?{identityDecision:identityDecisionForAudit}: {})}
       }
     });
     if(error){
