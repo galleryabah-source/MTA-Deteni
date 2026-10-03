@@ -206,7 +206,7 @@ The existing-match path must reuse the confirmed NID.
 
 ## 9. Phase 1 implementation boundary
 
-This first implementation provides a **deterministic, read-only identity resolver** over the existing runtime detainee collection.
+This implementation provides a **deterministic, read-only identity resolver** plus a mandatory identity-integrity precheck at the detainee create/save mutation boundary.
 
 It does NOT yet:
 
@@ -216,7 +216,7 @@ It does NOT yet:
 - alter the NID generator;
 - alter the NID contract;
 - automatically merge identities;
-- replace the current canonical create mutation.
+- bypass the canonical create mutation; the Save gate now guards that mutation before INSERT.
 
 This boundary is intentional. The production episode schema must first pass domain/schema reconciliation before a database migration is proposed.
 
@@ -249,7 +249,11 @@ Phase 1:
 - [x] Name-only candidates cannot auto-link.
 - [x] Multi-attribute evidence is returned.
 - [x] No second NID generator is introduced.
-- [x] No production database mutation is introduced.
+- [x] No production database mutation is introduced by the resolver itself.
+- [x] Detainee create/save is protected by a server-side identity precheck.
+- [x] Exact and near-name candidates block new-person creation until operator rejection (`NOT_SAME_PERSON`).
+- [x] No-match remains the only automatic path to canonical new-person/NID creation.
+- [x] Identity gate decision is included in the mutation audit metadata.
 
 Future gate:
 
