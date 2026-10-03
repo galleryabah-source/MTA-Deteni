@@ -11,7 +11,8 @@ const state={
   detainees:[
     {id:'1',nid:'RDM-PTK-26-000001',name:'Eman Samir Almorsallal',dateOfBirth:'1985-03-10',passportNumber:'P1234567',nationality:'XXX',status:'NONAKTIF'},
     {id:'2',nid:'RDM-PTK-26-000002',name:'Eman Samir Almorsallal',dateOfBirth:'1985-03-10',passportNumber:'P7654321',nationality:'XXX',status:'AKTIF'},
-    {id:'3',nid:'RDM-PTK-26-000003',name:'Ali Hassan',dateOfBirth:'1990-01-01',passportNumber:'',nationality:'YYY',status:'NONAKTIF'}
+    {id:'3',nid:'RDM-PTK-26-000003',name:'Ali Hassan',dateOfBirth:'1990-01-01',passportNumber:'',nationality:'YYY',status:'NONAKTIF'},
+    {id:'4',nid:'RDM-PTK-26-000004',name:'Eman Samir Almorsallai',dateOfBirth:'1987-12-01',passportNumber:'',nationality:'Suriah',status:'AKTIF'}
   ]
 };
 
@@ -62,6 +63,18 @@ test('IRR-007 NID remains the returned canonical identity',()=>{
   const r=resolver.resolve(state,{name:'Eman Samir Almorsallal',passportNumber:'P1234567'});
   assert.equal(r.candidates[0].nid,'RDM-PTK-26-000001');
   assert.match(r.candidates[0].nid,/^RDM-PTK-[0-9]{2}-[0-9]{6}$/);
+});
+
+
+test('IRR-009 near-name typo remains discoverable without automatic identity binding',()=>{
+  const r=resolver.resolve({detainees:[state.detainees[3]]},{name:'Eman Samir Almorsalla'});
+  assert.equal(r.status,'CANDIDATES_FOUND');
+  assert.equal(r.candidates.length,1);
+  assert.equal(r.candidates[0].nid,'RDM-PTK-26-000004');
+  assert.equal(r.candidates[0].confidence,'NAME_ONLY');
+  assert.ok(r.candidates[0].matchBasis.includes('NAME_NEAR'));
+  assert.equal(r.autoLinked,false);
+  assert.equal(r.requiresHumanConfirmation,true);
 });
 
 test('IRR-008 resolver does not introduce episode or NID generation',()=>{
