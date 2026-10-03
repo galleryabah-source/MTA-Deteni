@@ -8,6 +8,33 @@ const normCompact=v=>norm(v).replace(/\s+/g,'');
 const normPassport=v=>text(v).toUpperCase().replace(/[^A-Z0-9]/g,'');
 const normName=v=>norm(v).replace(/\s+/g,' ');
 const exact=(a,b)=>!!norm(a)&&norm(a)===norm(b);
+function levenshtein(a,b){
+  const aa=String(a||''),bb=String(b||'');
+  if(aa===bb)return 0;
+  if(!aa)return bb.length;
+  if(!bb)return aa.length;
+  let prev=Array.from({length:bb.length+1},(_,i)=>i);
+  for(let i=1;i<=aa.length;i++){
+    const cur=[i];
+    for(let j=1;j<=bb.length;j++){
+      cur[j]=Math.min(
+        cur[j-1]+1,
+        prev[j]+1,
+        prev[j-1]+(aa[i-1]===bb[j-1]?0:1)
+      );
+    }
+    prev=cur;
+  }
+  return prev[bb.length];
+}
+function nearName(a,b){
+  const aa=normName(a),bb=normName(b);
+  if(!aa||!bb||aa===bb)return false;
+  const minLength=Math.min(aa.length,bb.length);
+  if(minLength<8)return false;
+  const maxDistance=Math.max(1,Math.floor(minLength*0.06));
+  return levenshtein(aa,bb)<=maxDistance;
+}
 
 function evidence(query,d){
   const qName=normName(query.name), dName=normName(d.name);
@@ -18,6 +45,7 @@ function evidence(query,d){
   if(qPassport&&dPassport&&qPassport===dPassport)basis.push('PASSPORT_EXACT');
   if(qDob&&dDob&&qDob===dDob)basis.push('DATE_OF_BIRTH_EXACT');
   if(qName&&dName&&qName===dName)basis.push('NAME_EXACT');
+  else if(qName&&dName&&nearName(qName,dName))basis.push('NAME_NEAR');
   if(qNationality&&dNationality&&qNationality===dNationality)basis.push('NATIONALITY_EXACT');
   return basis;
 }
@@ -29,6 +57,8 @@ function confidence(basis){
   if(has('NAME_EXACT')&&has('DATE_OF_BIRTH_EXACT')&&has('NATIONALITY_EXACT'))return 'PROBABLE';
   if(has('NAME_EXACT')&&(has('DATE_OF_BIRTH_EXACT')||has('PASSPORT_EXACT')||has('NATIONALITY_EXACT')))return 'POSSIBLE';
   if(has('NAME_EXACT'))return 'NAME_ONLY';
+  if(has('NAME_NEAR')&&(has('DATE_OF_BIRTH_EXACT')||has('PASSPORT_EXACT')||has('NATIONALITY_EXACT')))return 'POSSIBLE';
+  if(has('NAME_NEAR'))return 'NAME_ONLY';
   return null;
 }
 
