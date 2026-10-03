@@ -55,7 +55,7 @@ assert.match(commands,/productionDetaineeMutation/);
 assert.match(commands,/window\.mtaProductionStateAdapter\?\.isProduction/);
 assert.match(commands,/createDetainee,updateDetainee,archiveDetainee/);
 
-assert.match(runtime,/document\.getElementById\('dForm'\)\.onsubmit=async/);
+assert.match(runtime,/createForm\.onsubmit=async/);
 assert.match(runtime,/await command\.createDetainee/);
 assert.match(runtime,/await command\.updateDetainee/);
 assert.match(runtime,/result\.state/);
