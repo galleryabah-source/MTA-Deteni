@@ -1,0 +1,39 @@
+name: MTA DETENI Identity Resolution UI
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'web/mta-identity-resolution-ui-v1.js'
+      - 'test/identity-resolution-ui-v1.test.mjs'
+      - 'web/mta-app-runtime-full.js'
+      - 'web/index.html'
+      - '.github/workflows/identity-resolution-ui.yml'
+  pull_request:
+    paths:
+      - 'web/mta-identity-resolution-ui-v1.js'
+      - 'test/identity-resolution-ui-v1.test.mjs'
+      - 'web/mta-app-runtime-full.js'
+      - 'web/index.html'
+      - '.github/workflows/identity-resolution-ui.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  identity-resolution-ui:
+    name: Identity Resolution UI Boundary
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Validate runtime syntax
+        run: |
+          node --check web/mta-identity-resolution-ui-v1.js
+          node --check web/mta-detainee-identity-resolution-v1.js
+          node --check web/mta-app-runtime-full.js
+      - name: Run UI boundary certification
+        run: node --test test/identity-resolution-ui-v1.test.mjs
