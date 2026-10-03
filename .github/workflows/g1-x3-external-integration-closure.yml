@@ -1,0 +1,24 @@
+name: G1-X3 External Integration Closure
+
+on:
+  push:
+    branches:
+      - audit/g1-x3-external-integration-closure-v1
+  pull_request:
+    branches:
+      - audit/legacy-code-external-operational-dependency-closure-v1
+
+permissions:
+  contents: read
+
+jobs:
+  g1-x3:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+      - name: Verify G1-X3 evidence contract
+        run: node test/g1-x3-external-integration-closure.test.mjs

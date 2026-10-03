@@ -334,3 +334,25 @@ That boundary should first:
 7. add CI detection preventing new detainee `code` consumers.
 
 Only after those gates are green should a physical retirement migration be considered.
+
+
+## Post-audit CI inventory reconciliation
+
+The legacy-code boundary guard was run again after the privileged credential audit branch was created. The guard identified six repository consumers that were not present in the original static inventory:
+
+- tests/authenticated-browser-acceptance.mjs
+- web/admin-settings-v8.js
+- web/mta-unified-shell-v1.js
+- web/mta-unified-shell-v2.js
+- web/preview-v5.js
+- web/preview-v6.js
+
+These are now explicitly recorded in the compatibility inventory.
+
+Classification note:
+- tests/authenticated-browser-acceptance.mjs is a synthetic browser acceptance fixture and contains synthetic detainee records;
+- admin-settings-v8.js, mta-unified-shell-v1.js, mta-unified-shell-v2.js, preview-v5.js and preview-v6.js are runtime/synthetic compatibility surfaces that still reference the legacy field in their current repository state.
+
+This discovery does not change the retirement decision. It strengthens the requirement that zero-consumer proof must include tests, synthetic runtime layers, previews, and compatibility surfaces, not only production-facing modules.
+
+The CI guard failure was therefore treated as inventory drift, not suppressed or bypassed.

@@ -1,5 +1,6 @@
 (()=>{'use strict';
 const KEY='mta-deteni-demo-v2';
+const identity=d=>String(d?.nid||d?.code||d?.id||'');
 const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const read=()=>{try{const k=window.MTADeteniStateKernel;if(k?.read)return k.read();return JSON.parse(localStorage.getItem(KEY)||'{}')}catch{return {}}};
 const A=(s,k)=>Array.isArray(s[k])?s[k]:[], norm=v=>String(v??'').trim()||'Tidak diisi';
@@ -14,9 +15,9 @@ function operationalRows(s){
  const latest={};p.forEach(x=>{if(!x.detaineeId)return;const t=String(x.since||x.createdAt||'');if(!latest[x.detaineeId]||t>latest[x.detaineeId]._t)latest[x.detaineeId]={...x,_t:t}});
  const moves={};m.forEach(x=>{if(x.detaineeId)moves[x.detaineeId]=(moves[x.detaineeId]||0)+1});
  const leaves={};l.forEach(x=>{if(x.detaineeId)leaves[x.detaineeId]=(leaves[x.detaineeId]||0)+1});
- return d.map((x,i)=>({no:i+1,code:x.code,name:x.name,nationality:x.nationality,status:x.status||x.state,age:age(x)??'',gender:x.gender||x.sex||x.jenisKelamin,block:latest[x.id]?.block||latest[x.id]?.blok||'',room:latest[x.id]?.room||latest[x.id]?.kamar||'',placementDate:latest[x.id]?.since||latest[x.id]?.createdAt||'',movements:moves[x.id]||0,leaves:leaves[x.id]||0,createdAt:x.createdAt}));}
+ return d.map((x,i)=>({no:i+1,code:identity(x),name:x.name,nationality:x.nationality,status:x.status||x.state,age:age(x)??'',gender:x.gender||x.sex||x.jenisKelamin,block:latest[x.id]?.block||latest[x.id]?.blok||'',room:latest[x.id]?.room||latest[x.id]?.kamar||'',placementDate:latest[x.id]?.since||latest[x.id]?.createdAt||'',movements:moves[x.id]||0,leaves:leaves[x.id]||0,createdAt:x.createdAt}));}
 function tableHtml(rows){
- return '<table class="dst detail-table"><thead><tr><th>No</th><th>Kode</th><th>Nama Deteni</th><th>Kebangsaan</th><th>Status</th><th>Usia</th><th>Jenis Kelamin</th><th>Blok</th><th>Kamar</th><th>Pergerakan</th><th>Izin</th><th>Tanggal Tercatat</th></tr></thead><tbody>'+
+ return '<table class="dst detail-table"><thead><tr><th>No</th><th>NID</th><th>Nama Deteni</th><th>Kebangsaan</th><th>Status</th><th>Usia</th><th>Jenis Kelamin</th><th>Blok</th><th>Kamar</th><th>Pergerakan</th><th>Izin</th><th>Tanggal Tercatat</th></tr></thead><tbody>'+
  rows.map(r=>'<tr><td>'+r.no+'</td><td>'+esc(r.code)+'</td><td>'+esc(r.name)+'</td><td>'+esc(r.nationality)+'</td><td>'+esc(r.status)+'</td><td>'+esc(r.age)+'</td><td>'+esc(r.gender)+'</td><td>'+esc(r.block)+'</td><td>'+esc(r.room)+'</td><td>'+r.movements+'</td><td>'+r.leaves+'</td><td>'+esc(r.createdAt)+'</td></tr>').join('')+
  '</tbody></table>';}
 function downloadTable(rows){

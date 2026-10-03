@@ -1,0 +1,18 @@
+name: G1-X4 Administrative Writer Provenance Audit
+
+on:
+  pull_request:
+    paths:
+      - "docs/G1_X4_ADMINISTRATIVE_WRITER_PROVENANCE_AUDIT_V1.md"
+      - "test/g1-x4-administrative-writer-provenance.test.mjs"
+      - ".github/workflows/g1-x4-administrative-writer-provenance.yml"
+
+jobs:
+  audit-boundary:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: node --test test/g1-x4-administrative-writer-provenance.test.mjs

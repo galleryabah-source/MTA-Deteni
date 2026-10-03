@@ -50,7 +50,7 @@
   const mapRoom=r=>({id:r.id,code:r.code,blockId:r.block_id,block:null,room:r.name,name:r.name,capacity:Number(r.capacity)||0,status:r.status,type:r.type||'STANDARD',gender:r.gender||'UMUM',scopeId:r.scope_id,version:r.version||1,metadata:r.metadata||{},createdAt:r.created_at,updatedAt:r.updated_at,source:'PRODUCTION_DB'});
   const mapDetainee=d=>{
     const metadata=d.metadata&&typeof d.metadata==='object'?d.metadata:{};
-    return {id:d.id,code:d.code,name:d.name,nationality:d.nationality||'',status:d.status,placement:d.placement||'',gender:String(metadata.gender||''),dateOfBirth:String(metadata.dateOfBirth||''),passportNumber:String(metadata.passportNumber||''),notes:String(metadata.notes||''),scopeId:d.scope_id,metadata,correlationId:String(metadata.correlationId||''),createdAt:d.created_at,updatedAt:d.updated_at,source:'PRODUCTION_DB'};
+    return {id:d.id,nid:d.nid||'',code:d.code,name:d.name,nationality:d.nationality||'',status:d.status,placement:d.placement||'',gender:String(metadata.gender||''),dateOfBirth:String(metadata.dateOfBirth||''),passportNumber:String(metadata.passportNumber||''),notes:String(metadata.notes||''),scopeId:d.scope_id,metadata,correlationId:String(metadata.correlationId||''),createdAt:d.created_at,updatedAt:d.updated_at,source:'PRODUCTION_DB'};
   };
   const mapPlacement=p=>({id:p.id,detaineeId:p.detainee_id,blockId:p.block_id,roomId:p.room_id,block:p.block||'',room:p.room||'',since:p.since,until:p.until||null,movementId:p.movement_id||null,correlationId:p.correlation_id||null,requestKey:p.request_key||null,metadata:p.metadata||{},createdAt:p.created_at,source:'PRODUCTION_DB'});
   const mapMovement=m=>({id:m.id,detaineeId:m.detainee_id,type:m.movement_type,destination:m.destination||'',purpose:m.purpose||'',occurredAt:m.occurred_at,createdAt:m.created_at,metadata:m.metadata||{},source:'PRODUCTION_DB'});
@@ -165,8 +165,9 @@
     const correlation=String(correlationId||crypto.randomUUID());
     const key=String(idempotencyKey||'').trim();
     if(!key)throw new Error('IDEMPOTENCY_KEY_REQUIRED');
-    const clean={code:String(code||'').trim(),name:String(name||'').trim(),nationality:String(nationality||'').trim(),status:String(status||'AKTIF'),placement:String(placement||'').trim(),updated_at:new Date().toISOString(),metadata:{gender:String(gender||''),dateOfBirth:String(dateOfBirth||''),passportNumber:String(passportNumber||''),notes:String(notes||''),correlationId:correlation,source:'PRODUCTION_RUNTIME'}};
+    const clean={name:String(name||'').trim(),nationality:String(nationality||'').trim(),status:String(status||'AKTIF'),placement:String(placement||'').trim(),updated_at:new Date().toISOString(),metadata:{gender:String(gender||''),dateOfBirth:String(dateOfBirth||''),passportNumber:String(passportNumber||''),notes:String(notes||''),correlationId:correlation,source:'PRODUCTION_RUNTIME'}};
     if(operation==='create'){
+      clean.code=String(code||'').trim();
       if(!clean.code||!clean.name)throw new Error('DETAINEE_INPUT_INVALID');
       const normalizedEntryYear=Number(entryYear);
       if(!Number.isInteger(normalizedEntryYear)||normalizedEntryYear<2000||normalizedEntryYear>2099)throw new Error('ENTRY_YEAR_REQUIRED');
@@ -177,6 +178,10 @@
     }
     if(!id)throw new Error('DETAINEE_ID_REQUIRED');
     if(operation==='update'){
+      if(Object.prototype.hasOwnProperty.call(args,'code')){
+        const current=state()?.detainees?.find(x=>String(x.id)===String(id));
+        if(String(args.code??'').trim()!==String(current?.code||'').trim())return{ok:false,code:'DETAINEE_CODE_IMMUTABLE'};
+      }
       const result=await request('detainees',{method:'PATCH',id:String(id),body:clean,headers:{'X-Request-Id':String(requestId||crypto.randomUUID()),'X-Correlation-Id':clean.metadata.correlationId,'Idempotency-Key':key}});
       const refreshed=await hydrate();
       return {ok:true,code:'DETAINEE_UPDATED',data:result.data,state:refreshed,correlationId};

@@ -1,0 +1,18 @@
+name: G1 Detainee Direct Write Containment
+
+on:
+  pull_request:
+    paths:
+      - "supabase/migrations/20261002160000_mta_detainee_direct_write_containment_v1.sql"
+      - "test/g1-detainee-direct-write-containment.test.mjs"
+      - ".github/workflows/g1-detainee-direct-write-containment.yml"
+
+jobs:
+  containment-boundary:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: node --test test/g1-detainee-direct-write-containment.test.mjs

@@ -467,6 +467,9 @@ Deno.serve(async(req)=>{
         delete body.entryYear;
         body={...body,entry_year:entryYear,scope_id:canonicalScopeId};
       }else if(id){
+        if(Object.prototype.hasOwnProperty.call(body,"code")){
+          return json(req,{ok:false,error:"DETAINEE_CODE_IMMUTABLE"},400,{requestId,correlationId});
+        }
         if(Object.prototype.hasOwnProperty.call(body,"entry_year")||Object.prototype.hasOwnProperty.call(body,"entryYear")){
           return json(req,{ok:false,error:"ENTRY_YEAR_IMMUTABLE"},400,{requestId,correlationId});
         }
