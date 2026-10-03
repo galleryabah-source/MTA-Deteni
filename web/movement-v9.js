@@ -78,7 +78,7 @@ function render(){
       const state=ensure();
       const correlationId=uid('COR');
       const result=await window.mtaUnifiedCreateMovement(state,{detaineeId:id,roomId:rid,occurredAt:occurred,type:String(form.get('type')||'TRANSFER_KAMAR'),note:String(form.get('note')||''),correlationId,requestKey:'ROOM_TRANSFER:'+id+':'+rid+':'+occurred});
-      if(!result.ok){appendAudit(state,'MOVEMENT_CREATE_BLOCKED','MOVEMENT',id,'DENIED',result.correlationId||correlationId);put(state);toast('Perpindahan ditolak: '+result.code);return}
+      if(!result.ok){appendAudit(d,'MOVEMENT_CREATE_BLOCKED','MOVEMENT',id,'DENIED',result.correlationId||correlationId);put(state);toast('Perpindahan ditolak: '+result.code);return}
       put(state);
       if(!state.lastMutation?.key){toast('Mutation evidence belum tersedia.');return}
       toast('Perpindahan kamar tersimpan.');
