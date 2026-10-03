@@ -46,7 +46,8 @@ function hasDetaineeCodePattern(source){
     /\b[xX]\.code\b/,
     /\bdetaineeCode\b/,
     /\bname=["']code["']/,
-    /\bcode\s*:\s*String\((?:options|o|args|body)\??\.code/
+    /\bcode\s*:\s*String\((?:options|o|args|body)\??\.code/,
+    /hasOwnProperty\.call\(body,\s*["']code["']\)/
   ].some(re=>re.test(source));
 }
 
