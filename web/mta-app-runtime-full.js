@@ -34,6 +34,8 @@ function uid(prefix){return prefix+'-'+Math.random().toString(36).slice(2,8).toU
 function now(){return new Date().toISOString()}
 function validateRuntimeState(x){if(!x||typeof x!=='object')throw new Error('STATE_INVALID');const roots=['detainees','placements','movements','leaves','documents','audit','rooms','blocks'];for(const k of roots)if(!Array.isArray(x[k]))throw new Error('STATE_ARRAY_REQUIRED:'+k);for(const k of roots){const ids=x[k].map(v=>v?.id).filter(Boolean);if(new Set(ids).size!==ids.length)throw new Error('STATE_DUPLICATE_ID:'+k)}if(x.audit.some(a=>!a?.id||!a?.action||!a?.resourceType||!a?.occurredAt))throw new Error('AUDIT_INVALID');const roomIds=new Set(x.rooms.map(r=>r.id));if(x.placements.some(p=>p.roomId&&!roomIds.has(p.roomId)))throw new Error('PLACEMENT_MASTER_ROOM_MISSING');const detaineeIds=new Set(x.detainees.map(d=>d.id));if(x.movements.some(m=>m.detaineeId&&!detaineeIds.has(m.detaineeId)))throw new Error('MOVEMENT_DETAINEE_MISSING');if(x.leaves.some(l=>l.detaineeId&&!detaineeIds.has(l.detaineeId)))throw new Error('LEAVE_DETAINEE_MISSING');return true}
 function esc(v=''){return String(v).replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]))}
+// Canonical detainee presentation boundary: NID first; legacy code is compatibility-only fallback for synthetic/legacy records.
+function detaineeIdentity(d){return String(d?.nid||d?.code||d?.id||'')}
 function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2200)}
 function appendAudit(state,action,resourceType,resourceId,result='SUCCESS',correlationId){
   const kernel=stateKernel();
