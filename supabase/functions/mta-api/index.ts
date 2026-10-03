@@ -46,12 +46,15 @@ const resolveDetaineeIdentityCandidates=async({admin,scopeId,body})=>{
     if(qName&&dName&&qName===dName)basis.push("NAME_EXACT");else if(qName&&dName&&identityNearName(qName,dName))basis.push("NAME_NEAR");
     if(qNationality&&dNationality&&qNationality===dNationality)basis.push("NATIONALITY_EXACT");
     if(!basis.length)return null;
-    const has=(x)=>basis.includes(x);let confidence="NAME_ONLY";
+    const has=(x)=>basis.includes(x);let confidence=null;
     if(has("PASSPORT_EXACT")&&has("DATE_OF_BIRTH_EXACT"))confidence="STRONG";
     else if(has("PASSPORT_EXACT")&&has("NAME_EXACT")&&has("NATIONALITY_EXACT"))confidence="STRONG";
     else if(has("NAME_EXACT")&&has("DATE_OF_BIRTH_EXACT")&&has("NATIONALITY_EXACT"))confidence="PROBABLE";
     else if(has("NAME_EXACT")&&(has("DATE_OF_BIRTH_EXACT")||has("PASSPORT_EXACT")||has("NATIONALITY_EXACT")))confidence="POSSIBLE";
+    else if(has("NAME_EXACT"))confidence="NAME_ONLY";
     else if(has("NAME_NEAR")&&(has("DATE_OF_BIRTH_EXACT")||has("PASSPORT_EXACT")||has("NATIONALITY_EXACT")))confidence="POSSIBLE";
+    else if(has("NAME_NEAR"))confidence="NAME_ONLY";
+    if(!confidence)return null;
     return {detaineeId:String(d.id||''),nid:String(d.nid||''),name:String(d.name||''),dateOfBirth:String(d.date_of_birth||''),passportNumber:String(d.passport_number||''),nationality:String(d.nationality||''),status:String(d.status||''),confidence,matchBasis:basis};
   }).filter(Boolean).sort((a,b)=>{const rank={STRONG:4,PROBABLE:3,POSSIBLE:2,NAME_ONLY:1};return (rank[b.confidence]-rank[a.confidence])||a.name.localeCompare(b.name,'id');});
   return {status:candidates.length?"CANDIDATES_FOUND":"NO_MATCH",candidates};
