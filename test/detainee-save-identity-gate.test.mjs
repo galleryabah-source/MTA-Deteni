@@ -50,7 +50,14 @@ test('SIG-004 UI has no standalone Cari Riwayat action and runtime forwards Save
   assert.match(runtimeSource,/identityDecision\}\)/);
 });
 
-test('SIG-005 production API contains a server-side identity gate before detainee mutation',()=>{
+test('SIG-005 server identity contract does not treat nationality-only evidence as a match',()=>{
+  const apiSource=fs.readFileSync(new URL('../supabase/functions/mta-api/index.ts',import.meta.url),'utf8');
+  assert.match(apiSource,/else if\(has\("NAME_EXACT"\)\)confidence="NAME_ONLY"/);
+  assert.match(apiSource,/else if\(has\("NAME_NEAR"\)\)confidence="NAME_ONLY"/);
+  assert.match(apiSource,/if\(!confidence\)return null/);
+});
+
+test('SIG-006 production API contains a server-side identity gate before detainee mutation',()=>{
   assert.match(apiSource,/resolveDetaineeIdentityCandidates/);
   assert.match(apiSource,/IDENTITY_REVIEW_REQUIRED/);
   assert.match(apiSource,/identity_decision/);
