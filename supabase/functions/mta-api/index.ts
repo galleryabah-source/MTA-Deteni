@@ -25,6 +25,38 @@ const SCOPED_MUTATION_RESOURCES=new Set(["detainees","placements","movements","l
 const denyAuthorization=(reasonCode)=>({allowed:false,reasonCode,policyVersion:AUTHZ_POLICY_VERSION});
 const allowAuthorization=()=>({allowed:true,reasonCode:"ALLOW",policyVersion:AUTHZ_POLICY_VERSION});
 
+const normalizeIdentityText=(value)=>String(value??'').normalize("NFKD").replace(/[\\u0300-\\u036f]/g,"").toLowerCase().replace(/[^a-z0-9]+/g," ").trim();
+const normalizeIdentityCompact=(value)=>normalizeIdentityText(value).replace(/\\s+/g,"");
+const normalizeIdentityPassport=(value)=>String(value??'').toUpperCase().replace(/[^A-Z0-9]/g,"");
+const identityLevenshtein=(a,b)=>{const aa=String(a||''),bb=String(b||'');if(aa===bb)return 0;if(!aa)return bb.length;if(!bb)return aa.length;let prev=Array.from({length:bb.length+1},(_,i)=>i);for(let i=1;i<=aa.length;i++){const cur=[i];for(let j=1;j<=bb.length;j++)cur[j]=Math.min(cur[j-1]+1,prev[j]+1,prev[j-1]+(aa[i-1]===bb[j-1]?0:1));prev=cur;}return prev[bb.length];};
+const identityNearName=(a,b)=>{const aa=normalizeIdentityText(a),bb=normalizeIdentityText(b);if(!aa||!bb||aa===bb)return false;const minLength=Math.min(aa.length,bb.length);if(minLength<8)return false;return identityLevenshtein(aa,bb)<=Math.max(1,Math.floor(minLength*0.06));};
+const resolveDetaineeIdentityCandidates=async({admin,scopeId,body})=>{
+  const queryName=String(body?.name||'').trim();
+  const queryDob=String(body?.metadata?.dateOfBirth??body?.date_of_birth??body?.dateOfBirth??'').trim();
+  const queryPassport=String(body?.metadata?.passportNumber??body?.passport_number??body?.passportNumber??'').trim();
+  const queryNationality=String(body?.nationality||'').trim();
+  if(!queryName&&!queryDob&&!queryPassport&&!queryNationality)return{status:'NO_MATCH',candidates:[]};
+  const rows=await admin.from("mta_detainees").select("id,nid,name,date_of_birth,passport_number,nationality,status,scope_id").eq("scope_id",scopeId).limit(5000);
+  if(rows.error)throw new Error("IDENTITY_RESOLUTION_READ_FAILED");
+  const qName=normalizeIdentityText(queryName),qDob=normalizeIdentityText(queryDob),qPassport=normalizeIdentityPassport(queryPassport),qNationality=normalizeIdentityCompact(queryNationality);
+  const candidates=(rows.data||[]).map(d=>{
+    const basis=[];const dName=normalizeIdentityText(d.name),dDob=normalizeIdentityText(d.date_of_birth),dPassport=normalizeIdentityPassport(d.passport_number),dNationality=normalizeIdentityCompact(d.nationality);
+    if(qPassport&&dPassport&&qPassport===dPassport)basis.push("PASSPORT_EXACT");
+    if(qDob&&dDob&&qDob===dDob)basis.push("DATE_OF_BIRTH_EXACT");
+    if(qName&&dName&&qName===dName)basis.push("NAME_EXACT");else if(qName&&dName&&identityNearName(qName,dName))basis.push("NAME_NEAR");
+    if(qNationality&&dNationality&&qNationality===dNationality)basis.push("NATIONALITY_EXACT");
+    if(!basis.length)return null;
+    const has=(x)=>basis.includes(x);let confidence="NAME_ONLY";
+    if(has("PASSPORT_EXACT")&&has("DATE_OF_BIRTH_EXACT"))confidence="STRONG";
+    else if(has("PASSPORT_EXACT")&&has("NAME_EXACT")&&has("NATIONALITY_EXACT"))confidence="STRONG";
+    else if(has("NAME_EXACT")&&has("DATE_OF_BIRTH_EXACT")&&has("NATIONALITY_EXACT"))confidence="PROBABLE";
+    else if(has("NAME_EXACT")&&(has("DATE_OF_BIRTH_EXACT")||has("PASSPORT_EXACT")||has("NATIONALITY_EXACT")))confidence="POSSIBLE";
+    else if(has("NAME_NEAR")&&(has("DATE_OF_BIRTH_EXACT")||has("PASSPORT_EXACT")||has("NATIONALITY_EXACT")))confidence="POSSIBLE";
+    return {detaineeId:String(d.id||''),nid:String(d.nid||''),name:String(d.name||''),dateOfBirth:String(d.date_of_birth||''),passportNumber:String(d.passport_number||''),nationality:String(d.nationality||''),status:String(d.status||''),confidence,matchBasis:basis};
+  }).filter(Boolean).sort((a,b)=>{const rank={STRONG:4,PROBABLE:3,POSSIBLE:2,NAME_ONLY:1};return (rank[b.confidence]-rank[a.confidence])||a.name.localeCompare(b.name,'id');});
+  return {status:candidates.length?"CANDIDATES_FOUND":"NO_MATCH",candidates};
+};
+
 const authorizeGenericMutation=async({admin,userId,role,resource,method,id,body})=>{
   const methodRoles=MUTATION_ROLE_POLICY[resource]?.[method];
   if(!methodRoles) return denyAuthorization("RESOURCE_ACTION_DENIED");
@@ -454,6 +486,15 @@ Deno.serve(async(req)=>{
       const scoped=await admin.from("mta_profile_scopes").select("scope_id").eq("profile_id",user.id).eq("active",true).limit(1).maybeSingle();
       if(scoped.error||!scoped.data?.scope_id)return json(req,{ok:false,error:"SCOPE_REQUIRED"},409);
       canonicalScopeId=scoped.data.scope_id;
+    }
+    if(resource==="detainees" && req.method==="POST"){
+      const identityResolution=await resolveDetaineeIdentityCandidates({admin,scopeId:canonicalScopeId,body});
+      const identityDecision=String(body?.identity_decision||"").trim();
+      if(identityResolution.status==="CANDIDATES_FOUND" && identityDecision!=="NOT_SAME_PERSON"){
+        emit("WARN","identity.create.denied",{status:409,outcome:"DENIED",errorCode:"IDENTITY_REVIEW_REQUIRED",resource,identityCandidateCount:identityResolution.candidates.length});
+        return json(req,{ok:false,error:"IDENTITY_REVIEW_REQUIRED",identityResolution,requestId,correlationId},409,{requestId,correlationId});
+      }
+      delete body.identity_decision;
     }
     if(resource==="detainees"){
       if(Object.prototype.hasOwnProperty.call(body,"nid")){
