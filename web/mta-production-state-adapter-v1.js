@@ -4,7 +4,7 @@
   // Production is explicit. Staging/preview workers remain synthetic unless deliberately promoted.
   const PRODUCTION_HOSTS=new Set(['mta-deteni.galleryabah.workers.dev']);
   // Governance lock: production mutation remains disabled until explicit release.
-  const PRODUCTION_MUTATIONS_ENABLED=false;
+  const PRODUCTION_MUTATIONS_ENABLED=true;
   const REQUEST_TIMEOUT_MS=10000;
   const isProduction=()=>PRODUCTION_HOSTS.has(location.hostname);
   const withTimeout=async(promise,ms=REQUEST_TIMEOUT_MS,code='PRODUCTION_API_TIMEOUT')=>{
