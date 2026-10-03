@@ -75,12 +75,12 @@ function render(){
         return;
       }
       if(typeof window.mtaUnifiedCreateMovement!=='function'||typeof window.mtaUnifiedAssignPlacement!=='function'){toast('Canonical movement/placement command belum siap.');return}
-      const state=ensure();
+      const d=ensure();
       const correlationId=uid('COR');
-      const result=await window.mtaUnifiedCreateMovement(state,{detaineeId:id,roomId:rid,occurredAt:occurred,type:String(form.get('type')||'TRANSFER_KAMAR'),note:String(form.get('note')||''),correlationId,requestKey:'ROOM_TRANSFER:'+id+':'+rid+':'+occurred});
-      if(!result.ok){appendAudit(d,'MOVEMENT_CREATE_BLOCKED','MOVEMENT',id,'DENIED',result.correlationId||correlationId);put(state);toast('Perpindahan ditolak: '+result.code);return}
-      put(state);
-      if(!state.lastMutation?.key){toast('Mutation evidence belum tersedia.');return}
+      const result=await window.mtaUnifiedCreateMovement(d,{detaineeId:id,roomId:rid,occurredAt:occurred,type:String(form.get('type')||'TRANSFER_KAMAR'),note:String(form.get('note')||''),correlationId,requestKey:'ROOM_TRANSFER:'+id+':'+rid+':'+occurred});
+      if(!result.ok){appendAudit(d,'MOVEMENT_CREATE_BLOCKED','MOVEMENT',id,'DENIED',result.correlationId||correlationId);put(d);toast('Perpindahan ditolak: '+result.code);return}
+      put(d);
+      if(!d.lastMutation?.key){toast('Mutation evidence belum tersedia.');return}
       toast('Perpindahan kamar tersimpan.');
       render();
     }catch(error){
