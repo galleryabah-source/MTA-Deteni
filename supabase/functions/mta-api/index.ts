@@ -36,11 +36,18 @@ const resolveDetaineeIdentityCandidates=async({admin,scopeId,body})=>{
   const queryPassport=String(body?.metadata?.passportNumber??body?.passport_number??body?.passportNumber??'').trim();
   const queryNationality=String(body?.nationality||'').trim();
   if(!queryName&&!queryDob&&!queryPassport&&!queryNationality)return{status:'NO_MATCH',candidates:[]};
-  const rows=await admin.from("mta_detainees").select("id,nid,name,date_of_birth,passport_number,nationality,status,scope_id").eq("scope_id",scopeId).limit(5000);
+  // Canonical storage contract: dateOfBirth/passportNumber are persisted in metadata JSONB.
+  // Do not introduce physical columns solely for identity resolution.
+  const rows=await admin.from("mta_detainees").select("id,nid,name,nationality,status,scope_id,metadata").eq("scope_id",scopeId).limit(5000);
   if(rows.error)throw new Error("IDENTITY_RESOLUTION_READ_FAILED");
   const qName=normalizeIdentityText(queryName),qDob=normalizeIdentityText(queryDob),qPassport=normalizeIdentityPassport(queryPassport),qNationality=normalizeIdentityCompact(queryNationality);
   const candidates=(rows.data||[]).map(d=>{
-    const basis=[];const dName=normalizeIdentityText(d.name),dDob=normalizeIdentityText(d.date_of_birth),dPassport=normalizeIdentityPassport(d.passport_number),dNationality=normalizeIdentityCompact(d.nationality);
+    const basis=[];
+    const metadata=d.metadata&&typeof d.metadata==="object"?d.metadata:{};
+    const dName=normalizeIdentityText(d.name);
+    const dDob=normalizeIdentityText(metadata.dateOfBirth??metadata.date_of_birth??"");
+    const dPassport=normalizeIdentityPassport(metadata.passportNumber??metadata.passport_number??"");
+    const dNationality=normalizeIdentityCompact(d.nationality);
     if(qPassport&&dPassport&&qPassport===dPassport)basis.push("PASSPORT_EXACT");
     if(qDob&&dDob&&qDob===dDob)basis.push("DATE_OF_BIRTH_EXACT");
     if(qName&&dName&&qName===dName)basis.push("NAME_EXACT");else if(qName&&dName&&identityNearName(qName,dName))basis.push("NAME_NEAR");
@@ -55,7 +62,7 @@ const resolveDetaineeIdentityCandidates=async({admin,scopeId,body})=>{
     else if(has("NAME_NEAR")&&(has("DATE_OF_BIRTH_EXACT")||has("PASSPORT_EXACT")||has("NATIONALITY_EXACT")))confidence="POSSIBLE";
     else if(has("NAME_NEAR"))confidence="NAME_ONLY";
     if(!confidence)return null;
-    return {detaineeId:String(d.id||''),nid:String(d.nid||''),name:String(d.name||''),dateOfBirth:String(d.date_of_birth||''),passportNumber:String(d.passport_number||''),nationality:String(d.nationality||''),status:String(d.status||''),confidence,matchBasis:basis};
+    return {detaineeId:String(d.id||''),nid:String(d.nid||''),name:String(d.name||''),dateOfBirth:String(metadata.dateOfBirth??metadata.date_of_birth??''),passportNumber:String(metadata.passportNumber??metadata.passport_number??''),nationality:String(d.nationality||''),status:String(d.status||''),confidence,matchBasis:basis};
   }).filter(Boolean).sort((a,b)=>{const rank={STRONG:4,PROBABLE:3,POSSIBLE:2,NAME_ONLY:1};return (rank[b.confidence]-rank[a.confidence])||a.name.localeCompare(b.name,'id');});
   return {status:candidates.length?"CANDIDATES_FOUND":"NO_MATCH",candidates};
 };
