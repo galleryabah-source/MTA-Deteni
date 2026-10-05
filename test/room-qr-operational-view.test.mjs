@@ -37,5 +37,13 @@ test("room QR opens as modal and supports print",()=>{
   assert.match(source,/function showRoomQr\(id\)\{installRoomQrStyle\(\);/);
   assert.match(source,/data-print-room-qr/);
   assert.match(source,/window\.open\('','_blank'/);
-  assert.match(source,/window\.print\(\)/);
+  assert.match(source,/printWindow\.print\(\)/);
+});
+
+
+test("room QR print window writes printable QR content before print",()=>{
+  assert.match(source,/printWindow\.document\.open\(\)/);
+  assert.match(source,/printWindow\.document\.write\(/);
+  assert.match(source,/setTimeout\(\(\)=>\{try\{printWindow\.focus\(\);printWindow\.print\(\)/);
+  assert.match(source,/360px/);
 });
