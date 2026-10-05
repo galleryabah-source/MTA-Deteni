@@ -36,14 +36,24 @@ test("room QR remains permanent while occupancy data stays dynamic",()=>{
 test("room QR opens as modal and supports print",()=>{
   assert.match(source,/function showRoomQr\(id\)\{installRoomQrStyle\(\);/);
   assert.match(source,/data-print-room-qr/);
-  assert.match(source,/window\.open\('','_blank'/);
+  assert.match(source,/window\.open\('about:blank','_blank'/);
   assert.match(source,/printWindow\.print\(\)/);
 });
 
 
 test("room QR print window writes printable QR content before print",()=>{
-  assert.match(source,/printWindow\.document\.open\(\)/);
-  assert.match(source,/printWindow\.document\.write\(/);
+  assert.match(source,/const pdoc=printWindow\.document/);
+  assert.match(source,/sheet\.innerHTML=/);
   assert.match(source,/setTimeout\(\(\)=>\{try\{printWindow\.focus\(\);printWindow\.print\(\)/);
   assert.match(source,/360px/);
+});
+
+
+test("room QR print popup renders DOM directly before print",()=>{
+  assert.match(source,/window\.open\('about:blank','_blank'/);
+  assert.match(source,/const pdoc=printWindow\.document/);
+  assert.match(source,/pdoc\.createElement\('style'\)/);
+  assert.match(source,/pdoc\.createElement\('main'\)/);
+  assert.match(source,/pdoc\.body\.appendChild\(sheet\)/);
+  assert.match(source,/printWindow\.print\(\)/);
 });
