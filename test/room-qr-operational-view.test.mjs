@@ -31,3 +31,11 @@ test("room QR remains permanent while occupancy data stays dynamic",()=>{
   assert.match(source,/Penghuni selalu diambil dari placement aktif/);
   assert.match(source,/Source of truth: Master Room \+ Placement Aktif/);
 });
+
+
+test("room QR opens as modal and supports print",()=>{
+  assert.match(source,/function showRoomQr\(id\)\{installRoomQrStyle\(\);/);
+  assert.match(source,/data-print-room-qr/);
+  assert.match(source,/window\.open\('','_blank'/);
+  assert.match(source,/window\.print\(\)/);
+});
