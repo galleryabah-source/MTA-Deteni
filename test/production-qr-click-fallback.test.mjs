@@ -35,3 +35,13 @@ const runtime=fs.readFileSync(new URL('../web/mta-app-runtime-full.js',import.me
 assert.match(runtime,/function roomOccupancyMap\(state\)/);
 assert.match(runtime,/\$\{occupancy\.get\(String\(r\.id\)\)\|\|0\}\/\$\{esc\(r\.capacity\)\}/);
 console.log('Detainee room occupancy option contract: PASS');
+
+
+test("clean QR print supports production detainee fallback and direct popup DOM rendering",()=>{
+  const printSource=fs.readFileSync(new URL('../web/qr-print-clean-v3.js',import.meta.url),'utf8');
+  assert.match(printSource,/q=d\.qr\?\.\[map\]\?\.\[id\]\|\|\(\(kind==='detainee'&&x\)\?\{token:'SYNTH-QR-'\+id/);
+  assert.match(printSource,/const pdoc=w\.document/);
+  assert.match(printSource,/pdoc\.createElement\('style'\)/);
+  assert.match(printSource,/pdoc\.body\.appendChild\(box\)/);
+  assert.match(printSource,/w\.print\(\)/);
+});
