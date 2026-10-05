@@ -60,6 +60,13 @@ test('SIG-005 server identity contract does not treat nationality-only evidence 
   assert.match(apiSource,/if\(!confidence\)return null/);
 });
 
+test('SIG-006A server identity resolver follows canonical metadata storage for DOB/passport',()=>{
+  assert.match(apiSource,/select\("id,nid,name,nationality,status,scope_id,metadata"\)/);
+  assert.match(apiSource,/metadata\.dateOfBirth\?\?metadata\.date_of_birth/);
+  assert.match(apiSource,/metadata\.passportNumber\?\?metadata\.passport_number/);
+  assert.doesNotMatch(apiSource,/select\("id,nid,name,date_of_birth,passport_number,nationality,status,scope_id"\)/);
+});
+
 test('SIG-006 production API contains a server-side identity gate before detainee mutation',()=>{
   assert.match(apiSource,/resolveDetaineeIdentityCandidates/);
   assert.match(apiSource,/IDENTITY_REVIEW_REQUIRED/);
