@@ -37,7 +37,7 @@ test("room QR opens as modal and supports print",()=>{
   assert.match(source,/function showRoomQr\(id\)\{installRoomQrStyle\(\);/);
   assert.match(source,/data-print-room-qr/);
   assert.match(source,/window\.open\('','_blank'/);
-  assert.match(source,/printWindow\\.print\\(\\)/);
+  assert.match(source,/printWindow\.print\(\)/);
 });
 
 
