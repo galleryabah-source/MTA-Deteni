@@ -46,3 +46,13 @@ test("clean QR print supports production detainee fallback and direct popup DOM 
   assert.match(printSource,/pdoc\.body\.appendChild\(box\)/);
   assert.match(printSource,/w\.print\(\)/);
 });
+
+
+test("QR action uses production audit boundary without browser-state write",()=>{
+  const shell=fs.readFileSync(new URL('../web/mta-unified-shell-v2.js',import.meta.url),'utf8');
+  assert.match(shell,/function qrActionAudit\(action,kind,id,result='SUCCESS'\)/);
+  assert.match(shell,/mtaProductionStateAdapter\?\.isProduction\?\.\(\)/);
+  assert.match(shell,/mtaProductionStateAdapter\.writeAudit/);
+  assert.match(shell,/qrActionAudit\('QR_ACTION_OPEN','DETAINEE',id\)/);
+  assert.doesNotMatch(shell,/function action\(kind,id\)\{[^]*?audit\('QR_ACTION_OPEN','DETAINEE',id\)/);
+});
