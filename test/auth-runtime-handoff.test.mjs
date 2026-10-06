@@ -24,6 +24,6 @@ test("canonical runtime can take over after authenticated shell readiness",()=>{
 test("authenticated runtime assets are cache-busted and statically ordered",()=>{
   assert.match(index,/mta-auth-ui\.js\?v=10/);
   assert.match(index,/mta-app-runtime\.js\?v=13/);
-  assert.match(index,/mta-app-runtime-full\.js\?v=24/);
+  assert.match(index,/mta-app-runtime-full\.js\?v=25/);
   assert.match(index,/data-mta-operational-runtime="static"/);
 });

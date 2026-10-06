@@ -19,6 +19,6 @@ const index=fs.readFileSync('web/index.html','utf8');
 const coreRuntime=fs.readFileSync('web/mta-app-runtime.js','utf8');
 assert.match(index,/mta-room-summary-dashboard-v2/);
 assert.match(index,/mta-app-runtime\.js\?v=13/);
-assert.match(index,/mta-app-runtime-full\.js\?v=24/);
+assert.match(index,/mta-app-runtime-full\.js\?v=25/);
 
 console.log('ROOM_SUMMARY_DASHBOARD_TEST: PASS');

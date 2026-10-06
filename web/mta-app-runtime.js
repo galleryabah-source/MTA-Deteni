@@ -31,7 +31,7 @@
   document.body.classList.add('mta-auth-ready');
   renderCore();
 
-  // Canonical operational runtime asset: /mta-app-runtime-full.js?v=24 (static deferred in index.html).
+  // Canonical operational runtime asset: /mta-app-runtime-full.js?v=25 (static deferred in index.html).
   // It installs its auth-state listener before authenticated hydration can fire,
   // eliminating the previous dynamically-injected async handoff race.
   const loadProvenance=()=>{
