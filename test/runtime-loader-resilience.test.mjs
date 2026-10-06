@@ -5,7 +5,7 @@ assert.match(source,/const criticalRuntimeScripts=new Set\(\['\/desktop-shell-v2
 assert.match(source,/catch\(err\)\{\n        failures\.push/);
 assert.match(source,/if\(criticalRuntimeScripts\.has\(src\.split\('\?'\)\[0\]\)\)throw err/);
 const desktop=source.indexOf("'/desktop-shell-v2.js?v=8'");
-const unified=source.indexOf("'/mta-unified-shell-v2.js?v=13'");
+const unified=source.indexOf("'/mta-unified-shell-v2.js?v=14'");
 const qr=source.indexOf("'https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.js'");
 assert(desktop>=0&&unified>desktop&&qr>=0);
 console.log('Authenticated runtime loader resilience contract: PASS');
