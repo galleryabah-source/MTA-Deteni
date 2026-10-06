@@ -8,6 +8,9 @@ assert.notEqual(actionStart,-1,"canonical QR action function must exist");
 const actionEnd=source.indexOf("\nfunction ",actionStart+10);
 assert.notEqual(actionEnd,-1,"QR action function boundary must remain identifiable");
 
+assert.match(source,/function recordQrActionAudit\(actionName,type,id,result='SUCCESS'\)/,"QR action audit must have a non-blocking runtime boundary");
+assert.match(source,/mtaProductionStateAdapter\?\.isProduction\?\.\(\)===true/ ,"production QR action must not use browser-local audit persistence");
+
 const actionSource=source.slice(actionStart,actionEnd);
 
 assert.match(actionSource,/dataset\.mtaQrAction='movement'/,"detainee QR action must expose a movement action boundary");
