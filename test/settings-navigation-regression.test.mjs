@@ -18,7 +18,7 @@ test("settings navigation handler is exposed before unified shell routing",()=>{
   assert.match(admin,/window\.p9openSettings=\(\)=>settings\(\)/);
   assert.match(admin,/\['OWNER','ADMIN'\]\.includes\(String\(d\.adminSettings\.role\|\|''\)\.toUpperCase\(\)\)/);
   assert.match(runtime,/admin-settings-v9\.js/);
-  assert.match(runtime,/mta-unified-shell-v2\.js\?v=14/);
+  assert.match(runtime,/mta-unified-shell-v2\.js\?v=15/);
 });
 
 test("unified shell preserves administrator settings route",()=>{
