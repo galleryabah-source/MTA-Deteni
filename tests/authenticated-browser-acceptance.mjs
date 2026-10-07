@@ -210,7 +210,16 @@ try {
   const qrResult = await page.locator('#mtaUnifiedScanResult').innerText();
   if (!/Lanjutkan Action/i.test(qrResult)) throw new Error('QR accepted result missing operational action');
   await page.getByRole('button', { name: /Lanjutkan Action/i }).click();
-  await page.waitForFunction(() => /Operational Action/i.test(document.getElementById('mtaUnifiedScanResult')?.textContent || ''), null, { timeout: 5000 });
+  await page.waitForFunction(() => /Detail Data Deteni/i.test(document.getElementById('appView')?.textContent || ''), null, { timeout: 5000 });
+  const personalDetail = await page.evaluate(() => ({
+    text: document.getElementById('appView')?.textContent || '',
+    movement: !!document.getElementById('ddMovement'),
+    leave: !!document.getElementById('ddLeave'),
+    id: document.querySelector('.dd-field b:last-child')?.textContent || ''
+  }));
+  if (!/Detail Data Deteni/i.test(personalDetail.text) || !personalDetail.movement || !personalDetail.leave) {
+    throw new Error('QR detainee did not route to personal detail with personal actions');
+  }
   const auditCount = await page.evaluate(() => (JSON.parse(localStorage.getItem('mta-deteni-demo-v2') || '{}').audit || []).filter(x => /QR_(RESOLVE|ACTION)/.test(x.action)).length);
   if (auditCount < 2) throw new Error('QR resolve/action audit evidence missing');
   console.log(`AUTH_QR_JOURNEY_PASS ${device} ${qrSeed.id} audit=${auditCount}`);
