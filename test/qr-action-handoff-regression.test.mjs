@@ -15,8 +15,8 @@ const actionSource=source.slice(actionStart,actionEnd);
 
 assert.match(actionSource,/dataset\.mtaQrAction='movement'/,"detainee QR action must expose a movement action boundary");
 assert.match(actionSource,/addEventListener\('click',\(\)=>window\.mtaUnifiedOpenMovement/,"movement action must use a programmatic click handler");
-assert.match(actionSource,/addEventListener\('click',\(\)=>window\.show\?\.\('leave'\)/,"leave action must use a programmatic click handler");
-assert.match(actionSource,/addEventListener\('click',\(\)=>window\.show\?\.\('detainee'/,"detainee detail action must use a programmatic click handler");
+assert.match(actionSource,/addEventListener\('click',\(\)=>openQrDetaineeLeave\(id\)/,"leave action must use the personal detainee leave context handler");
+assert.match(actionSource,/addEventListener\('click',\(\)=>openQrDetaineeDetail\(id\)/,"detainee detail action must preserve the personal detainee context");
 assert.doesNotMatch(actionSource,/onclick=/,"QR operational action must not depend on inline onclick handlers");
 
 const resolveStart=source.indexOf("function resolve(raw)");
