@@ -13,8 +13,8 @@ assert.match(source,/mtaProductionStateAdapter\?\.isProduction\?\.\(\)===true/ ,
 
 const actionSource=source.slice(actionStart,actionEnd);
 
-assert.match(actionSource,/dataset\.mtaQrAction='movement'/,"detainee QR action must expose a movement action boundary");
-assert.match(actionSource,/addEventListener\('click',\(\)=>window\.mtaUnifiedOpenMovement/,"movement action must use a programmatic click handler");
+assert.match(actionSource,/openQrDetaineeDetail\(id\)/,"detainee QR action must route directly to personal detail");
+assert.doesNotMatch(actionSource,/dataset\.mtaQrAction='movement'/,"generic movement action must not remain the primary detainee QR handoff");
 assert.match(actionSource,/addEventListener\('click',\(\)=>openQrDetaineeLeave\(id\)/,"leave action must use the personal detainee leave context handler");
 assert.match(actionSource,/addEventListener\('click',\(\)=>openQrDetaineeDetail\(id\)/,"detainee detail action must preserve the personal detainee context");
 assert.doesNotMatch(actionSource,/onclick=/,"QR operational action must not depend on inline onclick handlers");
