@@ -41,5 +41,5 @@ test("refresh fix is cache-busted through the authenticated runtime chain",()=>{
   assert.match(index,/mta-app-runtime\.js\?v=13/);
   assert.match(index,/mta-app-runtime-full\.js\?v=25/);
   assert.match(index,/data-mta-operational-runtime="static"/);
-  assert.match(fs.readFileSync("web/mta-app-runtime-full.js","utf8"),/mta-unified-shell-v2\.js\?v=14/);
+  assert.match(fs.readFileSync("web/mta-app-runtime-full.js","utf8"),/mta-unified-shell-v2\.js\?v=15/);
 });
