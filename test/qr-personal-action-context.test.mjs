@@ -19,7 +19,8 @@ test('QR detainee action preserves personal identity context',()=>{
 });
 
 test('QR personal actions remain on the existing canonical mutation seams',()=>{
-  assert.match(shell,/window\.mtaUnifiedOpenMovement\?\.\(id\)/);
+  assert.match(shell,/function openMovementForDetainee\(detaineeId\)/);
+  assert.match(shell,/p5openMovement/);
   assert.match(runtime,/MTADeteniDomainCommandsV2\.createLeave/);
   assert.match(runtime,/MTADetaineeDetailView/);
 });
