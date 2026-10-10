@@ -16,6 +16,10 @@ assert.ok(runtime.includes('detailView.detail(id)'), 'runtime must invoke the ca
 assert.ok(detail.includes('window.MTADetaineeDetailView=Object.freeze'), 'detail module must expose its public API');
 assert.ok(detail.includes('DETAINEE_DETAIL_VIEW'), 'detail view must emit an audit event');
 assert.ok(detail.includes("document.getElementById('ddBack')"), 'detail view must provide back navigation');
+assert.ok(detail.includes("document.getElementById('ddMovement')"), 'personal detail must expose movement action');
+assert.ok(detail.includes("window.mtaUnifiedOpenMovement(id)"), 'movement action must preserve detainee context');
+assert.ok(detail.includes("document.getElementById('ddLeave')"), 'personal detail must expose leave action');
+assert.ok(detail.includes('[name="detaineeId"]'), 'leave action must bind the same detainee');
 
 assert.ok(index.includes('detainee-detail-v1.js'), 'index must load the detail module');
 
