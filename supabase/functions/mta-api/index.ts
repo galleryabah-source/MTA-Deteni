@@ -299,7 +299,15 @@ Deno.serve(async(req)=>{
       if(req.method==="PATCH"){
         const body=await req.json().catch(()=>({}));
         const previous=current.data.metadata&&typeof current.data.metadata==="object"?current.data.metadata:{};
-        const settings={...(previous.adminSettings||{}),...(body.settings&&typeof body.settings==="object"?body.settings:{})};
+        const incomingSettings=body.settings&&typeof body.settings==="object"?body.settings:{};
+        const existingSettings=previous.adminSettings&&typeof previous.adminSettings==="object"?previous.adminSettings:{};
+        const settings={...existingSettings,...incomingSettings};
+        // Branding is a nested settings aggregate: asset/title updates must merge
+        // into it, not replace the other saved icon/logo/header fields.
+        if(incomingSettings.branding&&typeof incomingSettings.branding==="object"){
+          const existingBranding=existingSettings.branding&&typeof existingSettings.branding==="object"?existingSettings.branding:{};
+          settings.branding={...existingBranding,...incomingSettings.branding};
+        }
         const metadata={...previous,adminSettings:settings};
         const updated=await admin.from("mta_scopes").update({metadata,updated_at:new Date().toISOString()}).eq("id",scopeId).select("id,code,name,metadata").single();
         if(updated.error)return json(req,{ok:false,error:"ADMIN_CONFIG_UPDATE_FAILED"},400);
