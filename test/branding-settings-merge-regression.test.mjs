@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import fs from "node:fs";
+import test from "node:test";
 
 const api = fs.readFileSync("supabase/functions/mta-api/index.ts", "utf8");
 const commands = fs.readFileSync("web/mta-domain-commands-v2.js", "utf8");
@@ -7,7 +8,7 @@ const commands = fs.readFileSync("web/mta-domain-commands-v2.js", "utf8");
 assert.match(api, /const incomingSettings=body\.settings&&typeof body\.settings==="object"\?body\.settings:\{\}/);
 assert.match(api, /const existingBranding=existingSettings\.branding&&typeof existingSettings\.branding==="object"\?existingSettings\.branding:\{\}/);
 assert.match(api, /settings\.branding=\{\.\.\.existingBranding,\.\.\.incomingSettings\.branding\}/);
-assert.match(commands, /\.\.\.currentBranding,\[key\]:String\(o\.data\|\|'\'\)\}/);
+assert.ok(commands.includes("...currentBranding,[key]:String(o.data||'')}"));
 
 test("branding updates preserve all previously saved nested branding fields", () => {
   const previous = {
