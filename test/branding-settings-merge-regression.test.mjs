@@ -5,18 +5,25 @@ import test from "node:test";
 const api = fs.readFileSync("supabase/functions/mta-api/index.ts", "utf8");
 const commands = fs.readFileSync("web/mta-domain-commands-v2.js", "utf8");
 const admin = fs.readFileSync("web/admin-settings-v9.js", "utf8");
+const adapter = fs.readFileSync("web/mta-production-state-adapter-v1.js", "utf8");
+const runtime = fs.readFileSync("web/mta-app-runtime-full.js", "utf8");
 
 assert.match(api, /const incomingSettings=body\.settings&&typeof body\.settings==="object"\?body\.settings:\{\}/);
 assert.match(api, /const existingBranding=existingSettings\.branding&&typeof existingSettings\.branding==="object"\?existingSettings\.branding:\{\}/);
 assert.match(api, /settings\.branding=\{\.\.\.existingBranding,\.\.\.incomingSettings\.branding\}/);
+assert.ok(commands.includes("productionAdminConfigMutation({branding}"));
+assert.ok(commands.includes("adapter.updateAdminConfig"));
 assert.ok(commands.includes("...currentBranding,[key]:String(o.data||'')}"));
+assert.ok(adapter.includes("async function updateAdminConfig(settings"));
+assert.ok(adapter.includes("request('admin-config',{method:'PATCH'"));
+assert.ok(adapter.includes("const PRODUCTION_MUTATIONS_ENABLED=false;"));
 assert.ok(admin.includes("container.querySelector('.logo,.mta-auth-logo')"));
 assert.ok(admin.includes("document.querySelector('#appView .hero,.main .hero,.hero')"));
 assert.ok(admin.includes("img.mta-brand-header-image"));
 assert.ok(admin.includes("applyHeaderImage(document.querySelector('.top'),'top')"));
 assert.ok(admin.includes("applyHeaderImage(document.querySelector('#appView .hero,.main .hero,.hero'),'hero')"));
-const runtime = fs.readFileSync("web/mta-app-runtime-full.js", "utf8");
 assert.ok(runtime.includes("admin-settings-v9.js?v=6"));
+assert.ok(runtime.includes("mta-production-state-adapter-v1.js?v=8"));
 assert.ok(admin.includes("settings();applyWebBranding();toast('Pengaturan desain web tersimpan.')"));
 
 test("branding updates preserve all previously saved nested branding fields", () => {
