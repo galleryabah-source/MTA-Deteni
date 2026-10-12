@@ -84,7 +84,7 @@ function applyWebBranding(){
     Object.assign(image.style,{
       position:'absolute',inset:'0',width:'100%',height:'100%',objectFit:'cover',
       objectPosition:mode==='top'?'right center':'center right',
-      opacity:mode==='top'?'.22':'.38',zIndex:'-1',pointerEvents:'none'
+      opacity:mode==='top'?'.22':'.38',zIndex:'0',pointerEvents:'none'
     });
     container.querySelectorAll(':scope > :not(.mta-brand-header-image)').forEach(child=>{
       if(!child.style.position)child.style.position='relative';
