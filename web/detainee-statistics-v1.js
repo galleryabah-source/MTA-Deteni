@@ -26,8 +26,8 @@ function downloadTable(rows){
 function printStatisticsReport(){
  const root=document.getElementById('appView'),report=root?.querySelector('.ds');
  if(!report)return;
- const date=new Date(),dateText=date.toLocaleDateString('id-ID',{day:'2-digit',month:'long',year:'numeric'});
- const html='<!doctype html><html lang="id"><head><meta charset="utf-8"><title>Laporan Statistik Deteni</title><style>
+ const dateText=new Date().toLocaleDateString('id-ID',{day:'2-digit',month:'long',year:'numeric'});
+ const html=`<!doctype html><html lang="id"><head><meta charset="utf-8"><title>Laporan Statistik Deteni</title><style>
  @page{size:A4 portrait;margin:12mm}
  *{box-sizing:border-box;print-color-adjust:exact;-webkit-print-color-adjust:exact}
  body{font-family:Arial,Helvetica,sans-serif;color:#172033;margin:0;font-size:9pt;line-height:1.35}
@@ -51,7 +51,7 @@ function printStatisticsReport(){
  .detail-table thead{display:table-header-group}.detail-table tr{break-inside:avoid}
  .ds>section:last-child{break-before:page}
  .print-foot{margin-top:12px;border-top:1px solid #cfd5dd;padding-top:5px;font-size:7pt;color:#526176}
- </style></head><body><header class="print-head"><h1>LAPORAN STATISTIK DATA DETENI</h1><p>Dicetak pada '+esc(dateText)+' · Sumber: data operasional Deteni</p></header>'+report.innerHTML+'<footer class="print-foot">MTA DETENI · Laporan statistik operasional · Audit trail, log, telemetry, authentication, dan event internal tidak dihitung sebagai data Deteni.</footer><script>window.addEventListener("load",()=>setTimeout(()=>window.print(),250));window.addEventListener("afterprint",()=>setTimeout(()=>window.close(),250));<\/script></body></html>';
+ </style></head><body><header class="print-head"><h1>LAPORAN STATISTIK DATA DETENI</h1><p>Dicetak pada ${esc(dateText)} · Sumber: data operasional Deteni</p></header>${report.innerHTML}<footer class="print-foot">MTA DETENI · Laporan statistik operasional · Audit trail, log, telemetry, authentication, dan event internal tidak dihitung sebagai data Deteni.</footer><script>window.addEventListener("load",()=>setTimeout(()=>window.print(),250));window.addEventListener("afterprint",()=>setTimeout(()=>window.close(),250));<\/script></body></html>`;
  const frame=document.createElement('iframe');
  frame.title='Pratinjau cetak laporan statistik';frame.setAttribute('aria-hidden','true');
  frame.style.cssText='position:fixed;width:0;height:0;right:0;bottom:0;border:0;visibility:hidden';
