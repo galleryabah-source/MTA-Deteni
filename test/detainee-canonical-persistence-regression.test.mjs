@@ -63,14 +63,14 @@ assert.match(runtime,/const idempotencyKey='DETAINEE_ARCHIVE:'\+crypto\.randomUU
 assert.match(runtime,/command\.archiveDetainee\(db,id,\{idempotencyKey\}\)/);
 assert.match(runtime,/result\.state/);
 assert.match(runtime,/Data tersimpan ke database/);
-assert.match(runtime,/mta-production-state-adapter-v1\.js\?v=7/);
+assert.match(runtime,/mta-production-state-adapter-v1\.js\?v=8/);
 assert.match(runtime,/mta-domain-commands-v2\.js\?v=5/);
 assert.match(runtime,/mta-state-kernel-v1\.js\?v=5/);
 assert.match(runtime,/await window\.MTADeteniDomainCommandsV2\.assignPlacement/);
 assert.match(runtime,/await window\.MTADeteniDomainCommandsV2\.advanceLeave/);
 assert.match(runtime,/await window\.MTADeteniDomainCommandsV2\?\.createDocument/);
 
-assert.match(index,/mta-production-state-adapter-v1\.js\?v=7/);
+assert.match(index,/mta-production-state-adapter-v1\.js\?v=8/);
 assert.match(stateKernel,/isProductionHost/);
 assert.match(stateKernel,/PRODUCTION_BROWSER_STORAGE_FORBIDDEN/);
 assert.match(stateKernel,/if\(isProductionHost\(\)\)return clone\(window\.__mtaProductionState\|\|\{\}\)/);
