@@ -29,7 +29,7 @@ function printStatisticsReport(){
  const dateText=new Date().toLocaleDateString('id-ID',{day:'2-digit',month:'long',year:'numeric'});
  const printable=report.cloneNode(true);
  printable.querySelectorAll('.dshead,.no-print,.detail-actions,nav,[role="navigation"],.top,.side,.footer,.bottom-nav,.mobile-nav,.app-nav,.runtime-status,.runtime-banner,[data-mta-runtime-status]').forEach(el=>el.remove());
- printable.querySelectorAll('*').forEach(el=>{if(el.children.length===0&&/^Runtime:\\s*(Production|Preview|Development)/i.test((el.textContent||'').trim()))el.remove()});
+ printable.querySelectorAll('*').forEach(el=>{if(el.children.length===0&&/^Runtime:\s*(Production|Preview|Development)/i.test((el.textContent||'').trim()))el.remove()});
  const reportHtml=printable.outerHTML;
  const html=`<!doctype html><html lang="id"><head><meta charset="utf-8"><title>Laporan Statistik Deteni</title><style>
  @page{size:A4 portrait;margin:12mm}
