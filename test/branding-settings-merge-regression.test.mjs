@@ -12,6 +12,11 @@ assert.match(api, /settings\.branding=\{\.\.\.existingBranding,\.\.\.incomingSet
 assert.ok(commands.includes("...currentBranding,[key]:String(o.data||'')}"));
 assert.ok(admin.includes("container.querySelector('.logo,.mta-auth-logo')"));
 assert.ok(admin.includes("document.querySelector('#appView .hero,.main .hero,.hero')"));
+assert.ok(admin.includes("img.mta-brand-header-image"));
+assert.ok(admin.includes("applyHeaderImage(document.querySelector('.top'),'top')"));
+assert.ok(admin.includes("applyHeaderImage(document.querySelector('#appView .hero,.main .hero,.hero'),'hero')"));
+const runtime = fs.readFileSync("web/mta-app-runtime-full.js", "utf8");
+assert.ok(runtime.includes("admin-settings-v9.js?v=6"));
 assert.ok(admin.includes("settings();applyWebBranding();toast('Pengaturan desain web tersimpan.')"));
 
 test("branding updates preserve all previously saved nested branding fields", () => {
