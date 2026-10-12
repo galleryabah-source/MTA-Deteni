@@ -132,6 +132,16 @@
     // must be emitted by the server-side canonical mutation transaction.
     return {ok:false,code:'AUDIT_WRITE_DISABLED'};
   }
+  async function updateAdminConfig(settings,{requestId,correlationId,idempotencyKey}={}){
+    if(!isProduction())throw new Error('NOT_PRODUCTION');
+    if(!settings||typeof settings!=='object'||Array.isArray(settings))throw new Error('ADMIN_CONFIG_SETTINGS_INVALID');
+    const key=String(idempotencyKey||'').trim();
+    if(key.length<8)throw new Error('IDEMPOTENCY_KEY_REQUIRED');
+    const reqId=String(requestId||crypto.randomUUID()),correlation=String(correlationId||crypto.randomUUID());
+    const result=await request('admin-config',{method:'PATCH',body:{settings},headers:{'X-Request-Id':reqId,'X-Correlation-Id':correlation,'Idempotency-Key':key}});
+    const refreshed=await hydrate();
+    return {...result,ok:true,code:'ADMIN_CONFIG_UPDATED',state:refreshed,requestId:reqId,correlationId:correlation};
+  }
   async function mutateResource(resource,operation,{id,body={},requestId,correlationId,idempotencyKey}={}){
     if(!isProductionPersistenceEnabled())throw new Error('PRODUCTION_MUTATION_NOT_AUTHORIZED');
     const method=operation==='create'?'POST':operation==='update'?'PATCH':operation==='delete'?'DELETE':null;
@@ -207,5 +217,5 @@
     return {...response,state:refreshed,replayed:!!response.replayed};
   }
   async function refresh(){return hydrate()}
-  window.mtaProductionStateAdapter=Object.freeze({isProduction,isProductionPersistenceEnabled,hydrate,refresh,createBackup,restoreBackup,executeMovement,mutateResource,writeAudit,mutateDetainee,get:()=>state(),apiBase:API,request});
+  window.mtaProductionStateAdapter=Object.freeze({isProduction,isProductionPersistenceEnabled,hydrate,refresh,createBackup,restoreBackup,executeMovement,mutateResource,updateAdminConfig,writeAudit,mutateDetainee,get:()=>state(),apiBase:API,request});
 })();
