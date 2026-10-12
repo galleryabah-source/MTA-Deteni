@@ -10,3 +10,8 @@ assert.match(s,/Deteni dengan dokumen/);
 assert.match(s,/mta:data-changed/);
 assert.match(s,/window\.MTADetaineeStatisticsView=Object\.freeze/);
 console.log('MTA-F-20260926-003 statistics calculation/reporting contract: PASS');
+assert.match(s,/const printable=report\\.cloneNode\\(true\\)/);
+assert.match(s,/printable\\.querySelectorAll/);
+assert.match(s,/Runtime:\\\\s\\*/);
+assert.match(s,/bottom-nav/);
+console.log('MTA-F-20261012-PRINT-SHELL-CLEANUP static contract: PASS');
