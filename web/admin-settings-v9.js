@@ -70,20 +70,32 @@ function applyWebBranding(){
   let favicon=document.querySelector('link[data-mta-brand-favicon]');
   if(!favicon){favicon=document.createElement('link');favicon.rel='icon';favicon.dataset.mtaBrandFavicon='1';document.head.appendChild(favicon)}
   favicon.href=b.iconData||'/favicon.ico';
-  const hero=document.querySelector('#appView .hero,.main .hero,.hero');
-  if(hero){
-    if(b.headerData){
-      hero.style.backgroundImage='linear-gradient(90deg,rgba(255,255,255,.82) 0%,rgba(255,255,255,.68) 58%,rgba(255,255,255,.40) 100%),url("'+b.headerData+'")';
-      hero.style.backgroundSize='cover';
-      hero.style.backgroundPosition='center right';
-      hero.style.backgroundRepeat='no-repeat';
-    }else{
-      hero.style.backgroundImage='';
-      hero.style.backgroundSize='';
-      hero.style.backgroundPosition='';
-      hero.style.backgroundRepeat='';
+  const applyHeaderImage=(container,mode)=>{
+    if(!container)return;
+    let image=container.querySelector(':scope > img.mta-brand-header-image');
+    if(!b.headerData){
+      if(image)image.remove();
+      container.style.backgroundImage='';
+      return;
     }
-  }
+    if(!image){image=document.createElement('img');image.className='mta-brand-header-image';image.alt='';image.setAttribute('aria-hidden','true');image.decoding='async';container.prepend(image)}
+    image.src=b.headerData;
+    Object.assign(container.style,{position:'relative',isolation:'isolate',overflow:'hidden'});
+    Object.assign(image.style,{
+      position:'absolute',inset:'0',width:'100%',height:'100%',objectFit:'cover',
+      objectPosition:mode==='top'?'right center':'center right',
+      opacity:mode==='top'?'.22':'.38',zIndex:'-1',pointerEvents:'none'
+    });
+    container.querySelectorAll(':scope > :not(.mta-brand-header-image)').forEach(child=>{
+      if(!child.style.position)child.style.position='relative';
+      if(!child.style.zIndex)child.style.zIndex='1';
+    });
+    container.style.backgroundImage=mode==='top'
+      ?'linear-gradient(90deg,rgba(255,255,255,.94) 0%,rgba(255,255,255,.82) 58%,rgba(255,255,255,.55) 100%)'
+      :'linear-gradient(90deg,rgba(255,255,255,.90) 0%,rgba(255,255,255,.72) 58%,rgba(255,255,255,.45) 100%)';
+  };
+  applyHeaderImage(document.querySelector('.top'),'top');
+  applyHeaderImage(document.querySelector('#appView .hero,.main .hero,.hero'),'hero');
 }
 function readImage(file,cb){
   if(!file){return}
