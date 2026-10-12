@@ -27,6 +27,10 @@ function printStatisticsReport(){
  const root=document.getElementById('appView'),report=root?.querySelector('.ds');
  if(!report)return;
  const dateText=new Date().toLocaleDateString('id-ID',{day:'2-digit',month:'long',year:'numeric'});
+ const printable=report.cloneNode(true);
+ printable.querySelectorAll('.dshead,.no-print,.detail-actions,nav,[role="navigation"],.top,.side,.footer,.bottom-nav,.mobile-nav,.app-nav,.runtime-status,.runtime-banner,[data-mta-runtime-status]').forEach(el=>el.remove());
+ printable.querySelectorAll('*').forEach(el=>{if(el.children.length===0&&/^Runtime:\\s*(Production|Preview|Development)/i.test((el.textContent||'').trim()))el.remove()});
+ const reportHtml=printable.outerHTML;
  const html=`<!doctype html><html lang="id"><head><meta charset="utf-8"><title>Laporan Statistik Deteni</title><style>
  @page{size:A4 portrait;margin:12mm}
  *{box-sizing:border-box;print-color-adjust:exact;-webkit-print-color-adjust:exact}
@@ -51,13 +55,14 @@ function printStatisticsReport(){
  .detail-table thead{display:table-header-group}.detail-table tr{break-inside:avoid}
  .ds>section:last-child{break-before:page}
  .print-foot{margin-top:12px;border-top:1px solid #cfd5dd;padding-top:5px;font-size:7pt;color:#526176}
- </style></head><body><header class="print-head"><h1>LAPORAN STATISTIK DATA DETENI</h1><p>Dicetak pada ${esc(dateText)} · Sumber: data operasional Deteni</p></header>${report.innerHTML}<footer class="print-foot">MTA DETENI · Laporan statistik operasional · Audit trail, log, telemetry, authentication, dan event internal tidak dihitung sebagai data Deteni.</footer><script>window.addEventListener("load",()=>setTimeout(()=>window.print(),250));window.addEventListener("afterprint",()=>setTimeout(()=>window.close(),250));<\/script></body></html>`;
+ </style></head><body><header class="print-head"><h1>LAPORAN STATISTIK DATA DETENI</h1><p>Dicetak pada ${esc(dateText)} · Sumber: data operasional Deteni</p></header>${reportHtml}<footer class="print-foot">MTA DETENI · Laporan statistik operasional · Audit trail, log, telemetry, authentication, dan event internal tidak dihitung sebagai data Deteni.</footer><script>window.addEventListener("load",()=>setTimeout(()=>window.print(),250));window.addEventListener("afterprint",()=>setTimeout(()=>window.close(),250));<\/script></body></html>`;
  const frame=document.createElement('iframe');
  frame.title='Pratinjau cetak laporan statistik';frame.setAttribute('aria-hidden','true');
- frame.style.cssText='position:fixed;width:0;height:0;right:0;bottom:0;border:0;visibility:hidden';
+ frame.style.cssText='position:fixed;width:1px;height:1px;right:0;bottom:0;border:0;opacity:.01;pointer-events:none';
  document.body.appendChild(frame);
  const w=frame.contentWindow;w.document.open();w.document.write(html);w.document.close();
- setTimeout(()=>{try{w.focus()}catch{}},150);
+ w.addEventListener('load',()=>{try{w.focus();w.print()}catch{}},{once:true});
+ setTimeout(()=>{try{w.focus();w.print()}catch{}},400);
  setTimeout(()=>{if(frame.isConnected)frame.remove()},60000);
 }
 function printTable(rows){
