@@ -4,9 +4,9 @@ import { readFile } from "node:fs/promises";
 
 const read = path => readFile(new URL("../" + path, import.meta.url), "utf8");
 
-test("restricted health records are isolated by API role and scope", async () => {
+test("health records allow OWNER, ADMIN, EDITOR, and HEALTHCARE while scope remains enforced", async () => {
   const api = await read("supabase/functions/mta-api/index.ts");
-  assert.match(api, /kind==="HEALTH"&&!new Set\(\["OWNER","ADMIN","HEALTHCARE"\]\)\.has\(role\)/);
+  assert.match(api, /kind==="HEALTH"&&!new Set\(\["OWNER","ADMIN","EDITOR","HEALTHCARE"\]\)\.has\(role\)/);
   assert.match(api, /mta_profile_scopes/);
   assert.match(api, /RBAC_HEALTH_RECORD_ACCESS_DENIED/);
   assert.match(api, /DETAINEE_SCOPE_DENIED/);
