@@ -12,6 +12,8 @@ test("note retries retain one idempotency key and stable event timestamp", async
   assert.match(shell, /occurredAt:healthForm\.dataset\.examinedAt/);
   assert.match(shell, /activityForm\.dataset\.operationPayload=JSON\.stringify\(operation\)/);
   assert.match(shell, /healthForm\.dataset\.operationPayload=JSON\.stringify\(operation\)/);
+  assert.match(shell, /if\(activityForm\.dataset\.operationPayload\)\{const p=JSON\.parse\(activityForm\.dataset\.operationPayload\)/);
+  assert.match(shell, /if\(healthForm\.dataset\.operationPayload\)\{const p=JSON\.parse\(healthForm\.dataset\.operationPayload\)/);
   assert.match(shell, /const operation=pending\|\|\{noteType:/);
   assert.match(shell, /const operation=pending\|\|\{examType:/);
   assert.match(shell, /Percobaan ulang akan menggunakan payload dan kunci operasi yang sama/);
