@@ -32,7 +32,7 @@ test("health records are restricted and no direct browser database write is intr
   const migration = await read("supabase/migrations/20261013090000_mta_detainee_activity_health_records_v1.sql");
   const shell = await read("web/mta-unified-shell-v2.js");
   assert.match(migration, /role not in \('OWNER','ADMIN','EDITOR','HEALTHCARE'\)/);
-  assert.match(migration, /revoke all on public\.mta_detainee_health_records from anon, authenticated/);
+  assert.match(migration, /revoke all on public\.mta_detainee_health_records from (?:public, )?anon, authenticated/);
   assert.match(shell, /getDetaineeNotes\(id,'HEALTH'\)/);
   assert.match(shell, /createDetaineeNote\(\{detaineeId:id,kind:'HEALTH'/);
 });
