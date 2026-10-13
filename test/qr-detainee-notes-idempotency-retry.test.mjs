@@ -10,7 +10,15 @@ test("note retries retain one idempotency key and stable event timestamp", async
   assert.match(shell, /healthForm\.dataset\.idempotencyKey=healthForm\.dataset\.idempotencyKey\|\|\('HEALTH_RECORD:'/);
   assert.match(shell, /occurredAt:activityForm\.dataset\.occurredAt/);
   assert.match(shell, /occurredAt:healthForm\.dataset\.examinedAt/);
-  assert.match(shell, /Percobaan ulang akan menggunakan kunci operasi yang sama/);
+  assert.match(shell, /activityForm\.dataset\.operationPayload=JSON\.stringify\(operation\)/);
+  assert.match(shell, /healthForm\.dataset\.operationPayload=JSON\.stringify\(operation\)/);
+  assert.match(shell, /const operation=pending\|\|\{noteType:/);
+  assert.match(shell, /const operation=pending\|\|\{examType:/);
+  assert.match(shell, /Percobaan ulang akan menggunakan payload dan kunci operasi yang sama/);
+  assert.match(shell, /delete activityForm\.dataset\.operationPayload/);
+  assert.match(shell, /delete healthForm\.dataset\.operationPayload/);
+  assert.match(shell, /mtaActivityContent'\)\.value=operation\.content/);
+  assert.match(shell, /mtaHealthFindings'\)\.value=operation\.content/);
   assert.match(shell, /delete activityForm\.dataset\.idempotencyKey/);
   assert.match(shell, /delete healthForm\.dataset\.idempotencyKey/);
 });
