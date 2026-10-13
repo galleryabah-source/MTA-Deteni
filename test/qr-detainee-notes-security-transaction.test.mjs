@@ -36,7 +36,7 @@ test("note, audit, outbox, and idempotency response share one SQL transaction", 
 test("health-record table is not directly readable or writable by client roles", async () => {
   const migration = await read("supabase/migrations/20261013090000_mta_detainee_activity_health_records_v1.sql");
   assert.match(migration, /alter table public\.mta_detainee_health_records enable row level security/);
-  assert.match(migration, /revoke all on public\.mta_detainee_health_records from anon, authenticated/);
+  assert.match(migration, /revoke all on public\.mta_detainee_health_records from (?:public, )?anon, authenticated/);
   assert.match(migration, /grant select, insert on public\.mta_detainee_health_records to service_role/);
 });
 
