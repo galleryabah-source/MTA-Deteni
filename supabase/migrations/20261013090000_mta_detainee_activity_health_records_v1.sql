@@ -103,7 +103,7 @@ begin
 
   select * into v_profile from public.mta_profiles where id=p_actor_user_id and active=true for update;
   if not found then raise exception 'DNOTE_ACTOR_INACTIVE'; end if;
-  if p_note_kind='HEALTH' and v_profile.role not in ('OWNER','ADMIN','HEALTHCARE') then raise exception 'DNOTE_HEALTHCARE_ROLE_REQUIRED'; end if;
+  if p_note_kind='HEALTH' and v_profile.role not in ('OWNER','ADMIN','EDITOR','HEALTHCARE') then raise exception 'DNOTE_HEALTHCARE_ROLE_REQUIRED'; end if;
   if p_note_kind='ACTIVITY' and v_profile.role not in ('OWNER','ADMIN','EDITOR','HEALTHCARE') then raise exception 'DNOTE_ACTIVITY_ROLE_REQUIRED'; end if;
 
   select * into v_detainee from public.mta_detainees where id=p_detainee_id for update;
