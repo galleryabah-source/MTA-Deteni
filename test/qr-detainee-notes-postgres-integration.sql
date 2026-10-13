@@ -152,6 +152,17 @@ begin
     raise exception 'DNOTE_TEST_ACTIVITY_OUTBOX_MISSING';
   end if;
 
+  -- The SQL boundary rejects unknown note kinds instead of treating them as HEALTH.
+  begin
+    perform public.mta_create_detainee_note_transaction(
+      'notes-invalid-kind-'||txid_current(),repeat('9',64),'UNRECOGNIZED',v_detainee,null,
+      'Synthetic invalid-kind finding','OBSERVATION','','',now(),v_health,'req-invalid-kind','corr-invalid-kind');
+    raise exception 'DNOTE_TEST_INVALID_KIND_NOT_REJECTED';
+  exception when others then
+    get stacked diagnostics v_error = message_text;
+    if v_error not like '%DNOTE_NOTE_KIND_INVALID%' then raise; end if;
+  end;
+
   -- Reusing a key with a different request hash must fail closed.
   begin
     perform public.mta_create_detainee_note_transaction(
