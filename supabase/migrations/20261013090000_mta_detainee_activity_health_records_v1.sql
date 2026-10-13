@@ -150,7 +150,8 @@ begin
     jsonb_build_object('eventId',v_event_id,'auditEventId',v_audit_id,'detaineeId',p_detainee_id,'scopeId',v_scope_id,'actorUserId',p_actor_user_id,'requestId',p_request_id,'correlationId',p_correlation_id,'idempotencyKey',p_idempotency_key),
     p_idempotency_key,v_now);
 
-  v_response := jsonb_build_object('ok',true,'replayed',false,'noteKind',p_note_kind,'row',v_record,'auditEventId',v_audit_id,'outboxEventId',v_event_id,'requestId',p_request_id,'correlationId',p_correlation_id);
+  -- Return only the application contract; internal audit/outbox and correlation metadata stay server-side.
+  v_response := jsonb_build_object('ok',true,'replayed',false,'noteKind',p_note_kind,'row',v_record);
   update mta_internal.idempotency_keys set response=v_response,status='COMPLETED',completed_at=v_now where idempotency_key=p_idempotency_key;
   return v_response;
 end;
