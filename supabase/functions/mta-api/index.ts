@@ -325,7 +325,7 @@ Deno.serve(async(req)=>{
         const targetRole=String(target.data.role||"VIEWER").toUpperCase();
         if(targetRole==="OWNER" && role!=="OWNER") return json(req,{ok:false,error:"OWNER_USER_MANAGEMENT_DENIED"},403);
         const nextRole=body.role===undefined?targetRole:String(body.role).toUpperCase();
-        const allowedRoles=role==="OWNER"?new Set(["OWNER","ADMIN","EDITOR","REVIEWER","AUDITOR","VIEWER"]):new Set(["EDITOR","REVIEWER","AUDITOR","VIEWER"]);
+        const allowedRoles=role==="OWNER"?new Set(["OWNER","ADMIN","EDITOR","REVIEWER","AUDITOR","VIEWER","HEALTHCARE"]):new Set(["EDITOR","REVIEWER","AUDITOR","VIEWER","HEALTHCARE"]);
         if(!allowedRoles.has(targetRole)||!allowedRoles.has(nextRole)) return json(req,{ok:false,error:"USER_ROLE_NOT_ALLOWED"},403);
         if(role==="ADMIN"&&targetRole==="ADMIN") return json(req,{ok:false,error:"ADMIN_CANNOT_MANAGE_ADMIN"},403);
         if(id===user.id&&nextRole!==targetRole) return json(req,{ok:false,error:"SELF_ROLE_CHANGE_FORBIDDEN"},409);
