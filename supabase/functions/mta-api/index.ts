@@ -200,7 +200,12 @@ Deno.serve(async(req)=>{
       }
       if(req.method==="GET"){
         const table=kind==="HEALTH"?"mta_detainee_health_records":"mta_detainee_activity_notes";
-        const {data,error}=await admin.from(table).select("*").eq("detainee_id",targetId).order(kind==="HEALTH"?"examined_at":"created_at",{ascending:false}).limit(200);
+        // Return only fields required by the history UI; do not expose internal scope,
+        // request/correlation identifiers, or duplicate creator metadata to browsers.
+        const columns=kind==="HEALTH"
+          ?"id,detainee_id,exam_type,findings,action_taken,follow_up,examined_at,examiner_user_id,created_at"
+          :"id,detainee_id,note_type,content,occurred_at,actor_user_id,created_at";
+        const {data,error}=await admin.from(table).select(columns).eq("detainee_id",targetId).order(kind==="HEALTH"?"examined_at":"created_at",{ascending:false}).limit(200);
         if(error) return json(req,{ok:false,error:"DETAINEE_NOTES_READ_FAILED"},500);
         return json(req,{ok:true,resource,kind,data:data||[],role});
       }
