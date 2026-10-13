@@ -148,6 +148,9 @@ begin
 
   -- RLS and privileges: no direct client access; service_role has server-only access.
   if not (select relrowsecurity from pg_class where oid='public.mta_detainee_health_records'::regclass) then raise exception 'DNOTE_TEST_HEALTH_RLS_DISABLED'; end if;
+  if not (select relrowsecurity from pg_class where oid='public.mta_detainee_activity_notes'::regclass) then raise exception 'DNOTE_TEST_ACTIVITY_RLS_DISABLED'; end if;
+  if not (select relrowsecurity from pg_class where oid='public.mta_audit_chain_epochs'::regclass) then raise exception 'DNOTE_TEST_AUDIT_EPOCH_RLS_DISABLED'; end if;
+  if (select relforcerowsecurity from pg_class where oid='public.mta_audit_chain_epochs'::regclass) then raise exception 'DNOTE_TEST_AUDIT_EPOCH_FORCE_RLS_UNEXPECTED'; end if;
   if has_table_privilege('anon','public.mta_detainee_health_records','SELECT')
      or has_table_privilege('authenticated','public.mta_detainee_health_records','SELECT')
      or has_table_privilege('anon','public.mta_detainee_health_records','INSERT')
