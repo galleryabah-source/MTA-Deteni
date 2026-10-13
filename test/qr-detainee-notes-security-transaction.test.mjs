@@ -47,3 +47,10 @@ test("database failures are surfaced; the QR note path does not persist syntheti
   assert.match(shell, /Gagal menyimpan catatan:/);
   assert.match(shell, /Gagal menyimpan rekam kesehatan:/);
 });
+
+test("SQL transaction rejects NULL note kind and subtype values explicitly", async () => {
+  const migration = await read("supabase/migrations/20261013090000_mta_detainee_activity_health_records_v1.sql");
+  assert.match(migration, /p_note_kind is null or p_note_kind not in \('ACTIVITY','HEALTH'\)/);
+  assert.match(migration, /p_note_type is null or p_note_type not in \('ACTIVITY','CONDITION','INCIDENT'\)/);
+  assert.match(migration, /p_exam_type is null or p_exam_type not in \('OBSERVATION','EXAMINATION','FOLLOW_UP','REFERRAL'\)/);
+});
