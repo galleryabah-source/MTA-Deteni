@@ -85,6 +85,25 @@ begin
   select count(*) into v_count from mta_internal.outbox_events where idempotency_key=v_key;
   if v_count<>1 then raise exception 'DNOTE_TEST_REPLAY_DUPLICATED_OUTBOX'; end if;
 
+  -- EDITOR with an active matching scope can create an activity note.
+  v_key := 'notes-activity-'||txid_current();
+  v_result := public.mta_create_detainee_note_transaction(
+    v_key,repeat('f',64),'ACTIVITY',v_detainee,'INCIDENT','Synthetic activity note',
+    null,'','',now(),v_editor,'req-notes-activity-test','corr-notes-activity-test');
+  if coalesce((v_result->>'ok')::boolean,false) is not true
+     or coalesce((v_result->>'noteKind'),'') <> 'ACTIVITY' then
+    raise exception 'DNOTE_TEST_ACTIVITY_COMMIT_RESPONSE_INVALID';
+  end if;
+  if not exists(select 1 from public.mta_detainee_activity_notes where id=(v_result#>>'{row,id}')::uuid and detainee_id=v_detainee and actor_user_id=v_editor) then
+    raise exception 'DNOTE_TEST_ACTIVITY_ROW_MISSING';
+  end if;
+  if not exists(select 1 from public.mta_audit_events where id=(v_result->>'auditEventId')::uuid and action='DETAINEE_ACTIVITY_NOTE_CREATE') then
+    raise exception 'DNOTE_TEST_ACTIVITY_AUDIT_MISSING';
+  end if;
+  if not exists(select 1 from mta_internal.outbox_events where event_id=(v_result->>'outboxEventId')::uuid and idempotency_key=v_key) then
+    raise exception 'DNOTE_TEST_ACTIVITY_OUTBOX_MISSING';
+  end if;
+
   -- Reusing a key with a different request hash must fail closed.
   begin
     perform public.mta_create_detainee_note_transaction(
@@ -154,7 +173,11 @@ begin
   if has_table_privilege('anon','public.mta_detainee_health_records','SELECT')
      or has_table_privilege('authenticated','public.mta_detainee_health_records','SELECT')
      or has_table_privilege('anon','public.mta_detainee_health_records','INSERT')
-     or has_table_privilege('authenticated','public.mta_detainee_health_records','INSERT') then
+     or has_table_privilege('authenticated','public.mta_detainee_health_records','INSERT')
+     or has_table_privilege('anon','public.mta_detainee_activity_notes','SELECT')
+     or has_table_privilege('authenticated','public.mta_detainee_activity_notes','SELECT')
+     or has_table_privilege('anon','public.mta_detainee_activity_notes','INSERT')
+     or has_table_privilege('authenticated','public.mta_detainee_activity_notes','INSERT') then
     raise exception 'DNOTE_TEST_DIRECT_CLIENT_PRIVILEGE_PRESENT';
   end if;
   if not has_function_privilege('service_role','public.mta_create_detainee_note_transaction(text,text,text,uuid,text,text,text,text,text,timestamptz,uuid,text,text)','EXECUTE') then
