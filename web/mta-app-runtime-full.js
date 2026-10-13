@@ -307,7 +307,7 @@ if(!window.__mtaRuntimeClockTimer){window.__mtaRuntimeClockTimer=setInterval(()=
 async function loadAuthenticatedRuntime(){
   if(window.__mtaRuntimeLoading)return window.__mtaRuntimeLoading;
   const scripts=[
-    '/mta-production-state-adapter-v1.js?v=7&legacy-placement=1',
+    '/mta-production-state-adapter-v1.js?v=8&legacy-placement=1',
     '/mta-state-kernel-v1.js?v=5',
     '/mta-domain-commands-v2.js?v=5',
     '/offline-v1.js?v=2',
@@ -327,7 +327,7 @@ async function loadAuthenticatedRuntime(){
     '/mobile-shell-v1.js?v=3',
     '/daily-guard-report-v2.js',
     '/daily-guard-report-d57.js',
-    '/admin-settings-v9.js?v=5',
+    '/admin-settings-v9.js?v=6',
     '/mta-unified-shell-v2.js?v=15',
     '/mta-system-audit-v1.js?v=2'
   ];  const criticalRuntimeScripts=new Set(['/desktop-shell-v2.js','/mta-unified-shell-v2.js']);

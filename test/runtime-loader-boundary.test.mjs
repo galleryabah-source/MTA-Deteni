@@ -15,7 +15,7 @@ assert.match(loader,/__mtaOperationalRuntimeAssetFailed/);
 assert.match(runtime,/window.__mtaOperationalRuntimeLoaded=false/);
 assert.match(runtime,/window.__mtaOperationalRuntimeLoaded=true;[\s\S]*window\.dispatchEvent\(new CustomEvent\('mta-operational-runtime-loaded'\)\)/);
 assert.ok(runtime.indexOf('window.__mtaOperationalRuntimeLoaded=false') < runtime.indexOf('window.__mtaOperationalRuntimeLoaded=true;'));
-assert.match(runtime,/mta-production-state-adapter-v1\.js\?v=7/);
+assert.match(runtime,/mta-production-state-adapter-v1\.js\?v=8/);
 const adapter=fs.readFileSync('web/mta-production-state-adapter-v1.js','utf8');
 assert.match(adapter,/localStorage\?\.getItem\('mta-deteni-auth-session'\)/);
 assert.match(adapter,/window\.mtaAuth\?\.session\?\.\(\)/);
@@ -23,7 +23,7 @@ assert.match(index,/retired legacy runtime path/);
 assert.match(index,/script\[data-mta-operational-runtime="static"\]/);
 assert.match(index,/mtaRuntimeErrorBoundaryInstalled/);
 assert.ok(index.indexOf('mtaRuntimeErrorBoundaryInstalled') < index.indexOf('mta-app-runtime-full.js?v=25'));
-assert.match(index,/mta-production-state-adapter-v1\.js\?v=7\&legacy-placement=1/);
+assert.match(index,/mta-production-state-adapter-v1\.js\?v=8\&legacy-placement=1/);
 
 console.log('Runtime loader boundary regression: PASS');
 

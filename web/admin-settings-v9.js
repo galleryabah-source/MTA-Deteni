@@ -42,28 +42,60 @@ function installSettingsStyle(){
 function applyWebBranding(){
   const d=ensure(),b=d.adminSettings?.branding||{};
   const brand=document.querySelector('.brand');
-  if(brand){
-    const logo=brand.querySelector('.logo');
-    if(logo){if(b.logoData){logo.textContent='';logo.style.backgroundImage='url("'+b.logoData+'")';logo.style.backgroundSize='contain';logo.style.backgroundPosition='center';logo.style.backgroundRepeat='no-repeat'}else{logo.textContent='M';logo.style.backgroundImage='none'}}
-    const strong=brand.querySelector('strong');if(strong&&b.title)strong.textContent=b.title;
-    const small=brand.querySelector('small');if(small&&b.subtitle)small.textContent=b.subtitle;
-  }
+  const applyLogo=container=>{
+    if(!container)return;
+    const logo=container.querySelector('.logo,.mta-auth-logo');
+    if(logo){
+      let image=logo.querySelector('img.mta-brand-logo-image');
+      if(b.logoData){
+        if(!image){image=document.createElement('img');image.className='mta-brand-logo-image';image.alt='Logo MTA DETENI';image.decoding='async';logo.replaceChildren(image)}
+        image.src=b.logoData;
+        Object.assign(logo.style,{background:'transparent',backgroundImage:'none',padding:'0',overflow:'hidden'});
+        Object.assign(image.style,{display:'block',width:'100%',height:'100%',objectFit:'contain',borderRadius:'inherit'});
+      }else{
+        if(image)image.remove();
+        if(!logo.textContent.trim())logo.textContent='M';
+        logo.style.backgroundImage='none';
+        logo.style.background='';
+      }
+    }
+    const strong=container.querySelector('strong');
+    if(strong&&b.title)strong.textContent=b.title;
+    const small=container.querySelector('small');
+    if(small&&b.subtitle)small.textContent=b.subtitle;
+  };
+  applyLogo(brand);
+  applyLogo(document.querySelector('.mta-auth-brand'));
   const title=b.title||'MTA DETENI Digital';document.title=title;
   let favicon=document.querySelector('link[data-mta-brand-favicon]');
   if(!favicon){favicon=document.createElement('link');favicon.rel='icon';favicon.dataset.mtaBrandFavicon='1';document.head.appendChild(favicon)}
   favicon.href=b.iconData||'/favicon.ico';
-  const top=document.querySelector('.top');
-  if(top){
-    if(b.headerData){
-      top.style.backgroundImage='linear-gradient(90deg,rgba(255,255,255,.97) 0%,rgba(255,255,255,.92) 55%,rgba(255,255,255,.70) 100%),url("'+b.headerData+'")';
-      top.style.backgroundSize='cover';
-      top.style.backgroundPosition='right center';
-    }else{
-      top.style.backgroundImage='';
-      top.style.backgroundSize='';
-      top.style.backgroundPosition='';
+  const applyHeaderImage=(container,mode)=>{
+    if(!container)return;
+    let image=container.querySelector(':scope > img.mta-brand-header-image');
+    if(!b.headerData){
+      if(image)image.remove();
+      container.style.backgroundImage='';
+      return;
     }
-  }
+    if(!image){image=document.createElement('img');image.className='mta-brand-header-image';image.alt='';image.setAttribute('aria-hidden','true');image.decoding='async';container.prepend(image)}
+    image.src=b.headerData;
+    Object.assign(container.style,{position:'relative',isolation:'isolate',overflow:'hidden'});
+    Object.assign(image.style,{
+      position:'absolute',inset:'0',width:'100%',height:'100%',objectFit:'cover',
+      objectPosition:mode==='top'?'right center':'center right',
+      opacity:mode==='top'?'.22':'.38',zIndex:'0',pointerEvents:'none'
+    });
+    container.querySelectorAll(':scope > :not(.mta-brand-header-image)').forEach(child=>{
+      if(!child.style.position)child.style.position='relative';
+      if(!child.style.zIndex)child.style.zIndex='1';
+    });
+    container.style.backgroundImage=mode==='top'
+      ?'linear-gradient(90deg,rgba(255,255,255,.94) 0%,rgba(255,255,255,.82) 58%,rgba(255,255,255,.55) 100%)'
+      :'linear-gradient(90deg,rgba(255,255,255,.90) 0%,rgba(255,255,255,.72) 58%,rgba(255,255,255,.45) 100%)';
+  };
+  applyHeaderImage(document.querySelector('.top'),'top');
+  applyHeaderImage(document.querySelector('#appView .hero,.main .hero,.hero'),'hero');
 }
 function readImage(file,cb){
   if(!file){return}
@@ -176,10 +208,10 @@ function settings(){
 window.p9openSettings=()=>settings();
 window.p9settingsTab=settingsTab;
 window.p9saveAI=async()=>{const d=ensure(),entered=(document.querySelector('#p9aiKey')?.value||'').trim(),result=await window.MTADeteniDomainCommandsV2?.updateAi(d,{provider:document.querySelector('#p9aiProvider')?.value||'Gemini',model:(document.querySelector('#p9aiModel')?.value||'').trim(),endpoint:(document.querySelector('#p9aiEndpoint')?.value||'').trim(),apiKey:entered});if(!result?.ok){toast('Konfigurasi AI ditolak: '+(result?.code||'CANONICAL_COMMAND_UNAVAILABLE'));return}if(!window.mtaProductionStateAdapter?.isProduction?.())put(d);document.querySelector('#p9aiKey').value='';toast(entered?'Konfigurasi tersimpan; API key tidak disimpan di browser.':'Konfigurasi tersimpan tanpa API key.')};
-window.p9saveDesign=async()=>{const d=ensure(),result=await window.MTADeteniDomainCommandsV2?.updateBranding(d,{title:(document.querySelector('#p9brandTitle')?.value||'MTA DETENI Digital').trim(),subtitle:(document.querySelector('#p9brandSubtitle')?.value||'Manajemen Terpadu Administrasi Deteni').trim()});if(!result?.ok){toast('Branding ditolak: '+(result?.code||'CANONICAL_COMMAND_UNAVAILABLE'));return}if(!window.mtaProductionStateAdapter?.isProduction?.())put(d);applyWebBranding();settings();toast('Pengaturan desain web tersimpan.')};
-window.p9uploadAsset=kind=>{const map={icon:'p9iconFile',logo:'p9logoFile',header:'p9headerFile'},file=document.querySelector('#'+map[kind])?.files?.[0];if(!file)return toast('Pilih file terlebih dahulu.');readImage(file,async data=>{const d=ensure(),result=await window.MTADeteniDomainCommandsV2?.uploadBranding(d,{kind,data});if(!result?.ok){toast('Aset ditolak: '+(result?.code||'CANONICAL_COMMAND_UNAVAILABLE'));return}if(window.mtaProductionStateAdapter?.isProduction?.()){if(result.state)d.adminSettings=result.state.adminSettings||d.adminSettings;applyWebBranding();settings();toast('Aset '+kind+' tersimpan ke database.')}else{if(!window.mtaProductionStateAdapter?.isProduction?.())put(d);applyWebBranding();settings();toast('Aset '+kind+' berhasil diunggah.')}})};
+window.p9saveDesign=async()=>{const d=ensure(),result=await window.MTADeteniDomainCommandsV2?.updateBranding(d,{title:(document.querySelector('#p9brandTitle')?.value||'MTA DETENI Digital').trim(),subtitle:(document.querySelector('#p9brandSubtitle')?.value||'Manajemen Terpadu Administrasi Deteni').trim()});if(!result?.ok){toast('Branding ditolak: '+(result?.code||'CANONICAL_COMMAND_UNAVAILABLE'));return}if(!window.mtaProductionStateAdapter?.isProduction?.())put(d);settings();applyWebBranding();toast('Pengaturan desain web tersimpan.')};
+window.p9uploadAsset=kind=>{const map={icon:'p9iconFile',logo:'p9logoFile',header:'p9headerFile'},file=document.querySelector('#'+map[kind])?.files?.[0];if(!file)return toast('Pilih file terlebih dahulu.');readImage(file,async data=>{const d=ensure(),result=await window.MTADeteniDomainCommandsV2?.uploadBranding(d,{kind,data});if(!result?.ok){toast('Aset ditolak: '+(result?.code||'CANONICAL_COMMAND_UNAVAILABLE'));return}if(window.mtaProductionStateAdapter?.isProduction?.()){if(result.state)d.adminSettings=result.state.adminSettings||d.adminSettings;settings();applyWebBranding();toast('Aset '+kind+' tersimpan ke database.')}else{if(!window.mtaProductionStateAdapter?.isProduction?.())put(d);settings();applyWebBranding();toast('Aset '+kind+' berhasil diunggah.')}})};
 function shell(t,desc,b){return `<section class="hero"><h1>${t}</h1><p class="sub">${desc}</p></section>${b}`}
-window.p9saveSystem=async()=>{const d=ensure(),result=await window.MTADeteniDomainCommandsV2?.updateSystem(d,{facilityName:(document.querySelector('#p9facility')?.value||d.adminSettings.facilityName).trim(),timezone:document.querySelector('#p9tz')?.value||d.adminSettings.timezone});if(!result?.ok){toast('Pengaturan system ditolak: '+(result?.code||'CANONICAL_COMMAND_UNAVAILABLE'));return}if(window.mtaProductionStateAdapter?.isProduction?.()){if(result.state){window.__mtaProductionState=result.state;applyWebBranding()}settings();toast('Pengaturan system tersimpan ke production.');return}if(!window.mtaProductionStateAdapter?.isProduction?.())put(d);settings();toast('Pengaturan system tersimpan.')};
+window.p9saveSystem=async()=>{const d=ensure(),result=await window.MTADeteniDomainCommandsV2?.updateSystem(d,{facilityName:(document.querySelector('#p9facility')?.value||d.adminSettings.facilityName).trim(),timezone:document.querySelector('#p9tz')?.value||d.adminSettings.timezone});if(!result?.ok){toast('Pengaturan system ditolak: '+(result?.code||'CANONICAL_COMMAND_UNAVAILABLE'));return}if(window.mtaProductionStateAdapter?.isProduction?.()){if(result.state){window.__mtaProductionState=result.state}settings();applyWebBranding();toast('Pengaturan system tersimpan ke production.');return}if(!window.mtaProductionStateAdapter?.isProduction?.())put(d);settings();toast('Pengaturan system tersimpan.')};
 window.p9addCatalog=(key,label)=>{openModal(`<div class="dialoghead"><h2>Tambah ${E(label)}</h2><button class="x" onclick="closeModal()">×</button></div><div class="field"><label>Nilai</label><input id="p9cat" placeholder="Masukkan nilai master"></div><div class="actions"><button class="btn" onclick="closeModal()">Batal</button><button class="btn primary" onclick="window.p9saveCatalog('${E(key)}')">Simpan</button></div>`)};
 window.p9saveCatalog=async key=>{const d=ensure(),v=(document.querySelector('#p9cat')?.value||'').trim(),result=await window.MTADeteniDomainCommandsV2?.catalogCreate(d,key,v);if(!result?.ok){toast('Master ditolak: '+(result?.code||'CANONICAL_COMMAND_UNAVAILABLE'));return}if(!window.mtaProductionStateAdapter?.isProduction?.())put(d);closeModal();settings();toast('Master tersimpan.')};
 window.p9removeCatalog=async (key,i)=>{const d=ensure(),v=d.adminCatalogs[key]?.[i];if(!v)return;if(!confirm('Nonaktifkan master '+v+'?'))return;const result=await window.MTADeteniDomainCommandsV2?.catalogRemove(d,key,i);if(!result?.ok){toast('Master ditolak: '+(result?.code||'CANONICAL_COMMAND_UNAVAILABLE'));return}if(!window.mtaProductionStateAdapter?.isProduction?.())put(d);settings();toast('Master dinonaktifkan.')};
