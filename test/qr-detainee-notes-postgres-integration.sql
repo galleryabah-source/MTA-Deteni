@@ -63,13 +63,16 @@ begin
   if coalesce((v_result->>'ok')::boolean,false) is not true or coalesce((v_result->>'replayed')::boolean,true) is not false then
     raise exception 'DNOTE_TEST_HEALTH_COMMIT_RESPONSE_INVALID';
   end if;
+  if v_result ?| array['auditEventId','outboxEventId','requestId','correlationId'] then
+    raise exception 'DNOTE_TEST_INTERNAL_RESPONSE_FIELDS_EXPOSED';
+  end if;
   if not exists(select 1 from public.mta_detainee_health_records where id=(v_result#>>'{row,id}')::uuid and detainee_id=v_detainee) then
     raise exception 'DNOTE_TEST_HEALTH_ROW_MISSING';
   end if;
-  if not exists(select 1 from public.mta_audit_events where id=(v_result->>'auditEventId')::uuid and action='DETAINEE_HEALTH_RECORD_CREATE') then
+  if not exists(select 1 from public.mta_audit_events where resource_id=v_result#>>'{row,id}' and action='DETAINEE_HEALTH_RECORD_CREATE') then
     raise exception 'DNOTE_TEST_AUDIT_ROW_MISSING';
   end if;
-  if not exists(select 1 from mta_internal.outbox_events where event_id=(v_result->>'outboxEventId')::uuid and idempotency_key=v_key) then
+  if not exists(select 1 from mta_internal.outbox_events where aggregate_id=v_result#>>'{row,id}' and idempotency_key=v_key) then
     raise exception 'DNOTE_TEST_OUTBOX_ROW_MISSING';
   end if;
   if not exists(select 1 from mta_internal.idempotency_keys where idempotency_key=v_key and request_hash=v_hash and response<>'{}'::jsonb) then
@@ -145,10 +148,10 @@ begin
   if not exists(select 1 from public.mta_detainee_activity_notes where id=(v_result#>>'{row,id}')::uuid and detainee_id=v_detainee and actor_user_id=v_editor) then
     raise exception 'DNOTE_TEST_ACTIVITY_ROW_MISSING';
   end if;
-  if not exists(select 1 from public.mta_audit_events where id=(v_result->>'auditEventId')::uuid and action='DETAINEE_ACTIVITY_NOTE_CREATE') then
+  if not exists(select 1 from public.mta_audit_events where resource_id=v_result#>>'{row,id}' and action='DETAINEE_ACTIVITY_NOTE_CREATE') then
     raise exception 'DNOTE_TEST_ACTIVITY_AUDIT_MISSING';
   end if;
-  if not exists(select 1 from mta_internal.outbox_events where event_id=(v_result->>'outboxEventId')::uuid and idempotency_key=v_key) then
+  if not exists(select 1 from mta_internal.outbox_events where aggregate_id=v_result#>>'{row,id}' and idempotency_key=v_key) then
     raise exception 'DNOTE_TEST_ACTIVITY_OUTBOX_MISSING';
   end if;
 
