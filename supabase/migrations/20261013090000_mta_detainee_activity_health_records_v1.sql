@@ -87,7 +87,6 @@ begin
   if p_idempotency_key is null or length(trim(p_idempotency_key)) < 8 then raise exception 'DNOTE_IDEMPOTENCY_KEY_REQUIRED'; end if;
   if p_request_hash is null or p_request_hash !~ '^[0-9a-fA-F]{64}$' then raise exception 'DNOTE_REQUEST_HASH_INVALID'; end if;
   if p_actor_user_id is null or p_detainee_id is null or p_request_id is null or p_correlation_id is null then raise exception 'DNOTE_CONTEXT_REQUIRED'; end if;
-  if p_note_kind is null or p_note_kind not in ('ACTIVITY','HEALTH') then raise exception 'DNOTE_KIND_INVALID'; end if;
 
   select * into v_profile from public.mta_profiles where id=p_actor_user_id and active=true for update;
   if not found then raise exception 'DNOTE_ACTOR_INACTIVE'; end if;
