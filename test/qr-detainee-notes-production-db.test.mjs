@@ -23,6 +23,9 @@ test("detainee activity and health records use the production API and canonical 
   assert.match(migration, /mta_audit_events/);
   assert.match(migration, /mta_internal\.outbox_events/);
   assert.match(migration, /mta_internal\.idempotency_keys/);
+  assert.match(migration, /'actor_user_id',p_actor_user_id,'created_at',v_now/);
+  assert.match(migration, /'examiner_user_id',p_actor_user_id,'created_at',v_now/);
+  assert.doesNotMatch(migration, /returning id,to_jsonb\(mta_detainee_(?:activity_notes|health_records)\) into v_record_id,v_record/, "create responses must not serialize internal table columns");
   assert.match(adapter, /getDetaineeNotes/);
   assert.match(adapter, /createDetaineeNote/);
   assert.match(shell, /Simpan ke Database/);
