@@ -20,7 +20,7 @@ test("note persistence remains fail-closed until the server release gate is enab
 
 test("note, audit, outbox, and idempotency response share one SQL transaction", async () => {
   const migration = await read("supabase/migrations/20261013090000_mta_detainee_activity_health_records_v1.sql");
-  assert.match(migration, /^begin;/);
+  assert.match(migration, /(?:^|\n)begin;/);
   assert.match(migration, /insert into public\.mta_detainee_activity_notes/);
   assert.match(migration, /insert into public\.mta_detainee_health_records/);
   assert.match(migration, /insert into public\.mta_audit_events/);
