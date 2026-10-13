@@ -48,11 +48,11 @@ begin
   insert into public.mta_profile_scopes(profile_id,scope_id,active) values
     (v_editor,v_scope,true),(v_health,v_scope,true),(v_viewer,v_scope,true);
 
-  insert into public.mta_detainees(code,name,status,scope_id,entry_year,nid)
-  values ('NONPROD-NOTES-'||txid_current(),'Synthetic detainee A','AKTIF',v_scope,2026,'320100000000000101')
+  insert into public.mta_detainees(code,name,status,scope_id,entry_year)
+  values ('NONPROD-NOTES-'||txid_current(),'Synthetic detainee A','AKTIF',v_scope,2026)
   returning id into v_detainee;
-  insert into public.mta_detainees(code,name,status,scope_id,entry_year,nid)
-  values ('NONPROD-NOTES-B-'||txid_current(),'Synthetic detainee B','AKTIF',v_other_scope,2026,'320100000000000102')
+  insert into public.mta_detainees(code,name,status,scope_id,entry_year)
+  values ('NONPROD-NOTES-B-'||txid_current(),'Synthetic detainee B','AKTIF',v_other_scope,2026)
   returning id into v_other_detainee;
 
   -- HEALTHCARE scoped write commits note + audit + outbox + idempotency response.
