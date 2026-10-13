@@ -6,7 +6,9 @@ const read = path => readFile(new URL("../" + path, import.meta.url), "utf8");
 
 test("health records allow OWNER, ADMIN, EDITOR, and HEALTHCARE while scope remains enforced", async () => {
   const api = await read("supabase/functions/mta-api/index.ts");
+  const migration = await read("supabase/migrations/20261013090000_mta_detainee_activity_health_records_v1.sql");
   assert.match(api, /kind==="HEALTH"&&!new Set\(\["OWNER","ADMIN","EDITOR","HEALTHCARE"\]\)\.has\(role\)/);
+  assert.match(migration, /p_note_kind='HEALTH' and v_profile\.role not in \('OWNER','ADMIN','EDITOR','HEALTHCARE'\)/);
   assert.match(api, /mta_profile_scopes/);
   assert.match(api, /RBAC_HEALTH_RECORD_ACCESS_DENIED/);
   assert.match(api, /DETAINEE_SCOPE_DENIED/);
