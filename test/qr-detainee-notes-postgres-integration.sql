@@ -257,7 +257,7 @@ begin
      or has_table_privilege('authenticated','public.mta_audit_chain_epochs','SELECT') then
     raise exception 'DNOTE_TEST_AUDIT_EPOCH_DIRECT_ACCESS_PRESENT';
   end if;
-end $;
+end $$;
 
 rollback;
 
