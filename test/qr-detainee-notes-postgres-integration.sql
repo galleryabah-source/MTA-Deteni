@@ -2,7 +2,7 @@
 -- LOCAL/NONPROD ONLY. Entire fixture set is rolled back.
 \set ON_ERROR_STOP on
 begin;
-set local request.jwt.claim.role = 'service_role';
+set local request.jwt.claims = '{"role":"service_role"}';
 
 do $$
 declare
