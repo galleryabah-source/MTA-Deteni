@@ -99,7 +99,7 @@ begin
   -- Read-back from the canonical health table must return the committed record.
   select count(*) into v_count
   from public.mta_detainee_health_records
-  where detainee_id=v_detainee and actor_user_id=v_health
+  where detainee_id=v_detainee and examiner_user_id=v_health
     and findings='Synthetic integration finding';
   if v_count<>1 then raise exception 'DNOTE_TEST_HEALTH_READBACK_MISSING'; end if;
 
@@ -127,7 +127,7 @@ begin
     raise exception 'DNOTE_TEST_ADMIN_WRITE_FAILED';
   end if;
   if not exists(select 1 from public.mta_detainee_health_records
-    where id=(v_result#>>'{row,id}')::uuid and actor_user_id=v_admin
+    where id=(v_result#>>'{row,id}')::uuid and examiner_user_id=v_admin
       and detainee_id=v_other_detainee) then
     raise exception 'DNOTE_TEST_ADMIN_SCOPE_BYPASS_OR_READBACK_FAILED';
   end if;
