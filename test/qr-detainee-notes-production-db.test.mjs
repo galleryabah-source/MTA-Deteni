@@ -14,6 +14,8 @@ test("detainee activity and health records use the production API and canonical 
   assert.match(api, /RBAC_HEALTH_RECORD_ACCESS_DENIED/);
   assert.match(api, /DNOTE_HEALTHCARE_ROLE_REQUIRED/);
   assert.match(api, /mta_create_detainee_note_transaction/);
+  assert.match(api, /const columns=kind===\"HEALTH\"[\\s\\S]*?select\(columns\)/, "note history reads must use explicit least-privilege projections, not select(*)");
+  assert.doesNotMatch(api, /admin\.from\(table\)\.select\(\"\*\"\)\.eq\(\"detainee_id\",targetId\)/);
   assert.match(migration, /create table if not exists public\.mta_detainee_activity_notes/);
   assert.match(migration, /create table if not exists public\.mta_detainee_health_records/);
   assert.match(migration, /mta_profile_scopes/);
