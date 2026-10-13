@@ -76,6 +76,26 @@ begin
     raise exception 'DNOTE_TEST_IDEMPOTENCY_RESPONSE_MISSING';
   end if;
 
+  -- An unauthorized actor must not retrieve an existing idempotent response.
+  begin
+    perform public.mta_create_detainee_note_transaction(
+      v_key,v_hash,'HEALTH',v_detainee,null,'Synthetic integration finding','OBSERVATION',
+      'Synthetic action','Synthetic follow-up',now(),v_viewer,'req-notes-replay-deny','corr-notes-replay-deny');
+    raise exception 'DNOTE_TEST_UNAUTHORIZED_REPLAY_NOT_REJECTED';
+  exception when others then
+    get stacked diagnostics v_error = message_text;
+    if v_error not like '%DNOTE_HEALTHCARE_ROLE_REQUIRED%' then raise; end if;
+  end;
+
+  v_replay := public.mta_create_detainee_note_transaction(
+    v_key,v_hash,'HEALTH',v_detainee,null,'Synthetic integration finding','OBSERVATION',
+    'Synthetic action','Synthetic follow-up',now(),v_health,'req-notes-health-test','corr-notes-health-test');
+  if coalesce((v_replay->>'replayed')::boolean,false) is not true then raise exception 'DNOTE_TEST_REPLAY_NOT_DETECTED'; end if;
+  select count(*) into v_count from public.mta_detainee_health_records where detainee_id=v_detainee;
+  if v_count<>1 then raise exception 'DNOTE_TEST_REPLAY_DUPLICATED_NOTE'; end if;
+  select count(*) into v_count from mta_internal.outbox_events where idempotency_key=v_key;
+  if v_count<>1 then raise exception 'DNOTE_TEST_REPLAY_DUPLICATED_OUTBOX'; end if;
+
   -- Read-back from the canonical health table must return the committed record.
   select count(*) into v_count
   from public.mta_detainee_health_records
@@ -112,25 +132,6 @@ begin
     raise exception 'DNOTE_TEST_ADMIN_SCOPE_BYPASS_OR_READBACK_FAILED';
   end if;
 
-  -- An unauthorized actor must not retrieve an existing idempotent response.
-  begin
-    perform public.mta_create_detainee_note_transaction(
-      v_key,v_hash,'HEALTH',v_detainee,null,'Synthetic integration finding','OBSERVATION',
-      'Synthetic action','Synthetic follow-up',now(),v_viewer,'req-notes-replay-deny','corr-notes-replay-deny');
-    raise exception 'DNOTE_TEST_UNAUTHORIZED_REPLAY_NOT_REJECTED';
-  exception when others then
-    get stacked diagnostics v_error = message_text;
-    if v_error not like '%DNOTE_HEALTHCARE_ROLE_REQUIRED%' then raise; end if;
-  end;
-
-  v_replay := public.mta_create_detainee_note_transaction(
-    v_key,v_hash,'HEALTH',v_detainee,null,'Synthetic integration finding','OBSERVATION',
-    'Synthetic action','Synthetic follow-up',now(),v_health,'req-notes-health-test','corr-notes-health-test');
-  if coalesce((v_replay->>'replayed')::boolean,false) is not true then raise exception 'DNOTE_TEST_REPLAY_NOT_DETECTED'; end if;
-  select count(*) into v_count from public.mta_detainee_health_records where detainee_id=v_detainee;
-  if v_count<>1 then raise exception 'DNOTE_TEST_REPLAY_DUPLICATED_NOTE'; end if;
-  select count(*) into v_count from mta_internal.outbox_events where idempotency_key=v_key;
-  if v_count<>1 then raise exception 'DNOTE_TEST_REPLAY_DUPLICATED_OUTBOX'; end if;
 
   -- EDITOR with an active matching scope can create an activity note.
   v_key := 'notes-activity-'||txid_current();
