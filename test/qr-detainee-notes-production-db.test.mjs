@@ -25,6 +25,8 @@ test("detainee activity and health records use the production API and canonical 
   assert.match(migration, /mta_internal\.idempotency_keys/);
   assert.match(migration, /'actor_user_id',p_actor_user_id,'created_at',v_now/);
   assert.match(migration, /'examiner_user_id',p_actor_user_id,'created_at',v_now/);
+  assert.match(migration, /v_response := jsonb_build_object\('ok',true,'replayed',false,'noteKind',p_note_kind,'row',v_record\)/, "RPC response must expose only the application record contract");
+  assert.doesNotMatch(migration, /v_response := jsonb_build_object\([^;]*(?:auditEventId|outboxEventId|requestId|correlationId)/, "internal audit, outbox, and correlation metadata must not be returned to clients");
   assert.doesNotMatch(migration, /returning id,to_jsonb\(mta_detainee_(?:activity_notes|health_records)\) into v_record_id,v_record/, "create responses must not serialize internal table columns");
   assert.match(adapter, /getDetaineeNotes/);
   assert.match(adapter, /createDetaineeNote/);
