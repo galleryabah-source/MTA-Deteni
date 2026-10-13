@@ -7,6 +7,7 @@ begin;
 alter table public.mta_audit_chain_epochs enable row level security;
 alter table public.mta_audit_chain_epochs no force row level security;
 
-revoke all on table public.mta_audit_chain_epochs from anon, authenticated, service_role;
+-- Revoke inherited PUBLIC privileges explicitly as well as named API roles.
+revoke all on table public.mta_audit_chain_epochs from public, anon, authenticated, service_role;
 
 commit;
