@@ -86,7 +86,7 @@ begin
   if p_idempotency_key is null or length(trim(p_idempotency_key)) < 8 then raise exception 'DNOTE_IDEMPOTENCY_KEY_REQUIRED'; end if;
   if p_request_hash is null or p_request_hash !~ '^[0-9a-fA-F]{64}$' then raise exception 'DNOTE_REQUEST_HASH_INVALID'; end if;
   if p_actor_user_id is null or p_detainee_id is null or p_request_id is null or p_correlation_id is null then raise exception 'DNOTE_CONTEXT_REQUIRED'; end if;
-  if p_note_kind not in ('ACTIVITY','HEALTH') then raise exception 'DNOTE_KIND_INVALID'; end if;
+  if p_note_kind is null or p_note_kind not in ('ACTIVITY','HEALTH') then raise exception 'DNOTE_KIND_INVALID'; end if;
 
   select * into v_existing from mta_internal.idempotency_keys where idempotency_key=p_idempotency_key for update;
   if found then
@@ -114,13 +114,13 @@ begin
   v_scope_id := v_detainee.scope_id;
 
   if p_note_kind='ACTIVITY' then
-    if p_note_type not in ('ACTIVITY','CONDITION','INCIDENT') or length(trim(coalesce(p_content,''))) not between 1 and 4000 then raise exception 'DNOTE_ACTIVITY_INPUT_INVALID'; end if;
+    if p_note_type is null or p_note_type not in ('ACTIVITY','CONDITION','INCIDENT') or length(trim(coalesce(p_content,''))) not between 1 and 4000 then raise exception 'DNOTE_ACTIVITY_INPUT_INVALID'; end if;
     insert into public.mta_detainee_activity_notes(scope_id,detainee_id,note_type,content,occurred_at,actor_user_id,request_id,correlation_id)
     values(v_scope_id,p_detainee_id,p_note_type,trim(p_content),coalesce(p_examined_at,v_now),p_actor_user_id,p_request_id,p_correlation_id)
     returning id,to_jsonb(mta_detainee_activity_notes) into v_record_id,v_record;
     v_action := 'DETAINEE_ACTIVITY_NOTE_CREATE'; v_resource_type := 'DETAINEE_ACTIVITY_NOTE';
   else
-    if p_exam_type not in ('OBSERVATION','EXAMINATION','FOLLOW_UP','REFERRAL') or length(trim(coalesce(p_content,''))) not between 1 and 4000 then raise exception 'DNOTE_HEALTH_INPUT_INVALID'; end if;
+    if p_exam_type is null or p_exam_type not in ('OBSERVATION','EXAMINATION','FOLLOW_UP','REFERRAL') or length(trim(coalesce(p_content,''))) not between 1 and 4000 then raise exception 'DNOTE_HEALTH_INPUT_INVALID'; end if;
     insert into public.mta_detainee_health_records(scope_id,detainee_id,exam_type,findings,action_taken,follow_up,examined_at,examiner_user_id,created_by,request_id,correlation_id)
     values(v_scope_id,p_detainee_id,p_exam_type,trim(p_content),left(coalesce(p_action_taken,''),3000),left(coalesce(p_follow_up,''),2000),coalesce(p_examined_at,v_now),p_actor_user_id,p_actor_user_id,p_request_id,p_correlation_id)
     returning id,to_jsonb(mta_detainee_health_records) into v_record_id,v_record;
