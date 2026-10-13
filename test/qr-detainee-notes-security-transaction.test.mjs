@@ -23,6 +23,7 @@ test("note persistence remains fail-closed until the server release gate is enab
 
 test("note, audit, outbox, and idempotency response share one SQL transaction", async () => {
   const migration = await read("supabase/migrations/20261013090000_mta_detainee_activity_health_records_v1.sql");
+  assert.match(migration, /current_setting\(\x27request\.jwt\.claims\x27, true\)/, "SECURITY DEFINER RPC must recognize modern PostgREST JWT claims");
   assert.match(migration, /(?:^|\n)begin;/);
   assert.match(migration, /insert into public\.mta_detainee_activity_notes/);
   assert.match(migration, /insert into public\.mta_detainee_health_records/);
