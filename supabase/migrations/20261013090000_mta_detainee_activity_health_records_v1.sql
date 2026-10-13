@@ -43,8 +43,8 @@ create index if not exists mta_health_records_detainee_examined_idx
 
 alter table public.mta_detainee_activity_notes enable row level security;
 alter table public.mta_detainee_health_records enable row level security;
-revoke all on public.mta_detainee_activity_notes from anon, authenticated;
-revoke all on public.mta_detainee_health_records from anon, authenticated;
+revoke all on public.mta_detainee_activity_notes from public, anon, authenticated;
+revoke all on public.mta_detainee_health_records from public, anon, authenticated;
 grant select, insert on public.mta_detainee_activity_notes to service_role;
 grant select, insert on public.mta_detainee_health_records to service_role;
 
