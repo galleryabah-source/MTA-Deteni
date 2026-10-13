@@ -76,6 +76,17 @@ begin
     raise exception 'DNOTE_TEST_IDEMPOTENCY_RESPONSE_MISSING';
   end if;
 
+  -- An unauthorized actor must not retrieve an existing idempotent response.
+  begin
+    perform public.mta_create_detainee_note_transaction(
+      v_key,v_hash,'HEALTH',v_detainee,null,'Synthetic integration finding','OBSERVATION',
+      'Synthetic action','Synthetic follow-up',now(),v_viewer,'req-notes-replay-deny','corr-notes-replay-deny');
+    raise exception 'DNOTE_TEST_UNAUTHORIZED_REPLAY_NOT_REJECTED';
+  exception when others then
+    get stacked diagnostics v_error = message_text;
+    if v_error not like '%DNOTE_HEALTHCARE_ROLE_REQUIRED%' then raise; end if;
+  end;
+
   v_replay := public.mta_create_detainee_note_transaction(
     v_key,v_hash,'HEALTH',v_detainee,null,'Synthetic integration finding','OBSERVATION',
     'Synthetic action','Synthetic follow-up',now(),v_health,'req-notes-health-test','corr-notes-health-test');
