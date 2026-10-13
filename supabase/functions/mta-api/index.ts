@@ -175,11 +175,6 @@ Deno.serve(async(req)=>{
   // Operational writes are fail-closed. The release gate is server-side and
   // cannot be bypassed by changing browser state or calling the Edge Function directly.
   // Password/profile self-service remains available through /me so operators can recover credentials.
-  if(WRITE_METHODS.has(req.method) && resource!=="me" && resource!=="detainee-notes" && !productionWritesEnabled()) {
-    emit("WARN","mutation.locked",{status:423,outcome:"DENIED",errorCode:"PRODUCTION_WRITE_LOCKED"});
-    return json(req,{ok:false,error:"PRODUCTION_WRITE_LOCKED",role},423,{requestId,correlationId});
-  }
-
   if(resource==="detainee-notes"){
     if(!["GET","POST"].includes(req.method)) return json(req,{ok:false,error:"DETAINEE_NOTES_METHOD_NOT_ALLOWED"},405);
     const adminKey=Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
@@ -243,6 +238,11 @@ Deno.serve(async(req)=>{
     }
   }
 
+
+  if(WRITE_METHODS.has(req.method) && resource!=="me" && !productionWritesEnabled()) {
+    emit("WARN","mutation.locked",{status:423,outcome:"DENIED",errorCode:"PRODUCTION_WRITE_LOCKED"});
+    return json(req,{ok:false,error:"PRODUCTION_WRITE_LOCKED",role},423,{requestId,correlationId});
+  }
   if(resource==="admin-users"){
     if(!new Set(["OWNER","ADMIN"]).has(role)) return json(req,{ok:false,error:"RBAC_USER_ADMIN_DENIED"},403);
     const adminKey=Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
