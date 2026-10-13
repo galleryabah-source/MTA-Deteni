@@ -235,7 +235,29 @@ begin
      or has_function_privilege('authenticated','public.mta_create_detainee_note_transaction(text,text,text,uuid,text,text,text,text,text,timestamptz,uuid,text,text)','EXECUTE') then
     raise exception 'DNOTE_TEST_CLIENT_RPC_GRANT_PRESENT';
   end if;
-end $$;
+
+  -- The audit-chain trigger must be SECURITY DEFINER and retain an owner path
+  -- to the epoch table after client/service_role grants are revoked.
+  if not exists (
+    select 1
+    from pg_trigger t
+    join pg_class c on c.oid=t.tgrelid
+    join pg_proc p on p.oid=t.tgfoid
+    where not t.tgisinternal
+      and t.tgname='mta_audit_before_insert_hash'
+      and c.oid='public.mta_audit_events'::regclass
+      and p.oid='private.mta_audit_before_insert()'::regprocedure
+      and p.prosecdef
+      and has_table_privilege(pg_get_userbyid(p.proowner),'public.mta_audit_chain_epochs','SELECT')
+  ) then
+    raise exception 'DNOTE_TEST_AUDIT_TRIGGER_OWNER_PATH_INVALID';
+  end if;
+  if has_table_privilege('service_role','public.mta_audit_chain_epochs','SELECT')
+     or has_table_privilege('anon','public.mta_audit_chain_epochs','SELECT')
+     or has_table_privilege('authenticated','public.mta_audit_chain_epochs','SELECT') then
+    raise exception 'DNOTE_TEST_AUDIT_EPOCH_DIRECT_ACCESS_PRESENT';
+  end if;
+end $;
 
 rollback;
 
