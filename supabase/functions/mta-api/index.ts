@@ -2,7 +2,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { createObservabilityEvent, sanitizeObservabilityError, serializeObservabilityEvent } from "./observability.ts";
 
 const allowedOrigin=(origin)=>origin&&(/^https:\/\/(?:[a-z0-9-]+-)?mta-deteni\.galleryabah\.workers\.dev$/i.test(origin)||origin==="https://mta-deteni.galleryabah.workers.dev")?origin:"null";
-const cors=(req)=>({"Access-Control-Allow-Origin":allowedOrigin(req.headers.get("Origin")),"Access-Control-Allow-Headers":"authorization, x-client-info, apikey, content-type, x-request-id, x-correlation-id, idempotency-key","Access-Control-Allow-Methods":"GET,POST,PATCH,DELETE,OPTIONS","Access-Control-Expose-Headers":"X-Request-Id, X-Correlation-Id","Vary":"Origin","Content-Type":"application/json","X-Content-Type-Options":"nosniff"});
+const cors=(req)=>({"Access-Control-Allow-Origin":allowedOrigin(req.headers.get("Origin")),"Access-Control-Allow-Headers":"authorization, x-client-info, apikey, content-type, x-request-id, x-correlation-id, idempotency-key","Access-Control-Allow-Methods":"GET,POST,PATCH,DELETE,OPTIONS","Access-Control-Expose-Headers":"X-Request-Id, X-Correlation-Id","Vary":"Origin","Content-Type":"application/json","Cache-Control":"no-store, private","X-Content-Type-Options":"nosniff"});
 const TABLES=new Set(["detainees","placements","movements","leaves","documents","blocks","rooms","audit","audit-event"]);
 const WRITE_ROLES=new Set(["OWNER","ADMIN","EDITOR"]);
 const requestStarts=new WeakMap();
@@ -180,7 +180,6 @@ Deno.serve(async(req)=>{
     const adminKey=Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
     if(!adminKey) return json(req,{ok:false,error:"SERVER_CONFIGURATION_ERROR"},503);
     const admin=createClient(Deno.env.get("SUPABASE_URL")!,adminKey,{auth:{autoRefreshToken:false,persistSession:false}});
-    const isHealthcare=role==="HEALTHCARE";
     const requestIdNote=req.headers.get("X-Request-Id")||crypto.randomUUID();
     const correlationIdNote=req.headers.get("X-Correlation-Id")||requestIdNote;
     try{
