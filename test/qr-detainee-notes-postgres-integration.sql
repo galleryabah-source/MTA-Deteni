@@ -76,6 +76,42 @@ begin
     raise exception 'DNOTE_TEST_IDEMPOTENCY_RESPONSE_MISSING';
   end if;
 
+  -- Read-back from the canonical health table must return the committed record.
+  select count(*) into v_count
+  from public.mta_detainee_health_records
+  where detainee_id=v_detainee and actor_user_id=v_health
+    and findings='Synthetic integration finding';
+  if v_count<>1 then raise exception 'DNOTE_TEST_HEALTH_READBACK_MISSING'; end if;
+
+  -- OWNER bypasses scope membership but remains attributable in audit/outbox.
+  v_key := 'notes-owner-'||txid_current();
+  v_result := public.mta_create_detainee_note_transaction(
+    v_key,repeat('1',64),'ACTIVITY',v_other_detainee,'ACTIVITY','Synthetic OWNER note',
+    null,'','',now(),v_owner,'req-notes-owner-test','corr-notes-owner-test');
+  if coalesce((v_result->>'ok')::boolean,false) is not true then
+    raise exception 'DNOTE_TEST_OWNER_WRITE_FAILED';
+  end if;
+  if not exists(select 1 from public.mta_detainee_activity_notes
+    where id=(v_result#>>'{row,id}')::uuid and actor_user_id=v_owner
+      and detainee_id=v_other_detainee) then
+    raise exception 'DNOTE_TEST_OWNER_SCOPE_BYPASS_OR_READBACK_FAILED';
+  end if;
+
+  -- ADMIN also bypasses scope membership for a health record.
+  v_key := 'notes-admin-'||txid_current();
+  v_result := public.mta_create_detainee_note_transaction(
+    v_key,repeat('2',64),'HEALTH',v_other_detainee,null,'Synthetic ADMIN finding',
+    'OBSERVATION','Synthetic action','Synthetic follow-up',now(),v_admin,
+    'req-notes-admin-test','corr-notes-admin-test');
+  if coalesce((v_result->>'ok')::boolean,false) is not true then
+    raise exception 'DNOTE_TEST_ADMIN_WRITE_FAILED';
+  end if;
+  if not exists(select 1 from public.mta_detainee_health_records
+    where id=(v_result#>>'{row,id}')::uuid and actor_user_id=v_admin
+      and detainee_id=v_other_detainee) then
+    raise exception 'DNOTE_TEST_ADMIN_SCOPE_BYPASS_OR_READBACK_FAILED';
+  end if;
+
   -- An unauthorized actor must not retrieve an existing idempotent response.
   begin
     perform public.mta_create_detainee_note_transaction(
