@@ -235,7 +235,7 @@ Deno.serve(async(req)=>{
         const hit=map.find(([needle])=>message.includes(needle));
         return json(req,{ok:false,error:hit?.[1]||"DETAINEE_NOTE_COMMIT_FAILED"},hit?.[2]||500,{requestId:requestIdNote,correlationId:correlationIdNote});
       }
-      return json(req,{ok:true,resource,kind,data,replayed:!!data?.replayed,requestId:requestIdNote,correlationId:correlationIdNote},data?.replayed?200:201,{requestId:requestIdNote,correlationId:correlationIdNote});
+      return json(req,{ok:true,resource,kind,data,replayed:!!data?.replayed},data?.replayed?200:201,{requestId:requestIdNote,correlationId:correlationIdNote});
     }catch(error){
       emit("ERROR","detainee.notes.failed",{status:500,outcome:"FAILED",errorCode:"DETAINEE_NOTES_FAILED"});
       return json(req,{ok:false,error:"DETAINEE_NOTES_FAILED"},500,{requestId:requestIdNote,correlationId:correlationIdNote});
