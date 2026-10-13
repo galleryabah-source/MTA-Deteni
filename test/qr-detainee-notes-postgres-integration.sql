@@ -92,9 +92,13 @@ begin
   if v_audit_epoch is null or v_audit_sequence <= v_sequence_before then
     raise exception 'DNOTE_TEST_AUDIT_CHAIN_SEQUENCE_NOT_ADVANCED';
   end if;
-  if v_event_hash !~ '^[0-9a-f]{64} where aggregate_id=v_result#>>'{row,id}' and idempotency_key=v_key) then
+  if v_event_hash !~ '^[0-9a-f]{64}$' or v_previous_hash !~ '^[0-9a-f]{64}$' or v_hash_version <> 'AUDIT-HASH-v1' then
+    raise exception 'DNOTE_TEST_AUDIT_CHAIN_HASH_INVALID';
+  end if;
+  if not exists(select 1 from mta_internal.outbox_events where aggregate_id=v_result#>>'{row,id}' and idempotency_key=v_key) then
     raise exception 'DNOTE_TEST_OUTBOX_ROW_MISSING';
   end if;
+
   if not exists(select 1 from mta_internal.idempotency_keys where idempotency_key=v_key and request_hash=v_hash and response<>'{}'::jsonb) then
     raise exception 'DNOTE_TEST_IDEMPOTENCY_RESPONSE_MISSING';
   end if;
