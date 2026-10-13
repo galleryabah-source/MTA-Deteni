@@ -94,10 +94,26 @@ function resolve(raw){
 function action(kind,id){
  const d=get(), x=(kind==='detainee'?d.detainees:kind==='room'?d.rooms:d.leaves||[]).find(z=>z.id===id);
  if(!x){toast('Resource tidak ditemukan.');return}
- if(kind==='detainee'){window.show('detainee');setTimeout(()=>{const q=document.querySelector('#dSearch');if(q){q.value=x.code||id;window.filterDetainee?.()}},50)}
- else if(kind==='room'){window.show('room-ops')}
- else {window.show('leave')}
  audit('QR_ACTION_OPEN',kind.toUpperCase(),id);
+ if(kind!=='detainee'){if(kind==='room')window.show('room-ops');else window.show('leave');return}
+ const box=document.getElementById('mtaUnifiedScanResult');
+ if(box){
+   const notes=(d.detaineeNotes||[]).filter(n=>n.detaineeId===id).slice().sort((a,b)=>String(b.createdAt).localeCompare(String(a.createdAt)));
+   const escHtml=esc;
+   box.style.display='block';
+   box.innerHTML='<h2>Operational Action · '+escHtml(x.code||id)+'</h2><div class="notice"><b>'+escHtml(x.name||'Deteni')+'</b><br>Status: '+escHtml(x.status||'—')+'<br>Penempatan: '+escHtml(x.placement||'Belum tercatat')+'</div>'+
+    '<form id="mtaDetaineeNoteForm" class="card" style="margin-top:12px"><h3>Catatan Kegiatan & Kondisi Deteni</h3><label for="mtaNoteType">Jenis catatan</label><select id="mtaNoteType" required style="width:100%;padding:10px;border:1px solid var(--line);border-radius:9px"><option value="ACTIVITY">Kegiatan / hasil action</option><option value="CONDITION">Kondisi umum / observasi petugas</option><option value="INCIDENT">Kejadian khusus</option></select><label for="mtaNoteContent">Keterangan dan catatan</label><textarea id="mtaNoteContent" required maxlength="4000" rows="4" placeholder="Catat fakta yang diamati, waktu/konteks, tindakan petugas, dan tindak lanjut..." style="width:100%;padding:10px;border:1px solid var(--line);border-radius:9px;box-sizing:border-box"></textarea><button class="btn primary" type="submit">Simpan Catatan</button></form>'+
+    '<form id="mtaHealthNoteForm" class="card" style="margin-top:12px"><h3>Perawatan & Kesehatan</h3><div class="notice">Bagian ini untuk petugas/seksi Perawatan dan Kesehatan yang berwenang. Masukkan hanya data pemeriksaan yang diperlukan. Preview saat ini menyimpan data synthetic di browser, bukan rekam medis production.</div><label for="mtaHealthType">Jenis pemeriksaan</label><select id="mtaHealthType" style="width:100%;padding:10px;border:1px solid var(--line);border-radius:9px"><option value="OBSERVATION">Observasi kesehatan</option><option value="EXAMINATION">Pemeriksaan kesehatan</option><option value="FOLLOW_UP">Tindak lanjut / kontrol</option><option value="REFERRAL">Rujukan</option></select><label for="mtaHealthSummary">Keluhan / kondisi dan temuan pemeriksaan</label><textarea id="mtaHealthSummary" maxlength="4000" rows="3" placeholder="Ringkasan faktual pemeriksaan..." style="width:100%;padding:10px;border:1px solid var(--line);border-radius:9px;box-sizing:border-box"></textarea><label for="mtaHealthAction">Tindakan, rekomendasi, dan jadwal kontrol</label><textarea id="mtaHealthAction" maxlength="3000" rows="2" placeholder="Tindakan yang dilakukan dan tindak lanjut..." style="width:100%;padding:10px;border:1px solid var(--line);border-radius:9px;box-sizing:border-box"></textarea><label for="mtaHealthOfficer">Petugas pemeriksa (identitas akun, bukan nama bebas)</label><input id="mtaHealthOfficer" maxlength="120" placeholder="ID petugas terautentikasi" style="width:100%;padding:10px;border:1px solid var(--line);border-radius:9px;box-sizing:border-box"><button class="btn primary" type="submit">Simpan Catatan Kesehatan</button></form>'+
+    '<section class="card" style="margin-top:12px"><h3>Riwayat Catatan</h3>'+(notes.map(n=>'<article class="event"><b>'+escHtml(n.noteType==='HEALTH'?'KESEHATAN':n.noteType)+'</b><small>'+escHtml(n.createdAt)+' · '+escHtml(n.authorId||'operator synthetic')+'</small><p>'+escHtml(n.content)+'</p>'+(n.examType?'<small>Pemeriksaan: '+escHtml(n.examType)+' · Tindakan: '+escHtml(n.action||'—')+'</small>':'')+'</article>').join('')||'<div class="empty">Belum ada catatan.</div>')+'</section>';
+   const noteForm=document.getElementById('mtaDetaineeNoteForm');
+   noteForm.onsubmit=e=>{e.preventDefault();const content=document.getElementById('mtaNoteContent').value.trim();if(!content)return;appendDetaineeNote({detaineeId:id,noteType:document.getElementById('mtaNoteType').value,content,authorId:'SYNTHETIC-OPERATOR'});action(kind,id);toast('Catatan kegiatan tersimpan di preview synthetic.')};
+   document.getElementById('mtaHealthNoteForm').onsubmit=e=>{e.preventDefault();const summary=document.getElementById('mtaHealthSummary').value.trim(),officer=document.getElementById('mtaHealthOfficer').value.trim(),act=document.getElementById('mtaHealthAction').value.trim();if(!summary||!officer){toast('Isi temuan pemeriksaan dan ID petugas.');return}appendDetaineeNote({detaineeId:id,noteType:'HEALTH',content:summary,examType:document.getElementById('mtaHealthType').value,action:act,authorId:officer,restricted:true});action(kind,id);toast('Catatan kesehatan tersimpan di preview synthetic.')};
+ }
+}
+function appendDetaineeNote(note){
+ const d=get();d.detaineeNotes=Array.isArray(d.detaineeNotes)?d.detaineeNotes:[];
+ const record={id:uid('DNOTE'),...note,occurredAt:new Date().toISOString(),createdAt:new Date().toISOString(),requestId:uid('REQ'),correlationId:uid('COR'),source:'QR_OPERATIONAL_ACTION',appendOnly:true};
+ d.detaineeNotes.unshift(record);d.audit=d.audit||[];d.audit.unshift({id:uid('AUD'),action:note.noteType==='HEALTH'?'DETAINEE_HEALTH_NOTE_CREATE':'DETAINEE_NOTE_CREATE',resourceType:'DETAINEE_NOTE',resourceId:record.id,result:'SUCCESS',occurredAt:record.createdAt,actor:record.authorId,requestId:record.requestId,correlationId:record.correlationId,policyVersion:'AUTHZ-1.0'});put(d);
 }
 function installCustomViews(){
  const old=window.show;
