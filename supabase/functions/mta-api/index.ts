@@ -191,7 +191,7 @@ Deno.serve(async(req)=>{
       if(req.method==="POST"&&!new Set(["OWNER","ADMIN","EDITOR","HEALTHCARE"]).has(role)) return json(req,{ok:false,error:"RBAC_DETAINEE_NOTE_WRITE_DENIED",role},403);
       const kind=req.method==="POST"?String(body.note_kind||"ACTIVITY").toUpperCase():String(url.searchParams.get("kind")||"ACTIVITY").toUpperCase();
       if(!["ACTIVITY","HEALTH"].includes(kind)) return json(req,{ok:false,error:"DETAINEE_NOTE_KIND_INVALID"},400);
-      if(kind==="HEALTH"&&!new Set(["OWNER","ADMIN","HEALTHCARE"]).has(role)) return json(req,{ok:false,error:"RBAC_HEALTH_RECORD_ACCESS_DENIED",role},403);
+      if(kind==="HEALTH"&&!new Set(["OWNER","ADMIN","EDITOR","HEALTHCARE"]).has(role)) return json(req,{ok:false,error:"RBAC_HEALTH_RECORD_ACCESS_DENIED",role},403);
       if(kind==="ACTIVITY"&&!new Set(["OWNER","ADMIN","EDITOR","HEALTHCARE","REVIEWER","AUDITOR"]).has(role)) return json(req,{ok:false,error:"RBAC_ACTIVITY_NOTE_ACCESS_DENIED",role},403);
       const target=await admin.from("mta_detainees").select("id,scope_id,status").eq("id",targetId).maybeSingle();
       if(target.error||!target.data) return json(req,{ok:false,error:"DETAINEE_NOT_FOUND"},404);
