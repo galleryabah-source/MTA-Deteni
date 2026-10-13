@@ -80,7 +80,7 @@ declare
   v_now timestamptz := now();
   v_response jsonb;
 begin
-  if current_user <> 'service_role' and coalesce(current_setting('request.jwt.claim.role', true), '') <> 'service_role' then
+  if current_user <> 'service_role' and coalesce(nullif(current_setting('request.jwt.claims', true), '')::jsonb ->> 'role', nullif(current_setting('request.jwt.claim.role', true), ''), '') <> 'service_role' then
     raise exception 'DNOTE_SERVICE_ROLE_REQUIRED';
   end if;
   if p_note_kind is null or p_note_kind not in ('ACTIVITY','HEALTH') then raise exception 'DNOTE_NOTE_KIND_INVALID'; end if;
