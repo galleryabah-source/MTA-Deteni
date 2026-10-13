@@ -9,6 +9,7 @@ on:
       - "scripts/p9.6-*"
       - "p9.6/**"
       - "test/p9.6-*"
+      - "test/qr-detainee-notes-postgres-integration.sql"
       - "src/application/database-adapter-contract.ts"
       - "src/infrastructure/database/p9.6-database-adapter.ts"
 
