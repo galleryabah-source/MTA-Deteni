@@ -229,6 +229,16 @@ begin
   if not (select relrowsecurity from pg_class where oid='public.mta_detainee_activity_notes'::regclass) then raise exception 'DNOTE_TEST_ACTIVITY_RLS_DISABLED'; end if;
   if not (select relrowsecurity from pg_class where oid='public.mta_audit_chain_epochs'::regclass) then raise exception 'DNOTE_TEST_AUDIT_EPOCH_RLS_DISABLED'; end if;
   if (select relforcerowsecurity from pg_class where oid='public.mta_audit_chain_epochs'::regclass) then raise exception 'DNOTE_TEST_AUDIT_EPOCH_FORCE_RLS_UNEXPECTED'; end if;
+  if exists (
+    select 1
+    from pg_class c
+    cross join lateral aclexplode(coalesce(c.relacl,acldefault('r',c.relowner))) acl
+    where c.oid in ('public.mta_detainee_health_records'::regclass,'public.mta_detainee_activity_notes'::regclass)
+      and acl.grantee=0
+      and acl.privilege_type in ('SELECT','INSERT','UPDATE','DELETE','TRUNCATE','REFERENCES','TRIGGER')
+  ) then
+    raise exception 'DNOTE_TEST_PUBLIC_TABLE_PRIVILEGE_PRESENT';
+  end if;
   if has_table_privilege('anon','public.mta_detainee_health_records','SELECT')
      or has_table_privilege('authenticated','public.mta_detainee_health_records','SELECT')
      or has_table_privilege('anon','public.mta_detainee_health_records','INSERT')
