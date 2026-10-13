@@ -218,7 +218,7 @@ Deno.serve(async(req)=>{
       if(kind==="HEALTH"&&!new Set(["OBSERVATION","EXAMINATION","FOLLOW_UP","REFERRAL"]).has(examType)) return json(req,{ok:false,error:"HEALTH_EXAM_TYPE_INVALID"},400);
       const examinedAt=body.occurred_at||body.examined_at||new Date().toISOString();
       if(!Number.isFinite(Date.parse(String(examinedAt)))) return json(req,{ok:false,error:"NOTE_TIMESTAMP_INVALID"},400);
-      const payload={kind,targetId,noteType,content,examType,actionTaken,followUp,examinedAt,actor:user.id,requestId:requestIdNote,correlationId:correlationIdNote};
+      const payload={kind,targetId,noteType,content,examType,actionTaken,followUp,examinedAt,actor:user.id};
       const requestHash=await sha256Hex(stableJson(payload));
       const {data,error}=await admin.rpc("mta_create_detainee_note_transaction",{
         p_idempotency_key:idempotencyKey,p_request_hash:requestHash,p_note_kind:kind,p_detainee_id:targetId,
