@@ -88,6 +88,18 @@ begin
   if p_actor_user_id is null or p_detainee_id is null or p_request_id is null or p_correlation_id is null then raise exception 'DNOTE_CONTEXT_REQUIRED'; end if;
   if p_note_kind is null or p_note_kind not in ('ACTIVITY','HEALTH') then raise exception 'DNOTE_KIND_INVALID'; end if;
 
+  select * into v_profile from public.mta_profiles where id=p_actor_user_id and active=true for update;
+  if not found then raise exception 'DNOTE_ACTOR_INACTIVE'; end if;
+  if p_note_kind='HEALTH' and v_profile.role not in ('OWNER','ADMIN','EDITOR','HEALTHCARE') then raise exception 'DNOTE_HEALTHCARE_ROLE_REQUIRED'; end if;
+  if p_note_kind='ACTIVITY' and v_profile.role not in ('OWNER','ADMIN','EDITOR','HEALTHCARE') then raise exception 'DNOTE_ACTIVITY_ROLE_REQUIRED'; end if;
+
+  select * into v_detainee from public.mta_detainees where id=p_detainee_id for update;
+  if not found then raise exception 'DNOTE_DETAINEE_NOT_FOUND'; end if;
+  if v_profile.role not in ('OWNER','ADMIN') and not exists (
+    select 1 from public.mta_profile_scopes ps where ps.profile_id=p_actor_user_id and ps.scope_id=v_detainee.scope_id and ps.active=true
+  ) then raise exception 'DNOTE_SCOPE_DENIED'; end if;
+  v_scope_id := v_detainee.scope_id;
+
   select * into v_existing from mta_internal.idempotency_keys where idempotency_key=p_idempotency_key for update;
   if found then
     if v_existing.request_hash <> lower(p_request_hash) then raise exception 'DNOTE_IDEMPOTENCY_CONFLICT'; end if;
@@ -100,18 +112,6 @@ begin
   select * into v_existing from mta_internal.idempotency_keys where idempotency_key=p_idempotency_key for update;
   if v_existing.request_hash <> lower(p_request_hash) then raise exception 'DNOTE_IDEMPOTENCY_CONFLICT'; end if;
   if v_existing.response <> '{}'::jsonb then return v_existing.response || jsonb_build_object('replayed',true); end if;
-
-  select * into v_profile from public.mta_profiles where id=p_actor_user_id and active=true for update;
-  if not found then raise exception 'DNOTE_ACTOR_INACTIVE'; end if;
-  if p_note_kind='HEALTH' and v_profile.role not in ('OWNER','ADMIN','EDITOR','HEALTHCARE') then raise exception 'DNOTE_HEALTHCARE_ROLE_REQUIRED'; end if;
-  if p_note_kind='ACTIVITY' and v_profile.role not in ('OWNER','ADMIN','EDITOR','HEALTHCARE') then raise exception 'DNOTE_ACTIVITY_ROLE_REQUIRED'; end if;
-
-  select * into v_detainee from public.mta_detainees where id=p_detainee_id for update;
-  if not found then raise exception 'DNOTE_DETAINEE_NOT_FOUND'; end if;
-  if v_profile.role not in ('OWNER','ADMIN') and not exists (
-    select 1 from public.mta_profile_scopes ps where ps.profile_id=p_actor_user_id and ps.scope_id=v_detainee.scope_id and ps.active=true
-  ) then raise exception 'DNOTE_SCOPE_DENIED'; end if;
-  v_scope_id := v_detainee.scope_id;
 
   if p_note_kind='ACTIVITY' then
     if p_note_type is null or p_note_type not in ('ACTIVITY','CONDITION','INCIDENT') or length(trim(coalesce(p_content,''))) not between 1 and 4000 then raise exception 'DNOTE_ACTIVITY_INPUT_INVALID'; end if;
