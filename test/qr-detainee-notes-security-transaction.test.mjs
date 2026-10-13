@@ -58,3 +58,9 @@ test("SQL transaction rejects NULL note kind and subtype values explicitly", asy
   assert.match(migration, /p_note_type is null or p_note_type not in \('ACTIVITY','CONDITION','INCIDENT'\)/);
   assert.match(migration, /p_exam_type is null or p_exam_type not in \('OBSERVATION','EXAMINATION','FOLLOW_UP','REFERRAL'\)/);
 });
+
+test("detainee-notes successful API response keeps request/correlation identifiers in headers, not JSON body", async () => {
+  const api = await read("supabase/functions/mta-api/index.ts");
+  assert.match(api, /return json\(req,\{ok:true,resource,kind,data,replayed:!!data\?\.replayed\},data\?\.replayed\?200:201,\{requestId:requestIdNote,correlationId:correlationIdNote\}\)/);
+  assert.doesNotMatch(api, /return json\(req,\{ok:true,resource,kind,data,replayed:!!data\?\.replayed,requestId:requestIdNote,correlationId:correlationIdNote\}/);
+});
