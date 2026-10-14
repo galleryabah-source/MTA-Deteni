@@ -33,10 +33,10 @@
     const r=await window.mtaAuth?.session?.();
     return r?.data?.session||null;
   };
-  async function request(resource,{method='GET',id,body,headers={},sessionOverride=null}={}){
+  async function request(resource,{method='GET',id,body,headers={},sessionOverride=null,query=''}={}){
     let s=sessionOverride||await session();
     if(!s?.access_token)throw new Error('PRODUCTION_AUTH_REQUIRED');
-    const path=API+'/'+encodeURIComponent(resource)+(id?'/'+encodeURIComponent(id):'');
+    const path=API+'/'+encodeURIComponent(resource)+(id?'/'+encodeURIComponent(id):'')+String(query||'');
     const init=()=>({method,headers:{Authorization:'Bearer '+s.access_token,Accept:'application/json',...(body!==undefined?{'Content-Type':'application/json'}:{}),...headers},body:body===undefined?undefined:JSON.stringify(body)});
     let res=await withTimeout(fetch(path,init()));
     if(res.status===401&&window.mtaAuth?.refreshSession){
@@ -203,6 +203,20 @@
     }
     throw new Error('DETAINEE_MUTATION_OPERATION_INVALID');
   }
+  async function getDetaineeNotes(detaineeId,kind='ACTIVITY'){
+    if(!isProduction())throw new Error('PRODUCTION_DATABASE_REQUIRED');
+    const id=String(detaineeId||'').trim(),noteKind=String(kind||'ACTIVITY').toUpperCase();
+    if(!id||!['ACTIVITY','HEALTH'].includes(noteKind))throw new Error('DETAINEE_NOTE_QUERY_INVALID');
+    return request('detainee-notes',{query:'?detaineeId='+encodeURIComponent(id)+'&kind='+encodeURIComponent(noteKind)});
+  }
+  async function createDetaineeNote({detaineeId,kind='ACTIVITY',noteType,content,examType,actionTaken='',followUp='',occurredAt,requestId,correlationId,idempotencyKey}={}){
+    if(!isProduction())throw new Error('PRODUCTION_DATABASE_REQUIRED');
+    const id=String(detaineeId||'').trim(),noteKind=String(kind||'ACTIVITY').toUpperCase(),text=String(content||'').trim();
+    const key=String(idempotencyKey||'').trim();
+    if(!id||!['ACTIVITY','HEALTH'].includes(noteKind)||!text||!key)throw new Error('DETAINEE_NOTE_INPUT_INVALID');
+    const reqId=String(requestId||crypto.randomUUID()),correlation=String(correlationId||crypto.randomUUID());
+    return request('detainee-notes',{method:'POST',body:{detainee_id:id,note_kind:noteKind,note_type:noteKind==='ACTIVITY'?noteType:undefined,content:noteKind==='ACTIVITY'?text:undefined,findings:noteKind==='HEALTH'?text:undefined,exam_type:noteKind==='HEALTH'?examType:undefined,action_taken:actionTaken,follow_up:followUp,occurred_at:occurredAt||new Date().toISOString()},headers:{'X-Request-Id':reqId,'X-Correlation-Id':correlation,'Idempotency-Key':key}});
+  }
   async function createBackup(){
     if(!isProduction())throw new Error('NOT_PRODUCTION');
     return request('backup',{method:'GET'});
@@ -217,5 +231,5 @@
     return {...response,state:refreshed,replayed:!!response.replayed};
   }
   async function refresh(){return hydrate()}
-  window.mtaProductionStateAdapter=Object.freeze({isProduction,isProductionPersistenceEnabled,hydrate,refresh,createBackup,restoreBackup,executeMovement,mutateResource,updateAdminConfig,writeAudit,mutateDetainee,get:()=>state(),apiBase:API,request});
+  window.mtaProductionStateAdapter=Object.freeze({isProduction,isProductionPersistenceEnabled,hydrate,refresh,createBackup,restoreBackup,executeMovement,mutateResource,updateAdminConfig,writeAudit,mutateDetainee,getDetaineeNotes,createDetaineeNote,get:()=>state(),apiBase:API,request});
 })();

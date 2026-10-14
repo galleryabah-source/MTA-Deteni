@@ -2,7 +2,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { createObservabilityEvent, sanitizeObservabilityError, serializeObservabilityEvent } from "./observability.ts";
 
 const allowedOrigin=(origin)=>origin&&(/^https:\/\/(?:[a-z0-9-]+-)?mta-deteni\.galleryabah\.workers\.dev$/i.test(origin)||origin==="https://mta-deteni.galleryabah.workers.dev")?origin:"null";
-const cors=(req)=>({"Access-Control-Allow-Origin":allowedOrigin(req.headers.get("Origin")),"Access-Control-Allow-Headers":"authorization, x-client-info, apikey, content-type, x-request-id, x-correlation-id, idempotency-key","Access-Control-Allow-Methods":"GET,POST,PATCH,DELETE,OPTIONS","Access-Control-Expose-Headers":"X-Request-Id, X-Correlation-Id","Vary":"Origin","Content-Type":"application/json","X-Content-Type-Options":"nosniff"});
+const cors=(req)=>({"Access-Control-Allow-Origin":allowedOrigin(req.headers.get("Origin")),"Access-Control-Allow-Headers":"authorization, x-client-info, apikey, content-type, x-request-id, x-correlation-id, idempotency-key","Access-Control-Allow-Methods":"GET,POST,PATCH,DELETE,OPTIONS","Access-Control-Expose-Headers":"X-Request-Id, X-Correlation-Id","Vary":"Origin","Content-Type":"application/json","Cache-Control":"no-store, private","X-Content-Type-Options":"nosniff"});
 const TABLES=new Set(["detainees","placements","movements","leaves","documents","blocks","rooms","audit","audit-event"]);
 const WRITE_ROLES=new Set(["OWNER","ADMIN","EDITOR"]);
 const requestStarts=new WeakMap();
@@ -175,11 +175,78 @@ Deno.serve(async(req)=>{
   // Operational writes are fail-closed. The release gate is server-side and
   // cannot be bypassed by changing browser state or calling the Edge Function directly.
   // Password/profile self-service remains available through /me so operators can recover credentials.
+  if(resource==="detainee-notes"){
+    if(!["GET","POST"].includes(req.method)) return json(req,{ok:false,error:"DETAINEE_NOTES_METHOD_NOT_ALLOWED"},405);
+    const adminKey=Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+    if(!adminKey) return json(req,{ok:false,error:"SERVER_CONFIGURATION_ERROR"},503);
+    const admin=createClient(Deno.env.get("SUPABASE_URL")!,adminKey,{auth:{autoRefreshToken:false,persistSession:false}});
+    const requestIdNote=req.headers.get("X-Request-Id")||crypto.randomUUID();
+    const correlationIdNote=req.headers.get("X-Correlation-Id")||requestIdNote;
+    try{
+      const detaineeId=String(url.searchParams.get("detaineeId")||"").trim();
+      const body=req.method==="POST"?(await req.json().catch(()=>null)||{}):{};
+      const targetId=String(body.detainee_id||detaineeId).trim();
+      if(!targetId) return json(req,{ok:false,error:"DETAINEE_ID_REQUIRED"},400);
+      if(req.method==="POST"&&!new Set(["OWNER","ADMIN","EDITOR","HEALTHCARE"]).has(role)) return json(req,{ok:false,error:"RBAC_DETAINEE_NOTE_WRITE_DENIED",role},403);
+      const kind=req.method==="POST"?String(body.note_kind||"ACTIVITY").toUpperCase():String(url.searchParams.get("kind")||"ACTIVITY").toUpperCase();
+      if(!["ACTIVITY","HEALTH"].includes(kind)) return json(req,{ok:false,error:"DETAINEE_NOTE_KIND_INVALID"},400);
+      if(kind==="HEALTH"&&!new Set(["OWNER","ADMIN","EDITOR","HEALTHCARE"]).has(role)) return json(req,{ok:false,error:"RBAC_HEALTH_RECORD_ACCESS_DENIED",role},403);
+      if(kind==="ACTIVITY"&&!new Set(["OWNER","ADMIN","EDITOR","HEALTHCARE","REVIEWER","AUDITOR"]).has(role)) return json(req,{ok:false,error:"RBAC_ACTIVITY_NOTE_ACCESS_DENIED",role},403);
+      const target=await admin.from("mta_detainees").select("id,scope_id,status").eq("id",targetId).maybeSingle();
+      if(target.error||!target.data) return json(req,{ok:false,error:"DETAINEE_NOT_FOUND"},404);
+      if(!new Set(["OWNER","ADMIN"]).has(role)){
+        const membership=await admin.from("mta_profile_scopes").select("scope_id").eq("profile_id",user.id).eq("scope_id",target.data.scope_id).eq("active",true).maybeSingle();
+        if(membership.error||!membership.data) return json(req,{ok:false,error:"DETAINEE_SCOPE_DENIED"},403);
+      }
+      if(req.method==="GET"){
+        const table=kind==="HEALTH"?"mta_detainee_health_records":"mta_detainee_activity_notes";
+        // Return only fields required by the history UI; do not expose internal scope,
+        // request/correlation identifiers, or duplicate creator metadata to browsers.
+        const columns=kind==="HEALTH"
+          ?"id,detainee_id,exam_type,findings,action_taken,follow_up,examined_at,examiner_user_id,created_at"
+          :"id,detainee_id,note_type,content,occurred_at,actor_user_id,created_at";
+        const {data,error}=await admin.from(table).select(columns).eq("detainee_id",targetId).order(kind==="HEALTH"?"examined_at":"created_at",{ascending:false}).limit(200);
+        if(error) return json(req,{ok:false,error:"DETAINEE_NOTES_READ_FAILED"},500);
+        return json(req,{ok:true,resource,kind,data:data||[],role});
+      }
+      if(!productionWritesEnabled()) return json(req,{ok:false,error:"DETAINEE_NOTES_WRITE_LOCKED"},423,{requestId:requestIdNote,correlationId:correlationIdNote});
+      const idempotencyKey=String(req.headers.get("Idempotency-Key")||"").trim();
+      if(idempotencyKey.length<8) return json(req,{ok:false,error:"IDEMPOTENCY_KEY_REQUIRED"},400,{requestId:requestIdNote,correlationId:correlationIdNote});
+      const noteType=String(body.note_type||"").toUpperCase();
+      const content=String(kind==="HEALTH"?(body.findings||""):(body.content||"")).trim();
+      const examType=String(body.exam_type||"").toUpperCase();
+      const actionTaken=String(body.action_taken||"").trim();
+      const followUp=String(body.follow_up||"").trim();
+      if(!content||content.length>4000||actionTaken.length>3000||followUp.length>2000) return json(req,{ok:false,error:"DETAINEE_NOTE_INPUT_INVALID"},400);
+      if(kind==="ACTIVITY"&&!new Set(["ACTIVITY","CONDITION","INCIDENT"]).has(noteType)) return json(req,{ok:false,error:"DETAINEE_NOTE_TYPE_INVALID"},400);
+      if(kind==="HEALTH"&&!new Set(["OBSERVATION","EXAMINATION","FOLLOW_UP","REFERRAL"]).has(examType)) return json(req,{ok:false,error:"HEALTH_EXAM_TYPE_INVALID"},400);
+      const examinedAt=body.occurred_at||body.examined_at||new Date().toISOString();
+      if(!Number.isFinite(Date.parse(String(examinedAt)))) return json(req,{ok:false,error:"NOTE_TIMESTAMP_INVALID"},400);
+      const payload={kind,targetId,noteType,content,examType,actionTaken,followUp,examinedAt,actor:user.id};
+      const requestHash=await sha256Hex(stableJson(payload));
+      const {data,error}=await admin.rpc("mta_create_detainee_note_transaction",{
+        p_idempotency_key:idempotencyKey,p_request_hash:requestHash,p_note_kind:kind,p_detainee_id:targetId,
+        p_note_type:noteType||null,p_content:content,p_exam_type:examType||null,p_action_taken:actionTaken,p_follow_up:followUp,
+        p_examined_at:String(examinedAt),p_actor_user_id:user.id,p_request_id:requestIdNote,p_correlation_id:correlationIdNote
+      });
+      if(error){
+        const message=String(error.message||"");
+        const map=[["DNOTE_IDEMPOTENCY_CONFLICT","IDEMPOTENCY_CONFLICT",409],["DNOTE_HEALTHCARE_ROLE_REQUIRED","RBAC_HEALTH_RECORD_ACCESS_DENIED",403],["DNOTE_ACTIVITY_ROLE_REQUIRED","RBAC_ACTIVITY_NOTE_WRITE_DENIED",403],["DNOTE_SCOPE_DENIED","DETAINEE_SCOPE_DENIED",403],["DNOTE_DETAINEE_NOT_FOUND","DETAINEE_NOT_FOUND",404],["DNOTE_IDEMPOTENCY_KEY_REQUIRED","IDEMPOTENCY_KEY_REQUIRED",400],["DNOTE_","DETAINEE_NOTE_REJECTED",400]];
+        const hit=map.find(([needle])=>message.includes(needle));
+        return json(req,{ok:false,error:hit?.[1]||"DETAINEE_NOTE_COMMIT_FAILED"},hit?.[2]||500,{requestId:requestIdNote,correlationId:correlationIdNote});
+      }
+      return json(req,{ok:true,resource,kind,data,replayed:!!data?.replayed},data?.replayed?200:201,{requestId:requestIdNote,correlationId:correlationIdNote});
+    }catch(error){
+      emit("ERROR","detainee.notes.failed",{status:500,outcome:"FAILED",errorCode:"DETAINEE_NOTES_FAILED"});
+      return json(req,{ok:false,error:"DETAINEE_NOTES_FAILED"},500,{requestId:requestIdNote,correlationId:correlationIdNote});
+    }
+  }
+
+
   if(WRITE_METHODS.has(req.method) && resource!=="me" && !productionWritesEnabled()) {
     emit("WARN","mutation.locked",{status:423,outcome:"DENIED",errorCode:"PRODUCTION_WRITE_LOCKED"});
     return json(req,{ok:false,error:"PRODUCTION_WRITE_LOCKED",role},423,{requestId,correlationId});
   }
-
   if(resource==="admin-users"){
     if(!new Set(["OWNER","ADMIN"]).has(role)) return json(req,{ok:false,error:"RBAC_USER_ADMIN_DENIED"},403);
     const adminKey=Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
@@ -207,7 +274,7 @@ Deno.serve(async(req)=>{
         const existingNip=await admin.from("mta_profiles").select("id").eq("nip",nip).maybeSingle();
         if(existingNip.data?.id) return json(req,{ok:false,error:"USER_NIP_ALREADY_EXISTS"},409);
         const email=`${nip}@auth.mta-deteni.internal`;
-        const allowedRoles=role==="OWNER"?new Set(["OWNER","ADMIN","EDITOR","REVIEWER","AUDITOR","VIEWER"]):new Set(["EDITOR","REVIEWER","AUDITOR","VIEWER"]);
+        const allowedRoles=role==="OWNER"?new Set(["OWNER","ADMIN","EDITOR","REVIEWER","AUDITOR","VIEWER","HEALTHCARE"]):new Set(["EDITOR","REVIEWER","AUDITOR","VIEWER"]);
         if(!allowedRoles.has(requestedRole)) return json(req,{ok:false,error:"USER_ROLE_NOT_ALLOWED"},403);
         const created=await admin.auth.admin.createUser({email,password,email_confirm:true,user_metadata:{full_name:displayName}});
         if(created.error||!created.data.user) return json(req,{ok:false,error:"ADMIN_USER_CREATE_FAILED"},400);
@@ -262,7 +329,7 @@ Deno.serve(async(req)=>{
         const targetRole=String(target.data.role||"VIEWER").toUpperCase();
         if(targetRole==="OWNER" && role!=="OWNER") return json(req,{ok:false,error:"OWNER_USER_MANAGEMENT_DENIED"},403);
         const nextRole=body.role===undefined?targetRole:String(body.role).toUpperCase();
-        const allowedRoles=role==="OWNER"?new Set(["OWNER","ADMIN","EDITOR","REVIEWER","AUDITOR","VIEWER"]):new Set(["EDITOR","REVIEWER","AUDITOR","VIEWER"]);
+        const allowedRoles=role==="OWNER"?new Set(["OWNER","ADMIN","EDITOR","REVIEWER","AUDITOR","VIEWER","HEALTHCARE"]):new Set(["EDITOR","REVIEWER","AUDITOR","VIEWER"]);
         if(!allowedRoles.has(targetRole)||!allowedRoles.has(nextRole)) return json(req,{ok:false,error:"USER_ROLE_NOT_ALLOWED"},403);
         if(role==="ADMIN"&&targetRole==="ADMIN") return json(req,{ok:false,error:"ADMIN_CANNOT_MANAGE_ADMIN"},403);
         if(id===user.id&&nextRole!==targetRole) return json(req,{ok:false,error:"SELF_ROLE_CHANGE_FORBIDDEN"},409);

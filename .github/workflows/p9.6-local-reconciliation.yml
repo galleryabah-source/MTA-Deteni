@@ -9,6 +9,7 @@ on:
       - "scripts/p9.6-*"
       - "p9.6/**"
       - "test/p9.6-*"
+      - "test/qr-detainee-notes-postgres-integration.sql"
       - "src/application/database-adapter-contract.ts"
       - "src/infrastructure/database/p9.6-database-adapter.ts"
 
@@ -67,6 +68,8 @@ jobs:
             psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f "$f"
           done
           echo LOCAL_REPLAY_SUCCESS > artifacts/p9.6/local-replay-success.txt
+      - name: Run detainee note transaction and RLS integration gate (disposable PostgreSQL only)
+        run: psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f test/qr-detainee-notes-postgres-integration.sql
       - name: Run controlled non-production scope provisioning rehearsal
         run: |
           psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f p9.6/controlled-scope-provisioning.sql
