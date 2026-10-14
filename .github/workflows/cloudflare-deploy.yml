@@ -26,6 +26,14 @@ jobs:
       - name: Install Wrangler
         run: npm install --global wrangler@4.132.0
 
+      - name: Install project dependencies
+        run: npm install --no-audit --no-fund
+
+      - name: Run project tests and typecheck before credentials/deploy
+        run: |
+          npm test
+          npm run typecheck
+
       - name: Verify deployment artifact contract before credentials/deploy
         run: |
           test -f wrangler.toml
@@ -48,6 +56,11 @@ jobs:
           test -f web/master-room-guard-v10.js
           test -f web/preview-v10.js
           test -f web/qr-print-clean-v3.js
+          test -f web/mta-unified-shell-v2.js
+          test -f web/mta-production-state-adapter-v1.js
+          test -f web/mta-app-runtime-full.js
+          test -f web/mta-state-kernel-v1.js
+          test -f web/mta-domain-commands-v2.js
           echo "MTA DETENI Cloudflare artifact contract: PASS"
 
       - name: Verify production target is main
@@ -108,7 +121,7 @@ jobs:
             if curl --fail --silent --show-error --max-time 10 "$DEPLOY_URL/api/health" > health.json; then
               node -e "const fs=require('fs'); const x=JSON.parse(fs.readFileSync('health.json','utf8')); if(x.ok!==true || x.app!=='MTA DETENI' || x.deploymentSource!=='GITHUB_MAIN' || x.deploymentCommit!==process.env.GITHUB_SHA) { console.error(JSON.stringify(x,null,2)); process.exit(1); } console.log('Cloudflare runtime provenance PASS:',x.app,x.runtime,x.deploymentSource,x.deploymentCommit);"
               curl --fail --silent --show-error --max-time 10 "$DEPLOY_URL/api/runtime" > runtime.json
-              node -e "const fs=require('fs'); const x=JSON.parse(fs.readFileSync('runtime.json','utf8')); if(x.mode!=='PRODUCTION_RUNTIME' || x.source!=='PRODUCTION_DB' || x.syntheticOnly!==false || x.deploymentSource!=='GITHUB_MAIN' || x.deploymentCommit!==process.env.GITHUB_SHA) { console.error(JSON.stringify(x,null,2)); process.exit(1); } console.log('Cloudflare runtime identity PASS:',x.mode,x.source,x.deploymentCommit);"
+              node -e "const fs=require('fs'); const x=JSON.parse(fs.readFileSync('runtime.json','utf8')); if(x.mode!=='PRODUCTION_RUNTIME' || x.source!=='PRODUCTION_DB' || x.syntheticOnly!==false || x.database!=='NOT_PROBED' || x.deploymentSource!=='GITHUB_MAIN' || x.deploymentCommit!==process.env.GITHUB_SHA) { console.error(JSON.stringify(x,null,2)); process.exit(1); } console.log('Cloudflare runtime identity PASS:',x.mode,x.source,x.deploymentCommit); console.log('Database readiness is intentionally NOT inferred from the runtime metadata endpoint.');"
               exit 0
             fi
             sleep 5
