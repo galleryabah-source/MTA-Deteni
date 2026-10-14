@@ -8,7 +8,8 @@
     const adapter=window.mtaProductionStateAdapter;
     const runtime=window.__mtaRuntimeStatus||{};
     if(production){
-      return Object.freeze({version:VERSION,mode:'PRODUCTION',source:'PRODUCTION_DB',database:runtime.database==='CONNECTED'?'CONNECTED':'DISCONNECTED',syntheticOnly:false});
+      const database=['CONNECTED','DISCONNECTED','NOT_PROBED'].includes(runtime.database)?runtime.database:'NOT_PROBED';
+      return Object.freeze({version:VERSION,mode:'PRODUCTION',source:'PRODUCTION_DB',database,syntheticOnly:false});
     }
     return Object.freeze({version:VERSION,mode:'SYNTHETIC',source:'SYNTHETIC_RUNTIME',database:'DISCONNECTED',syntheticOnly:true});
   }
@@ -27,13 +28,13 @@
     if(p.mode==='PRODUCTION'){
       const replacements=[
         ['Runtime: SYNTHETIC','Runtime: PRODUCTION · PRODUCTION_DB'],
-        ['SYNTHETIC ONLY','PRODUCTION READ-ONLY'],
-        ['Synthetic runtime; bukan data operasional nyata.','Production DB runtime; data operasional read-only.'],
-        ['Provenance: synthetic-operational-runtime','Provenance: production-db-read-only'],
-        ['Generated from verified structured synthetic records. Restricted operational fields are excluded.','Generated from verified production database records. Restricted operational fields are excluded.'],
+        ['SYNTHETIC ONLY','PRODUCTION RUNTIME'],
+        ['Synthetic runtime; bukan data operasional nyata.','Sumber data runtime produksi; status koneksi diperiksa terpisah.'],
+        ['Provenance: synthetic-operational-runtime','Provenance: production-runtime'],
+        ['Generated from verified structured synthetic records. Restricted operational fields are excluded.','Data berasal dari runtime produksi; verifikasi sumber dan scope akses sebelum tindakan operasional.'],
         ['ADMIN ONLY · Role synthetic saat ini:','ADMIN ONLY · Role saat ini:'],
         ['Role synthetic:','Role:'],
-        ['Runtime tetap synthetic/local.','Runtime production terhubung ke database.']
+        ['Runtime tetap synthetic/local.',p.database==='CONNECTED'?'Runtime production terhubung ke database.':p.database==='DISCONNECTED'?'Runtime production; koneksi database gagal.':'Runtime production; status database belum diverifikasi.']
       ];
       const walker=document.createTreeWalker(document.body,NodeFilter.SHOW_TEXT);
       const nodes=[];while(walker.nextNode())nodes.push(walker.currentNode);
