@@ -14,11 +14,11 @@ assert.match(provenance,/production-db-read-only/);
 assert.match(runtime,/mode:production\?'PRODUCTION':'SYNTHETIC'/);
 assert.match(adapter,/window\.__mtaRuntimeStatus=\{mode:'PRODUCTION',database:'CONNECTED'/);
 assert.doesNotMatch(worker,/dataMode:'SYNTHETIC_ONLY'/);
-assert.doesNotMatch(worker,/livePostgresqlExecution:false/);
-assert.doesNotMatch(worker,/realDetaineeDataAllowed:false/);
-assert.match(worker,/dataMode:'PRODUCTION_DB'/);
-assert.match(worker,/livePostgresqlExecution:true/);
-assert.match(worker,/realDetaineeDataAllowed:true/);
+assert.match(worker,/dataMode:'PRODUCTION_DB', database:'NOT_PROBED'/);
+assert.match(worker,/productionDatabase:'NOT_PROBED', productionStorage:'NOT_PROBED'/);
+assert.doesNotMatch(worker,/livePostgresqlExecution:true|livePostgresqlExecution:false/);
+assert.doesNotMatch(worker,/realDetaineeDataAllowed:true|realDetaineeDataAllowed:false/);
+assert.doesNotMatch(worker,/productionAccessAuthorized:true/);
 
 const productionLoadedModules=[
   ['web/mta-unified-shell-v2.js','canonical operational shell'],
@@ -41,6 +41,6 @@ assert.doesNotMatch(fs.readFileSync('web/admin-settings-v9.js','utf8'),/Role syn
 assert.doesNotMatch(fs.readFileSync('web/daily-guard-report-v2.js','utf8'),/Generated from verified structured synthetic records/);
 
 console.log('PROVENANCE SYNTHETIC LABEL FORENSIC REGRESSION PASS');
-console.log('Production contract: PRODUCTION / PRODUCTION_DB / CONNECTED / syntheticOnly=false');
+console.log('Production contract: PRODUCTION / PRODUCTION_DB configured / database NOT_PROBED / syntheticOnly=false');
 console.log('Synthetic contract: SYNTHETIC / SYNTHETIC_RUNTIME / DISCONNECTED / syntheticOnly=true');
-console.log('Production worker no longer advertises synthetic-only or DB-disconnected health state');
+console.log('Worker metadata no longer claims DB connectivity or access authorization without an actual probe');
