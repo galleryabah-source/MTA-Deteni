@@ -61,6 +61,7 @@ jobs:
           test -f web/mta-app-runtime-full.js
           test -f web/mta-state-kernel-v1.js
           test -f web/mta-domain-commands-v2.js
+          test -f web/mta-provenance-v1.js
           echo "MTA DETENI Cloudflare artifact contract: PASS"
 
       - name: Verify production target is main
