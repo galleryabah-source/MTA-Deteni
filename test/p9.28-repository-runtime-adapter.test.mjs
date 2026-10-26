@@ -1,0 +1,3 @@
+import assert from "node:assert/strict"; import test from "node:test"; import {parameterizedQuery} from "../src/infrastructure/database/repository-runtime-adapter.ts";
+test("query values remain parameterized",()=>assert.deepEqual(parameterizedQuery("select * from t where id=$1",["D1"]),{text:"select * from t where id=$1",values:["D1"]}));
+test("empty SQL is rejected",()=>assert.throws(()=>parameterizedQuery("",[]),/EMPTY_QUERY/));
