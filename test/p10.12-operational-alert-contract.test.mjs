@@ -1,0 +1,3 @@
+import assert from"node:assert/strict";import test from"node:test";import{validateAlert}from"../src/domain/operations/operational-alert-contract.js";
+test("P10.12 accepts synthetic alert",()=>assert.deepEqual(validateAlert({alertId:"ALT-1",type:"RETURN_OVERDUE",resourceId:"LV-1",severity:"WARNING",status:"OPEN",createdAt:"2026-09-21T08:00:00Z"}),[]));
+test("P10.12 rejects malformed alert",()=>assert.deepEqual(validateAlert({alertId:"",type:"",resourceId:"",severity:"BAD",status:"BAD",createdAt:"bad"}),["INVALID_ALERT_ID","INVALID_ALERT_TYPE","INVALID_RESOURCE_ID","INVALID_SEVERITY","INVALID_STATUS","INVALID_CREATED_AT"]));
