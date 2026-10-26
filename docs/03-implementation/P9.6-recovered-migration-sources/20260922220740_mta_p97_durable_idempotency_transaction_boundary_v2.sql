@@ -1,0 +1,3 @@
+-- P9.7 v2 reconciliation marker.
+-- The executable transaction boundary is finalized in v3.
+-- Kept as a migration-history marker to mirror the production migration sequence.
