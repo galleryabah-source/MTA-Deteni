@@ -1,0 +1,5 @@
+import assert from "node:assert/strict"; import test from "node:test"; import {executeAtomicCriticalMutation} from "../src/infrastructure/database/atomic-audit-outbox-boundary.ts";
+const base={transaction:async(fn)=>fn(),auditAvailable:async()=>true,appendAudit:async()=>{},appendOutbox:async()=>{},mutate:async()=>{}};
+test("critical mutation is atomic across mutation audit outbox",async()=>{const calls=[]; const r=await executeAtomicCriticalMutation({...base,mutate:async()=>calls.push("mutation"),appendAudit:async()=>calls.push("audit"),appendOutbox:async()=>calls.push("outbox"),transaction:async fn=>{calls.push("transaction");return fn();}}); assert.equal(r,"EXECUTED"); assert.deepEqual(calls,["transaction","mutation","audit","outbox"]);});
+test("audit unavailable fails safe",async()=>assert.equal(await executeAtomicCriticalMutation({...base,auditAvailable:async()=>false}),"FAILED_SAFE"));
+test("outbox failure fails safe",async()=>assert.equal(await executeAtomicCriticalMutation({...base,appendOutbox:async()=>{throw new Error("OUTBOX");}}),"FAILED_SAFE"));
