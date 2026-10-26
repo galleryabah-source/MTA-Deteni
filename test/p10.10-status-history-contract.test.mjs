@@ -1,0 +1,3 @@
+import assert from"node:assert/strict";import test from"node:test";import{validateStatusHistory}from"../src/domain/status/status-history-contract.js";
+test("P10.10 accepts synthetic status history",()=>assert.deepEqual(validateStatusHistory({entryId:"SH-1",detaineeId:"SYN-1",toStatus:"ACTIVE",changedAt:"2026-09-21T08:00:00Z",sourceId:"EV-1",verified:false}),[]));
+test("P10.10 rejects malformed history",()=>assert.deepEqual(validateStatusHistory({entryId:"",detaineeId:"",fromStatus:"bad status",toStatus:"",changedAt:"bad",sourceId:"",verified:"x"}),["INVALID_ENTRY_ID","INVALID_DETAINEE_ID","INVALID_FROM_STATUS","INVALID_TO_STATUS","INVALID_CHANGED_AT","INVALID_SOURCE_ID","INVALID_VERIFICATION_STATE"]));
