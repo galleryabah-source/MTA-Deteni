@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#f5f7fb">
+  <title>MTA DETENI — UI Prototype</title>
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+  <div class="app-shell">
+    <header class="topbar">
+      <button class="icon-button" id="menuButton" aria-label="Buka navigasi" aria-expanded="true">☰</button>
+      <div class="brand"><span class="brand-mark">M</span><div><strong>MTA DETENI</strong><small>Manajemen Terpadu Administrasi Deteni</small></div></div>
+      <label class="search"><span>⌕</span><input id="searchInput" type="search" placeholder="Cari deteni, dokumen, atau proses…"></label>
+      <button class="icon-button" aria-label="Notifikasi">◌</button>
+      <button class="user-chip" aria-label="Profil pengguna">OP</button>
+    </header>
+
+    <aside class="sidebar" id="sidebar" aria-label="Navigasi utama">
+      <nav>
+        <a class="nav-item active" href="#dashboard">⌂ <span>Dashboard</span></a>
+        <a class="nav-item" href="#deteni">◉ <span>Deteni</span></a>
+        <a class="nav-item" href="#placement">▦ <span>Penempatan</span></a>
+        <a class="nav-item" href="#movement">↔ <span>Pergerakan</span></a>
+        <a class="nav-item" href="#leave">↗ <span>Izin Keluar</span></a>
+        <a class="nav-item" href="#escort">◎ <span>Pengawalan</span></a>
+        <a class="nav-item" href="#documents">▤ <span>Dokumen</span></a>
+        <a class="nav-item" href="#reports">▥ <span>Laporan</span></a>
+        <a class="nav-item" href="#audit">◫ <span>Audit</span></a>
+        <a class="nav-item" href="#settings">⚙ <span>Pengaturan</span></a>
+      </nav>
+      <div class="sidebar-footer">Foundation UI v1.0<br><span>Synthetic data only</span></div>
+    </aside>
+
+    <main class="main" id="dashboard">
+      <section class="page-heading">
+        <div><p class="eyebrow">OVERVIEW</p><h1>Dashboard Operasional</h1><p class="muted">Ringkasan aktivitas MTA DETENI. Data pada prototype bersifat sintetis.</p></div>
+        <div class="command-bar"><button class="button secondary" id="densityButton">Density: Comfortable</button><button class="button primary">+ Tindakan</button></div>
+      </section>
+
+      <section class="kpi-grid" aria-label="Indikator utama">
+        <article class="card kpi"><span>Total Deteni</span><strong>128</strong><small>+4 minggu ini</small></article>
+        <article class="card kpi"><span>Dalam Penempatan</span><strong>121</strong><small>94% terpetakan</small></article>
+        <article class="card kpi"><span>Pergerakan Hari Ini</span><strong>37</strong><small>31 selesai</small></article>
+        <article class="card kpi"><span>Izin Aktif</span><strong>6</strong><small>2 perlu perhatian</small></article>
+      </section>
+
+      <section class="workspace-grid">
+        <article class="card panel large">
+          <div class="panel-heading"><div><h2>Aktivitas Terbaru</h2><p class="muted">Timeline operasional sintetis</p></div><button class="button ghost">Lihat semua</button></div>
+          <div class="timeline">
+            <div class="timeline-item"><span class="dot success"></span><div><strong>Pergerakan selesai</strong><p>DET-000128 kembali ke blok A-02.</p><time>08:32</time></div></div>
+            <div class="timeline-item"><span class="dot accent"></span><div><strong>Izin keluar dibuat</strong><p>Draft izin menunggu pemeriksaan.</p><time>08:17</time></div></div>
+            <div class="timeline-item"><span class="dot warning"></span><div><strong>Pengawalan dijadwalkan</strong><p>Penugasan sintetis untuk 2 petugas.</p><time>07:54</time></div></div>
+          </div>
+        </article>
+
+        <article class="card panel">
+          <div class="panel-heading"><div><h2>Quick Actions</h2><p class="muted">Akses tugas umum</p></div></div>
+          <div class="quick-actions"><button>＋ Tambah deteni</button><button>↗ Proses izin keluar</button><button>◎ Buat penugasan</button><button>▤ Generate laporan</button></div>
+        </article>
+      </section>
+
+      <section class="card panel detainee-panel" id="deteni">
+        <div class="panel-heading"><div><h2>Deteni — Daftar Ringkas</h2><p class="muted">Tampilan berubah menjadi kartu pada layar kecil.</p></div><button class="button secondary">Filter</button></div>
+        <div class="table-wrap"><table><thead><tr><th>ID</th><th>Nama Sintetis</th><th>Blok</th><th>Status</th><th>Update</th></tr></thead><tbody>
+          <tr><td>DET-000128</td><td>Sample Person A</td><td>A-02</td><td><span class="status success">Aktif</span></td><td>08:32</td></tr>
+          <tr><td>DET-000127</td><td>Sample Person B</td><td>B-01</td><td><span class="status success">Aktif</span></td><td>08:11</td></tr>
+          <tr><td>DET-000126</td><td>Sample Person C</td><td>A-03</td><td><span class="status warning">Izin</span></td><td>07:54</td></tr>
+        </tbody></table></div>
+      </section>
+    </main>
+  </div>
+  <script src="./app.js" defer></script>
+</body>
+</html>
