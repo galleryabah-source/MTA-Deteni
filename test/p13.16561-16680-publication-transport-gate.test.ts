@@ -1,0 +1,7 @@
+import test from "node:test";
+import assert from "node:assert/strict";
+import { evaluatePublicationTransportGate, PUBLICATION_TRANSPORT_GATE_VERSION } from "../src/domain/reporting/publication-transport-gate";
+const admitted={publicationId:"PUB-001",projectionId:"PROJ-001",certificationId:"CERT-001",sourceFingerprint:"SRC-001",admissionFingerprint:"a".repeat(64),syntheticOnly:true as const,externalTransport:false as const,durablePublication:false as const};
+test("transport gate remains blocked after admission",()=>{const r=evaluatePublicationTransportGate(admitted);assert.equal(r.version,PUBLICATION_TRANSPORT_GATE_VERSION);assert.equal(r.decision,"BLOCKED");assert.equal(r.reasonCode,"TRANSPORT_NOT_AUTHORIZED");assert.equal(r.externalTransport,false);assert.equal(r.durablePublication,false);});
+test("invalid admission identity is blocked",()=>{const r=evaluatePublicationTransportGate({...admitted,syntheticOnly:false as never});assert.equal(r.decision,"BLOCKED");assert.equal(r.reasonCode,"ADMISSION_IDENTITY_INVALID");});
+test("transport fingerprint is deterministic",()=>{const a=evaluatePublicationTransportGate(admitted);const b=evaluatePublicationTransportGate(admitted);assert.equal(a.transportFingerprint,b.transportFingerprint);});
