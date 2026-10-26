@@ -1,0 +1,4 @@
+import assert from"node:assert/strict";import test from"node:test";import{authorizeDocument}from"../src/application/document/document-usecase-contract.js";
+test("P10.16 allows matching permission",()=>assert.equal(authorizeDocument({userId:"USR-1",permission:"document.issue",authenticated:true,scopeAllowed:true},"ISSUE"),"ALLOWED"));
+test("P10.16 denies issue without issue permission",()=>assert.equal(authorizeDocument({userId:"USR-1",permission:"document.generate",authenticated:true,scopeAllowed:true},"ISSUE"),"PERMISSION_DENIED"));
+test("P10.16 denies unauthenticated",()=>assert.equal(authorizeDocument({userId:"USR-1",permission:"document.view",authenticated:false,scopeAllowed:true},"VIEW"),"AUTH_REQUIRED"));
