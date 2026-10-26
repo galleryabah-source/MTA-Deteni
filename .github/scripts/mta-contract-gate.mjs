@@ -23,6 +23,7 @@ const pkg = JSON.parse(read("package.json") || "{}");
 const workflow = read(".github/workflows/mta-domain-ci.yml");
 const status = read("PROJECT_STATUS.md");
 const exitCriteria = read("P13_EXIT_CRITERIA.md");
+const unifiedShell = read("web/mta-unified-shell-v2.js");
 
 check("ARCH-5809", pkg.scripts?.typecheck === "tsc --noEmit", "production typecheck script is explicit");
 check("ARCH-5810", pkg.scripts?.["typecheck:test"] === "tsc -p tsconfig.test.json --noEmit", "test typecheck boundary is explicit");
@@ -45,6 +46,16 @@ check("GOV-5819", !workflow.includes("DATABASE_URL") && !workflow.includes("SUPA
 check("STATE-5820", status.includes("P13.260881–274880"), "status reflects the current terminal governed P13 range");
 check("STATE-5821", status.includes("P13.260881–274880 — CLOSED / CONTROLLED-NONPROD EVIDENCE OBSERVED") && !status.includes("OBSERVATION PENDING"), "status reflects observed controlled-nonprod execution evidence without falsely claiming production authorization");
 check("GOV-5822", exitCriteria.includes("P13-EXIT-01") && exitCriteria.includes("P13-EXIT-08"), "P13 exit criteria are explicitly versioned");
+check(
+  "F5-5823",
+  unifiedShell.includes("mutationResult=createMovementCommand(probe") &&
+    unifiedShell.includes("mutationResult.code==='MOVEMENT_CREATED'") &&
+    !unifiedShell.includes("probe.movements.unshift({id:movementId") &&
+    !unifiedShell.includes("probe.placements.unshift({id:placementId") &&
+    !unifiedShell.includes("probe.audit.unshift({id:'AUD-F5-FINAL-MOV'") &&
+    !unifiedShell.includes("probe.audit.unshift({id:'AUD-F5-FINAL-PLC'"),
+  "F5 final integrity probe must execute through the canonical movement/placement mutation command and canonical audit path, not direct state injection",
+);
 
 const evidenceDir = path.join(root, "artifacts", "mta-evidence");
 fs.mkdirSync(evidenceDir, { recursive: true });
