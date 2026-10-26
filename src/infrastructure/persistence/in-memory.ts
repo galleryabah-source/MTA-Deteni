@@ -1,4 +1,5 @@
-import type { AppendOnlyRepository, OutboxMessage, OutboxRepository, RepositoryResult, VersionedEntity, VersionedRepository } from "./contracts.js";
+import type { OutboxEventContract } from "../../application/outbox-runtime-contract.js";
+import type { AppendOnlyRepository, OutboxRepository, RepositoryResult, VersionedEntity, VersionedRepository } from "./contracts.js";
 
 export class InMemoryVersionedRepository<T extends VersionedEntity & { id: string }> implements VersionedRepository<T> {
   private readonly items = new Map<string, T>();
@@ -27,12 +28,12 @@ export class InMemoryAppendOnlyRepository<T extends { id: string; aggregateId: s
 }
 
 export class InMemoryOutboxRepository implements OutboxRepository {
-  private readonly pending = new Map<string, OutboxMessage>();
-  async enqueue(message: OutboxMessage): Promise<"ENQUEUED" | "DUPLICATE"> {
-    if (this.pending.has(message.id)) return "DUPLICATE";
-    this.pending.set(message.id, message);
+  private readonly pending = new Map<string, OutboxEventContract>();
+  async enqueue(event: OutboxEventContract): Promise<"ENQUEUED" | "DUPLICATE"> {
+    if (this.pending.has(event.eventId)) return "DUPLICATE";
+    this.pending.set(event.eventId, event);
     return "ENQUEUED";
   }
-  async claim(limit: number): Promise<readonly OutboxMessage[]> { return [...this.pending.values()].slice(0, Math.max(0, limit)); }
-  async acknowledge(id: string): Promise<void> { this.pending.delete(id); }
+  async claim(limit: number): Promise<readonly OutboxEventContract[]> { return [...this.pending.values()].slice(0, Math.max(0, limit)); }
+  async acknowledge(eventId: string): Promise<void> { this.pending.delete(eventId); }
 }

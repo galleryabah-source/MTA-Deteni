@@ -1,4 +1,5 @@
-import type { AppendOnlyRepository, OutboxMessage, OutboxRepository, RepositoryResult, VersionedEntity, VersionedRepository } from "./contracts.js";
+import type { OutboxEventContract } from "../../application/outbox-runtime-contract.js";
+import type { AppendOnlyRepository, OutboxRepository, RepositoryResult, VersionedEntity, VersionedRepository } from "./contracts.js";
 
 export type PersistenceOperationContext = Readonly<{
   transactionId: string;
@@ -18,8 +19,8 @@ export type AppendOnlyPersistenceContract<T extends { id: string; aggregateId: s
 }>;
 
 export type OutboxPersistenceContract = Readonly<{
-  enqueue(message: OutboxMessage, context: PersistenceOperationContext): Promise<"ENQUEUED" | "DUPLICATE">;
-  claim(consumerId: string, limit: number, context: PersistenceOperationContext): Promise<readonly OutboxMessage[]>;
+  enqueue(event: OutboxEventContract, context: PersistenceOperationContext): Promise<"ENQUEUED" | "DUPLICATE">;
+  claim(consumerId: string, limit: number, context: PersistenceOperationContext): Promise<readonly OutboxEventContract[]>;
   acknowledge(consumerId: string, id: string, context: PersistenceOperationContext): Promise<void>;
 }>;
 
@@ -44,7 +45,7 @@ export function assertAppendOnlyCompatibility<T extends { id: string; aggregateI
 
 export function assertOutboxCompatibility(repository: OutboxRepository): OutboxPersistenceContract {
   return {
-    enqueue: (message, context) => { if (validatePersistenceOperationContext(context) === "BLOCKED") return Promise.reject(new Error("PERSISTENCE_CONTEXT_INVALID")); return repository.enqueue(message); },
+    enqueue: (event, context) => { if (validatePersistenceOperationContext(context) === "BLOCKED") return Promise.reject(new Error("PERSISTENCE_CONTEXT_INVALID")); return repository.enqueue(event); },
     claim: (consumerId, limit, context) => { if (!consumerId.trim() || validatePersistenceOperationContext(context) === "BLOCKED") return Promise.reject(new Error("PERSISTENCE_CONTEXT_INVALID")); return repository.claim(limit); },
     acknowledge: (consumerId, id, context) => { if (!consumerId.trim() || !id.trim() || validatePersistenceOperationContext(context) === "BLOCKED") return Promise.reject(new Error("PERSISTENCE_CONTEXT_INVALID")); return repository.acknowledge(id); }
   };
