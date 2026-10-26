@@ -1,0 +1,5 @@
+export const EXCEPTION_CONTRACT_VERSION="P10.13-INFERRED-v2";
+export type ExceptionStatus="OPEN"|"ACKNOWLEDGED"|"RESOLVED";
+export type OperationalException={exceptionId:string;code:string;resourceId:string;status:ExceptionStatus;openedAt:string;resolutionReason?:string};
+const ID=/^[A-Za-z0-9._-]{1,128}$/;
+export function validateException(e:OperationalException):string[]{const x:string[]=[];if(!ID.test(e.exceptionId))x.push("INVALID_EXCEPTION_ID");if(!ID.test(e.code))x.push("INVALID_CODE");if(!ID.test(e.resourceId))x.push("INVALID_RESOURCE_ID");if(!["OPEN","ACKNOWLEDGED","RESOLVED"].includes(e.status))x.push("INVALID_STATUS");if(Number.isNaN(Date.parse(e.openedAt)))x.push("INVALID_OPENED_AT");if(e.status==="RESOLVED"&&!e.resolutionReason?.trim())x.push("MISSING_RESOLUTION_REASON");return x;}
