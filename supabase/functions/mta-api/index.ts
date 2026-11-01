@@ -12,12 +12,10 @@ const sha256Hex=async(value)=>{const bytes=new TextEncoder().encode(value),hash=
 const productionWritesEnabled=()=>Deno.env.get("MTA_PRODUCTION_WRITES_ENABLED")==="true";
 const WRITE_METHODS=new Set(["POST","PATCH","DELETE"]);
 const AUTHZ_POLICY_VERSION="AUTHZ-DB-RLS-v1";
+// Protected lifecycle resources are deliberately absent here. They may be read
+// through TABLES, but writes must use their dedicated domain transaction command.
 const MUTATION_ROLE_POLICY={
   detainees:{POST:new Set(["OWNER","ADMIN","EDITOR"]),PATCH:new Set(["OWNER","ADMIN","EDITOR"]),DELETE:new Set(["OWNER","ADMIN"])},
-  placements:{POST:new Set(["OWNER","ADMIN","EDITOR"]),PATCH:new Set(["OWNER","ADMIN","EDITOR"]),DELETE:new Set(["OWNER","ADMIN"])},
-  movements:{POST:new Set(["OWNER","ADMIN","EDITOR"]),PATCH:new Set(["OWNER","ADMIN","EDITOR"]),DELETE:new Set(["OWNER","ADMIN"])},
-  leaves:{POST:new Set(["OWNER","ADMIN","EDITOR"]),PATCH:new Set(["OWNER","ADMIN","EDITOR"]),DELETE:new Set(["OWNER","ADMIN"])},
-  documents:{POST:new Set(["OWNER","ADMIN","EDITOR"]),PATCH:new Set(["OWNER","ADMIN","EDITOR"]),DELETE:new Set(["OWNER","ADMIN"])},
   blocks:{POST:new Set(["OWNER","ADMIN"]),PATCH:new Set(["OWNER","ADMIN"]),DELETE:new Set(["OWNER","ADMIN"])},
   rooms:{POST:new Set(["OWNER","ADMIN"]),PATCH:new Set(["OWNER","ADMIN"]),DELETE:new Set(["OWNER","ADMIN"])}
 };
@@ -607,23 +605,57 @@ Deno.serve(async(req)=>{
       if(req.method==="POST"){
         body={...body,scope_id:canonicalScopeId};
       }else if(id){
-        const current=await admin.from("mta_blocks").select("scope_id").eq("id",id).single();
+        const current=await admin.from("mta_blocks").select("id,scope_id,status").eq("id",id).single();
         if(current.error||!current.data)return json(req,{ok:false,error:"BLOCK_NOT_FOUND"},404);
         if(current.data.scope_id!==canonicalScopeId)return json(req,{ok:false,error:"WRONG_SCOPE"},403);
+        if(req.method==="PATCH"){
+          if(Object.prototype.hasOwnProperty.call(body,"scope_id"))return json(req,{ok:false,error:"BLOCK_SCOPE_IMMUTABLE"},409);
+          if(String(body.status||"").toUpperCase()==="INACTIVE"){
+            const activeRooms=await admin.from("mta_rooms").select("id",{count:"exact",head:true}).eq("block_id",id).eq("status","ACTIVE");
+            if(activeRooms.error)return json(req,{ok:false,error:"BLOCK_OCCUPANCY_CHECK_FAILED"},503);
+            if((activeRooms.count||0)>0)return json(req,{ok:false,error:"BLOCK_HAS_ACTIVE_ROOMS"},409);
+          }
+        }
       }
     }
     if(resource==="rooms"){
       if(req.method==="POST"){
         const blockId=String(body.block_id||"");
         if(!blockId)return json(req,{ok:false,error:"ROOM_BLOCK_REQUIRED"},400);
-        const block=await admin.from("mta_blocks").select("scope_id").eq("id",blockId).single();
+        const block=await admin.from("mta_blocks").select("scope_id,status").eq("id",blockId).single();
         if(block.error||!block.data?.scope_id)return json(req,{ok:false,error:"BLOCK_NOT_FOUND"},404);
         if(block.data.scope_id!==canonicalScopeId)return json(req,{ok:false,error:"WRONG_SCOPE"},403);
+        if(String(block.data.status||"").toUpperCase()!=="ACTIVE")return json(req,{ok:false,error:"BLOCK_INACTIVE"},409);
         body={...body,scope_id:canonicalScopeId};
       }else if(id){
-        const current=await admin.from("mta_rooms").select("scope_id").eq("id",id).single();
+        const current=await admin.from("mta_rooms").select("id,scope_id,block_id,capacity,status").eq("id",id).single();
         if(current.error||!current.data)return json(req,{ok:false,error:"ROOM_NOT_FOUND"},404);
         if(current.data.scope_id!==canonicalScopeId)return json(req,{ok:false,error:"WRONG_SCOPE"},403);
+        if(req.method==="PATCH"){
+          if(Object.prototype.hasOwnProperty.call(body,"scope_id"))return json(req,{ok:false,error:"ROOM_SCOPE_IMMUTABLE"},409);
+          let occupiedCount=null;
+          const blockChanged=body.block_id!==undefined&&String(body.block_id)!==String(current.data.block_id);
+          const needsOccupancyCheck=body.capacity!==undefined||String(body.status||"").toUpperCase()==="INACTIVE"||blockChanged;
+          if(needsOccupancyCheck){
+            const occupancy=await admin.from("mta_placements").select("id",{count:"exact",head:true}).eq("room_id",id).is("until",null);
+            if(occupancy.error)return json(req,{ok:false,error:"ROOM_OCCUPANCY_CHECK_FAILED"},503);
+            occupiedCount=occupancy.count||0;
+          }
+          if(body.capacity!==undefined){
+            const nextCapacity=Number(body.capacity);
+            if(!Number.isInteger(nextCapacity)||nextCapacity<1)return json(req,{ok:false,error:"ROOM_CAPACITY_INVALID"},400);
+            if(nextCapacity<occupiedCount)return json(req,{ok:false,error:"ROOM_CAPACITY_BELOW_OCCUPANCY"},409);
+            body.capacity=nextCapacity;
+          }
+          if(String(body.status||"").toUpperCase()==="INACTIVE"&&occupiedCount>0)return json(req,{ok:false,error:"ROOM_OCCUPIED_CANNOT_DEACTIVATE"},409);
+          if(blockChanged){
+            if(occupiedCount>0)return json(req,{ok:false,error:"ROOM_HAS_ACTIVE_PLACEMENTS"},409);
+            const block=await admin.from("mta_blocks").select("scope_id,status").eq("id",String(body.block_id)).single();
+            if(block.error||!block.data?.scope_id)return json(req,{ok:false,error:"BLOCK_NOT_FOUND"},404);
+            if(block.data.scope_id!==canonicalScopeId)return json(req,{ok:false,error:"WRONG_SCOPE"},403);
+            if(String(block.data.status||"").toUpperCase()!=="ACTIVE")return json(req,{ok:false,error:"BLOCK_INACTIVE"},409);
+          }
+        }
       }
     }
     if(req.method==="POST" && resource==="movements" && body?.command==="MOVE_DETAINEE"){
@@ -659,6 +691,18 @@ Deno.serve(async(req)=>{
         return json(req,{ok:false,error:"TRANSACTIONAL_MOVEMENT_REJECTED",command:"MOVE_DETAINEE",requestId,correlationId},400);
       }
       return json(req,{ok:true,resource,role,command:"MOVE_DETAINEE",data,replayed:!!data?.replayed},data?.replayed?200:201);
+    }
+    // These resources represent protected domain lifecycles. Do not allow
+    // generic table writes to bypass their domain transaction commands.
+    const canonicalWriteRequired={
+      movements:"MOVEMENT_CANONICAL_COMMAND_REQUIRED",
+      placements:"PLACEMENT_CANONICAL_COMMAND_REQUIRED",
+      leaves:"LEAVE_CANONICAL_COMMAND_REQUIRED",
+      documents:"DOCUMENT_CANONICAL_COMMAND_REQUIRED"
+    }[resource];
+    if(WRITE_METHODS.has(req.method)&&canonicalWriteRequired){
+      emit("WARN","canonical_command.required",{status:405,outcome:"DENIED",errorCode:canonicalWriteRequired,resource});
+      return json(req,{ok:false,error:canonicalWriteRequired,resource,requestId,correlationId},405,{requestId,correlationId});
     }
     const authorizationDecision=await authorizeGenericMutation({admin,userId:user.id,role,resource,method:req.method,id,body});
     if(!authorizationDecision.allowed){
