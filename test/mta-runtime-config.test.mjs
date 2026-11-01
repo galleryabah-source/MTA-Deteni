@@ -74,6 +74,7 @@ test("Supabase URL rejects unsafe schemes and embedded credentials/query", () =>
     "https://user:password@example.supabase.co",
     "https://example.supabase.co?token=secret",
     "https://example.supabase.co#fragment",
+    "https://example.supabase.co/functions",
     "not-a-url",
   ]) {
     assert.throws(
