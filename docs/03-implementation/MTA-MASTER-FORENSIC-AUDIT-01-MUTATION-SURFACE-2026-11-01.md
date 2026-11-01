@@ -5,8 +5,9 @@
 - Baseline branch: `main`
 - Baseline commit: `4ce5a330ec89f90dac9bc7f8f87d1fabdc6ae866`
 - Audit branch: `audit/master-forensic-mutation-surface-2026-11-01`
-- Status: **FORENSIC FINDINGS RECORDED — MUT-001/MUT-002 REMEDIATED; REMAINING FINDINGS OPEN**
-- Remediation PR: [#334](https://github.com/galleryabah-source/MTA-Deteni/pull/334), merged 2026-11-01 as `5105d57760d8b6c89150cabf1671e8f8cf98ad3c`.
+- Status: **FORENSIC FINDINGS RECORDED — MUT-001/MUT-002/MUT-008/MUT-009/MUT-010 REMEDIATED AT SOURCE; REMAINING FINDINGS OPEN**
+- Remediation PR #334: [merged](https://github.com/galleryabah-source/MTA-Deteni/pull/334) as `5105d57760d8b6c89150cabf1671e8f8cf98ad3c`.
+- Remediation PR #335: [merged](https://github.com/galleryabah-source/MTA-Deteni/pull/335) as `6c153f6d8661555312760f1f4d113b0b723e17c0`.
 - Production writes: remain fail-closed. Do not change `MTA_PRODUCTION_WRITES_ENABLED`.
 - Migration freeze: remains in force. No migration or production deployment is authorized by this report.
 
@@ -174,7 +175,7 @@ Related release state at audit time:
 ### MUT-008 — Generic mutation bypasses protected Placement, Movement, Leave, and Document lifecycles
 
 - Severity: **CRITICAL**
-- Status: **REMEDIATION IN PR #335 — CI/review pending**.
+- Status: **REMEDIATED AT SOURCE** in PR #335; merged commit `6c153f6d8661555312760f1f4d113b0b723e17c0`. All 8 GitHub Actions workflows and the Cloudflare Workers Build check passed. Dedicated domain command implementation and runtime UAT remain open.
 - Evidence:
   - `supabase/functions/mta-api/index.ts` previously allowed `placements`, `movements`, `leaves`, and `documents` in `MUTATION_ROLE_POLICY`.
   - Except for the exact `POST /movements` command `MOVE_DETAINEE`, generic POST/PATCH/DELETE fell through to `mta_execute_idempotent_mutation`.
@@ -455,7 +456,7 @@ The audit also confirmed several important protections that should be preserved:
 | Order | Work package | Required evidence | Release impact |
 |---:|---|---|---|
 | 1 | MUT-001 and MUT-002 — completed in PR #334 | 8/8 PR CI workflows PASS; authenticated role/scope UAT remains | API source correction complete; runtime UAT open |
-| 2 | MUT-008, MUT-009, and MUT-010 — remediation in PR #335 | Generic write denial + archive-only and master-data fail-closed tests | Prevent state-machine, scope, and hard-delete bypass |
+| 2 | MUT-008, MUT-009, and MUT-010 — completed in PR #335 | 8/8 GitHub Actions workflows + Cloudflare Workers Build PASS; production runtime remains gated | Generic bypasses closed at Edge API boundary |
 | 3 | Fix MUT-003 and MUT-011 | Failure-injection, idempotency replay, and saga/reconciliation evidence | Identity/admin integrity |
 | 4 | Redesign MUT-004/005/006/007 and STO-001 | Snapshot, completeness, restore, immutability, replay, private-object authorization tests | Recovery and storage certification |
 | 5 | Fix AUD-001 | PostgreSQL rollback/sequence integration test | Audit certification |
