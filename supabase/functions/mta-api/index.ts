@@ -16,8 +16,10 @@ const AUTHZ_POLICY_VERSION="AUTHZ-DB-RLS-v1";
 // through TABLES, but writes must use their dedicated domain transaction command.
 const MUTATION_ROLE_POLICY={
   detainees:{POST:new Set(["OWNER","ADMIN","EDITOR"]),PATCH:new Set(["OWNER","ADMIN","EDITOR"]),DELETE:new Set(["OWNER","ADMIN"])},
-  blocks:{POST:new Set(["OWNER","ADMIN"]),PATCH:new Set(["OWNER","ADMIN"]),DELETE:new Set(["OWNER","ADMIN"])},
-  rooms:{POST:new Set(["OWNER","ADMIN"]),PATCH:new Set(["OWNER","ADMIN"]),DELETE:new Set(["OWNER","ADMIN"])}
+  // Master Block/Room creation is scope-bound; updates/deletes require a
+  // dedicated transactional master-data command and are intentionally absent.
+  blocks:{POST:new Set(["OWNER","ADMIN"])},
+  rooms:{POST:new Set(["OWNER","ADMIN"])}
 };
 const SCOPED_MUTATION_RESOURCES=new Set(["detainees","placements","movements","leaves"]);
 const denyAuthorization=(reasonCode)=>({allowed:false,reasonCode,policyVersion:AUTHZ_POLICY_VERSION});
@@ -566,6 +568,11 @@ Deno.serve(async(req)=>{
     let body=req.method==="DELETE"?{}:await req.json().catch(()=>({}));
     let identityDecisionForAudit="";
     let canonicalScopeId=null;
+    if((resource==="blocks"||resource==="rooms")&&(req.method==="PATCH"||req.method==="DELETE")){
+      const errorCode=resource==="blocks"?"BLOCK_MASTER_COMMAND_REQUIRED":"ROOM_MASTER_COMMAND_REQUIRED";
+      emit("WARN","master_data.command.required",{status:405,outcome:"DENIED",errorCode,resource});
+      return json(req,{ok:false,error:errorCode,resource,requestId,correlationId},405,{requestId,correlationId});
+    }
     if(["blocks","rooms","detainees"].includes(resource)){
       const scoped=await admin.from("mta_profile_scopes").select("scope_id").eq("profile_id",user.id).eq("active",true).limit(1).maybeSingle();
       if(scoped.error||!scoped.data?.scope_id)return json(req,{ok:false,error:"SCOPE_REQUIRED"},409);
@@ -601,62 +608,17 @@ Deno.serve(async(req)=>{
         if(current.data.scope_id!==canonicalScopeId)return json(req,{ok:false,error:"WRONG_SCOPE"},403);
       }
     }
-    if(resource==="blocks"){
-      if(req.method==="POST"){
-        body={...body,scope_id:canonicalScopeId};
-      }else if(id){
-        const current=await admin.from("mta_blocks").select("id,scope_id,status").eq("id",id).single();
-        if(current.error||!current.data)return json(req,{ok:false,error:"BLOCK_NOT_FOUND"},404);
-        if(current.data.scope_id!==canonicalScopeId)return json(req,{ok:false,error:"WRONG_SCOPE"},403);
-        if(req.method==="PATCH"){
-          if(Object.prototype.hasOwnProperty.call(body,"scope_id"))return json(req,{ok:false,error:"BLOCK_SCOPE_IMMUTABLE"},409);
-          if(String(body.status||"").toUpperCase()==="INACTIVE"){
-            const activeRooms=await admin.from("mta_rooms").select("id",{count:"exact",head:true}).eq("block_id",id).eq("status","ACTIVE");
-            if(activeRooms.error)return json(req,{ok:false,error:"BLOCK_OCCUPANCY_CHECK_FAILED"},503);
-            if((activeRooms.count||0)>0)return json(req,{ok:false,error:"BLOCK_HAS_ACTIVE_ROOMS"},409);
-          }
-        }
-      }
+    if(resource==="blocks"&&req.method==="POST"){
+      body={...body,scope_id:canonicalScopeId};
     }
-    if(resource==="rooms"){
-      if(req.method==="POST"){
-        const blockId=String(body.block_id||"");
-        if(!blockId)return json(req,{ok:false,error:"ROOM_BLOCK_REQUIRED"},400);
-        const block=await admin.from("mta_blocks").select("scope_id,status").eq("id",blockId).single();
-        if(block.error||!block.data?.scope_id)return json(req,{ok:false,error:"BLOCK_NOT_FOUND"},404);
-        if(block.data.scope_id!==canonicalScopeId)return json(req,{ok:false,error:"WRONG_SCOPE"},403);
-        if(String(block.data.status||"").toUpperCase()!=="ACTIVE")return json(req,{ok:false,error:"BLOCK_INACTIVE"},409);
-        body={...body,scope_id:canonicalScopeId};
-      }else if(id){
-        const current=await admin.from("mta_rooms").select("id,scope_id,block_id,capacity,status").eq("id",id).single();
-        if(current.error||!current.data)return json(req,{ok:false,error:"ROOM_NOT_FOUND"},404);
-        if(current.data.scope_id!==canonicalScopeId)return json(req,{ok:false,error:"WRONG_SCOPE"},403);
-        if(req.method==="PATCH"){
-          if(Object.prototype.hasOwnProperty.call(body,"scope_id"))return json(req,{ok:false,error:"ROOM_SCOPE_IMMUTABLE"},409);
-          let occupiedCount=null;
-          const blockChanged=body.block_id!==undefined&&String(body.block_id)!==String(current.data.block_id);
-          const needsOccupancyCheck=body.capacity!==undefined||String(body.status||"").toUpperCase()==="INACTIVE"||blockChanged;
-          if(needsOccupancyCheck){
-            const occupancy=await admin.from("mta_placements").select("id",{count:"exact",head:true}).eq("room_id",id).is("until",null);
-            if(occupancy.error)return json(req,{ok:false,error:"ROOM_OCCUPANCY_CHECK_FAILED"},503);
-            occupiedCount=occupancy.count||0;
-          }
-          if(body.capacity!==undefined){
-            const nextCapacity=Number(body.capacity);
-            if(!Number.isInteger(nextCapacity)||nextCapacity<1)return json(req,{ok:false,error:"ROOM_CAPACITY_INVALID"},400);
-            if(nextCapacity<occupiedCount)return json(req,{ok:false,error:"ROOM_CAPACITY_BELOW_OCCUPANCY"},409);
-            body.capacity=nextCapacity;
-          }
-          if(String(body.status||"").toUpperCase()==="INACTIVE"&&occupiedCount>0)return json(req,{ok:false,error:"ROOM_OCCUPIED_CANNOT_DEACTIVATE"},409);
-          if(blockChanged){
-            if(occupiedCount>0)return json(req,{ok:false,error:"ROOM_HAS_ACTIVE_PLACEMENTS"},409);
-            const block=await admin.from("mta_blocks").select("scope_id,status").eq("id",String(body.block_id)).single();
-            if(block.error||!block.data?.scope_id)return json(req,{ok:false,error:"BLOCK_NOT_FOUND"},404);
-            if(block.data.scope_id!==canonicalScopeId)return json(req,{ok:false,error:"WRONG_SCOPE"},403);
-            if(String(block.data.status||"").toUpperCase()!=="ACTIVE")return json(req,{ok:false,error:"BLOCK_INACTIVE"},409);
-          }
-        }
-      }
+    if(resource==="rooms"&&req.method==="POST"){
+      const blockId=String(body.block_id||"");
+      if(!blockId)return json(req,{ok:false,error:"ROOM_BLOCK_REQUIRED"},400);
+      const block=await admin.from("mta_blocks").select("scope_id,status").eq("id",blockId).single();
+      if(block.error||!block.data?.scope_id)return json(req,{ok:false,error:"BLOCK_NOT_FOUND"},404);
+      if(block.data.scope_id!==canonicalScopeId)return json(req,{ok:false,error:"WRONG_SCOPE"},403);
+      if(String(block.data.status||"").toUpperCase()!=="ACTIVE")return json(req,{ok:false,error:"BLOCK_INACTIVE"},409);
+      body={...body,scope_id:canonicalScopeId};
     }
     if(req.method==="POST" && resource==="movements" && body?.command==="MOVE_DETAINEE"){
       const requestHash=await sha256Hex(stableJson({method:req.method,resource,body}));
