@@ -29,6 +29,10 @@ This is a **source-level forensic audit**. It does not prove production runtime 
 - `supabase/migrations/20261013090000_mta_detainee_activity_health_records_v1.sql`
 - `supabase/migrations/20260923040000_mta_document_storage_read_hardening.sql`
 - `docs/03-implementation/P9.9-PRIVATE-STORAGE-KERNEL-v1.0.md`
+- `docs/03-implementation/P9.6-AUTHORIZATION-MATRIX.md`
+- `docs/03-implementation/P9.6-CANONICAL-SCOPE-IDENTITY-SOURCE-OF-TRUTH-AUDIT.md`
+- `docs/06-architecture/AUTHORIZATION-CONTROL-PLANE.md`
+- `docs/07-security/RBAC-PERMISSION-CATALOG-v1.0.md`
 - `src/application/private-storage-contract.ts`
 - `docs/03-implementation/P9.7-recovered-migration-sources/20260922220754_mta_p97_durable_idempotency_transaction_boundary_v3.sql`
 - `docs/03-implementation/P9.7-recovered-migration-sources/20260922220814_mta_p97_durable_idempotency_rpc_wrapper_v1.sql`
@@ -203,6 +207,40 @@ Related release state at audit time:
 3. Require an explicit release record and acceptance evidence for each production mutation domain.
 4. Test that enabling one domain cannot enable another.
 
+### AUTHZ-002 — Runtime role bypass conflicts with the P9.6 scoped authorization oracle
+
+- Severity: **HIGH — POLICY CONFLICT / GOVERNANCE DECISION REQUIRED**
+- Evidence:
+  - `docs/03-implementation/P9.6-AUTHORIZATION-MATRIX.md` states that a role alone does not authorize a scoped operational resource and that positive authorization requires active membership to the requested scope and resource ownership by that scope.
+  - `supabase/functions/mta-api/index.ts` returns ALLOW for OWNER/ADMIN in `authorizeGenericMutation` before verifying active scope membership.
+  - The detainee-note API and note transaction similarly skip scope membership checks for OWNER/ADMIN.
+  - `supabase/migrations/20260922075730_mta_canonical_scope_and_qr_registry.sql` and `20260922075831_mta_scope_policy_hardening.sql` include global OWNER/ADMIN/AUDITOR read branches for scoped records.
+  - The API mutation policy is a role-to-method map (`MUTATION_ROLE_POLICY`) rather than a call to the documented permission/duty/context authorization decision contract.
+- Consequence: the implemented enforcement permits global privileged-role access where the P9.6 policy oracle describes scope membership as mandatory. This may be an intentional global-administrator exception, but that exception is not documented in the P9.6 matrix and must not be inferred.
+- This is a policy-contract conflict, not a claim that cross-scope access has occurred in production.
+
+**Required remediation**
+1. Obtain an explicit governance decision: (A) OWNER/ADMIN/AUDITOR are global-scope exceptions, or (B) every scoped operation requires active scope membership.
+2. If B, remove global role bypasses consistently from Edge API, transaction RPCs, and RLS policies.
+3. If A, amend P9.6 and the authorization matrix to define precisely which roles/actions have global access, including sensitive health, document, export, and audit boundaries.
+4. Connect the permission catalog and duty/context decision point to the actual server-side enforcement path; model-only adversarial tests are not production API evidence.
+5. Add cross-scope integration tests against the actual Edge API and RLS, including OWNER, ADMIN, AUDITOR, EDITOR, REVIEWER, and HEALTHCARE.
+
+### SCOPE-001 — Canonical production scope identity and memberships remain an unresolved release prerequisite
+
+- Severity: **BLOCKER FOR SCOPED PRODUCTION ACTIVATION**
+- Evidence: `docs/03-implementation/P9.6-CANONICAL-SCOPE-IDENTITY-SOURCE-OF-TRUTH-AUDIT.md` records that the production scope code/name were unresolved and that, at the time of that audit, `mta_scopes` and `mta_profile_scopes` had zero rows.
+- The P9.6 document explicitly prohibits inventing a canonical scope, seeding production scope data, assigning production OWNER/ADMIN memberships, or silently bypassing `SCOPE_REQUIRED`.
+- This audit did not independently query live Supabase data; the zero-row statement is attributed to the existing P9.6 audit evidence and must be revalidated through an authorized read-only production check before any release decision.
+- The API requires an active scope membership for several root operations and for admin configuration. Therefore scope provisioning is a real operational prerequisite, not a value to hard-code into the application.
+
+**Required remediation**
+1. Obtain the canonical scope code/name from an authoritative facility/site source and record the owner approval.
+2. Re-query production scope and membership state using read-only access; compare it with migration history.
+3. Prepare a controlled provisioning manifest and non-production rehearsal.
+4. Provision production only after explicit owner approval, migration/governance clearance, and P9.6 authorization certification.
+5. Do not use a default scope or role-derived scope.
+
 ### STO-001 — Private bucket binary access is broader than metadata authorization and ignores classification
 
 - Severity: **CRITICAL**
@@ -246,9 +284,10 @@ The audit also confirmed several important protections that should be preserved:
 | 2 | Fix MUT-003 | Failure-injection tests; atomic DB RPC / saga evidence | Identity/admin integrity |
 | 3 | Redesign MUT-004/005/006/007 and STO-001 | Snapshot, completeness, restore, immutability, replay, private-object authorization tests | Recovery and storage certification |
 | 4 | Fix AUD-001 | PostgreSQL rollback/sequence integration test | Audit certification |
-| 5 | Fix AUTH-001 | Edge policy evidence + login security tests | Authentication hardening |
-| 6 | Implement GOV-001 | Per-resource release gate tests | Controlled production activation |
-| 7 | Full regression | `npm test`, `npm run typecheck`, SQL integration, browser UAT | Re-certification |
+| 5 | Resolve AUTHZ-002 and SCOPE-001 | Owner-approved scope policy + read-only production reconciliation + cross-scope API/RLS tests | Authorization and scope release blocker |
+| 6 | Fix AUTH-001 | Edge policy evidence + login security tests | Authentication hardening |
+| 7 | Implement GOV-001 | Per-resource release gate tests | Controlled production activation |
+| 8 | Full regression | `npm test`, `npm run typecheck`, SQL integration, browser UAT | Re-certification |
 
 ## 6. Explicit non-actions
 
