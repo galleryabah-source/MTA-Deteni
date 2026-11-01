@@ -1,5 +1,8 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { loadMtaRuntimeConfig } from "../_shared/runtime-config.mjs";
+
+const runtimeConfig=loadMtaRuntimeConfig((name)=>Deno.env.get(name),{requireAnonKey:false});
 
 /**
  * P9.8 canonical dispatcher source recovered from the historically deployed
@@ -36,12 +39,9 @@ const json = (body: unknown, status = 200) =>
     headers: { "Content-Type": "application/json", "Cache-Control": "no-store" },
   });
 
-const adminClient = () => {
-  const url = Deno.env.get("SUPABASE_URL");
-  const key = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
-  if (!url || !key) throw new Error("DISPATCHER_CONFIGURATION_ERROR");
-  return createClient(url, key, { auth: { autoRefreshToken: false, persistSession: false } });
-};
+const adminClient = () => createClient(runtimeConfig.supabaseUrl, runtimeConfig.supabaseServiceRoleKey, {
+  auth: { autoRefreshToken: false, persistSession: false },
+});
 
 const publishInternal = async (event: OutboxEvent) => {
   const required = [
