@@ -7,7 +7,9 @@ const api=fs.readFileSync("supabase/functions/mta-api/index.ts","utf8");
 
 test("admin-users service role has only the narrow profile table privileges required by the protected path",()=>{
   assert.match(migration,/grant select, insert, update, delete on table public\.mta_profiles to service_role/i);
-  assert.match(api,/createClient\(Deno\.env\.get\("SUPABASE_URL"\)!\,adminKey/);
+  assert.match(api,/createAdminClient/);
+  assert.match(api,/runtimeConfig\.supabaseServiceRoleKey/);
+  assert.match(api,/loadMtaRuntimeConfig/);
   assert.match(api,/resource==="admin-users"/);
 });
 
