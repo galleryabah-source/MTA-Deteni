@@ -5,7 +5,8 @@
 - Baseline branch: `main`
 - Baseline commit: `4ce5a330ec89f90dac9bc7f8f87d1fabdc6ae866`
 - Audit branch: `audit/master-forensic-mutation-surface-2026-11-01`
-- Status: **FORENSIC FINDINGS RECORDED — REMEDIATION NOT YET APPLIED**
+- Status: **FORENSIC FINDINGS RECORDED — MUT-001/MUT-002 REMEDIATED; REMAINING FINDINGS OPEN**
+- Remediation PR: [#334](https://github.com/galleryabah-source/MTA-Deteni/pull/334), merged 2026-11-01 as `5105d57760d8b6c89150cabf1671e8f8cf98ad3c`.
 - Production writes: remain fail-closed. Do not change `MTA_PRODUCTION_WRITES_ENABLED`.
 - Migration freeze: remains in force. No migration or production deployment is authorized by this report.
 
@@ -47,6 +48,7 @@ Related release state at audit time:
 ### MUT-001 — Editor update of a detainee is rejected by the generic scope resolver
 
 - Severity: **HIGH**
+- Status: **REMEDIATED** in PR #334; merged commit `5105d57760d8b6c89150cabf1671e8f8cf98ad3c`. All 8 PR CI workflows passed. Static route/scope regression tests were added; isolated database role/scope integration remains required.
 - Evidence: `supabase/functions/mta-api/index.ts`, `authorizeGenericMutation`.
 - The resolver selects `detainee_id,scope_id` from `mta_detainees` when `resource === "detainees"`. The detainee root row is identified by `id`; it does not have the child-resource `detainee_id` column.
 - For an EDITOR performing PATCH, the query can fail and the resolver returns `RESOURCE_NOT_FOUND`, even where the detainee belongs to the editor's active scope. OWNER/ADMIN bypass this branch, which can conceal the defect in owner-only tests.
@@ -62,6 +64,7 @@ Related release state at audit time:
 ### MUT-002 — Admin password-reset route is shadowed by the generic POST/create-user branch
 
 - Severity: **HIGH**
+- Status: **REMEDIATED** in PR #334; merged commit `5105d57760d8b6c89150cabf1671e8f8cf98ad3c`. All 8 PR CI workflows passed. Route-dispatch regression tests were added; authenticated password-reset UAT remains required.
 - Evidence: `supabase/functions/mta-api/index.ts`, `resource === "admin-users"`.
 - The `if (req.method === "POST")` create-user branch appears before `if (req.method === "POST" && id && routeParts[2] === "password-reset")`.
 - The create-user branch returns for invalid/missing NIP, so the later password-reset branch is unreachable for the intended POST route.
@@ -239,7 +242,7 @@ The audit also confirmed several important protections that should be preserved:
 
 | Order | Work package | Required evidence | Release impact |
 |---:|---|---|---|
-| 1 | Fix MUT-001 and MUT-002 | Route-level and authorization integration tests | API correctness |
+| 1 | MUT-001 and MUT-002 — completed in PR #334 | 8/8 PR CI workflows PASS; authenticated role/scope UAT remains | API source correction complete; runtime UAT open |
 | 2 | Fix MUT-003 | Failure-injection tests; atomic DB RPC / saga evidence | Identity/admin integrity |
 | 3 | Redesign MUT-004/005/006/007 and STO-001 | Snapshot, completeness, restore, immutability, replay, private-object authorization tests | Recovery and storage certification |
 | 4 | Fix AUD-001 | PostgreSQL rollback/sequence integration test | Audit certification |
