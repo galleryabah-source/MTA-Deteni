@@ -7,6 +7,15 @@ const api = readFileSync(
   "utf8",
 );
 
+test("detainee removal is archive-only through the standard API", () => {
+  assert.match(api, /DETAINEE_ARCHIVE_ONLY/);
+  assert.match(api, /resource==="detainees"&&req\.method==="DELETE"/);
+  const start = api.indexOf("const MUTATION_ROLE_POLICY={");
+  const end = api.indexOf("};", start);
+  const policy = api.slice(start, end);
+  assert.doesNotMatch(policy, /detainees:\{[^}]*DELETE:/);
+});
+
 test("protected lifecycle resources have no generic mutation role policy", () => {
   const policyStart = api.indexOf("const MUTATION_ROLE_POLICY={");
   const policyEnd = api.indexOf("};", policyStart);
