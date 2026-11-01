@@ -1,0 +1,103 @@
+import assert from "node:assert/strict";
+import test from "node:test";
+import { loadMtaRuntimeConfig } from "../supabase/functions/_shared/runtime-config.mjs";
+
+const base = {
+  SUPABASE_URL: "https://example.supabase.co",
+  SUPABASE_ANON_KEY: "anon-secret-value",
+  SUPABASE_SERVICE_ROLE_KEY: "service-secret-value",
+  MTA_PRODUCTION_WRITES_ENABLED: "false",
+  MTA_ENVIRONMENT: "production",
+};
+const reader = (values) => (name) => values[name];
+
+test("runtime config loads required server values and normalizes environment", () => {
+  const config = loadMtaRuntimeConfig(reader(base));
+  assert.equal(config.supabaseUrl, "https://example.supabase.co");
+  assert.equal(config.environment, "PRODUCTION");
+  assert.equal(config.productionWritesRequested, false);
+  assert.equal(config.productionWritesEnabled, false);
+  assert.equal(Object.isFrozen(config), true);
+});
+
+test("production writes require both explicit true and PRODUCTION environment", () => {
+  const enabled = loadMtaRuntimeConfig(reader({
+    ...base,
+    MTA_PRODUCTION_WRITES_ENABLED: "true",
+    MTA_ENVIRONMENT: "production",
+  }));
+  assert.equal(enabled.productionWritesEnabled, true);
+
+  const staging = loadMtaRuntimeConfig(reader({
+    ...base,
+    MTA_PRODUCTION_WRITES_ENABLED: "true",
+    MTA_ENVIRONMENT: "staging",
+  }));
+  assert.equal(staging.productionWritesRequested, true);
+  assert.equal(staging.productionWritesEnabled, false);
+
+  const unspecified = loadMtaRuntimeConfig(reader({
+    ...base,
+    MTA_PRODUCTION_WRITES_ENABLED: "true",
+    MTA_ENVIRONMENT: undefined,
+  }));
+  assert.equal(unspecified.environment, "UNSPECIFIED");
+  assert.equal(unspecified.productionWritesEnabled, false);
+});
+
+test("missing required variables fail fast without exposing secret values", () => {
+  const invalid = { ...base, SUPABASE_SERVICE_ROLE_KEY: "" };
+  assert.throws(
+    () => loadMtaRuntimeConfig(reader(invalid)),
+    (error) => {
+      assert.match(error.message, /MTA_CONFIG_MISSING:SUPABASE_SERVICE_ROLE_KEY/);
+      assert.equal(error.message.includes("anon-secret-value"), false);
+      assert.equal(error.message.includes("service-secret-value"), false);
+      return true;
+    },
+  );
+});
+
+test("Supabase URL rejects unsafe schemes and embedded credentials/query", () => {
+  for (const url of [
+    "http://supabase.example.com",
+    "https://user:password@example.supabase.co",
+    "https://example.supabase.co?token=secret",
+    "https://example.supabase.co#fragment",
+    "not-a-url",
+  ]) {
+    assert.throws(
+      () => loadMtaRuntimeConfig(reader({ ...base, SUPABASE_URL: url })),
+      /MTA_CONFIG_INVALID:SUPABASE_URL/,
+    );
+  }
+});
+
+test("local HTTP is allowed only for loopback development", () => {
+  const config = loadMtaRuntimeConfig(reader({
+    ...base,
+    SUPABASE_URL: "http://127.0.0.1:54321/",
+    MTA_ENVIRONMENT: "local",
+  }));
+  assert.equal(config.supabaseUrl, "http://127.0.0.1:54321");
+  assert.throws(
+    () => loadMtaRuntimeConfig(reader({
+      ...base,
+      SUPABASE_URL: "http://192.168.1.10:54321",
+    })),
+    /MTA_CONFIG_INVALID:SUPABASE_URL_PROTOCOL/,
+  );
+});
+
+test("invalid environment and production write flag fail closed", () => {
+  assert.throws(
+    () => loadMtaRuntimeConfig(reader({ ...base, MTA_ENVIRONMENT: "prod-ish" })),
+    /MTA_CONFIG_INVALID:MTA_ENVIRONMENT/,
+  );
+  assert.throws(
+    () => loadMtaRuntimeConfig(reader({ ...base, MTA_PRODUCTION_WRITES_ENABLED: "yes" })),
+    /MTA_CONFIG_INVALID:MTA_PRODUCTION_WRITES_ENABLED/,
+  );
+});
+
+console.log("MTA P9.2 runtime configuration contract PASS");
