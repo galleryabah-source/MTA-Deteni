@@ -30,7 +30,8 @@ export function loadMtaRuntimeConfig(readEnv) {
   } catch {
     throw new Error("MTA_CONFIG_INVALID:SUPABASE_URL");
   }
-  const localHttp = parsedUrl.protocol === "http:" &&
+  const localEnvironment = ["LOCAL", "DEVELOPMENT", "TEST"].includes(environmentRaw);
+  const localHttp = parsedUrl.protocol === "http:" && localEnvironment &&
     ["localhost", "127.0.0.1", "::1", "[::1]"].includes(parsedUrl.hostname);
   if (parsedUrl.protocol !== "https:" && !localHttp) {
     throw new Error("MTA_CONFIG_INVALID:SUPABASE_URL_PROTOCOL");
@@ -42,6 +43,9 @@ export function loadMtaRuntimeConfig(readEnv) {
   const allowedEnvironments = new Set(["PRODUCTION", "STAGING", "DEVELOPMENT", "TEST", "LOCAL", "UNSPECIFIED"]);
   if (!allowedEnvironments.has(environmentRaw)) {
     throw new Error("MTA_CONFIG_INVALID:MTA_ENVIRONMENT");
+  }
+  if (supabaseAnonKey === supabaseServiceRoleKey) {
+    throw new Error("MTA_CONFIG_INVALID:KEY_SEPARATION");
   }
   if (writeFlagRaw && writeFlagRaw !== "true" && writeFlagRaw !== "false") {
     throw new Error("MTA_CONFIG_INVALID:MTA_PRODUCTION_WRITES_ENABLED");
