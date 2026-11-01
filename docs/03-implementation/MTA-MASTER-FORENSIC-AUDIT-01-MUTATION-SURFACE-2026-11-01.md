@@ -200,7 +200,7 @@ Related release state at audit time:
 ### MUT-009 — Master Block/Room PATCH can rebind scope/relationships or violate occupancy invariants
 
 - Severity: **HIGH**
-- Status: **REMEDIATION IN PR #335 — CI/review pending**.
+- Status: **REMEDIATED AT SOURCE** in PR #335; merged commit `6c153f6d8661555312760f1f4d113b0b723e17c0`. All 8 GitHub Actions workflows and the Cloudflare Workers Build check passed. Dedicated domain command implementation and runtime UAT remain open.
 - Evidence:
   - `supabase/functions/mta-api/index.ts` previously checked the current block/room `scope_id` for PATCH, but did not reject a caller-supplied new `scope_id`.
   - Room PATCH did not validate a changed `block_id` against the actor's canonical scope.
@@ -220,7 +220,7 @@ Related release state at audit time:
 ### MUT-010 — Standard API exposes hard DELETE for detainees while the application lifecycle uses archive
 
 - Severity: **HIGH**
-- Status: **REMEDIATION IN PR #335 — CI/review pending**.
+- Status: **REMEDIATED AT SOURCE** in PR #335; merged commit `6c153f6d8661555312760f1f4d113b0b723e17c0`. All 8 GitHub Actions workflows and the Cloudflare Workers Build check passed. Dedicated domain command implementation and runtime UAT remain open.
 - Evidence:
   - `MUTATION_ROLE_POLICY.detainees` previously permitted DELETE for OWNER/ADMIN.
   - The production adapter's `mutateDetainee("archive")` uses PATCH to set status to `NONAKTIF` and records archive metadata; it does not use DELETE.
