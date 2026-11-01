@@ -98,6 +98,24 @@ test("local HTTP is allowed only for loopback development", () => {
     })),
     /MTA_CONFIG_INVALID:SUPABASE_URL_PROTOCOL/,
   );
+  assert.throws(
+    () => loadMtaRuntimeConfig(reader({
+      ...base,
+      SUPABASE_URL: "http://localhost:54321",
+      MTA_ENVIRONMENT: "production",
+    })),
+    /MTA_CONFIG_INVALID:SUPABASE_URL_PROTOCOL/,
+  );
+});
+
+test("service and anon keys must be distinct", () => {
+  assert.throws(
+    () => loadMtaRuntimeConfig(reader({
+      ...base,
+      SUPABASE_SERVICE_ROLE_KEY: base.SUPABASE_ANON_KEY,
+    })),
+    /MTA_CONFIG_INVALID:KEY_SEPARATION/,
+  );
 });
 
 test("invalid environment and production write flag fail closed", () => {
