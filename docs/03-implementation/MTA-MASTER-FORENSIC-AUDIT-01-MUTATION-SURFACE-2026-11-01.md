@@ -316,6 +316,24 @@ Related release state at audit time:
 5. Add direct PostgREST tests using a valid token for an account with `must_change_password=true`; all operational table access must be denied while the self-service password-change path remains available.
 6. Keep the migration freeze; do not apply this migration to production until separately approved and rehearsed.
 
+### AUTH-004 — Legacy admin-register creates a second, non-canonical identity provisioning path
+
+- Severity: **MEDIUM**
+- Evidence:
+  - `supabase/functions/mta-api/index.ts` exposes `admin-register` to OWNER/ADMIN and calls `auth.admin.createUser` with an arbitrary email, without requiring an 18-digit NIP and without appending a canonical `USER_CREATE` audit event.
+  - `supabase/migrations/20260921070000_mta_production_auth_rbac_v1.sql` bootstraps a profile with the default VIEWER role and display name derived from email.
+  - `supabase/migrations/20260928114500_mta_identity_credential_bootstrap_v1.sql` marks bootstrapped users `must_change_password=true`.
+  - `supabase/migrations/20261001090000_mta_nip_identity_contract_v1.sql` makes NIP the canonical login identifier; `mta_profiles.nip` is nullable at schema level but unique when present.
+  - No frontend call site for `admin-register` was found in the audited web source.
+- Consequence: the API retains an alternate account-creation path that does not establish the canonical NIP identity or the same audit lifecycle as `admin-users`. It can create a profile that cannot use the intended NIP login until separately repaired.
+- This route is protected by OWNER/ADMIN authorization and the global production write gate; no unauthorized account creation is claimed.
+
+**Required remediation**
+1. Confirm whether `admin-register` is still an approved onboarding path.
+2. If not, deprecate it and return a stable `410 ADMIN_REGISTER_DEPRECATED`.
+3. If retained, require NIP and route through the same canonical provisioning workflow, with idempotency, audit, rollback/reconciliation, and explicit credential delivery.
+4. Add a test proving there is only one supported identity creation path.
+
 ### AUTH-001 — Login handler has no visible application-level rate limit or authentication audit
 
 - Severity: **HIGH**
