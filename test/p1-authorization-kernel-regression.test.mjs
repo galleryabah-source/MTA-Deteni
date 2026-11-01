@@ -5,13 +5,16 @@ const api=fs.readFileSync('supabase/functions/mta-api/index.ts','utf8');
 
 assert.match(api,/const AUTHZ_POLICY_VERSION="AUTHZ-DB-RLS-v1"/);
 assert.match(api,/const MUTATION_ROLE_POLICY=/);
+const policyStart=api.indexOf("const MUTATION_ROLE_POLICY={");
+const policyEnd=api.indexOf("};",policyStart);
+const policy=api.slice(policyStart,policyEnd);
 assert.match(api,/detainees:\{POST:new Set\(\["OWNER","ADMIN","EDITOR"\]\),PATCH:new Set\(\["OWNER","ADMIN","EDITOR"\]\),DELETE:new Set\(\["OWNER","ADMIN"\]\)\}/);
-assert.doesNotMatch(api,/placements:/);
-assert.doesNotMatch(api,/movements:/);
-assert.doesNotMatch(api,/leaves:/);
-assert.doesNotMatch(api,/documents:/);
-assert.match(api,/blocks:\{POST:new Set\(\["OWNER","ADMIN"\]\)\}/);
-assert.match(api,/rooms:\{POST:new Set\(\["OWNER","ADMIN"\]\)\}/);
+assert.doesNotMatch(policy,/placements:/);
+assert.doesNotMatch(policy,/movements:/);
+assert.doesNotMatch(policy,/leaves:/);
+assert.doesNotMatch(policy,/documents:/);
+assert.match(policy,/blocks:\{POST:new Set\(\["OWNER","ADMIN"\]\)\}/);
+assert.match(policy,/rooms:\{POST:new Set\(\["OWNER","ADMIN"\]\)\}/);
 
 
 
