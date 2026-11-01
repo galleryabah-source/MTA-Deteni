@@ -230,6 +230,25 @@ Related release state at audit time:
   2. Keep archive as a status/metadata transition with audit and idempotency.
   3. If legal purge is ever required, implement a separate approval-controlled retention/purge workflow with legal basis, retention checks, evidence, and explicit authorization.
 
+### MUT-011 — Administrative and self-service mutation routes bypass the common idempotency-key boundary
+
+- Severity: **HIGH**
+- Evidence:
+  - The generic table mutation path in `supabase/functions/mta-api/index.ts` requires `Idempotency-Key` before invoking `mta_execute_idempotent_mutation`.
+  - The special `MOVE_DETAINEE` path also uses the request's idempotency key.
+  - The earlier route-specific branches for `admin-users`, `admin-config`, `ai-config`, `ai-job`, `admin-register`, and `/me` execute before the generic idempotency-key check.
+  - `admin-users` password reset generates a new temporary password on each call; `ai-job` creates a new job row per POST; other admin writes can append duplicate audit records on retries.
+  - Backup restore has its own backup-ID/request-hash replay contract and is tracked separately under MUT-007.
+- Consequence: network retries, double-clicks, or client resubmission can repeat administrative side effects or create duplicate jobs. A request ID/correlation ID is not a substitute for a durable idempotency key and replay result.
+- This is a source-level boundary gap; no duplicate production operations are claimed.
+
+**Required remediation**
+1. Define a shared mutation envelope for every route-specific write: actor, action, resource, idempotency key, request hash, request ID, and correlation ID.
+2. Persist an idempotency operation record before performing side effects and return the original result on a matching replay.
+3. Reject reuse of the same key with a different request hash.
+4. For Supabase Auth and AI-provider side effects, use an explicit saga/operation state and reconciliation rather than pretending they are part of a PostgreSQL transaction.
+5. Add retry/replay/concurrent duplicate tests for each route family.
+
 ### AUD-001 — Audit sequence verifier can reject valid transactions after rollback
 
 - Severity: **HIGH**
@@ -437,7 +456,7 @@ The audit also confirmed several important protections that should be preserved:
 |---:|---|---|---|
 | 1 | MUT-001 and MUT-002 — completed in PR #334 | 8/8 PR CI workflows PASS; authenticated role/scope UAT remains | API source correction complete; runtime UAT open |
 | 2 | MUT-008, MUT-009, and MUT-010 — remediation in PR #335 | Generic write denial + archive-only and master-data fail-closed tests | Prevent state-machine, scope, and hard-delete bypass |
-| 3 | Fix MUT-003 | Failure-injection tests; atomic DB RPC / saga evidence | Identity/admin integrity |
+| 3 | Fix MUT-003 and MUT-011 | Failure-injection, idempotency replay, and saga/reconciliation evidence | Identity/admin integrity |
 | 4 | Redesign MUT-004/005/006/007 and STO-001 | Snapshot, completeness, restore, immutability, replay, private-object authorization tests | Recovery and storage certification |
 | 5 | Fix AUD-001 | PostgreSQL rollback/sequence integration test | Audit certification |
 | 6 | Resolve AUTHZ-002 and SCOPE-001 | Owner-approved scope policy + read-only production reconciliation + cross-scope API/RLS tests | Authorization and scope release blocker |
