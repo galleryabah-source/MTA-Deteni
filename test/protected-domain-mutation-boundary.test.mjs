@@ -37,23 +37,19 @@ test("placements, leaves, and documents fail closed until dedicated commands exi
   assert.match(api, /if\(WRITE_METHODS\.has\(req\.method\)&&canonicalWriteRequired\)/);
 });
 
-test("block and room scope identities cannot be rebound by PATCH", () => {
-  assert.match(api, /BLOCK_SCOPE_IMMUTABLE/);
-  assert.match(api, /ROOM_SCOPE_IMMUTABLE/);
-  assert.match(api, /if\(current\.data\.scope_id!==canonicalScopeId\)/);
+test("master block and room updates fail closed pending transactional commands", () => {
+  assert.match(api, /BLOCK_MASTER_COMMAND_REQUIRED/);
+  assert.match(api, /ROOM_MASTER_COMMAND_REQUIRED/);
+  assert.match(api, /resource==="blocks"\\|\\|resource==="rooms"/);
+  assert.match(api, /req.method==="PATCH"\\|\\|req.method==="DELETE"/);
+  assert.doesNotMatch(api, /blocks:\\{POST:new Set\\(\\["OWNER","ADMIN"\\]\\),PATCH:/);
+  assert.doesNotMatch(api, /rooms:\\{POST:new Set\\(\\["OWNER","ADMIN"\\]\\),PATCH:/);
 });
 
-test("room block relation is checked against the actor's canonical scope", () => {
-  assert.match(api, /mta_blocks"\)\.select\("scope_id,status"\)\.eq\("id",String\(body\.block_id\)\)/);
+test("new rooms require an active block in the same canonical scope", () => {
+  assert.match(api, /mta_blocks"\\)\\.select\\("scope_id,status"\\)\\.eq\\("id",blockId\\)/);
   assert.match(api, /BLOCK_INACTIVE/);
-  assert.match(api, /ROOM_HAS_ACTIVE_PLACEMENTS/);
-});
-
-test("room capacity and deactivation cannot violate current occupancy", () => {
-  assert.match(api, /mta_placements"\)\.select\("id",\{count:"exact",head:true\}\)\.eq\("room_id",id\)\.is\("until",null\)/);
-  assert.match(api, /ROOM_CAPACITY_BELOW_OCCUPANCY/);
-  assert.match(api, /ROOM_OCCUPIED_CANNOT_DEACTIVATE/);
-  assert.match(api, /BLOCK_HAS_ACTIVE_ROOMS/);
+  assert.match(api, /body=\\{\\.\\.\\.body,scope_id:canonicalScopeId\\}/);
 });
 
 console.log("MTA DETENI protected domain mutation boundary regression PASS");
