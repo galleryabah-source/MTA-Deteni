@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import { loadMtaRuntimeConfig } from "../supabase/functions/_shared/runtime-config.mjs";
+import { readFileSync } from "node:fs";
 
 const base = {
   SUPABASE_URL: "https://example.supabase.co",
@@ -10,6 +11,15 @@ const base = {
   MTA_ENVIRONMENT: "production",
 };
 const reader = (values) => (name) => values[name];
+
+test("Edge Functions use the shared loader instead of ad hoc environment reads", () => {
+  const api = readFileSync(new URL("../supabase/functions/mta-api/index.ts", import.meta.url), "utf8");
+  const login = readFileSync(new URL("../supabase/functions/mta-login/index.ts", import.meta.url), "utf8");
+  assert.equal((api.match(/Deno\.env\.get\(/g) || []).length, 1);
+  assert.equal((login.match(/Deno\.env\.get\(/g) || []).length, 1);
+  assert.match(api, /loadMtaRuntimeConfig\(\(name\)=>Deno\.env\.get\(name\)\)/);
+  assert.match(login, /loadMtaRuntimeConfig\(\(name\)=>Deno\.env\.get\(name\)\)/);
+});
 
 test("runtime config loads required server values and normalizes environment", () => {
   const config = loadMtaRuntimeConfig(reader(base));
