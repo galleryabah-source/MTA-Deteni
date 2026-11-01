@@ -5,13 +5,23 @@ const api=fs.readFileSync('supabase/functions/mta-api/index.ts','utf8');
 
 assert.match(api,/const AUTHZ_POLICY_VERSION="AUTHZ-DB-RLS-v1"/);
 assert.match(api,/const MUTATION_ROLE_POLICY=/);
-assert.match(api,/detainees:\{POST:new Set\(\["OWNER","ADMIN","EDITOR"\]\),PATCH:new Set\(\["OWNER","ADMIN","EDITOR"\]\),DELETE:new Set\(\["OWNER","ADMIN"\]\)\}/);
-assert.match(api,/placements:\{POST:new Set\(\["OWNER","ADMIN","EDITOR"\]\),PATCH:new Set\(\["OWNER","ADMIN","EDITOR"\]\),DELETE:new Set\(\["OWNER","ADMIN"\]\)\}/);
-assert.match(api,/movements:\{POST:new Set\(\["OWNER","ADMIN","EDITOR"\]\),PATCH:new Set\(\["OWNER","ADMIN","EDITOR"\]\),DELETE:new Set\(\["OWNER","ADMIN"\]\)\}/);
-assert.match(api,/leaves:\{POST:new Set\(\["OWNER","ADMIN","EDITOR"\]\),PATCH:new Set\(\["OWNER","ADMIN","EDITOR"\]\),DELETE:new Set\(\["OWNER","ADMIN"\]\)\}/);
-assert.match(api,/documents:\{POST:new Set\(\["OWNER","ADMIN","EDITOR"\]\),PATCH:new Set\(\["OWNER","ADMIN","EDITOR"\]\),DELETE:new Set\(\["OWNER","ADMIN"\]\)\}/);
-assert.match(api,/blocks:\{POST:new Set\(\["OWNER","ADMIN"\]\),PATCH:new Set\(\["OWNER","ADMIN"\]\),DELETE:new Set\(\["OWNER","ADMIN"\]\)\}/);
-assert.match(api,/rooms:\{POST:new Set\(\["OWNER","ADMIN"\]\),PATCH:new Set\(\["OWNER","ADMIN"\]\),DELETE:new Set\(\["OWNER","ADMIN"\]\)\}/);
+const policyStart=api.indexOf("const MUTATION_ROLE_POLICY={");
+const policyEnd=api.indexOf("};",policyStart);
+const policy=api.slice(policyStart,policyEnd);
+assert.match(policy,/detainees:\{POST:new Set\(\["OWNER","ADMIN","EDITOR"\]\),PATCH:new Set\(\["OWNER","ADMIN","EDITOR"\]\)\}/);
+assert.doesNotMatch(policy,/detainees:\{[^}]*DELETE:/);
+assert.doesNotMatch(policy,/placements:/);
+assert.doesNotMatch(policy,/movements:/);
+assert.doesNotMatch(policy,/leaves:/);
+assert.doesNotMatch(policy,/documents:/);
+assert.match(policy,/blocks:\{POST:new Set\(\["OWNER","ADMIN"\]\)\}/);
+assert.match(policy,/rooms:\{POST:new Set\(\["OWNER","ADMIN"\]\)\}/);
+
+
+
+
+
+
 
 assert.match(api,/const authorizeGenericMutation=async/);
 assert.match(api,/return denyAuthorization\("PERMISSION_DENIED"\)/);

@@ -15,8 +15,9 @@ test("MUT-001: detainee root scope lookup selects root-table columns", () => {
   assert.match(api, /select\(currentColumns\)\.eq\("id",id\)/);
   assert.match(
     api,
-    /detainees:\{POST:new Set\(\["OWNER","ADMIN","EDITOR"\]\),PATCH:new Set\(\["OWNER","ADMIN","EDITOR"\]\),DELETE:new Set\(\["OWNER","ADMIN"\]\)\}/,
+    /detainees:\{POST:new Set\(\["OWNER","ADMIN","EDITOR"\]\),PATCH:new Set\(\["OWNER","ADMIN","EDITOR"\]\)\}/,
   );
+  assert.doesNotMatch(api, /detainees:\{[^}]*DELETE:/);
 });
 
 test("MUT-002: admin-users create route is collection-only; reset route remains reachable", () => {

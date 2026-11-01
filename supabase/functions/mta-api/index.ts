@@ -12,14 +12,14 @@ const sha256Hex=async(value)=>{const bytes=new TextEncoder().encode(value),hash=
 const productionWritesEnabled=()=>Deno.env.get("MTA_PRODUCTION_WRITES_ENABLED")==="true";
 const WRITE_METHODS=new Set(["POST","PATCH","DELETE"]);
 const AUTHZ_POLICY_VERSION="AUTHZ-DB-RLS-v1";
+// Protected lifecycle resources are deliberately absent here. They may be read
+// through TABLES, but writes must use their dedicated domain transaction command.
 const MUTATION_ROLE_POLICY={
-  detainees:{POST:new Set(["OWNER","ADMIN","EDITOR"]),PATCH:new Set(["OWNER","ADMIN","EDITOR"]),DELETE:new Set(["OWNER","ADMIN"])},
-  placements:{POST:new Set(["OWNER","ADMIN","EDITOR"]),PATCH:new Set(["OWNER","ADMIN","EDITOR"]),DELETE:new Set(["OWNER","ADMIN"])},
-  movements:{POST:new Set(["OWNER","ADMIN","EDITOR"]),PATCH:new Set(["OWNER","ADMIN","EDITOR"]),DELETE:new Set(["OWNER","ADMIN"])},
-  leaves:{POST:new Set(["OWNER","ADMIN","EDITOR"]),PATCH:new Set(["OWNER","ADMIN","EDITOR"]),DELETE:new Set(["OWNER","ADMIN"])},
-  documents:{POST:new Set(["OWNER","ADMIN","EDITOR"]),PATCH:new Set(["OWNER","ADMIN","EDITOR"]),DELETE:new Set(["OWNER","ADMIN"])},
-  blocks:{POST:new Set(["OWNER","ADMIN"]),PATCH:new Set(["OWNER","ADMIN"]),DELETE:new Set(["OWNER","ADMIN"])},
-  rooms:{POST:new Set(["OWNER","ADMIN"]),PATCH:new Set(["OWNER","ADMIN"]),DELETE:new Set(["OWNER","ADMIN"])}
+  detainees:{POST:new Set(["OWNER","ADMIN","EDITOR"]),PATCH:new Set(["OWNER","ADMIN","EDITOR"])},
+  // Master Block/Room creation is scope-bound; updates/deletes require a
+  // dedicated transactional master-data command and are intentionally absent.
+  blocks:{POST:new Set(["OWNER","ADMIN"])},
+  rooms:{POST:new Set(["OWNER","ADMIN"])}
 };
 const SCOPED_MUTATION_RESOURCES=new Set(["detainees","placements","movements","leaves"]);
 const denyAuthorization=(reasonCode)=>({allowed:false,reasonCode,policyVersion:AUTHZ_POLICY_VERSION});
@@ -568,6 +568,15 @@ Deno.serve(async(req)=>{
     let body=req.method==="DELETE"?{}:await req.json().catch(()=>({}));
     let identityDecisionForAudit="";
     let canonicalScopeId=null;
+    if(resource==="detainees"&&req.method==="DELETE"){
+      emit("WARN","detainee.archive_only",{status:405,outcome:"DENIED",errorCode:"DETAINEE_ARCHIVE_ONLY",resource});
+      return json(req,{ok:false,error:"DETAINEE_ARCHIVE_ONLY",resource,requestId,correlationId},405,{requestId,correlationId});
+    }
+    if((resource==="blocks"||resource==="rooms")&&(req.method==="PATCH"||req.method==="DELETE")){
+      const errorCode=resource==="blocks"?"BLOCK_MASTER_COMMAND_REQUIRED":"ROOM_MASTER_COMMAND_REQUIRED";
+      emit("WARN","master_data.command.required",{status:405,outcome:"DENIED",errorCode,resource});
+      return json(req,{ok:false,error:errorCode,resource,requestId,correlationId},405,{requestId,correlationId});
+    }
     if(["blocks","rooms","detainees"].includes(resource)){
       const scoped=await admin.from("mta_profile_scopes").select("scope_id").eq("profile_id",user.id).eq("active",true).limit(1).maybeSingle();
       if(scoped.error||!scoped.data?.scope_id)return json(req,{ok:false,error:"SCOPE_REQUIRED"},409);
@@ -603,28 +612,17 @@ Deno.serve(async(req)=>{
         if(current.data.scope_id!==canonicalScopeId)return json(req,{ok:false,error:"WRONG_SCOPE"},403);
       }
     }
-    if(resource==="blocks"){
-      if(req.method==="POST"){
-        body={...body,scope_id:canonicalScopeId};
-      }else if(id){
-        const current=await admin.from("mta_blocks").select("scope_id").eq("id",id).single();
-        if(current.error||!current.data)return json(req,{ok:false,error:"BLOCK_NOT_FOUND"},404);
-        if(current.data.scope_id!==canonicalScopeId)return json(req,{ok:false,error:"WRONG_SCOPE"},403);
-      }
+    if(resource==="blocks"&&req.method==="POST"){
+      body={...body,scope_id:canonicalScopeId};
     }
-    if(resource==="rooms"){
-      if(req.method==="POST"){
-        const blockId=String(body.block_id||"");
-        if(!blockId)return json(req,{ok:false,error:"ROOM_BLOCK_REQUIRED"},400);
-        const block=await admin.from("mta_blocks").select("scope_id").eq("id",blockId).single();
-        if(block.error||!block.data?.scope_id)return json(req,{ok:false,error:"BLOCK_NOT_FOUND"},404);
-        if(block.data.scope_id!==canonicalScopeId)return json(req,{ok:false,error:"WRONG_SCOPE"},403);
-        body={...body,scope_id:canonicalScopeId};
-      }else if(id){
-        const current=await admin.from("mta_rooms").select("scope_id").eq("id",id).single();
-        if(current.error||!current.data)return json(req,{ok:false,error:"ROOM_NOT_FOUND"},404);
-        if(current.data.scope_id!==canonicalScopeId)return json(req,{ok:false,error:"WRONG_SCOPE"},403);
-      }
+    if(resource==="rooms"&&req.method==="POST"){
+      const blockId=String(body.block_id||"");
+      if(!blockId)return json(req,{ok:false,error:"ROOM_BLOCK_REQUIRED"},400);
+      const block=await admin.from("mta_blocks").select("scope_id,status").eq("id",blockId).single();
+      if(block.error||!block.data?.scope_id)return json(req,{ok:false,error:"BLOCK_NOT_FOUND"},404);
+      if(block.data.scope_id!==canonicalScopeId)return json(req,{ok:false,error:"WRONG_SCOPE"},403);
+      if(String(block.data.status||"").toUpperCase()!=="ACTIVE")return json(req,{ok:false,error:"BLOCK_INACTIVE"},409);
+      body={...body,scope_id:canonicalScopeId};
     }
     if(req.method==="POST" && resource==="movements" && body?.command==="MOVE_DETAINEE"){
       const requestHash=await sha256Hex(stableJson({method:req.method,resource,body}));
@@ -659,6 +657,18 @@ Deno.serve(async(req)=>{
         return json(req,{ok:false,error:"TRANSACTIONAL_MOVEMENT_REJECTED",command:"MOVE_DETAINEE",requestId,correlationId},400);
       }
       return json(req,{ok:true,resource,role,command:"MOVE_DETAINEE",data,replayed:!!data?.replayed},data?.replayed?200:201);
+    }
+    // These resources represent protected domain lifecycles. Do not allow
+    // generic table writes to bypass their domain transaction commands.
+    const canonicalWriteRequired={
+      movements:"MOVEMENT_CANONICAL_COMMAND_REQUIRED",
+      placements:"PLACEMENT_CANONICAL_COMMAND_REQUIRED",
+      leaves:"LEAVE_CANONICAL_COMMAND_REQUIRED",
+      documents:"DOCUMENT_CANONICAL_COMMAND_REQUIRED"
+    }[resource];
+    if(WRITE_METHODS.has(req.method)&&canonicalWriteRequired){
+      emit("WARN","canonical_command.required",{status:405,outcome:"DENIED",errorCode:canonicalWriteRequired,resource});
+      return json(req,{ok:false,error:canonicalWriteRequired,resource,requestId,correlationId},405,{requestId,correlationId});
     }
     const authorizationDecision=await authorizeGenericMutation({admin,userId:user.id,role,resource,method:req.method,id,body});
     if(!authorizationDecision.allowed){
