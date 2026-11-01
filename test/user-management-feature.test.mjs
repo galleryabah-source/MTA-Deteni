@@ -3,6 +3,7 @@ import { strict as assert } from 'node:assert';
 const s=readFileSync(new URL('../web/user-management-v1.js',import.meta.url),'utf8');
 const api=readFileSync(new URL('../web/mta-production-api.js',import.meta.url),'utf8');
 const apiServer=readFileSync(new URL('../supabase/functions/mta-api/index.ts',import.meta.url),'utf8');
+const runtimeConfig=readFileSync(new URL('../supabase/functions/_shared/runtime-config.mjs',import.meta.url),'utf8');
 const i=readFileSync(new URL('../web/index.html',import.meta.url),'utf8');
 const reg=readFileSync(new URL('../FEATURE_REGISTRY.md',import.meta.url),'utf8');
 
@@ -25,7 +26,9 @@ assert.match(api,/create:\(resource,body\)=>request\(resource,\{method:'POST',bo
 assert.match(api,/update:\(resource,id,body\)=>request\(resource,\{method:'PATCH',id,body\}\)/);
 assert.match(apiServer,/resource==="admin-users"/);
 assert.match(apiServer,/new Set\(\["OWNER","ADMIN"\]\)/);
-assert.match(apiServer,/SUPABASE_SERVICE_ROLE_KEY/);
+assert.match(apiServer,/createAdminClient/);
+assert.match(apiServer,/runtimeConfig\.supabaseServiceRoleKey/);
+assert.match(runtimeConfig,/SUPABASE_SERVICE_ROLE_KEY/);
 assert.match(apiServer,/auth\.admin\.createUser/);
 assert.match(apiServer,/mta_profiles/);
 assert.match(apiServer,/USER_CREATE/);
