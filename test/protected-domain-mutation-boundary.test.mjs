@@ -40,16 +40,16 @@ test("placements, leaves, and documents fail closed until dedicated commands exi
 test("master block and room updates fail closed pending transactional commands", () => {
   assert.match(api, /BLOCK_MASTER_COMMAND_REQUIRED/);
   assert.match(api, /ROOM_MASTER_COMMAND_REQUIRED/);
-  assert.match(api, /resource==="blocks"\\|\\|resource==="rooms"/);
-  assert.match(api, /req.method==="PATCH"\\|\\|req.method==="DELETE"/);
-  assert.doesNotMatch(api, /blocks:\\{POST:new Set\\(\\["OWNER","ADMIN"\\]\\),PATCH:/);
-  assert.doesNotMatch(api, /rooms:\\{POST:new Set\\(\\["OWNER","ADMIN"\\]\\),PATCH:/);
+  assert.match(api, /resource==="blocks"\|\|resource==="rooms"/);
+  assert.match(api, /req.method==="PATCH"\|\|req.method==="DELETE"/);
+  assert.doesNotMatch(api, /blocks:\{POST:new Set\(\["OWNER","ADMIN"\]\),PATCH:/);
+  assert.doesNotMatch(api, /rooms:\{POST:new Set\(\["OWNER","ADMIN"\]\),PATCH:/);
 });
 
 test("new rooms require an active block in the same canonical scope", () => {
-  assert.match(api, /mta_blocks"\\)\\.select\\("scope_id,status"\\)\\.eq\\("id",blockId\\)/);
+  assert.match(api, /mta_blocks"\)\.select\("scope_id,status"\)\.eq\("id",blockId\)/);
   assert.match(api, /BLOCK_INACTIVE/);
-  assert.match(api, /body=\\{\\.\\.\\.body,scope_id:canonicalScopeId\\}/);
+  assert.match(api, /body=\{\.\.\.body,scope_id:canonicalScopeId\}/);
 });
 
 console.log("MTA DETENI protected domain mutation boundary regression PASS");
