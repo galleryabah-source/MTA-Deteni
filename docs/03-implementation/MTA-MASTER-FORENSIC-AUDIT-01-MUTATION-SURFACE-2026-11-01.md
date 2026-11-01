@@ -29,6 +29,8 @@ This is a **source-level forensic audit**. It does not prove production runtime 
 - `supabase/migrations/20261013090000_mta_detainee_activity_health_records_v1.sql`
 - `supabase/migrations/20260923040000_mta_document_storage_read_hardening.sql`
 - `docs/03-implementation/P9.9-PRIVATE-STORAGE-KERNEL-v1.0.md`
+- `Pengerjaan V.01.txt` — P9.2 Configuration, P9.3 Authentication, P9.4 Authorization, P9.5 Audit contracts.
+- `web/mta-auth.js`
 - `docs/03-implementation/P9.6-AUTHORIZATION-MATRIX.md`
 - `docs/03-implementation/P9.6-CANONICAL-SCOPE-IDENTITY-SOURCE-OF-TRUTH-AUDIT.md`
 - `docs/06-architecture/AUTHORIZATION-CONTROL-PLANE.md`
@@ -179,6 +181,39 @@ Related release state at audit time:
 3. Add a PostgreSQL integration test: insert audit event, force a later statement failure/rollback, commit a subsequent event, then verify integrity.
 4. Preserve historical epoch evidence and do not rewrite historical audit records.
 
+### CFG-001 — Environment configuration is read ad hoc rather than validated through a central startup contract
+
+- Severity: **MEDIUM**
+- Evidence:
+  - `supabase/functions/mta-api/index.ts` contains 27 direct `Deno.env.get(...)` calls.
+  - `supabase/functions/mta-login/index.ts` contains 3 direct `Deno.env.get(...)` calls.
+  - The audited repository tree contains no central typed environment-schema/loader module for these Edge Functions.
+  - The P9.2 contract in `Pengerjaan V.01.txt` requires a central environment loader, schema validation, separation by environment, and fail-fast handling for critical configuration.
+- Consequence: configuration validity is checked at individual request/route boundaries rather than being established once as a typed runtime contract. This can defer discovery of missing critical configuration until a particular route is called.
+- The inspected code does not expose secret values in these calls; the finding is about configuration governance and validation, not evidence of secret leakage.
+
+**Required remediation**
+1. Introduce a shared typed configuration loader for Supabase Edge Functions.
+2. Validate required URL/key formats and environment mode once per isolate initialization; fail closed for critical configuration.
+3. Keep secrets server-side and redact values from errors/logs.
+4. Add tests for missing, malformed, cross-environment, and optional AI-off configuration.
+5. Do not add secrets to Git or change production environment variables as part of this code remediation.
+
+### AUTH-002 — Browser authentication session is persisted in localStorage, contrary to the P9.3 secure-cookie preference
+
+- Severity: **HIGH — ARCHITECTURE DECISION REQUIRED**
+- Evidence: `web/mta-auth.js` configures Supabase Auth with `persistSession:true` and `storage:window.localStorage`, then calls `supabase.auth.setSession()` with the session returned by `/api/mta-login`.
+- The P9.3 Authentication Kernel in `Pengerjaan V.01.txt` requires secure, HttpOnly, SameSite, expiring/revocable sessions and says not to store authentication secrets in localStorage where a secure HttpOnly-cookie pattern can be used.
+- The current UI review document separately records a decision to preserve the existing Supabase storage key/persistence model while fixing hydration behavior. The two contracts therefore need explicit reconciliation.
+- Consequence: an XSS vulnerability capable of executing same-origin script can potentially read browser-persisted session material. This audit does not claim that XSS has been found.
+
+**Required remediation**
+1. Make an explicit architecture decision between a BFF/HttpOnly-cookie session boundary and a documented Supabase browser-session exception with compensating XSS controls.
+2. If moving to cookies, design CSRF protection, refresh/rotation, logout revocation, cross-tab behavior, and API authentication together; do not simply disable localStorage without a replacement session mechanism.
+3. Add CSP, Trusted Types where supported, dependency pinning, and XSS regression tests regardless of the chosen session model.
+4. Verify explicit logout, global revocation, hard refresh, refresh-token rotation, and disabled-user behavior in browser UAT.
+5. Do not change the session mechanism as an isolated patch.
+
 ### AUTH-001 — Login handler has no visible application-level rate limit or authentication audit
 
 - Severity: **HIGH**
@@ -285,9 +320,10 @@ The audit also confirmed several important protections that should be preserved:
 | 3 | Redesign MUT-004/005/006/007 and STO-001 | Snapshot, completeness, restore, immutability, replay, private-object authorization tests | Recovery and storage certification |
 | 4 | Fix AUD-001 | PostgreSQL rollback/sequence integration test | Audit certification |
 | 5 | Resolve AUTHZ-002 and SCOPE-001 | Owner-approved scope policy + read-only production reconciliation + cross-scope API/RLS tests | Authorization and scope release blocker |
-| 6 | Fix AUTH-001 | Edge policy evidence + login security tests | Authentication hardening |
-| 7 | Implement GOV-001 | Per-resource release gate tests | Controlled production activation |
-| 8 | Full regression | `npm test`, `npm run typecheck`, SQL integration, browser UAT | Re-certification |
+| 6 | Resolve CFG-001 and AUTH-002 | Typed environment validation + approved session architecture + browser security tests | Configuration/authentication hardening |
+| 7 | Fix AUTH-001 | Edge policy evidence + login security tests | Authentication hardening |
+| 8 | Implement GOV-001 | Per-resource release gate tests | Controlled production activation |
+| 9 | Full regression | `npm test`, `npm run typecheck`, SQL integration, browser UAT | Re-certification |
 
 ## 6. Explicit non-actions
 
@@ -312,6 +348,6 @@ The mutation surface is not certified until:
 6. Private storage binary access enforces object-level scope/classification and passes negative role/scope tests.
 7. Audit integrity remains valid across commit, rollback, retry, replay, and restore scenarios.
 8. Negative authorization tests prove cross-scope and role bypass attempts are denied.
-9. CI, runtime, and release evidence are recorded separately.
+10. CI, runtime, and release evidence are recorded separately.
 
 **Final status: FINDINGS RECORDED / REMEDIATION REQUIRED / PRODUCTION NO-GO UNCHANGED.**
