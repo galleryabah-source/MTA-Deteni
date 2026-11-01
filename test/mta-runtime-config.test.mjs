@@ -15,10 +15,12 @@ const reader = (values) => (name) => values[name];
 test("Edge Functions use the shared loader instead of ad hoc environment reads", () => {
   const api = readFileSync(new URL("../supabase/functions/mta-api/index.ts", import.meta.url), "utf8");
   const login = readFileSync(new URL("../supabase/functions/mta-login/index.ts", import.meta.url), "utf8");
-  assert.equal((api.match(/Deno\.env\.get\(/g) || []).length, 1);
-  assert.equal((login.match(/Deno\.env\.get\(/g) || []).length, 1);
-  assert.match(api, /loadMtaRuntimeConfig\(\(name\)=>Deno\.env\.get\(name\)\)/);
-  assert.match(login, /loadMtaRuntimeConfig\(\(name\)=>Deno\.env\.get\(name\)\)/);
+  const outbox = readFileSync(new URL("../supabase/functions/mta-outbox-dispatcher/index.ts", import.meta.url), "utf8");
+  for (const source of [api, login, outbox]) {
+    assert.equal((source.match(/Deno\.env\.get\(/g) || []).length, 1);
+    assert.match(source, /loadMtaRuntimeConfig\(\(name\)=>Deno\.env\.get\(name\)/);
+  }
+  assert.match(outbox, /requireAnonKey:false/);
 });
 
 test("runtime config loads required server values and normalizes environment", () => {
@@ -53,6 +55,16 @@ test("production writes require both explicit true and PRODUCTION environment", 
   }));
   assert.equal(unspecified.environment, "UNSPECIFIED");
   assert.equal(unspecified.productionWritesEnabled, false);
+});
+
+test("outbox dispatcher can use the least-privilege config profile without anon key", () => {
+  const config = loadMtaRuntimeConfig(reader({
+    SUPABASE_URL: base.SUPABASE_URL,
+    SUPABASE_SERVICE_ROLE_KEY: base.SUPABASE_SERVICE_ROLE_KEY,
+    MTA_ENVIRONMENT: "production",
+  }), { requireAnonKey: false });
+  assert.equal(config.supabaseAnonKey, "");
+  assert.equal(config.supabaseServiceRoleKey, base.SUPABASE_SERVICE_ROLE_KEY);
 });
 
 test("missing required variables fail fast without exposing secret values", () => {
