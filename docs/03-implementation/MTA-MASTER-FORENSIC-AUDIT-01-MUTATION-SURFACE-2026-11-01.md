@@ -216,6 +216,20 @@ Related release state at audit time:
 4. Implement future updates under a database transaction that locks the block/room and relevant placement state before changing status/capacity/relationships.
 5. Add concurrency tests racing room capacity/status updates against movement commits.
 
+### MUT-010 — Standard API exposes hard DELETE for detainees while the application lifecycle uses archive
+
+- Severity: **HIGH**
+- Status: **REMEDIATION IN PR #335 — CI/review pending**.
+- Evidence:
+  - `MUTATION_ROLE_POLICY.detainees` previously permitted DELETE for OWNER/ADMIN.
+  - The production adapter's `mutateDetainee("archive")` uses PATCH to set status to `NONAKTIF` and records archive metadata; it does not use DELETE.
+  - The generic P9.7 mutation RPC supports DELETE for allowlisted tables.
+- Consequence: a privileged caller could invoke a permanent delete path that is not the normal archive workflow. Foreign-key restrictions may prevent some deletes, but they are not a substitute for an explicit retention/purge policy.
+- Required remediation:
+  1. Deny standard API DELETE for detainees.
+  2. Keep archive as a status/metadata transition with audit and idempotency.
+  3. If legal purge is ever required, implement a separate approval-controlled retention/purge workflow with legal basis, retention checks, evidence, and explicit authorization.
+
 ### AUD-001 — Audit sequence verifier can reject valid transactions after rollback
 
 - Severity: **HIGH**
@@ -384,7 +398,7 @@ The audit also confirmed several important protections that should be preserved:
 | Order | Work package | Required evidence | Release impact |
 |---:|---|---|---|
 | 1 | MUT-001 and MUT-002 — completed in PR #334 | 8/8 PR CI workflows PASS; authenticated role/scope UAT remains | API source correction complete; runtime UAT open |
-| 2 | MUT-008 and MUT-009 — remediation in PR #335 | Generic write denial + domain command boundary tests; master data fail-closed tests | Prevent state-machine and scope bypass |
+| 2 | MUT-008, MUT-009, and MUT-010 — remediation in PR #335 | Generic write denial + archive-only and master-data fail-closed tests | Prevent state-machine, scope, and hard-delete bypass |
 | 3 | Fix MUT-003 | Failure-injection tests; atomic DB RPC / saga evidence | Identity/admin integrity |
 | 4 | Redesign MUT-004/005/006/007 and STO-001 | Snapshot, completeness, restore, immutability, replay, private-object authorization tests | Recovery and storage certification |
 | 5 | Fix AUD-001 | PostgreSQL rollback/sequence integration test | Audit certification |
