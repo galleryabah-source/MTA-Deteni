@@ -268,6 +268,7 @@ Related release state at audit time:
 ### CFG-001 — Environment configuration is read ad hoc rather than validated through a central startup contract
 
 - Severity: **MEDIUM**
+- Status: **REMEDIATION IN PR #336 — CI/review pending**.
 - Evidence:
   - `supabase/functions/mta-api/index.ts` contains 27 direct `Deno.env.get(...)` calls.
   - `supabase/functions/mta-login/index.ts` contains 3 direct `Deno.env.get(...)` calls.
