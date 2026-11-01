@@ -270,15 +270,16 @@ Related release state at audit time:
 - Severity: **MEDIUM**
 - Status: **REMEDIATION IN PR #336 — CI/review pending**.
 - Evidence:
-  - `supabase/functions/mta-api/index.ts` contains 27 direct `Deno.env.get(...)` calls.
-  - `supabase/functions/mta-login/index.ts` contains 3 direct `Deno.env.get(...)` calls.
+  - `supabase/functions/mta-api/index.ts` contained 27 direct `Deno.env.get(...)` calls.
+  - `supabase/functions/mta-login/index.ts` contained 3 direct `Deno.env.get(...)` calls.
+  - `supabase/functions/mta-outbox-dispatcher/index.ts` contained 2 direct `Deno.env.get(...)` calls.
   - The audited repository tree contains no central typed environment-schema/loader module for these Edge Functions.
   - The P9.2 contract in `Pengerjaan V.01.txt` requires a central environment loader, schema validation, separation by environment, and fail-fast handling for critical configuration.
 - Consequence: configuration validity is checked at individual request/route boundaries rather than being established once as a typed runtime contract. This can defer discovery of missing critical configuration until a particular route is called.
 - The inspected code does not expose secret values in these calls; the finding is about configuration governance and validation, not evidence of secret leakage.
 
 **Required remediation**
-1. Introduce a shared typed configuration loader for Supabase Edge Functions.
+1. Introduce a shared typed configuration loader for all three Supabase Edge Functions.
 2. Validate required URL/key formats and environment mode once per isolate initialization; fail closed for critical configuration.
 3. Keep secrets server-side and redact values from errors/logs.
 4. Add tests for missing, malformed, cross-environment, and optional AI-off configuration.
