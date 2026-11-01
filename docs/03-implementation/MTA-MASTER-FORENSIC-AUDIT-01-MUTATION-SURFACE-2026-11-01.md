@@ -29,7 +29,7 @@ This is a **source-level forensic audit**. It does not prove production runtime 
 - `supabase/migrations/20261013090000_mta_detainee_activity_health_records_v1.sql`
 - `supabase/migrations/20260923040000_mta_document_storage_read_hardening.sql`
 - `docs/03-implementation/P9.9-PRIVATE-STORAGE-KERNEL-v1.0.md`
-- `Pengerjaan V.01.txt` — P9.2 Configuration, P9.3 Authentication, P9.4 Authorization, P9.5 Audit contracts.
+- User-provided design artifact `Pengerjaan V.01.txt` — P9.2 Configuration, P9.3 Authentication, P9.4 Authorization, P9.5 Audit contracts.
 - `web/mta-auth.js`
 - `docs/03-implementation/P9.6-AUTHORIZATION-MATRIX.md`
 - `docs/03-implementation/P9.6-CANONICAL-SCOPE-IDENTITY-SOURCE-OF-TRUTH-AUDIT.md`
