@@ -26,6 +26,9 @@ This is a **source-level forensic audit**. It does not prove production runtime 
 - `supabase/migrations/20260927123000_mta_transactional_movement_v1.sql`
 - `supabase/migrations/20261002040000_mta_audit_sequence_v1.sql`
 - `supabase/migrations/20261013090000_mta_detainee_activity_health_records_v1.sql`
+- `supabase/migrations/20260923040000_mta_document_storage_read_hardening.sql`
+- `docs/03-implementation/P9.9-PRIVATE-STORAGE-KERNEL-v1.0.md`
+- `src/application/private-storage-contract.ts`
 - `docs/03-implementation/P9.7-recovered-migration-sources/20260922220754_mta_p97_durable_idempotency_transaction_boundary_v3.sql`
 - `docs/03-implementation/P9.7-recovered-migration-sources/20260922220814_mta_p97_durable_idempotency_rpc_wrapper_v1.sql`
 - `supabase/operations/mta_backup_restore_transaction_v1.sql`
@@ -197,6 +200,25 @@ Related release state at audit time:
 3. Require an explicit release record and acceptance evidence for each production mutation domain.
 4. Test that enabling one domain cannot enable another.
 
+### STO-001 — Private bucket binary access is broader than metadata authorization and ignores classification
+
+- Severity: **CRITICAL**
+- Evidence:
+  - `supabase/migrations/20260921070000_mta_production_auth_rbac_v1.sql` creates `mta_storage_read_authenticated` on `storage.objects` for every authenticated OWNER, ADMIN, EDITOR, REVIEWER, and AUDITOR in bucket `mta-deteni-private`.
+  - The same migration's storage insert/update/delete policies are also role/bucket-based rather than object/scope/classification-based.
+  - `supabase/migrations/20260923040000_mta_document_storage_read_hardening.sql` tightens `mta_storage_objects` metadata reads for EDITOR/REVIEWER to documents created by the current user, but it does not replace the broader `storage.objects` binary-read policy.
+  - The `mta_storage_objects.classification` column is not consulted by the bucket access policy.
+  - `docs/03-implementation/P9.9-PRIVATE-STORAGE-KERNEL-v1.0.md` requires server-side authorization, scope, classification, object-state checks, and time-limited download grants; the document marks implementation as not verified.
+- Consequence: if the policy is applied as written and protected objects exist in the bucket, a user in one role can access binary objects beyond the narrower metadata visibility rule. The bucket being private does not by itself provide per-object authorization.
+- This is a source-policy finding. Actual deployed Supabase Storage policy and object contents have not been queried or verified in this audit.
+
+**Required remediation**
+1. Remove broad authenticated binary-read access from `storage.objects`; keep the bucket private.
+2. Route download through a server-authorized object-ID boundary that checks actor, active scope, document ownership/resource, classification, object state, and purpose.
+3. Issue short-lived, object-specific download grants only after authorization; never log signed URLs.
+4. Restrict direct upload to a server-controlled quarantine/validation flow; enforce MIME, size, checksum, classification, and audit.
+5. Add disposable-Supabase tests proving cross-scope and cross-classification reads are denied for EDITOR, REVIEWER, AUDITOR, and other non-authorized roles.
+
 ## 4. Positive controls confirmed
 
 The audit also confirmed several important protections that should be preserved:
@@ -219,7 +241,7 @@ The audit also confirmed several important protections that should be preserved:
 |---:|---|---|---|
 | 1 | Fix MUT-001 and MUT-002 | Route-level and authorization integration tests | API correctness |
 | 2 | Fix MUT-003 | Failure-injection tests; atomic DB RPC / saga evidence | Identity/admin integrity |
-| 3 | Redesign MUT-004/005/006/007 | Snapshot, completeness, restore, immutability, replay tests | Recovery certification |
+| 3 | Redesign MUT-004/005/006/007 and STO-001 | Snapshot, completeness, restore, immutability, replay, private-object authorization tests | Recovery and storage certification |
 | 4 | Fix AUD-001 | PostgreSQL rollback/sequence integration test | Audit certification |
 | 5 | Fix AUTH-001 | Edge policy evidence + login security tests | Authentication hardening |
 | 6 | Implement GOV-001 | Per-resource release gate tests | Controlled production activation |
@@ -245,8 +267,9 @@ The mutation surface is not certified until:
 3. Every successful critical mutation has exactly one canonical audit event and required outbox event.
 4. Every mutation has idempotency and concurrency evidence where applicable.
 5. Backup and restore cover the approved domain model and pass disposable-PostgreSQL integration tests.
-6. Audit integrity remains valid across commit, rollback, retry, replay, and restore scenarios.
-7. Negative authorization tests prove cross-scope and role bypass attempts are denied.
-8. CI, runtime, and release evidence are recorded separately.
+6. Private storage binary access enforces object-level scope/classification and passes negative role/scope tests.
+7. Audit integrity remains valid across commit, rollback, retry, replay, and restore scenarios.
+8. Negative authorization tests prove cross-scope and role bypass attempts are denied.
+9. CI, runtime, and release evidence are recorded separately.
 
 **Final status: FINDINGS RECORDED / REMEDIATION REQUIRED / PRODUCTION NO-GO UNCHANGED.**
