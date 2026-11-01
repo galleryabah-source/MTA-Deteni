@@ -15,7 +15,7 @@ const AUTHZ_POLICY_VERSION="AUTHZ-DB-RLS-v1";
 // Protected lifecycle resources are deliberately absent here. They may be read
 // through TABLES, but writes must use their dedicated domain transaction command.
 const MUTATION_ROLE_POLICY={
-  detainees:{POST:new Set(["OWNER","ADMIN","EDITOR"]),PATCH:new Set(["OWNER","ADMIN","EDITOR"]),DELETE:new Set(["OWNER","ADMIN"])},
+  detainees:{POST:new Set(["OWNER","ADMIN","EDITOR"]),PATCH:new Set(["OWNER","ADMIN","EDITOR"])},
   // Master Block/Room creation is scope-bound; updates/deletes require a
   // dedicated transactional master-data command and are intentionally absent.
   blocks:{POST:new Set(["OWNER","ADMIN"])},
@@ -568,6 +568,10 @@ Deno.serve(async(req)=>{
     let body=req.method==="DELETE"?{}:await req.json().catch(()=>({}));
     let identityDecisionForAudit="";
     let canonicalScopeId=null;
+    if(resource==="detainees"&&req.method==="DELETE"){
+      emit("WARN","detainee.archive_only",{status:405,outcome:"DENIED",errorCode:"DETAINEE_ARCHIVE_ONLY",resource});
+      return json(req,{ok:false,error:"DETAINEE_ARCHIVE_ONLY",resource,requestId,correlationId},405,{requestId,correlationId});
+    }
     if((resource==="blocks"||resource==="rooms")&&(req.method==="PATCH"||req.method==="DELETE")){
       const errorCode=resource==="blocks"?"BLOCK_MASTER_COMMAND_REQUIRED":"ROOM_MASTER_COMMAND_REQUIRED";
       emit("WARN","master_data.command.required",{status:405,outcome:"DENIED",errorCode,resource});
