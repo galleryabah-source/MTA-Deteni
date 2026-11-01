@@ -1,9 +1,21 @@
 /**
+ * @typedef {Object} MtaRuntimeConfig
+ * @property {string} supabaseUrl
+ * @property {string} supabaseAnonKey
+ * @property {string} supabaseServiceRoleKey
+ * @property {string} environment
+ * @property {boolean} productionWritesRequested
+ * @property {boolean} productionWritesEnabled
+ */
+
+/**
  * Shared, fail-closed runtime configuration contract for MTA DETENI Edge Functions.
  * Values are read once at module initialization. Secret values are never included
  * in validation errors or returned diagnostics.
  *
  * @param {(name: string) => string | undefined} readEnv
+ * @param {{requireAnonKey?: boolean}} [options]
+ * @returns {Readonly<MtaRuntimeConfig>}
  */
 export function loadMtaRuntimeConfig(readEnv, options = {}) {
   if (typeof readEnv !== "function") {
