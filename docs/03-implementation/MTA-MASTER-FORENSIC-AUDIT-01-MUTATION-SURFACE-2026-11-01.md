@@ -38,6 +38,11 @@ This is a **source-level forensic audit**. It does not prove production runtime 
 - `src/application/private-storage-contract.ts`
 - `docs/03-implementation/P9.7-recovered-migration-sources/20260922220754_mta_p97_durable_idempotency_transaction_boundary_v3.sql`
 - `docs/03-implementation/P9.7-recovered-migration-sources/20260922220814_mta_p97_durable_idempotency_rpc_wrapper_v1.sql`
+- `docs/03-implementation/P9.7-TRANSACTION-IDEMPOTENCY-KERNEL-v1.0.md`
+- `docs/03-implementation/P10.253-260-PLACEMENT-CONTRACT.md`
+- `docs/03-implementation/P10.285-292-DOCUMENT-ENGINE-CONTRACT.md`
+- `docs/03-implementation/P10.317-324-PLACEMENT-IMPLEMENTATION-SCAFFOLD.md`
+- `docs/03-implementation/P10.349-356-DOCUMENT-ENGINE-IMPLEMENTATION-SCAFFOLD.md`
 - `supabase/operations/mta_backup_restore_transaction_v1.sql`
 - `test/p1-authorization-kernel-regression.test.mjs`
 - `test/p9.7-canonical-boundary-regression.test.mjs`
@@ -165,6 +170,51 @@ Related release state at audit time:
 2. Return the canonical audit event ID from the RPC.
 3. Do not append a second success event in the Edge Function.
 4. Test first execution, replay, RPC failure, and audit failure.
+
+### MUT-008 — Generic mutation bypasses protected Placement, Movement, Leave, and Document lifecycles
+
+- Severity: **CRITICAL**
+- Status: **REMEDIATION IN PR #335 — CI/review pending**.
+- Evidence:
+  - `supabase/functions/mta-api/index.ts` previously allowed `placements`, `movements`, `leaves`, and `documents` in `MUTATION_ROLE_POLICY`.
+  - Except for the exact `POST /movements` command `MOVE_DETAINEE`, generic POST/PATCH/DELETE fell through to `mta_execute_idempotent_mutation`.
+  - The P9.7 contract explicitly prohibits generic status updates for protected state machines and requires duty-officer authorization for leave receipt/completion.
+  - `web/mta-domain-commands-v2.js` routes placement creation and leave status advancement through generic `productionResourceMutation`; document transitions also use generic resource updates.
+  - No dedicated `mta_execute_leave_transaction` or document lifecycle transaction function was found in the audited migration/API tree.
+  - The dedicated movement transaction validates room capacity and updates movement + placement + detainee projection + audit + outbox + idempotency atomically, but the generic API fall-through could bypass that command.
+- Consequence:
+  - A generic movement insert/update/delete could bypass the movement transaction and alter movement history.
+  - Generic placement writes could create duplicate active placements or bypass room capacity checks.
+  - Generic leave updates could set workflow status without the P9.7 `leave.receive` permission, PETUGAS_JAGA assignment, active duty, handover, or concurrency boundary.
+  - Generic document updates could bypass template/version, approval, numbering, and issuance state controls.
+- This is a source-level bypass path; the production write gate is currently fail-closed and no production mutation is claimed to have occurred.
+
+**Required remediation**
+1. Deny generic writes to `movements`, `placements`, `leaves`, and `documents`.
+2. Preserve `MOVE_DETAINEE` as the only movement write command.
+3. Implement dedicated transactional commands for initial placement, leave lifecycle/handover, and document generation/approval/issue before re-enabling those writes.
+4. Ensure each command validates permission, scope, assignment/duty, current state, idempotency, audit, and outbox inside the authoritative transaction.
+5. Add direct API negative tests proving generic writes are denied even when a caller has a valid bearer token and role.
+
+### MUT-009 — Master Block/Room PATCH can rebind scope/relationships or violate occupancy invariants
+
+- Severity: **HIGH**
+- Status: **REMEDIATION IN PR #335 — CI/review pending**.
+- Evidence:
+  - `supabase/functions/mta-api/index.ts` previously checked the current block/room `scope_id` for PATCH, but did not reject a caller-supplied new `scope_id`.
+  - Room PATCH did not validate a changed `block_id` against the actor's canonical scope.
+  - Room PATCH did not check whether a new capacity was below active placement count or whether an occupied room was being deactivated.
+  - `mta_execute_movement_transaction` locks the destination room and checks its capacity, but generic room updates did not share that lock/transaction boundary.
+  - `mta_blocks` and `mta_rooms` are included in the generic P9.7 table allowlist.
+- Consequence: a privileged caller could move a master record across scope boundaries or create a room-capacity/status inconsistency. A preflight occupancy query in the Edge Function alone would still have a TOCTOU race against the movement transaction.
+- The safe remediation is therefore to deny generic PATCH/DELETE until a dedicated master-data transaction can lock the affected master row and validate occupancy/relationships atomically.
+
+**Required remediation**
+1. Keep scope identity immutable.
+2. Deny generic block/room PATCH and DELETE until a dedicated transactional master-data command exists.
+3. Permit creation only with canonical scope assignment and active same-scope parent block validation.
+4. Implement future updates under a database transaction that locks the block/room and relevant placement state before changing status/capacity/relationships.
+5. Add concurrency tests racing room capacity/status updates against movement commits.
 
 ### AUD-001 — Audit sequence verifier can reject valid transactions after rollback
 
@@ -334,14 +384,15 @@ The audit also confirmed several important protections that should be preserved:
 | Order | Work package | Required evidence | Release impact |
 |---:|---|---|---|
 | 1 | MUT-001 and MUT-002 — completed in PR #334 | 8/8 PR CI workflows PASS; authenticated role/scope UAT remains | API source correction complete; runtime UAT open |
-| 2 | Fix MUT-003 | Failure-injection tests; atomic DB RPC / saga evidence | Identity/admin integrity |
-| 3 | Redesign MUT-004/005/006/007 and STO-001 | Snapshot, completeness, restore, immutability, replay, private-object authorization tests | Recovery and storage certification |
-| 4 | Fix AUD-001 | PostgreSQL rollback/sequence integration test | Audit certification |
-| 5 | Resolve AUTHZ-002 and SCOPE-001 | Owner-approved scope policy + read-only production reconciliation + cross-scope API/RLS tests | Authorization and scope release blocker |
-| 6 | Resolve CFG-001 and AUTH-002 | Typed environment validation + approved session architecture + browser security tests | Configuration/authentication hardening |
-| 7 | Fix AUTH-001 and AUD-002 | Edge rate-limit evidence + durable authentication/denial audit tests | Authentication and audit hardening |
-| 8 | Implement GOV-001 | Per-resource release gate tests | Controlled production activation |
-| 9 | Full regression | `npm test`, `npm run typecheck`, SQL integration, browser UAT | Re-certification |
+| 2 | MUT-008 and MUT-009 — remediation in PR #335 | Generic write denial + domain command boundary tests; master data fail-closed tests | Prevent state-machine and scope bypass |
+| 3 | Fix MUT-003 | Failure-injection tests; atomic DB RPC / saga evidence | Identity/admin integrity |
+| 4 | Redesign MUT-004/005/006/007 and STO-001 | Snapshot, completeness, restore, immutability, replay, private-object authorization tests | Recovery and storage certification |
+| 5 | Fix AUD-001 | PostgreSQL rollback/sequence integration test | Audit certification |
+| 6 | Resolve AUTHZ-002 and SCOPE-001 | Owner-approved scope policy + read-only production reconciliation + cross-scope API/RLS tests | Authorization and scope release blocker |
+| 7 | Resolve CFG-001 and AUTH-002 | Typed environment validation + approved session architecture + browser security tests | Configuration/authentication hardening |
+| 8 | Fix AUTH-001 and AUD-002 | Edge rate-limit evidence + durable authentication/denial audit tests | Authentication and audit hardening |
+| 9 | Implement GOV-001 | Per-resource release gate tests | Controlled production activation |
+| 10 | Full regression | `npm test`, `npm run typecheck`, SQL integration, browser UAT | Re-certification |
 
 ## 6. Explicit non-actions
 
