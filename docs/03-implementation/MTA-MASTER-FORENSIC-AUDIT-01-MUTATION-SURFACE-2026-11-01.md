@@ -214,6 +214,24 @@ Related release state at audit time:
 4. Verify explicit logout, global revocation, hard refresh, refresh-token rotation, and disabled-user behavior in browser UAT.
 5. Do not change the session mechanism as an isolated patch.
 
+### AUD-002 — Denied and failed authentication/authorization attempts are not consistently written to the canonical audit ledger
+
+- Severity: **HIGH**
+- Evidence:
+  - The P9.3/P9.5 contracts in the user-provided `Pengerjaan V.01.txt` require `LOGIN_SUCCESS`, `LOGIN_FAILURE`, `LOGOUT`, `SESSION_REVOKED`, `ACCOUNT_DISABLED`, `AUTHENTICATION_LOCKOUT`, and durable denied/failed action evidence.
+  - `supabase/functions/mta-login/index.ts` returns generic `INVALID_LOGIN` responses but does not write authentication success/failure events to `mta_audit_events`.
+  - In `supabase/functions/mta-api/index.ts`, authorization denials such as `authorization.denied` are emitted to application observability and returned to the caller, but the inspected deny path does not append a canonical `ACCESS_DENIED` audit event.
+  - Multiple role-denial and method-denial branches return directly without durable audit evidence.
+- Consequence: the canonical ledger can prove successful domain mutations while lacking a complete durable record of denied access attempts and authentication lifecycle events. Console logs are not equivalent to immutable audit evidence and may have different retention/access guarantees.
+- This is a source-level coverage gap; no claim is made that external identity-provider or Cloudflare logs are absent.
+
+**Required remediation**
+1. Define a privacy-safe security-event writer for pre-authentication and authenticated denial paths.
+2. Record success/failure/deny outcome, route/action, actor when known, request/correlation IDs, policy version, and safe source context.
+3. Never store passwords, access/refresh tokens, raw session payloads, or unnecessary raw NIP values in audit metadata.
+4. Ensure audit-write failure behavior is explicit for high-risk operations and does not create an account-enumeration oracle.
+5. Add tests for invalid login, successful login, logout/revocation, inactive account, role denial, scope denial, policy denial, and audit-writer failure.
+
 ### AUTH-001 — Login handler has no visible application-level rate limit or authentication audit
 
 - Severity: **HIGH**
@@ -321,7 +339,7 @@ The audit also confirmed several important protections that should be preserved:
 | 4 | Fix AUD-001 | PostgreSQL rollback/sequence integration test | Audit certification |
 | 5 | Resolve AUTHZ-002 and SCOPE-001 | Owner-approved scope policy + read-only production reconciliation + cross-scope API/RLS tests | Authorization and scope release blocker |
 | 6 | Resolve CFG-001 and AUTH-002 | Typed environment validation + approved session architecture + browser security tests | Configuration/authentication hardening |
-| 7 | Fix AUTH-001 | Edge policy evidence + login security tests | Authentication hardening |
+| 7 | Fix AUTH-001 and AUD-002 | Edge rate-limit evidence + durable authentication/denial audit tests | Authentication and audit hardening |
 | 8 | Implement GOV-001 | Per-resource release gate tests | Controlled production activation |
 | 9 | Full regression | `npm test`, `npm run typecheck`, SQL integration, browser UAT | Re-certification |
 
