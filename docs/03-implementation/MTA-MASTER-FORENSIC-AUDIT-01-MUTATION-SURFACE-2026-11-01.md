@@ -296,6 +296,26 @@ Related release state at audit time:
 4. Ensure audit-write failure behavior is explicit for high-risk operations and does not create an account-enumeration oracle.
 5. Add tests for invalid login, successful login, logout/revocation, inactive account, role denial, scope denial, policy denial, and audit-writer failure.
 
+### AUTH-003 — Forced-password-change state is enforced by Edge API but not by the database RLS role helper
+
+- Severity: **CRITICAL**
+- Evidence:
+  - `supabase/functions/mta-api/index.ts` blocks normal Edge API resources when `profile.must_change_password` is true, while keeping `/me` available.
+  - `supabase/migrations/20260921070000_mta_production_auth_rbac_v1.sql` defines `mta_current_role()` as returning the profile role when `active = true`.
+  - `supabase/migrations/20260921061400_mta_production_auth_rbac_v1_2_private_helper.sql` moves that same helper into `private.mta_current_role()` without adding a `must_change_password = false` predicate.
+  - RLS policies use `private.mta_current_role()`; therefore the forced-change flag checked by the Edge API is not part of the database authorization predicate.
+  - The repaired admin password-reset route sets `must_change_password=true` and returns `sessionRevoked:true`, but the inspected password-reset branch does not call `admin.auth.admin.signOut(id,"global")`.
+- Consequence: an existing authenticated session may be blocked from the application Edge API but still satisfy direct Supabase PostgREST RLS policies. The response also claims session revocation without source evidence that revocation occurred.
+- This is a source-level authorization gap; no direct database access by a real user has been attempted.
+
+**Required remediation**
+1. Prepare an additive migration that updates `private.mta_current_role()` to return no role when the profile is inactive or `must_change_password=true`.
+2. Review every RLS policy and self-service password-change path against that helper change before applying it.
+3. Rework password reset as an explicit fail-closed saga: set forced-change state, revoke all sessions, update the password, record completion, and persist recoverable operation status.
+4. Return `sessionRevoked:true` only after the Admin API confirms successful global revocation.
+5. Add direct PostgREST tests using a valid token for an account with `must_change_password=true`; all operational table access must be denied while the self-service password-change path remains available.
+6. Keep the migration freeze; do not apply this migration to production until separately approved and rehearsed.
+
 ### AUTH-001 — Login handler has no visible application-level rate limit or authentication audit
 
 - Severity: **HIGH**
