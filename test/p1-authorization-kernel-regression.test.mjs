@@ -6,12 +6,18 @@ const api=fs.readFileSync('supabase/functions/mta-api/index.ts','utf8');
 assert.match(api,/const AUTHZ_POLICY_VERSION="AUTHZ-DB-RLS-v1"/);
 assert.match(api,/const MUTATION_ROLE_POLICY=/);
 assert.match(api,/detainees:\{POST:new Set\(\["OWNER","ADMIN","EDITOR"\]\),PATCH:new Set\(\["OWNER","ADMIN","EDITOR"\]\),DELETE:new Set\(\["OWNER","ADMIN"\]\)\}/);
-assert.match(api,/placements:\{POST:new Set\(\["OWNER","ADMIN","EDITOR"\]\),PATCH:new Set\(\["OWNER","ADMIN","EDITOR"\]\),DELETE:new Set\(\["OWNER","ADMIN"\]\)\}/);
-assert.match(api,/movements:\{POST:new Set\(\["OWNER","ADMIN","EDITOR"\]\),PATCH:new Set\(\["OWNER","ADMIN","EDITOR"\]\),DELETE:new Set\(\["OWNER","ADMIN"\]\)\}/);
-assert.match(api,/leaves:\{POST:new Set\(\["OWNER","ADMIN","EDITOR"\]\),PATCH:new Set\(\["OWNER","ADMIN","EDITOR"\]\),DELETE:new Set\(\["OWNER","ADMIN"\]\)\}/);
-assert.match(api,/documents:\{POST:new Set\(\["OWNER","ADMIN","EDITOR"\]\),PATCH:new Set\(\["OWNER","ADMIN","EDITOR"\]\),DELETE:new Set\(\["OWNER","ADMIN"\]\)\}/);
-assert.match(api,/blocks:\{POST:new Set\(\["OWNER","ADMIN"\]\),PATCH:new Set\(\["OWNER","ADMIN"\]\),DELETE:new Set\(\["OWNER","ADMIN"\]\)\}/);
-assert.match(api,/rooms:\{POST:new Set\(\["OWNER","ADMIN"\]\),PATCH:new Set\(\["OWNER","ADMIN"\]\),DELETE:new Set\(\["OWNER","ADMIN"\]\)\}/);
+assert.doesNotMatch(api,/placements:/);
+assert.doesNotMatch(api,/movements:/);
+assert.doesNotMatch(api,/leaves:/);
+assert.doesNotMatch(api,/documents:/);
+assert.match(api,/blocks:\{POST:new Set\(\["OWNER","ADMIN"\]\)\}/);
+assert.match(api,/rooms:\{POST:new Set\(\["OWNER","ADMIN"\]\)\}/);
+
+
+
+
+
+
 
 assert.match(api,/const authorizeGenericMutation=async/);
 assert.match(api,/return denyAuthorization\("PERMISSION_DENIED"\)/);
