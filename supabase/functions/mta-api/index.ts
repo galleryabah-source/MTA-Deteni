@@ -1,9 +1,9 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { loadMtaRuntimeConfig } from "../_shared/runtime-config.mjs";
+import { createObservabilityEvent, sanitizeObservabilityError, serializeObservabilityEvent } from "./observability.ts";
 
 const runtimeConfig=loadMtaRuntimeConfig((name)=>Deno.env.get(name));
 const createAdminClient=()=>createClient(runtimeConfig.supabaseUrl,runtimeConfig.supabaseServiceRoleKey,{auth:{autoRefreshToken:false,persistSession:false}});
-import { createObservabilityEvent, sanitizeObservabilityError, serializeObservabilityEvent } from "./observability.ts";
 
 const allowedOrigin=(origin)=>origin&&(/^https:\/\/(?:[a-z0-9-]+-)?mta-deteni\.galleryabah\.workers\.dev$/i.test(origin)||origin==="https://mta-deteni.galleryabah.workers.dev")?origin:"null";
 const cors=(req)=>({"Access-Control-Allow-Origin":allowedOrigin(req.headers.get("Origin")),"Access-Control-Allow-Headers":"authorization, x-client-info, apikey, content-type, x-request-id, x-correlation-id, idempotency-key","Access-Control-Allow-Methods":"GET,POST,PATCH,DELETE,OPTIONS","Access-Control-Expose-Headers":"X-Request-Id, X-Correlation-Id","Vary":"Origin","Content-Type":"application/json","Cache-Control":"no-store, private","X-Content-Type-Options":"nosniff"});
