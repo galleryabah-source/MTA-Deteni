@@ -80,7 +80,7 @@ const authorizeGenericMutation=async({admin,userId,role,resource,method,id,body}
 
   let current=null;
   if(method!=="POST"){
-    const currentColumns=resource==="detainees"?"detainee_id,scope_id":"detainee_id";
+    const currentColumns=resource==="detainees"?"id,scope_id":"detainee_id";
     const currentResult=await admin.from("mta_"+resource).select(currentColumns).eq("id",id).maybeSingle();
     if(currentResult.error||!currentResult.data) return denyAuthorization("RESOURCE_NOT_FOUND");
     current=currentResult.data;
@@ -263,7 +263,7 @@ Deno.serve(async(req)=>{
         const data=visibleProfiles.map(p=>({...p,email:emails.get(p.id)||null}));
         return json(req,{ok:true,resource,data});
       }
-      if(req.method==="POST"){
+      if(req.method==="POST"&&!id){
         const body=await req.json().catch(()=>null)||{};
         const nip=String(body.nip||"").trim();
         const password=String(body.password||"");
