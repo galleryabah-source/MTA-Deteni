@@ -5,20 +5,21 @@
  *
  * @param {(name: string) => string | undefined} readEnv
  */
-export function loadMtaRuntimeConfig(readEnv) {
+export function loadMtaRuntimeConfig(readEnv, options = {}) {
   if (typeof readEnv !== "function") {
     throw new Error("MTA_CONFIG_READER_REQUIRED");
   }
 
   const supabaseUrlRaw = String(readEnv("SUPABASE_URL") ?? "").trim();
   const supabaseAnonKey = String(readEnv("SUPABASE_ANON_KEY") ?? "").trim();
+  const requireAnonKey = options.requireAnonKey !== false;
   const supabaseServiceRoleKey = String(readEnv("SUPABASE_SERVICE_ROLE_KEY") ?? "").trim();
   const writeFlagRaw = String(readEnv("MTA_PRODUCTION_WRITES_ENABLED") ?? "").trim().toLowerCase();
   const environmentRaw = String(readEnv("MTA_ENVIRONMENT") ?? "UNSPECIFIED").trim().toUpperCase();
 
   const missing = [];
   if (!supabaseUrlRaw) missing.push("SUPABASE_URL");
-  if (!supabaseAnonKey) missing.push("SUPABASE_ANON_KEY");
+  if (requireAnonKey && !supabaseAnonKey) missing.push("SUPABASE_ANON_KEY");
   if (!supabaseServiceRoleKey) missing.push("SUPABASE_SERVICE_ROLE_KEY");
   if (missing.length) {
     throw new Error("MTA_CONFIG_MISSING:" + missing.join(","));
@@ -44,7 +45,7 @@ export function loadMtaRuntimeConfig(readEnv) {
   if (!allowedEnvironments.has(environmentRaw)) {
     throw new Error("MTA_CONFIG_INVALID:MTA_ENVIRONMENT");
   }
-  if (supabaseAnonKey === supabaseServiceRoleKey) {
+  if (supabaseAnonKey && supabaseAnonKey === supabaseServiceRoleKey) {
     throw new Error("MTA_CONFIG_INVALID:KEY_SEPARATION");
   }
   if (writeFlagRaw && writeFlagRaw !== "true" && writeFlagRaw !== "false") {
