@@ -1,4 +1,7 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { loadMtaRuntimeConfig } from "../_shared/runtime-config.mjs";
+
+const runtimeConfig=loadMtaRuntimeConfig((name)=>Deno.env.get(name));
 
 const allowedOrigin=(origin)=>{
   if(!origin)return "*";
@@ -24,13 +27,8 @@ Deno.serve(async(req)=>{
   // for invalid format, missing account, inactive account, or bad password.
   if(!/^\d{18}$/.test(nip)||!password)return json(req,{ok:false,error:"INVALID_LOGIN"},401);
 
-  const serviceKey=Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
-  const supabaseUrl=Deno.env.get("SUPABASE_URL");
-  const anonKey=Deno.env.get("SUPABASE_ANON_KEY");
-  if(!serviceKey||!supabaseUrl||!anonKey)return json(req,{ok:false,error:"SERVER_CONFIGURATION_ERROR"},503);
-
-  const admin=createClient(supabaseUrl,serviceKey,{auth:{autoRefreshToken:false,persistSession:false}});
-  const verifier=createClient(supabaseUrl,anonKey,{auth:{autoRefreshToken:false,persistSession:false}});
+  const admin=createClient(runtimeConfig.supabaseUrl,runtimeConfig.supabaseServiceRoleKey,{auth:{autoRefreshToken:false,persistSession:false}});
+  const verifier=createClient(runtimeConfig.supabaseUrl,runtimeConfig.supabaseAnonKey,{auth:{autoRefreshToken:false,persistSession:false}});
   try{
     const profile=await admin.from("mta_profiles").select("id,active").eq("nip",nip).maybeSingle();
     if(profile.error||!profile.data?.id||profile.data.active!==true)return json(req,{ok:false,error:"INVALID_LOGIN"},401);

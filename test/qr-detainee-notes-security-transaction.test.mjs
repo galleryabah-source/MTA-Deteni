@@ -16,7 +16,8 @@ test("health records allow OWNER, ADMIN, EDITOR, and HEALTHCARE while scope rema
 
 test("note persistence remains fail-closed until the server release gate is enabled", async () => {
   const api = await read("supabase/functions/mta-api/index.ts");
-  assert.match(api, /const productionWritesEnabled=\(\)=>Deno\.env\.get\("MTA_PRODUCTION_WRITES_ENABLED"\)==="true"/);
+  assert.match(api, /const productionWritesEnabled=\(\)=>runtimeConfig\.productionWritesEnabled/);
+  assert.match(api, /loadMtaRuntimeConfig\(\(name\)=>Deno\.env\.get\(name\)\)/);
   assert.match(api, /"Cache-Control":"no-store, private"/, "sensitive detainee and health API responses must not be cached");
   assert.match(api, /if\(!productionWritesEnabled\(\)\) return json\(req,\{ok:false,error:"DETAINEE_NOTES_WRITE_LOCKED"\},423/);
 });

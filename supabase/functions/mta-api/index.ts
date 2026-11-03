@@ -1,5 +1,9 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { loadMtaRuntimeConfig } from "../_shared/runtime-config.mjs";
 import { createObservabilityEvent, sanitizeObservabilityError, serializeObservabilityEvent } from "./observability.ts";
+
+const runtimeConfig=loadMtaRuntimeConfig((name)=>Deno.env.get(name));
+const createAdminClient=()=>createClient(runtimeConfig.supabaseUrl,runtimeConfig.supabaseServiceRoleKey,{auth:{autoRefreshToken:false,persistSession:false}});
 
 const allowedOrigin=(origin)=>origin&&(/^https:\/\/(?:[a-z0-9-]+-)?mta-deteni\.galleryabah\.workers\.dev$/i.test(origin)||origin==="https://mta-deteni.galleryabah.workers.dev")?origin:"null";
 const cors=(req)=>({"Access-Control-Allow-Origin":allowedOrigin(req.headers.get("Origin")),"Access-Control-Allow-Headers":"authorization, x-client-info, apikey, content-type, x-request-id, x-correlation-id, idempotency-key","Access-Control-Allow-Methods":"GET,POST,PATCH,DELETE,OPTIONS","Access-Control-Expose-Headers":"X-Request-Id, X-Correlation-Id","Vary":"Origin","Content-Type":"application/json","Cache-Control":"no-store, private","X-Content-Type-Options":"nosniff"});
@@ -9,7 +13,7 @@ const requestStarts=new WeakMap();
 const json=(req,body,status=200,context={})=>{const requestId=context.requestId||req.headers.get("X-Request-Id")||crypto.randomUUID();const correlationId=context.correlationId||req.headers.get("X-Correlation-Id")||requestId;const durationMs=requestStarts.has(req)?performance.now()-requestStarts.get(req):undefined;const event=(()=>{try{return serializeObservabilityEvent(createObservabilityEvent({level:status>=500?"ERROR":status>=400?"WARN":"INFO",service:"mta-api",event:status>=500?"request.failed":"request.completed",requestId,correlationId,method:req.method,route:new URL(req.url).pathname,status,durationMs,outcome:status>=500?"FAILED":status>=400?"DENIED":"SUCCESS",errorCode:body?.error}));}catch{return null;}})();if(event)console.log(event);return new Response(JSON.stringify(body),{status,headers:{...cors(req),"X-Request-Id":requestId,"X-Correlation-Id":correlationId}});};
 const stableJson=(value)=>{if(value===null||typeof value!=="object")return JSON.stringify(value);if(Array.isArray(value))return "["+value.map(stableJson).join(",")+"]";return "{"+Object.keys(value).sort().map((k)=>JSON.stringify(k)+":"+stableJson(value[k])).join(",")+"}";};
 const sha256Hex=async(value)=>{const bytes=new TextEncoder().encode(value),hash=await crypto.subtle.digest("SHA-256",bytes);return Array.from(new Uint8Array(hash)).map((b)=>b.toString(16).padStart(2,"0")).join("");};
-const productionWritesEnabled=()=>Deno.env.get("MTA_PRODUCTION_WRITES_ENABLED")==="true";
+const productionWritesEnabled=()=>runtimeConfig.productionWritesEnabled;
 const WRITE_METHODS=new Set(["POST","PATCH","DELETE"]);
 const AUTHZ_POLICY_VERSION="AUTHZ-DB-RLS-v1";
 // Protected lifecycle resources are deliberately absent here. They may be read
@@ -112,7 +116,7 @@ Deno.serve(async(req)=>{
   if(req.method==="OPTIONS") return new Response(null,{status:204,headers:{...cors(req),"X-Request-Id":requestId,"X-Correlation-Id":correlationId}});
   const authorization=req.headers.get("Authorization");
   if(!authorization?.startsWith("Bearer ")) { emit("WARN","request.denied",{status:401,outcome:"DENIED",errorCode:"AUTH_REQUIRED",durationMs:performance.now()-startedAt}); return json(req,{ok:false,error:"AUTH_REQUIRED"},401,{requestId,correlationId}); }
-  const supabase=createClient(Deno.env.get("SUPABASE_URL")!,Deno.env.get("SUPABASE_ANON_KEY")!,{global:{headers:{Authorization:authorization}}});
+  const supabase=createClient(runtimeConfig.supabaseUrl,runtimeConfig.supabaseAnonKey,{global:{headers:{Authorization:authorization}}});
   const {data:{user},error:userError}=await supabase.auth.getUser();
   if(userError||!user) { emit("WARN","request.denied",{status:401,outcome:"DENIED",errorCode:"AUTH_INVALID",durationMs:performance.now()-startedAt}); return json(req,{ok:false,error:"AUTH_INVALID"},401,{requestId,correlationId}); }
   const {data:profile,error:profileError}=await supabase.from("mta_profiles").select("id,role,display_name,active,must_change_password,password_changed_at,password_reset_at").eq("id",user.id).single();
@@ -128,9 +132,7 @@ Deno.serve(async(req)=>{
   const resource=routeParts[0],id=routeParts[1];
   if(resource==="me"){
     if(req.method==="GET") return json(req,{ok:true,user:{id:user.id,email:user.email},profile,role});
-    const adminKey=Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
-    if(!adminKey) return json(req,{ok:false,error:"SERVER_CONFIGURATION_ERROR"},503);
-    const admin=createClient(Deno.env.get("SUPABASE_URL")!,adminKey,{auth:{autoRefreshToken:false,persistSession:false}});
+    const admin=createAdminClient();
     try{
       if(req.method==="PATCH"){
         const body=await req.json().catch(()=>null)||{};
@@ -151,7 +153,7 @@ Deno.serve(async(req)=>{
         if(newPassword!==confirmation) return json(req,{ok:false,error:"PASSWORD_CONFIRMATION_MISMATCH"},400);
         if(currentPassword===newPassword) return json(req,{ok:false,error:"PASSWORD_REUSE_FORBIDDEN"},400);
         if(!user.email) return json(req,{ok:false,error:"PASSWORD_EMAIL_UNAVAILABLE"},400);
-        const verifier=createClient(Deno.env.get("SUPABASE_URL")!,Deno.env.get("SUPABASE_ANON_KEY")!,{auth:{autoRefreshToken:false,persistSession:false}});
+        const verifier=createClient(runtimeConfig.supabaseUrl,runtimeConfig.supabaseAnonKey,{auth:{autoRefreshToken:false,persistSession:false}});
         const verified=await verifier.auth.signInWithPassword({email:user.email,password:currentPassword});
         if(verified.error||!verified.data.user) return json(req,{ok:false,error:"CURRENT_PASSWORD_INVALID"},401);
         const changed=await admin.auth.admin.updateUserById(user.id,{password:newPassword});
@@ -177,9 +179,7 @@ Deno.serve(async(req)=>{
   // Password/profile self-service remains available through /me so operators can recover credentials.
   if(resource==="detainee-notes"){
     if(!["GET","POST"].includes(req.method)) return json(req,{ok:false,error:"DETAINEE_NOTES_METHOD_NOT_ALLOWED"},405);
-    const adminKey=Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
-    if(!adminKey) return json(req,{ok:false,error:"SERVER_CONFIGURATION_ERROR"},503);
-    const admin=createClient(Deno.env.get("SUPABASE_URL")!,adminKey,{auth:{autoRefreshToken:false,persistSession:false}});
+    const admin=createAdminClient();
     const requestIdNote=req.headers.get("X-Request-Id")||crypto.randomUUID();
     const correlationIdNote=req.headers.get("X-Correlation-Id")||requestIdNote;
     try{
@@ -249,9 +249,7 @@ Deno.serve(async(req)=>{
   }
   if(resource==="admin-users"){
     if(!new Set(["OWNER","ADMIN"]).has(role)) return json(req,{ok:false,error:"RBAC_USER_ADMIN_DENIED"},403);
-    const adminKey=Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
-    if(!adminKey) return json(req,{ok:false,error:"SERVER_CONFIGURATION_ERROR"},503);
-    const admin=createClient(Deno.env.get("SUPABASE_URL")!,adminKey,{auth:{autoRefreshToken:false,persistSession:false}});
+    const admin=createAdminClient();
     try{
       if(req.method==="GET"){
         const {data:profiles,error:pe}=await admin.from("mta_profiles").select("id,nip,role,display_name,active,must_change_password,created_at,updated_at").order("created_at",{ascending:true});
@@ -354,8 +352,7 @@ Deno.serve(async(req)=>{
 
   if(resource==="admin-config"){
     if(!new Set(["OWNER","ADMIN"]).has(role)) return json(req,{ok:false,error:"RBAC_ADMIN_CONFIG_DENIED",role},403);
-    const adminKey=Deno.env.get("SUPABASE_SERVICE_ROLE_KEY"); if(!adminKey) return json(req,{ok:false,error:"SERVER_CONFIGURATION_ERROR"},503);
-    const admin=createClient(Deno.env.get("SUPABASE_URL")!,adminKey,{auth:{autoRefreshToken:false,persistSession:false}});
+    const admin=createAdminClient();
     try{
       const scoped=await admin.from("mta_profile_scopes").select("scope_id").eq("profile_id",user.id).eq("active",true).limit(1).maybeSingle();
       if(scoped.error||!scoped.data?.scope_id)return json(req,{ok:false,error:"SCOPE_REQUIRED"},409);
@@ -387,8 +384,7 @@ Deno.serve(async(req)=>{
 
   if(resource==="ai-config"){
     if(!new Set(["OWNER","ADMIN"]).has(role)) return json(req,{ok:false,error:"RBAC_AI_ADMIN_DENIED",role},403);
-    const adminKey=Deno.env.get("SUPABASE_SERVICE_ROLE_KEY"); if(!adminKey) return json(req,{ok:false,error:"SERVER_CONFIGURATION_ERROR"},503);
-    const admin=createClient(Deno.env.get("SUPABASE_URL")!,adminKey,{auth:{autoRefreshToken:false,persistSession:false}});
+    const admin=createAdminClient();
     try{
       const {data:cfg,error:readError}=await admin.from("mta_ai_config").select("id,enabled,provider,api_url,model,secret_name,key_configured,updated_by,updated_at").order("updated_at",{ascending:false}).limit(1).single();
       if(readError||!cfg) return json(req,{ok:false,error:"AI_CONFIG_READ_FAILED"},500);
@@ -411,8 +407,7 @@ Deno.serve(async(req)=>{
 
   if(resource==="ai-health"&&req.method==="POST"){
     if(!new Set(["OWNER","ADMIN"]).has(role))return json(req,{ok:false,error:"RBAC_AI_ADMIN_DENIED",role},403);
-    const adminKey=Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");if(!adminKey)return json(req,{ok:false,error:"SERVER_CONFIGURATION_ERROR"},503);
-    const admin=createClient(Deno.env.get("SUPABASE_URL")!,adminKey,{auth:{autoRefreshToken:false,persistSession:false}});
+    const admin=createAdminClient();
     try{
       const {data:cfg,error:ce}=await admin.from("mta_ai_config").select("*").order("updated_at",{ascending:false}).limit(1).single();
       if(ce||!cfg)return json(req,{ok:false,error:"AI_CONFIG_READ_FAILED"},500);
@@ -429,8 +424,7 @@ Deno.serve(async(req)=>{
   }
   if(resource==="ai-job" && req.method==="POST"){
     if(!new Set(["OWNER","ADMIN","EDITOR"]).has(role)) return json(req,{ok:false,error:"RBAC_AI_JOB_DENIED",role},403);
-    const adminKey=Deno.env.get("SUPABASE_SERVICE_ROLE_KEY"); if(!adminKey) return json(req,{ok:false,error:"SERVER_CONFIGURATION_ERROR"},503);
-    const admin=createClient(Deno.env.get("SUPABASE_URL")!,adminKey,{auth:{autoRefreshToken:false,persistSession:false}});
+    const admin=createAdminClient();
     let jobId=null;
     try{
       const body=await req.json().catch(()=>null)||{};
@@ -470,9 +464,7 @@ Deno.serve(async(req)=>{
     if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return json(req,{ok:false,error:"INVALID_EMAIL"},400);
     if(password.length<12||password.length>128) return json(req,{ok:false,error:"PASSWORD_POLICY_MIN_12"},400);
     if(displayName.length<2||displayName.length>120) return json(req,{ok:false,error:"INVALID_DISPLAY_NAME"},400);
-    const serviceKey=Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
-    if(!serviceKey) return json(req,{ok:false,error:"ADMIN_REGISTRATION_NOT_CONFIGURED"},503);
-    const admin=createClient(Deno.env.get("SUPABASE_URL")!,serviceKey,{auth:{autoRefreshToken:false,persistSession:false}});
+    const admin=createAdminClient();
     const created=await admin.auth.admin.createUser({email,password,email_confirm:false,user_metadata:{full_name:displayName,created_by:user.id}});
     if(created.error) return json(req,{ok:false,error:"ADMIN_REGISTRATION_FAILED"},400);
     return json(req,{ok:true,created:true,user:{id:created.data.user?.id,email:created.data.user?.email},createdBy:user.id},201);
@@ -480,8 +472,7 @@ Deno.serve(async(req)=>{
   
   if(resource==="backup"&&req.method==="GET"){
     if(!new Set(["OWNER","ADMIN"]).has(role))return json(req,{ok:false,error:"RBAC_BACKUP_READ_DENIED",role},403);
-    const adminKey=Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");if(!adminKey)return json(req,{ok:false,error:"SERVER_CONFIGURATION_ERROR"},503);
-    const admin=createClient(Deno.env.get("SUPABASE_URL")!,adminKey,{auth:{autoRefreshToken:false,persistSession:false}});
+    const admin=createAdminClient();
     try{
       const names=["detainees","blocks","rooms","movements","placements","leaves","documents","audit"];
       const loaded=await Promise.all(names.map(async name=>{
@@ -505,8 +496,7 @@ Deno.serve(async(req)=>{
   }
   if(resource==="backup-restore"&&req.method==="POST"){
     if(role!=="OWNER")return json(req,{ok:false,error:"RBAC_BACKUP_RESTORE_DENIED",role},403);
-    const adminKey=Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");if(!adminKey)return json(req,{ok:false,error:"SERVER_CONFIGURATION_ERROR"},503);
-    const admin=createClient(Deno.env.get("SUPABASE_URL")!,adminKey,{auth:{autoRefreshToken:false,persistSession:false}});
+    const admin=createAdminClient();
     try{
       const body=await req.json().catch(()=>null);
       const manifest=body?.manifest,payload=body?.payload;
@@ -558,9 +548,7 @@ Deno.serve(async(req)=>{
       return json(req,{ok:true,resource,role,data});
     }
 
-    const adminKey=Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
-    if(!adminKey) return json(req,{ok:false,error:"SERVER_CONFIGURATION_ERROR"},503);
-    const admin=createClient(Deno.env.get("SUPABASE_URL")!,adminKey,{auth:{autoRefreshToken:false,persistSession:false}});
+    const admin=createAdminClient();
     const requestId=req.headers.get("X-Request-Id")||crypto.randomUUID();
     const correlationId=req.headers.get("X-Correlation-Id")||requestId;
     const idempotencyKey=String(req.headers.get("Idempotency-Key")||"").trim();
