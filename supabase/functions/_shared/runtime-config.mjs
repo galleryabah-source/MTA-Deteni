@@ -26,7 +26,7 @@ export function loadMtaRuntimeConfig(readEnv, options = {}) {
   const supabaseAnonKey = String(readEnv("SUPABASE_ANON_KEY") ?? "").trim();
   const requireAnonKey = options.requireAnonKey !== false;
   const supabaseServiceRoleKey = String(readEnv("SUPABASE_SERVICE_ROLE_KEY") ?? "").trim();
-  const writeFlagRaw = String(readEnv("MTA_PRODUCTION_WRITES_ENABLED") ?? "").trim().toLowerCase();
+  const writeFlagRaw = String(readEnv("MTA_PRODUCTION_WRITES_ENABLED") ?? "");
   const environmentRaw = String(readEnv("MTA_ENVIRONMENT") ?? "UNSPECIFIED").trim().toUpperCase();
 
   const missing = [];
