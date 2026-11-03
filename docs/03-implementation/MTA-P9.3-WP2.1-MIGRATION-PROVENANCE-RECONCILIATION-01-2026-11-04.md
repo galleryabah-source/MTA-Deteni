@@ -101,7 +101,7 @@ The 21 live names requiring source/commit provenance resolution are:
 20. `assign_initial_owner_admin_nip_v1`
 21. `audit_initial_owner_admin_nip_assignment_v1`
 
-**Current classification:** `UNRESOLVED_LIVE_SOURCE_PROVENANCE`. No semantic equivalence is asserted. The next source investigation must locate original commits, renamed/deleted paths, PR patches, or archived migration artifacts before deciding whether any item is reconstructed or live-only.
+**Current classification:** the 21 entries have no normalized-name counterpart under `supabase/migrations/`, but they are not all source-missing. Follow-up repository searches found archived P9.7 source SQL for four live entries and a P9.8 provenance manifest for three live entries. These are `ARCHIVED_SOURCE_FOUND` candidates, not yet `EXACT_MATCH` or `SAME_EFFECT_RECONSTRUCTED`. The remaining entries stay `UNRESOLVED_LIVE_SOURCE_PROVENANCE`. No semantic equivalence is asserted.
 
 ### 3.2 Repository SQL files without normalized-name live counterparts
 
@@ -150,3 +150,51 @@ Use the following controlled labels in the final matrix:
 **P9.3: FORENSIC IN PROGRESS — NOT CERTIFIED.**
 
 No production write, migration, configuration, Auth, Storage, or deployment authorization is implied by this report.
+
+
+## 7. WP2.1 follow-up — archived P9.7/P9.8 source evidence
+
+A second repository search located historical source artifacts that were not under `supabase/migrations/`.
+
+### 7.1 P9.7 — four archived SQL sources found
+
+The repository contains `docs/03-implementation/P9.7-RECOVERED-MIGRATION-PROVENANCE-MANIFEST.md`, which attributes the following live production versions to the historical branch `p9.7-durable-postgres-boundary-2026-09-23`:
+
+| Live version | Live name | Archived source |
+|---|---|---|
+| 20260922220723 | mta_p97_durable_idempotency_transaction_boundary_v1 | `P9.7-recovered-migration-sources/20260922220723_mta_p97_durable_idempotency_transaction_boundary_v1.sql` |
+| 20260922220740 | mta_p97_durable_idempotency_transaction_boundary_v2 | `P9.7-recovered-migration-sources/20260922220740_mta_p97_durable_idempotency_transaction_boundary_v2.sql` |
+| 20260922220754 | mta_p97_durable_idempotency_transaction_boundary_v3 | `P9.7-recovered-migration-sources/20260922220754_mta_p97_durable_idempotency_transaction_boundary_v3.sql` |
+| 20260922220814 | mta_p97_durable_idempotency_rpc_wrapper_v1 | `P9.7-recovered-migration-sources/20260922220814_mta_p97_durable_idempotency_rpc_wrapper_v1.sql` |
+
+The four archived files were fetched and inspected:
+- v1 creates `mta_internal.idempotency_keys`, its completed-at index, enables RLS, revokes anon/authenticated privileges, and grants service_role access.
+- v2 is explicitly a reconciliation marker; its body says the executable transaction boundary is finalized in v3.
+- v3 defines `mta_internal.execute_idempotent_mutation(...)`, including idempotency replay/conflict checks, table/operation allowlists, mutation execution, audit insertion, and idempotency completion.
+- RPC wrapper v1 defines `public.mta_execute_idempotent_mutation(...)` delegating to the internal function and restricts EXECUTE to service_role.
+
+**Classification:** `ARCHIVED_SOURCE_FOUND` for all four P9.7 entries. The manifest and archived SQL establish a traceable source artifact, but do not by themselves prove byte-for-byte equivalence with the applied live migration or identify a live migration checksum. Keep them archived; do not move them into the executable migrations directory during migration freeze.
+
+### 7.2 P9.8 — provenance manifest found; version discrepancy remains
+
+The repository contains `docs/03-implementation/P9.8-RECOVERED-MIGRATION-PROVENANCE-MANIFEST.md` with these dispositions:
+
+| Manifest version/name | Manifest claim | Live inventory comparison |
+|---|---|---|
+| 20260922221532_mta_p98_transactional_outbox_v1 | recovered and archived as provenance | Live version/name match |
+| 20260922221548_mta_p98_outbox_event_identity_v2 | recovered by historical branch comparison; executable body verified against live production function | Live version/name match; underlying comparison evidence still needs direct review |
+| 20260922222000_mta_p98_outbox_dispatcher_v1 | recovered and archived as provenance | Live inventory has version 20260922222630 with same name; timestamp/version discrepancy unresolved |
+
+The P9.8 manifest is provenance evidence, not the SQL body itself. The dispatcher version discrepancy must be traced to historical branch commits/renames and not silently normalized. The P9.8 manifest's statement that the event-identity executable body was verified is recorded as a prior repository assertion; this WP2.1 pass has not independently reproduced that full comparison.
+
+**Classification:** `ARCHIVED_PROVENANCE_MANIFEST_FOUND` for the three P9.8 entries. Dispatcher remains `UNRESOLVED_VERSION_MAPPING` until source commit/branch lineage is verified.
+
+### 7.3 Revised remaining search scope
+
+The 21 live entries without a normalized migration path now divide into:
+- 4 P9.7 entries with archived SQL source artifacts;
+- 3 P9.8 entries with a recovered provenance manifest (one has a live/manifest version discrepancy);
+- 14 entries still requiring source/commit/PR or archived artifact discovery.
+
+This is a source-discovery classification only. It does not change the live database, migration history, or release gate.
+
