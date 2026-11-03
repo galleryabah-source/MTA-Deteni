@@ -46,7 +46,7 @@ Beberapa live migration yang tercatat tidak tampak pada daftar source SQL yang s
 - audit service-role grants
 - initial OWNER/ADMIN NIP assignment dan audit assignment
 
-**Required action:** build exact version/name/file reconciliation matrix dari seluruh 45 live entries terhadap repository history. Jangan membuat migration baru atau mengubah migration history untuk menutup selisih.
+**Required action:** build exact version/name/file reconciliation matrix dari seluruh 44 live entries terhadap repository history. Jangan membuat migration baru atau mengubah migration history untuk menutup selisih.
 
 ### 3.1 Hasil pencocokan nama awal
 
@@ -193,7 +193,7 @@ Tidak ada perubahan konfigurasi yang dilakukan.
 | RLS-04 force RLS | CONFIRMED: RLS true, FORCE false pada target tables | Evidence/architecture |
 | RLS-05 records/epochs | CONFIRMED: 4 public/internal tables tanpa policy; Advisor count total 6 | Medium |
 | RLS-06 document write | CONFIRMED: UPDATE/INSERT/DELETE lebih luas daripada SELECT creator restriction | High |
-| Migration provenance | CONFIRMED COUNT GAP: 45 live entries vs 26 source SQL files | High |
+| Migration provenance | CONFIRMED COUNT GAP: 44 live entries vs 26 source SQL files | High |
 | Auth leaked password | CONFIRMED Advisor WARN | Medium |
 
 ## 9. Remaining verification — not yet performed
