@@ -28,9 +28,9 @@ Project `tmmhxqgzelgrsrxbbfzh`:
 
 ## 3. Migration history reconciliation
 
-Supabase migration history mengembalikan **45 migration entries**. Pemeriksaan source repository pada branch audit sebelumnya menemukan **26 SQL migration files** di `supabase/migrations/`.
+Supabase migration history mengembalikan **44 migration entries**. Pemeriksaan source repository pada branch audit sebelumnya menemukan **26 SQL migration files** di `supabase/migrations/`.
 
-Ini adalah perbedaan jumlah 19 entry. Perbedaan jumlah tidak otomatis membuktikan 19 file hilang satu-per-satu, karena nama/version dapat direkonstruksi, digabung, atau disusun ulang. Namun ini adalah provenance gap yang wajib direkonsiliasi sebelum source repository dianggap merepresentasikan seluruh schema history live.
+Ini adalah perbedaan jumlah 18 entry. Pencocokan nama normalisasi awal menemukan 23 live entries yang memiliki pasangan nama file di repository, 21 live entries tanpa pasangan nama file, dan 3 file repository tanpa pasangan nama live. Pencocokan nama bukan pembuktian kesamaan SQL; beberapa file repository memiliki timestamp berbeda dari versi migration live. Ini adalah provenance gap yang wajib direkonsiliasi sebelum source repository dianggap merepresentasikan seluruh schema history live.
 
 Beberapa live migration yang tercatat tidak tampak pada daftar source SQL yang sebelumnya diperiksa, termasuk:
 - QR resolver active/expiry hardening
@@ -47,6 +47,12 @@ Beberapa live migration yang tercatat tidak tampak pada daftar source SQL yang s
 - initial OWNER/ADMIN NIP assignment dan audit assignment
 
 **Required action:** build exact version/name/file reconciliation matrix dari seluruh 45 live entries terhadap repository history. Jangan membuat migration baru atau mengubah migration history untuk menutup selisih.
+
+### 3.1 Hasil pencocokan nama awal
+
+**23/44** live entries mempunyai pasangan nama file berdasarkan normalisasi nama. **21 live entries** belum memiliki pasangan nama file yang cocok, antara lain QR resolver hardening, authenticated grants, P9.7/P9.8 idempotency/outbox, document storage hardening v2, audit hash chain v2, privileged movement containment, audit service-role grants, serta dua migration initial OWNER/ADMIN NIP assignment. **3 file repository** belum mempunyai pasangan nama live berdasarkan normalisasi: `mta_document_storage_read_hardening.sql`, `mta_audit_hash_chain_v1.sql`, dan `mta_scope_metadata_admin_config_v1.sql`.
+
+Hasil ini hanya pencocokan nama, bukan penilaian isi SQL atau status commit. Tahap berikutnya harus membandingkan SQL effects dan commit history sebelum mengklasifikasikan source missing atau reconstructed equivalent.
 
 ## 4. Live table/RLS evidence
 
