@@ -130,6 +130,15 @@ test("service and anon keys must be distinct", () => {
   );
 });
 
+test("production write flag accepts only exact lowercase boolean literals", () => {
+  for (const value of ["TRUE", "False", " true", "false ", "yes", "1"]) {
+    assert.throws(
+      () => loadMtaRuntimeConfig(reader({ ...base, MTA_PRODUCTION_WRITES_ENABLED: value })),
+      /MTA_CONFIG_INVALID:MTA_PRODUCTION_WRITES_ENABLED/,
+    );
+  }
+});
+
 test("invalid environment and production write flag fail closed", () => {
   assert.throws(
     () => loadMtaRuntimeConfig(reader({ ...base, MTA_ENVIRONMENT: "prod-ish" })),
