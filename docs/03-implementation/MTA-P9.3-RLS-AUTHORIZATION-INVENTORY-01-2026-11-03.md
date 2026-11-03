@@ -59,9 +59,9 @@ Tidak ditemukan bukti dalam migration yang diperiksa bahwa profile helper memuat
 | Table | RLS | SELECT | INSERT / UPDATE | DELETE |
 |---|---|---|---|---|
 | `mta_detainees` | Enabled | OWNER/ADMIN/AUDITOR global; lainnya membership aktif pada scope detainee | OWNER/ADMIN global; EDITOR wajib membership aktif | OWNER/ADMIN; policy expression mengandung kondisi scope tambahan yang redundan karena role telah membatasi OWNER/ADMIN |
-| `mta_placements` | Tidak ditemukan ENABLE pada file awal; policy scope dibuat | OWNER/ADMIN/AUDITOR global; lainnya membership scope detainee terkait | OWNER/ADMIN global; EDITOR wajib membership | OWNER/ADMIN |
-| `mta_movements` | Tidak ditemukan ENABLE pada file awal; policy scope dibuat | OWNER/ADMIN/AUDITOR global; lainnya membership scope detainee terkait | OWNER/ADMIN global; EDITOR wajib membership | OWNER/ADMIN |
-| `mta_leaves` | Tidak ditemukan ENABLE pada file awal; policy scope dibuat | OWNER/ADMIN/AUDITOR global; lainnya membership scope detainee terkait | OWNER/ADMIN global; EDITOR wajib membership | OWNER/ADMIN |
+| `mta_placements` | Enabled pada migration foundation | OWNER/ADMIN/AUDITOR global; lainnya membership scope detainee terkait | OWNER/ADMIN global; EDITOR wajib membership | OWNER/ADMIN |
+| `mta_movements` | Enabled pada migration foundation | OWNER/ADMIN/AUDITOR global; lainnya membership scope detainee terkait | OWNER/ADMIN global; EDITOR wajib membership | OWNER/ADMIN |
+| `mta_leaves` | Enabled pada migration foundation | OWNER/ADMIN/AUDITOR global; lainnya membership scope detainee terkait | OWNER/ADMIN global; EDITOR wajib membership | OWNER/ADMIN |
 | `mta_documents` | Enabled dari foundation | Policy SELECT terbaru: OWNER/ADMIN/AUDITOR global; EDITOR/REVIEWER hanya jika created_by = auth.uid() | Policy awal OWNER/ADMIN/EDITOR masih ada pada migration source | Policy awal OWNER/ADMIN |
 | `mta_blocks` | Enabled | authenticated | OWNER/ADMIN tanpa scope | OWNER/ADMIN tanpa scope |
 | `mta_rooms` | Enabled | authenticated | OWNER/ADMIN tanpa scope | OWNER/ADMIN tanpa scope |
@@ -100,11 +100,11 @@ Policy `storage.objects` membatasi bucket, bukan object ownership, document rela
 
 **Remediasi desain:** object policy harus mengikat path/object ke metadata canonical dan dokumen yang sah, serta memvalidasi scope dan klasifikasi. Perlu uji download, upload, update, delete lintas user/scope.
 
-### RLS-04 — RLS enablement placements/movements/leaves belum dibuktikan dari source
-**Severity: High / evidence gap.**  
-Migration foundation mengaktifkan RLS pada detainees, placements, movements, leaves, documents, audit, storage metadata, AI jobs. Namun daftar migration source yang diperiksa memperlihatkan foundation hanya mengaktifkan sebagian tabel; scope-hardening membuat policy placements/movements/leaves tetapi tidak terlihat mengaktifkan RLS pada ketiganya. Policy tanpa RLS tidak menegakkan pembatasan.
+### RLS-04 — FORCE ROW LEVEL SECURITY dan bypass privilege belum dibuktikan
+**Severity: Medium / evidence gap.**  
+Migration source mengaktifkan RLS pada tabel operasional utama, termasuk detainees, placements, movements, leaves, documents, audit, storage metadata dan AI jobs. Namun source yang diperiksa tidak membuktikan bahwa `FORCE ROW LEVEL SECURITY` diterapkan atau bahwa owner/service-role bypass semantics telah diuji. Ini bukan otomatis defect: service-role/internal command paths mungkin memang memerlukan bypass, tetapi harus dibatasi dan dibuktikan.
 
-**Remediasi evidence:** query katalog read-only pada database target untuk `pg_class.relrowsecurity`, `pg_policies`, grants, dan migration history. Jangan menganggap source file = state live.
+**Remediasi evidence:** query katalog read-only untuk `relrowsecurity`, `relforcerowsecurity`, owner, grants, dan `pg_policies`; uji role authenticated dan service-role path secara terpisah. Jangan menganggap source file = state live.
 
 ### RLS-05 — Activity/health records dan audit epochs fail-closed, belum punya kontrak akses
 **Severity: Medium / readiness blocker.**  
