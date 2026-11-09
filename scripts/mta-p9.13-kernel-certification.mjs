@@ -38,14 +38,16 @@ for(const [id,name,command] of checks){
 const worker=fs.readFileSync("worker-v11.js","utf8");
 const governance={
   syntheticOnly:/dataMode:\s*['"]SYNTHETIC_ONLY['"]/.test(worker),
-  productionAccessAuthorized:!/productionAccessAuthorized:\s*false/.test(worker),
-  livePostgresqlExecution:!/livePostgresqlExecution:\s*false/.test(worker),
-  realDetaineeDataAllowed:!/realDetaineeDataAllowed:\s*false/.test(worker),
+  productionAccessAuthorized:/productionAccessAuthorized:\s*true/.test(worker),
+  livePostgresqlExecution:/livePostgresqlExecution:\s*true/.test(worker),
+  realDetaineeDataAllowed:/realDetaineeDataAllowed:\s*true/.test(worker),
+  databaseNotProbed:/database:\s*['"]NOT_PROBED['"]/.test(worker)&&/productionDatabase:\s*['"]NOT_PROBED['"]/.test(worker),
+  storageNotProbed:/storage:\s*['"]NOT_PROBED['"]/.test(worker)&&/productionStorage:\s*['"]NOT_PROBED['"]/.test(worker),
   migrationFreeze:/migrationFreeze:\s*true/.test(worker),
   aiOff:/ai:\s*['"]OFF['"]/.test(worker),
 };
 
-const governancePass=governance.syntheticOnly===false && governance.productionAccessAuthorized===true && governance.livePostgresqlExecution===true && governance.realDetaineeDataAllowed===true && governance.migrationFreeze===true && governance.aiOff===true;
+const governancePass=governance.syntheticOnly===false && governance.productionAccessAuthorized===false && governance.livePostgresqlExecution===false && governance.realDetaineeDataAllowed===false && governance.databaseNotProbed===true && governance.storageNotProbed===true && governance.migrationFreeze===true && governance.aiOff===true;
 const mandatoryPass=results.every(x=>x.status==="PASS");
 const certified=mandatoryPass&&governancePass;
 

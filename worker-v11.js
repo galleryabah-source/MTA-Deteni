@@ -27,21 +27,19 @@ export default {
     if (url.pathname === '/api/health') return Response.json({
       ok:true, app:'MTA DETENI', runtime:'cloudflare-static-adapter', preview:'operational-v16',
       deploymentSource:'GITHUB_MAIN', deploymentCommit:env.MTA_DEPLOY_COMMIT||'UNBOUND',
-      dataMode:'PRODUCTION_DB', database:'CONNECTED',
-      storage:'PRIVATE_BUCKET_READY', ai:'OFF', migrationFreeze:true,
-      productionAccessAuthorized:true, livePostgresqlExecution:true, realDetaineeDataAllowed:true,
+      dataMode:'PRODUCTION_DB', database:'NOT_PROBED',
+      storage:'NOT_PROBED', ai:'OFF', migrationFreeze:true,
       externalTransportAllowed:false, durablePublicationAllowed:false,
       capabilities:['dashboard','detainee','placement','movement','leave','documents','audit','operational-monitor','qr-center','scan-center','operational-queue','room-ops','leave-qr','camera-scan','camera-qr-v2','reports','admin-settings','master-block','master-room','master-operational-catalogs','room-transfer-master','master-room-contract-v10','responsive-left-nav','collapsible-nav','desktop-shell-v2','responsive-hardening-v12','offline-shell-v2','durable-offline-queue','lan-ready-shell','qr-offline-cache','adaptive-mobile-scanner','mobile-tablet-shell-v2','mobile-bottom-nav','mobile-central-qr-scan'],
       timestamp:new Date().toISOString()
     });
     if (url.pathname === '/api/runtime') return Response.json({
-      mode:'PRODUCTION_RUNTIME', source:'PRODUCTION_DB', database:'CONNECTED', syntheticOnly:false,
+      mode:'PRODUCTION_RUNTIME', source:'PRODUCTION_DB', database:'NOT_PROBED', syntheticOnly:false,
       deploymentSource:'GITHUB_MAIN', deploymentCommit:env.MTA_DEPLOY_COMMIT||'UNBOUND',
       persistence:'SUPABASE_PRODUCTION_READ_ONLY+INDEXED_DB_QUEUE',
       nextAdapter:'SUPABASE_PRODUCTION_AUTH_RBAC', authorization:'ENFORCED_SERVER_SIDE_RBAC',
-      productionDatabase:'CONNECTED', productionStorage:'PRIVATE_BUCKET_READY', ai:'OFF',
-      audit:'SERVER_CANONICAL_EVENT_LEDGER', migrationFreeze:true, productionAccessAuthorized:true,
-      livePostgresqlExecution:true, previewVersion:'v16', masterRoomContract:'v10',
+      productionDatabase:'NOT_PROBED', productionStorage:'NOT_PROBED', ai:'OFF',
+      audit:'SERVER_CANONICAL_EVENT_LEDGER', migrationFreeze:true, previewVersion:'v16', masterRoomContract:'v10',
       responsiveNav:'DESKTOP_LEFT_VERTICAL_COLLAPSIBLE__MOBILE_BOTTOM_NAV', responsiveHardening:'v12',
       desktopShell:'v2', offlineShell:'SERVICE_WORKER_V2', offlineQueue:'INDEXED_DB',
       qrRuntime:'LOCAL_ENCODER_CACHED', cameraScanner:'HTML5_QR_CODE_V2_ADAPTIVE',
