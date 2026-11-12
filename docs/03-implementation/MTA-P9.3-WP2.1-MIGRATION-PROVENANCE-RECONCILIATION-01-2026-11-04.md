@@ -466,3 +466,23 @@ Separately, four additional live entries were recovered from merged PR patches (
 The remaining P9.8 dispatcher version mapping, the source-to-live version mappings, and all required live SQL-effect comparisons remain open. The prior PostgreSQL authentication failure (SQLSTATE `28P01`) still blocks fresh direct catalog comparison.
 
 **Consolidated status:** WP2.1.3 SOURCE DISCOVERY = ADVANCED / PARTIAL; WP2.1 = NOT CERTIFIED; P9.3 = NOT CERTIFIED.
+
+
+## 13. Additional identity lineage — NIP identity contract (PR #273)
+
+A merged PR search found an authoritative patch for the NIP identity contract:
+
+- PR #273: `feat: adopt 18 digit NIP as login identity`
+- Merged: 2026-10-01T07:37:09Z
+- Branch: `feat/nip-authentication-contract`
+- Head commit: `c29e4ef786b79d7bc29b43369260c7fb33e0803b`
+- Source path in patch: `supabase/migrations/20261001090000_mta_nip_identity_contract_v1.sql`
+- Live migration inventory: version `20261001073742`, name `mta_nip_identity_contract_v1`.
+
+The PR patch adds nullable `mta_profiles.nip`, a format constraint for 18 digits, a partial unique index, and a column comment. The same PR adds NIP-to-profile lookup in `mta-login`, retrieves the existing Auth user's email server-side, and verifies the password using Supabase Auth. Its response uses a generic `INVALID_LOGIN` for malformed NIP, missing/inactive profile, and invalid credentials; it also avoids logging NIP/password.
+
+**Disposition:** `MERGED_PR_SOURCE_FOUND_VERSION_MISMATCH`. The migration source is recovered from a merged PR, but the SQL filename timestamp (`20261001090000`) differs from live migration version (`20261001073742`). The migration body is available in the PR patch, not yet compared to live catalog column/constraint/index definitions. Do not classify as exact or semantically reconciled until that comparison succeeds.
+
+This NIP contract is an additional lineage item outside the original 21-entry unmatched-name cohort. It is relevant to P9.3 authentication because the login identifier is NIP while credential verification remains delegated to Supabase Auth. It does not, by itself, establish rate limiting, login audit durability, session revocation, or forced-password-change enforcement.
+
+No database mutation or Auth configuration change was performed.
