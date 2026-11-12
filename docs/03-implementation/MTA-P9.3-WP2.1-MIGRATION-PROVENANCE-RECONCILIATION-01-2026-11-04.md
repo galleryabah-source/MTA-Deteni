@@ -365,15 +365,11 @@ A targeted PR-history search recovered authoritative merged PR patches for four 
 
 **Disposition:** `MERGED_PR_SOURCE_FOUND_VERSION_MISMATCH`. The PR source and effect are identified, but the live version differs from the filename timestamp. The NO FORCE RLS owner/trigger behavior and effective grants still require catalog verification.
 
-### 10.5 Revised lineage discovery counts
+### 10.5 Additional lineage items outside the original 21-entry unmatched-name group
 
-The earlier 14-entry unresolved source-discovery group is reduced by four live migration entries for which merged PR source artifacts have now been recovered:
-- G1 direct detainee DML containment (#299);
-- G1-X4 privileged movement EXECUTE containment (#300);
-- detainee activity/health records (#331);
-- audit-chain epoch RLS hardening (#331).
+The four entries recovered in this section—G1 direct detainee DML containment (#299), G1-X4 privileged movement EXECUTE containment (#300), detainee activity/health records (#331), and audit-chain epoch RLS hardening (#331)—are additional live inventory entries whose migration names embed the source filename timestamp. They were not members of the original 21-entry normalized-name mismatch list in section 3.1, so they do not reduce that list's 14-entry post-P9.7/P9.8 source-discovery worklist.
 
-These four are not classified as exact live SQL matches. Their source files are recovered, but each has a version/timestamp mismatch and remains pending live-effect comparison. The count of unresolved entries is therefore a discovery-worklist count only, not a certification count.
+These four source artifacts are recovered from merged PR patches, but each has a version/timestamp mismatch and remains pending live-effect comparison. They must be tracked as a separate lineage cohort, not used to adjust the original 21-entry count.
 
 ### 10.6 WP2.1.3 status
 
@@ -451,3 +447,22 @@ This follow-up recovered historical SQL paths for:
 These eight source artifacts reduce the unresolved source-discovery worklist. They do not resolve the separate P9.8 dispatcher version mapping, the AI secure configuration provenance gap, or the four later merged-PR version-mismatch cases in section 10. All recovered artifacts remain provenance evidence only; they are not moved into the executable migration directory and are not replayed.
 
 **WP2.1.3 remains PARTIAL — NOT CERTIFIED.** Fresh live effect comparison remains blocked by the prior read-only SQL connection failure (SQLSTATE `28P01`).
+
+
+## 12. Consolidated WP2.1.3 source-discovery count (supersedes earlier interim counts)
+
+The original normalized-name reconciliation identified 21 live migration entries without a repository migration counterpart. The current source-discovery evidence for those 21 is:
+
+- 4 P9.7 historical SQL sources recovered (section 7.1);
+- 3 P9.8 historical SQL sources recovered, with dispatcher version mapping unresolved (section 9);
+- 8 additional historical SQL sources recovered for QR, document storage, audit hash chain, and movement idempotency (section 11);
+- 1 admin-users service-role privilege source file recovered with a live/source version mismatch (section 8.1);
+- 5 entries still without an authoritative source artifact recovered in this pass: `mta_ai_secure_configuration`, `mta_audit_service_role_read_insert_grant_v1`, `mta_p97_service_role_dml_grants_v1`, `assign_initial_owner_admin_nip_v1`, and `audit_initial_owner_admin_nip_v1`.
+
+This yields **16 of 21 live entries with a historical/repository source artifact located**, and **5 of 21 still source-unrecovered in the current search record**. This is a source-discovery count only. It does not imply SQL effect equivalence, successful production replay, or permission to restore files into the executable migration directory.
+
+Separately, four additional live entries were recovered from merged PR patches (#299, #300, #331) and are tracked as a distinct cohort in section 10. They are not included in the original 21-entry denominator.
+
+The remaining P9.8 dispatcher version mapping, the source-to-live version mappings, and all required live SQL-effect comparisons remain open. The prior PostgreSQL authentication failure (SQLSTATE `28P01`) still blocks fresh direct catalog comparison.
+
+**Consolidated status:** WP2.1.3 SOURCE DISCOVERY = ADVANCED / PARTIAL; WP2.1 = NOT CERTIFIED; P9.3 = NOT CERTIFIED.
