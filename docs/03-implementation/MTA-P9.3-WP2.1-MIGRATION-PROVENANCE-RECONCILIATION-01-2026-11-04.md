@@ -198,3 +198,61 @@ The 21 live entries without a normalized migration path now divide into:
 
 This is a source-discovery classification only. It does not change the live database, migration history, or release gate.
 
+
+
+## 8. Additional source-path findings and inspection limitation
+
+### 8.1 Admin-users service-role privilege — same migration name, different version
+
+A repository search found:
+`supabase/migrations/20260928093000_mta_admin_users_service_role_privilege_v1.sql`
+
+Its SQL grants SELECT/INSERT/UPDATE/DELETE on `public.mta_profiles` to `service_role` and adds a table comment describing the protected `mta-api` admin-users path.
+
+The live migration inventory records the same migration name at version `20260928025558`. This is a **same-name / version mismatch candidate**. The file is an authoritative repository source artifact, but its timestamp does not match the live version. Do not classify it as `EXACT_MATCH` until historical branch/commit evidence confirms the version mapping and SQL effect against the live catalog.
+
+### 8.2 Transactional movement and outbox source artifact
+
+The repository file `supabase/migrations/20260927123000_mta_transactional_movement_v1.sql` contains:
+- `mta_internal.idempotency_keys` and `mta_internal.outbox_events` table definitions;
+- a transactional movement function with replay/conflict handling;
+- movement/placement/detainee updates;
+- audit event insertion and outbox event insertion in one transaction;
+- a service-role-only public RPC wrapper.
+
+The live migration history separately records `mta_transactional_movement_v1` at version `20260927132428`. This is a same-name / version mismatch candidate whose effects overlap with P9.7/P9.8 foundations. It must be compared carefully with the recovered P9.7/P9.8 sources and live function definitions; do not count the same database effect twice or infer that the full P9.7/P9.8 sequence is represented by this movement migration.
+
+### 8.3 Repository search results for the remaining names
+
+The default-branch code search returned no exact file hits for the following names:
+- `mta_qr_resolver_active_expiry_hardening`
+- `mta_authenticated_domain_table_grants`
+- `mta_qr_registry_policy_performance_hardening`
+- `mta_audit_events_authenticated_read_grant`
+- `mta_ai_secure_configuration`
+- `mta_audit_service_role_read_insert_grant_v1`
+- `assign_initial_owner_admin_nip_v1`
+- `audit_initial_owner_admin_nip_assignment_v1`
+- `mta_transactional_movement_v1_idempotency_fix`
+- `20261002160000_mta_detainee_direct_write_containment_v1`
+- `20261002223000_g1_x4_privileged_movement_execute_containment_v1`
+- `mta_document_storage_read_hardening_v2`
+- `mta_audit_hash_chain_v2`
+
+This is a bounded search result, not proof of absence: GitHub code search covered the default branch, and commit-message search did not return matches for these exact strings. Historical branches, deleted paths, PR patches, release artifacts, and external backups remain possible sources.
+
+### 8.4 Live catalog query attempt
+
+A read-only PostgreSQL catalog query was attempted to check whether object/policy/function names corresponding to the unresolved migration labels exist. The Supabase SQL execution service returned a connection error: PostgreSQL authentication failed for user `postgres` (SQLSTATE `28P01`). No query results were returned and no database mutation occurred.
+
+Therefore no new live-catalog conclusion is drawn from this attempt. Retry only when the read-only SQL connection is healthy; until then retain the prior verified live metadata and mark new effect-level comparisons as pending.
+
+### 8.5 Updated disposition
+
+- P9.7: 4 archived SQL sources found; source provenance is documented, but byte-for-byte/live-effect verification remains open.
+- P9.8: 3 manifest entries found; dispatcher version mapping remains unresolved.
+- Admin-users privilege and transactional movement: repository SQL source files found with version mismatches that require lineage/effect verification.
+- Remaining exact-name searches: no source hit in the default-branch search; classification remains `UNRESOLVED`, not `LIVE_ONLY`.
+- Live catalog effect verification: blocked for this pass by SQL connection authentication failure.
+
+**WP2.1 remains PARTIAL — NOT CERTIFIED.**
