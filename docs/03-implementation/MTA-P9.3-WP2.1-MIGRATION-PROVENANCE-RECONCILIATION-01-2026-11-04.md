@@ -256,3 +256,64 @@ Therefore no new live-catalog conclusion is drawn from this attempt. Retry only 
 - Live catalog effect verification: blocked for this pass by SQL connection authentication failure.
 
 **WP2.1 remains PARTIAL — NOT CERTIFIED.**
+
+
+## 9. WP2.1.3 — Historical branch lineage recovery (follow-up)
+
+A branch-level repository inspection recovered the original P9.8 migration paths from the historical branch `p9.8-application-e2e-2026-09-23`. This improves the evidence beyond the earlier manifest-only result.
+
+### 9.1 P9.8 outbox table — exact version/path recovery
+
+Fetched from `p9.8-application-e2e-2026-09-23`:
+
+- Path: `supabase/migrations/20260922221532_mta_p98_transactional_outbox_v1.sql`
+- Blob SHA: `861c00d366518048947c4956ee45e456064566c0`
+- Live inventory: version `20260922221532`, name `mta_p98_transactional_outbox_v1`.
+
+The recovered SQL creates `mta_internal.outbox_events`, indexes pending and aggregate lookup paths, enables RLS, revokes client-role table privileges, and grants service_role table privileges.
+
+**Disposition:** `HISTORICAL_SOURCE_PATH_AND_VERSION_MATCH`. This confirms a historical repository source path at the exact live version. It does not independently establish that the currently deployed object state is byte-for-byte or effect-for-effect identical; live catalog comparison remains required.
+
+### 9.2 P9.8 event identity — exact version/path recovery
+
+Fetched from `p9.8-application-e2e-2026-09-23`:
+
+- Path: `supabase/migrations/20260922221548_mta_p98_outbox_event_identity_v2.sql`
+- Blob SHA: `2627aa5cda855990807529269dff4decdb23fafe`
+- Live inventory: version `20260922221548`, name `mta_p98_outbox_event_identity_v2`.
+
+The recovered SQL replaces `mta_internal.execute_idempotent_mutation(...)`. Its body enforces service-role context, validates idempotency key/request hash, restricts operation and target table names, performs mutation, inserts audit and outbox records, completes the idempotency response, and restricts function EXECUTE to service_role.
+
+**Disposition:** `HISTORICAL_SOURCE_PATH_AND_VERSION_MATCH`. The path and version now match the live migration inventory. The prior P9.8 manifest also asserted that the executable body was verified against the live production function; this pass retrieved the historical body but did not obtain a successful fresh live SQL definition comparison. Do not elevate this to `EXACT_SQL_MATCH` or `SAME_EFFECT_RECONSTRUCTED` yet.
+
+### 9.3 P9.8 dispatcher — unresolved version mapping
+
+Fetched from `p9.8-application-e2e-2026-09-23`:
+
+- Path: `supabase/migrations/20260922222000_mta_p98_outbox_dispatcher_v1.sql`
+- Blob SHA: `acd14a3081a2f5ae28cf9606de5bb6585840c8ec`
+- Live inventory: version `20260922222630`, name `mta_p98_outbox_dispatcher_v1`.
+
+The recovered SQL defines `claim_outbox_events`, `release_outbox_event`, and `complete_outbox_event`, with service_role-only EXECUTE grants. The source version differs from the live version by 630 seconds.
+
+**Disposition:** `UNRESOLVED_VERSION_MAPPING`. Need a commit/PR lineage bridge or another authoritative source showing the timestamp/version change, then compare function signatures, bodies, ownership, search_path, grants, and live catalog definitions. Do not silently relabel the archived file or alter migration history.
+
+### 9.4 Historical branch lookup limitations
+
+- The three P9.8 files were successfully retrieved from `p9.8-application-e2e-2026-09-23`.
+- The same paths were not found at `p9.8-outbox-2026-09-23` through the GitHub contents endpoint. This is recorded only as a retrieval limitation for that branch/path combination, not as proof that the branch or source never existed.
+- PR #171 and #172 independently contain patch copies of the first two P9.8 migration bodies, with later migration filenames `20260923100000` and `20260923100500`. Those later patch copies are not the matching live-version source paths; the historical branch files above are the stronger path/version evidence.
+
+### 9.5 WP2.1.3 status update
+
+| P9.8 live migration | Historical source | Current disposition |
+|---|---|---|
+| 20260922221532 transactional_outbox_v1 | Exact same-version path recovered | `HISTORICAL_SOURCE_PATH_AND_VERSION_MATCH` |
+| 20260922221548 outbox_event_identity_v2 | Exact same-version path recovered | `HISTORICAL_SOURCE_PATH_AND_VERSION_MATCH` |
+| 20260922222630 outbox_dispatcher_v1 | Source path exists at 20260922222000 | `UNRESOLVED_VERSION_MAPPING` |
+
+WP2.1.3 is **PARTIALLY ADVANCED**, not complete. The recovered source files improve historical provenance but do not replace the required SQL-effect comparison against live catalog definitions. The previous SQL authentication failure (SQLSTATE `28P01`) remains a blocker to fresh direct catalog comparison.
+
+No database query was successfully executed in this follow-up. No DDL/DML, migration execution, Auth/Storage/RLS/grant change, or deployment was performed.
+
+**Gate remains:** WP2.1 PARTIAL — NOT CERTIFIED; P9.3 FORENSIC IN PROGRESS — NOT CERTIFIED.
