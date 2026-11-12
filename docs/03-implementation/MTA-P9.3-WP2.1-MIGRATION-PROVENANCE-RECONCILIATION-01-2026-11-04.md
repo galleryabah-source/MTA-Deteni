@@ -317,3 +317,66 @@ WP2.1.3 is **PARTIALLY ADVANCED**, not complete. The recovered source files impr
 No database query was successfully executed in this follow-up. No DDL/DML, migration execution, Auth/Storage/RLS/grant change, or deployment was performed.
 
 **Gate remains:** WP2.1 PARTIAL — NOT CERTIFIED; P9.3 FORENSIC IN PROGRESS — NOT CERTIFIED.
+
+
+## 10. WP2.1.3 — Additional PR-lineage recovery
+
+A targeted PR-history search recovered authoritative merged PR patches for four more live migration labels. The evidence is stronger than default-branch exact-name search alone, but each item has a production-history version differing from the SQL filename timestamp.
+
+### 10.1 G1 direct detainee DML containment
+
+- Merged PR: #299 — `hardening: contain direct detainee DML at database boundary`
+- Historical branch: `hardening/g1-detainee-direct-write-containment-v1`
+- Merged at: 2026-10-02T14:59:52Z
+- Source path: `supabase/migrations/20261002160000_mta_detainee_direct_write_containment_v1.sql`
+- SQL effect in PR patch: revokes INSERT, UPDATE, DELETE on `public.mta_detainees` from `authenticated`.
+- Live inventory: version `20261002150223`, name `20261002160000_mta_detainee_direct_write_containment_v1`.
+
+**Disposition:** `MERGED_PR_SOURCE_FOUND_VERSION_MISMATCH`. The PR and SQL source are verified, but the live history version is earlier than the timestamp embedded in the migration name. Need migration history/commit lineage and live ACL comparison before effect equivalence is certified.
+
+### 10.2 G1-X4 privileged movement execution containment
+
+- Merged PR: #300 — `hardening: contain privileged movement writer execution`
+- Historical branch: `hardening/g1-x4-privileged-writer-provenance-v2`
+- Merged at: 2026-10-02T15:53:02Z
+- Source path: `supabase/migrations/20261002223000_g1_x4_privileged_movement_execute_containment_v1.sql`
+- SQL effect in PR patch: revokes EXECUTE on `mta_internal.execute_movement_transaction(...)` from PUBLIC, anon, authenticated; grants EXECUTE to service_role.
+- Live inventory: version `20261002155310`, name `20261002223000_g1_x4_privileged_movement_execute_containment_v1`.
+
+**Disposition:** `MERGED_PR_SOURCE_FOUND_VERSION_MISMATCH`. The PR patch and SQL effect are recovered, but the live history version differs from the migration filename timestamp. Verify exact function signature, effective ACL, and lineage before declaring equivalence.
+
+### 10.3 Detainee activity and restricted health records
+
+- Merged PR: #331 — `feat(db): persist detainee activity notes and restricted health records`
+- Historical branch: `feat/qr-detainee-notes-health-records`
+- Merged at: 2026-10-14T01:08:37Z
+- Source path: `supabase/migrations/20261013090000_mta_detainee_activity_health_records_v1.sql`
+- SQL patch defines activity-note and health-record tables, RLS and service-role grants, and a SECURITY DEFINER transactional RPC with idempotency, actor/scope checks, audit and outbox insertion.
+- Live inventory: version `20261014010854`, name `mta_detainee_activity_health_records_v1`.
+
+**Disposition:** `MERGED_PR_SOURCE_FOUND_VERSION_MISMATCH`. Source SQL is recovered from the merged PR patch, but its embedded migration timestamp differs from the live migration-history version. The migration body also requires live catalog/effective-privilege comparison; source discovery alone does not certify runtime behavior.
+
+### 10.4 Audit-chain epoch RLS hardening
+
+- Same merged PR: #331
+- Source path: `supabase/migrations/20261013093000_mta_audit_chain_epochs_rls_v1.sql`
+- SQL patch enables RLS, explicitly sets NO FORCE RLS, and revokes all table privileges from PUBLIC, anon, authenticated, and service_role on `public.mta_audit_chain_epochs`.
+- Live inventory: version `20261014010900`, name `mta_audit_chain_epochs_rls_v1`.
+
+**Disposition:** `MERGED_PR_SOURCE_FOUND_VERSION_MISMATCH`. The PR source and effect are identified, but the live version differs from the filename timestamp. The NO FORCE RLS owner/trigger behavior and effective grants still require catalog verification.
+
+### 10.5 Revised lineage discovery counts
+
+The earlier 14-entry unresolved source-discovery group is reduced by four live migration entries for which merged PR source artifacts have now been recovered:
+- G1 direct detainee DML containment (#299);
+- G1-X4 privileged movement EXECUTE containment (#300);
+- detainee activity/health records (#331);
+- audit-chain epoch RLS hardening (#331).
+
+These four are not classified as exact live SQL matches. Their source files are recovered, but each has a version/timestamp mismatch and remains pending live-effect comparison. The count of unresolved entries is therefore a discovery-worklist count only, not a certification count.
+
+### 10.6 WP2.1.3 status
+
+WP2.1.3 has now recovered additional P9.8 historical branch sources and four merged PR migration patches. The remaining core blocker is no longer simply locating source artifacts; it is proving the mapping from historical migration file/PR commit to the live migration-history version and comparing effective SQL objects/privileges. The previous read-only SQL authentication failure (SQLSTATE `28P01`) still prevents fresh direct catalog comparison.
+
+**No production database query, DDL/DML, migration apply, Auth/Storage/RLS/grant change, or deployment was performed in this follow-up.**
