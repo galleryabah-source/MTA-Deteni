@@ -380,3 +380,74 @@ These four are not classified as exact live SQL matches. Their source files are 
 WP2.1.3 has now recovered additional P9.8 historical branch sources and four merged PR migration patches. The remaining core blocker is no longer simply locating source artifacts; it is proving the mapping from historical migration file/PR commit to the live migration-history version and comparing effective SQL objects/privileges. The previous read-only SQL authentication failure (SQLSTATE `28P01`) still prevents fresh direct catalog comparison.
 
 **No production database query, DDL/DML, migration apply, Auth/Storage/RLS/grant change, or deployment was performed in this follow-up.**
+
+
+## 11. WP2.1.3 — Recovered QR, audit, document, and movement lineage
+
+A further branch-level search located the historical source files listed in the P9.6 recovered migration manifest. The source files were independently fetched from their named historical branches; their blob identities are recorded below. The P9.6 manifest is currently present in open PR #253 (not merged), so its semantic reconciliation assertions are treated as prior repository claims, not as fresh production verification.
+
+### 11.1 Five QR / authenticated-grant migrations
+
+Historical source branch: `p9.7-transaction-idempotency-reconciliation-2026-09-23`.
+
+| Live production version | Live migration name | Historical source path | Blob SHA |
+|---|---|---|---|
+| 20260922080419 | mta_qr_resolver_active_expiry_hardening | `20260922150000_mta_qr_resolver_active_expiry_hardening.sql` | `d1e8b4eeed239a3d623da700e403c6d479eb96b7` |
+| 20260922082436 | mta_authenticated_domain_table_grants | `20260922153000_mta_authenticated_domain_table_grants.sql` | `1f4cb3ea18ef1833a14495ea94d720dc8b9f3437` |
+| 20260922082515 | mta_qr_resolver_invoker_hardening | `20260922154500_mta_qr_resolver_invoker_hardening.sql` | `037995e4b7e04157015026a821a704c020bfcfa9` |
+| 20260922082545 | mta_qr_registry_policy_performance_hardening | `20260922160000_mta_qr_registry_policy_performance_hardening.sql` | `ff4f3686b10ed1de206c6949cfe0d430c9c90b5e` |
+| 20260922084559 | mta_audit_events_authenticated_read_grant | `20260922170000_mta_audit_events_authenticated_read_grant.sql` | `8f786608d0e2574b149adff87e36d8f9d0fc86f3` |
+
+Observed source effects:
+- QR active/expiry hardening replaces `public.mta_resolve_qr` with authenticated-profile, scope, active-token, context, and expiry checks.
+- Authenticated domain table grants grant CRUD to authenticated on the selected domain tables, relying on RLS for row authorization.
+- QR invoker hardening replaces the resolver with SECURITY INVOKER and grants authenticated SELECT on the QR registry.
+- QR policy/performance hardening splits write policies by action and adds creator/revoker indexes.
+- Audit read grant gives authenticated SELECT on `mta_audit_events`, with RLS remaining the row-level authorization boundary.
+
+**Disposition:** `HISTORICAL_SOURCE_PATH_RECOVERED` for all five. Their source filenames use later timestamps than the live migration-history versions. This is not an exact timestamp match. The P9.6 manifest claims semantic production matches, but this WP2.1 pass has not independently reproduced the full live policy/function/index/grant comparison. Keep effect equivalence pending.
+
+### 11.2 Document storage read hardening and audit hash chain
+
+Historical source branch: `phase9.8-outbox-hardening`.
+
+| Live production version | Live migration name | Historical source path | Blob SHA |
+|---|---|---|---|
+| 20260923022848 | mta_document_storage_read_hardening_v2 | `20260923040000_mta_document_storage_read_hardening.sql` | `650e9c1cf0e5594f09e3993b2b4a28bfd26ac130` |
+| 20260923022906 | mta_audit_hash_chain_v2 | `20260923041000_mta_audit_hash_chain_v1.sql` | `6009cdad54ac3b9870bf05c24eb60c8285baae75` |
+
+Observed source effects:
+- Document storage hardening replaces the document SELECT policy so EDITOR/REVIEWER metadata visibility is restricted to documents created by the current user, while OWNER/ADMIN/AUDITOR retain broader read access.
+- Audit hash-chain source adds hash version/previous/event hash fields, backfills a chain, installs a SECURITY DEFINER insert hash trigger, adds immutable update/delete triggers, and restricts the verifier function to service_role.
+
+**Disposition:** `HISTORICAL_SOURCE_PATH_RECOVERED` for both. Live names indicate v2 while the recovered files use v1 source filenames and later file timestamps. The P9.6 manifest claims semantic matches, but fresh direct live function/policy/trigger/grant comparison remains pending. Do not label as byte-identical or exact migration match.
+
+### 11.3 Transactional movement idempotency fix
+
+Historical source branch: `production-transactional-movement`.
+
+- Live production version: `20260927132513`
+- Live migration name: `mta_transactional_movement_v1_idempotency_fix`
+- Historical source path: `supabase/migrations/20260927123000_mta_transactional_movement_v1.sql`
+- Blob SHA: `c9f5188048888ee07667d63c81cf3d4ae5883850`
+
+The recovered source contains idempotency and outbox table definitions, transactional movement logic, audit/outbox writes, and a service-role-only RPC wrapper. The P9.6 manifest maps the live idempotency-fix entry to this source plus commit `9d90bf5fcdbdd90f79aa661ca10ceb0c4cb169cf`, and asserts that the live function reflects the completed-only idempotency fix including `ON CONFLICT DO NOTHING`.
+
+**Disposition:** `HISTORICAL_SOURCE_PATH_RECOVERED_VERSION_AND_NAME_MISMATCH`. The source filename predates the live migration-history entry and has a different migration name. The prior manifest's semantic match assertion is not independently reproduced in this pass. Compare the exact live function body and effective grants before certifying.
+
+### 11.4 AI secure configuration remains a provenance exception
+
+The P9.6 AI migration disposition states that `20260922162628 mta_ai_secure_configuration` has not been recovered from the repository history searched. That document records deployed AI objects and the disabled state, but explicitly prohibits reconstructing migration SQL from live production objects.
+
+This remains `SOURCE_NOT_RECOVERED_FROM_SEARCHED_REPOSITORY_HISTORY`; historical existence is undetermined. No source is fabricated and `AI_ENABLED = FALSE` remains unchanged.
+
+### 11.5 Updated source-discovery disposition
+
+This follow-up recovered historical SQL paths for:
+- 5 QR/authenticated-grant migrations;
+- 2 document/audit hardening migrations;
+- 1 transactional movement idempotency-fix migration.
+
+These eight source artifacts reduce the unresolved source-discovery worklist. They do not resolve the separate P9.8 dispatcher version mapping, the AI secure configuration provenance gap, or the four later merged-PR version-mismatch cases in section 10. All recovered artifacts remain provenance evidence only; they are not moved into the executable migration directory and are not replayed.
+
+**WP2.1.3 remains PARTIAL — NOT CERTIFIED.** Fresh live effect comparison remains blocked by the prior read-only SQL connection failure (SQLSTATE `28P01`).
